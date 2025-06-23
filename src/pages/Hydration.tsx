@@ -16,35 +16,42 @@ import {
   RotateCcw,
   Bell
 } from 'lucide-react';
+import { useAppStore } from '@/stores/useAppStore';
 
 const Hydration = () => {
   const [selectedAmount, setSelectedAmount] = useState(250);
 
-  // Données mockées
-  const dailyData = {
-    current: 1.8,
-    goal: 2.5,
-    unit: 'L'
-  };
+  // === CONNEXION AU STORE ===
+  const {
+    hydrationEntries,
+    dailyGoals,
+    user,
+    getTodayHydration,
+    getWeeklyStats,
+    addHydration,
+    removeLastHydration,
+    resetDailyHydration
+  } = useAppStore();
+
+  // === DONNÉES EN TEMPS RÉEL ===
+  const currentHydration = getTodayHydration();
+  const goalHydration = dailyGoals.water;
+  const weeklyStats = getWeeklyStats();
+  
+  // Calculs
+  const currentMl = currentHydration * 1000;
+  const goalMl = goalHydration * 1000;
+  const remaining = goalMl - currentMl;
+  const percentage = Math.min((currentMl / goalMl) * 100, 100);
+
+  // Entrées d'aujourd'hui
+  const today = new Date().toDateString();
+  const todayIntakes = hydrationEntries
+    .filter(entry => new Date(entry.time).toDateString() === today)
+    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+    .slice(0, 10); // Limiter à 10 dernières entrées
 
   const quickAmounts = [125, 250, 330, 500, 750];
-
-  const todayIntakes = [
-    { time: '07:30', amount: 250, type: 'water', icon: Droplets },
-    { time: '09:15', amount: 200, type: 'coffee', icon: Coffee },
-    { time: '11:00', amount: 330, type: 'water', icon: Droplets },
-    { time: '12:30', amount: 250, type: 'water', icon: Droplets },
-    { time: '14:45', amount: 200, type: 'water', icon: Droplets },
-    { time: '16:20', amount: 330, type: 'water', icon: Droplets },
-    { time: '18:00', amount: 250, type: 'water', icon: Droplets }
-  ];
-
-  const weeklyStats = {
-    average: 2.1,
-    bestDay: 2.8,
-    streak: 4,
-    totalWeek: 14.7
-  };
 
   const hydrationTips = [
     {
@@ -80,23 +87,24 @@ const Hydration = () => {
     { title: 'Maître de l\'eau', description: '3L par jour pendant 7 jours', emoji: '💧', unlocked: false }
   ];
 
-  // Calculs
-  const currentMl = dailyData.current * 1000;
-  const goalMl = dailyData.goal * 1000;
-  const remaining = goalMl - currentMl;
-  const percentage = Math.min((currentMl / goalMl) * 100, 100);
-
-  // Fonctions
-  const addWater = (amount) => {
-    console.log(`Ajout de ${amount}ml d'eau`);
-    // Ici on ajouterait la logique pour mettre à jour les données
+  // === ACTIONS ===
+  const handleAddWater = (amount: number) => {
+    addHydration(amount, 'water');
+    console.log(`✅ Ajouté: ${amount}ml d'eau`);
   };
 
-  const removeLastIntake = () => {
-    console.log('Suppression de la dernière prise');
+  const handleRemoveLast = () => {
+    removeLastHydration();
+    console.log('❌ Supprimé: dernière entrée');
   };
 
-  const getTypeColor = (type) => {
+  const handleReset = () => {
+    resetDailyHydration();
+    console.log('🔄 Reset: hydratation du jour');
+  };
+
+  // === FONCTIONS UTILITAIRES ===
+  const getTypeColor = (type: string) => {
     switch (type) {
       case 'water': return 'text-blue-500';
       case 'coffee': return 'text-brown-500';
@@ -106,7 +114,7 @@ const Hydration = () => {
     }
   };
 
-  const getPriorityColor = (priority) => {
+  const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'border-l-red-500 bg-red-50';
       case 'medium': return 'border-l-yellow-500 bg-yellow-50';
@@ -115,7 +123,14 @@ const Hydration = () => {
     }
   };
 
-  const QuickAmountButton = ({ amount, isSelected, onClick }) => (
+  const formatTime = (isoString: string) => {
+    return new Date(isoString).toLocaleTimeString('fr-FR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
+
+  const QuickAmountButton = ({ amount, isSelected, onClick }: any) => (
     <button
       onClick={() => onClick(amount)}
       className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
@@ -128,13 +143,13 @@ const Hydration = () => {
     </button>
   );
 
-  const IntakeItem = ({ intake, index }) => {
-    const IntakeIcon = intake.icon;
+  const IntakeItem = ({ intake }: any) => {
+    const IntakeIcon = intake.type === 'coffee' ? Coffee : Droplets;
     return (
       <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
         <div className="flex items-center space-x-3">
           <IntakeIcon size={16} className={getTypeColor(intake.type)} />
-          <span className="text-sm text-gray-600">{intake.time}</span>
+          <span className="text-sm text-gray-600">{formatTime(intake.time)}</span>
         </div>
         <span className="text-sm font-medium text-gray-800">{intake.amount}ml</span>
       </div>
@@ -149,14 +164,14 @@ const Hydration = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Hydratation</h1>
-            <p className="text-gray-600">Suivez votre consommation d'eau quotidienne</p>
+            <p className="text-gray-600">Niveau {user.level} • {user.totalPoints} XP</p>
           </div>
           <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
             <Bell size={20} className="text-gray-600" />
           </button>
         </div>
 
-        {/* Objectif principal */}
+        {/* Objectif principal - DONNÉES EN TEMPS RÉEL */}
         <div className="bg-gradient-hydration p-5 rounded-xl text-white relative overflow-hidden">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg">Aujourd'hui</h3>
@@ -164,14 +179,14 @@ const Hydration = () => {
           </div>
           
           <div className="text-center mb-4">
-            <div className="text-4xl font-bold mb-1">{dailyData.current}L</div>
-            <div className="text-white/80">sur {dailyData.goal}L</div>
+            <div className="text-4xl font-bold mb-1">{currentHydration.toFixed(1)}L</div>
+            <div className="text-white/80">sur {goalHydration}L</div>
             <div className="text-sm text-white/70 mt-1">
               {remaining > 0 ? `${(remaining/1000).toFixed(1)}L restants` : 'Objectif atteint ! 🎉'}
             </div>
           </div>
 
-          {/* Barre de progression avec vagues */}
+          {/* Barre de progression avec données réelles */}
           <div className="relative w-full bg-white/20 rounded-full h-4 mb-2 overflow-hidden">
             <div 
               className="bg-white rounded-full h-4 transition-all duration-500 relative"
@@ -193,7 +208,7 @@ const Hydration = () => {
           </div>
         </div>
 
-        {/* Actions rapides */}
+        {/* Actions rapides - FONCTIONNELLES */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-800">Ajouter de l'eau</h2>
           
@@ -209,30 +224,34 @@ const Hydration = () => {
             ))}
           </div>
 
-          {/* Boutons d'action */}
+          {/* Boutons d'action - CONNECTÉS AU STORE */}
           <div className="grid grid-cols-3 gap-3">
             <button 
-              onClick={() => addWater(selectedAmount)}
+              onClick={() => handleAddWater(selectedAmount)}
               className="bg-fitness-hydration text-white p-4 rounded-xl font-medium flex flex-col items-center hover:bg-fitness-hydration/90 transition-colors"
             >
               <Plus size={24} className="mb-1" />
               <span className="text-sm">Ajouter {selectedAmount}ml</span>
             </button>
             <button 
-              onClick={removeLastIntake}
-              className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors"
+              onClick={handleRemoveLast}
+              disabled={todayIntakes.length === 0}
+              className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Minus size={24} className="mb-1" />
               <span className="text-sm">Annuler</span>
             </button>
-            <button className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors">
+            <button 
+              onClick={handleReset}
+              className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
               <RotateCcw size={24} className="mb-1" />
               <span className="text-sm">Reset</span>
             </button>
           </div>
         </div>
 
-        {/* Statistiques de la semaine */}
+        {/* Statistiques de la semaine - DONNÉES RÉELLES */}
         <div className="bg-white p-4 rounded-xl border border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-800">Cette semaine</h3>
@@ -241,25 +260,25 @@ const Hydration = () => {
           
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-800">{weeklyStats.average}L</div>
+              <div className="text-2xl font-bold text-gray-800">{weeklyStats.avgHydration.toFixed(1)}L</div>
               <div className="text-gray-600 text-sm">Moyenne/jour</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-800">{weeklyStats.bestDay}L</div>
-              <div className="text-gray-600 text-sm">Meilleur jour</div>
+              <div className="text-2xl font-bold text-gray-800">{weeklyStats.workouts}</div>
+              <div className="text-gray-600 text-sm">Workouts</div>
             </div>
           </div>
           
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <div className="flex items-center space-x-2">
               <Award size={16} className="text-blue-500" />
-              <span className="text-sm text-gray-600">Série: {weeklyStats.streak} jours</span>
+              <span className="text-sm text-gray-600">Série en cours</span>
             </div>
-            <div className="text-sm text-gray-600">Total: {weeklyStats.totalWeek}L</div>
+            <div className="text-sm text-gray-600">Total: {(weeklyStats.avgHydration * 7).toFixed(1)}L</div>
           </div>
         </div>
 
-        {/* Historique du jour */}
+        {/* Historique du jour - DONNÉES RÉELLES */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-800">Aujourd'hui</h2>
@@ -267,11 +286,19 @@ const Hydration = () => {
           </div>
           
           <div className="bg-white p-4 rounded-xl border border-gray-100">
-            <div className="space-y-1 max-h-48 overflow-y-auto">
-              {todayIntakes.map((intake, index) => (
-                <IntakeItem key={index} intake={intake} index={index} />
-              ))}
-            </div>
+            {todayIntakes.length > 0 ? (
+              <div className="space-y-1 max-h-48 overflow-y-auto">
+                {todayIntakes.map((intake) => (
+                  <IntakeItem key={intake.id} intake={intake} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Droplets size={48} className="mx-auto mb-2 opacity-50" />
+                <p>Aucune prise d'eau aujourd'hui</p>
+                <p className="text-sm">Commencez par ajouter de l'eau !</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -338,6 +365,11 @@ const Hydration = () => {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Debug info (temporaire) */}
+        <div className="bg-gray-100 p-3 rounded-lg text-xs text-gray-600">
+          <p>🔧 Debug: {hydrationEntries.length} entrées • {currentHydration.toFixed(2)}L aujourd'hui</p>
         </div>
 
         {/* Espace pour la bottom nav */}
