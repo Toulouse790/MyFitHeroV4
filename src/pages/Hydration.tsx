@@ -179,10 +179,10 @@ const Hydration = () => {
           </div>
           
           <div className="text-center mb-4">
-            <div className="text-4xl font-bold mb-1">{currentHydration.toFixed(1)}L</div>
+            <div className="text-4xl font-bold mb-1">{(Math.round(currentHydration * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}L</div>
             <div className="text-white/80">sur {goalHydration}L</div>
             <div className="text-sm text-white/70 mt-1">
-              {remaining > 0 ? `${(remaining/1000).toFixed(1)}L restants` : 'Objectif atteint ! 🎉'}
+              {remaining > 0 ? `${(Math.round((remaining/1000) * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}L restants` : 'Objectif atteint ! 🎉'}
             </div>
           </div>
 
@@ -274,7 +274,7 @@ const Hydration = () => {
               <Award size={16} className="text-blue-500" />
               <span className="text-sm text-gray-600">Série en cours</span>
             </div>
-            <div className="text-sm text-gray-600">Total: {(weeklyStats.avgHydration * 7).toFixed(1)}L</div>
+            <div className="text-sm text-gray-600">Total: {(Math.round((weeklyStats.avgHydration * 7) * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}L</div>
           </div>
         </div>
 
