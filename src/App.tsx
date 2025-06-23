@@ -22,7 +22,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/workout" element={<div className="p-4 text-center">🏋️ Module Workout - En cours de développement</div>} />
               <Route path="/nutrition" element={<div className="p-4 text-center">🍎 Module Nutrition - En cours de développement</div>} />
-              <Route path="/dashboard" element={<div className="p-4 text-center">📊 Dashboard - En cours de développement</div>} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<div className="p-4 text-center">👤 Profil - En cours de développement</div>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
