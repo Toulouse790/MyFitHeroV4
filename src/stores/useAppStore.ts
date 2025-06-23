@@ -61,22 +61,19 @@ interface UserProfile {
 }
 
 interface DailyGoals {
-  water: number;        // en L
-  calories: number;     // kcal
-  protein: number;      // g
-  carbs: number;        // g
-  fat: number;          // g
-  steps: number;        // pas
-  workouts: number;     // séances
-  sleep: number;        // heures
+  water: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  steps: number;
+  workouts: number;
+  sleep: number;
 }
 
 interface AppState {
-  // === USER DATA ===
   user: UserProfile;
   dailyGoals: DailyGoals;
-  
-  // === DAILY DATA ===
   hydrationEntries: HydrationEntry[];
   workoutSessions: WorkoutSession[];
   nutritionEntries: NutritionEntry[];
@@ -90,28 +87,15 @@ interface AppState {
   getWeeklyStats: () => any;
   
   // === ACTIONS ===
-  // Hydratation
   addHydration: (amount: number, type?: string) => void;
   removeLastHydration: () => void;
   resetDailyHydration: () => void;
-  
-  // Workouts
   addWorkout: (workout: Omit<WorkoutSession, 'id'>) => void;
-  
-  // Nutrition
   addNutrition: (nutrition: Omit<NutritionEntry, 'id'>) => void;
-  
-  // Sleep
   addSleep: (sleep: Omit<SleepEntry, 'id'>) => void;
-  
-  // Achievements
   unlockAchievement: (achievementId: string) => void;
-  
-  // Profile
   updateProfile: (updates: Partial<UserProfile>) => void;
   addExperience: (points: number) => void;
-  
-  // Utils
   resetAllData: () => void;
 }
 
@@ -130,14 +114,14 @@ const initialUser: UserProfile = {
 };
 
 const initialGoals: DailyGoals = {
-  water: 2.5,      // 2.5L
-  calories: 2200,  // 2200 kcal
-  protein: 120,    // 120g
-  carbs: 250,      // 250g
-  fat: 70,         // 70g
-  steps: 10000,    // 10k pas
-  workouts: 1,     // 1 séance/jour
-  sleep: 8         // 8h
+  water: 2.5,
+  calories: 2200,
+  protein: 120,
+  carbs: 250,
+  fat: 70,
+  steps: 10000,
+  workouts: 1,
+  sleep: 8
 };
 
 const initialAchievements: Achievement[] = [
@@ -153,7 +137,6 @@ const initialAchievements: Achievement[] = [
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      // === STATE INITIAL ===
       user: initialUser,
       dailyGoals: initialGoals,
       hydrationEntries: [],
@@ -162,13 +145,12 @@ export const useAppStore = create<AppState>()(
       sleepEntries: [],
       achievements: initialAchievements,
 
-      // === COMPUTED VALUES ===
       getTodayHydration: () => {
         const today = new Date().toDateString();
         const todayEntries = get().hydrationEntries.filter(
           entry => new Date(entry.time).toDateString() === today
         );
-        return todayEntries.reduce((total, entry) => total + entry.amount, 0) / 1000; // en L
+        return todayEntries.reduce((total, entry) => total + entry.amount, 0) / 1000;
       },
 
       getTodayCalories: () => {
@@ -203,12 +185,11 @@ export const useAppStore = create<AppState>()(
           totalDuration: weekWorkouts.reduce((total, w) => total + w.duration, 0),
           totalCalories: weekWorkouts.reduce((total, w) => total + w.calories, 0),
           avgHydration: weekHydration.length > 0 
-            ? weekHydration.reduce((total, h) => total + h.amount, 0) / 7000 // en L/jour
+            ? weekHydration.reduce((total, h) => total + h.amount, 0) / 7000
             : 0
         };
       },
 
-      // === ACTIONS HYDRATATION ===
       addHydration: (amount: number, type = 'water') => {
         const newEntry: HydrationEntry = {
           id: Date.now().toString(),
@@ -221,7 +202,8 @@ export const useAppStore = create<AppState>()(
           hydrationEntries: [...state.hydrationEntries, newEntry]
         }));
 
-        // Vérifier achievements
+        get().addExperience(10);
+
         const { getTodayHydration, dailyGoals, unlockAchievement } = get();
         if (getTodayHydration() >= dailyGoals.water) {
           unlockAchievement('hydration-master');
@@ -243,7 +225,6 @@ export const useAppStore = create<AppState>()(
         }));
       },
 
-      // === ACTIONS WORKOUTS ===
       addWorkout: (workout) => {
         const newWorkout: WorkoutSession = {
           id: Date.now().toString(),
@@ -254,10 +235,8 @@ export const useAppStore = create<AppState>()(
           workoutSessions: [...state.workoutSessions, newWorkout]
         }));
 
-        // Add experience points
         get().addExperience(50);
 
-        // Check achievements
         const { workoutSessions, unlockAchievement } = get();
         if (workoutSessions.length === 1) {
           unlockAchievement('first-workout');
@@ -267,7 +246,6 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // === ACTIONS NUTRITION ===
       addNutrition: (nutrition) => {
         const newNutrition: NutritionEntry = {
           id: Date.now().toString(),
@@ -277,9 +255,10 @@ export const useAppStore = create<AppState>()(
         set(state => ({
           nutritionEntries: [...state.nutritionEntries, newNutrition]
         }));
+
+        get().addExperience(20);
       },
 
-      // === ACTIONS SLEEP ===
       addSleep: (sleep) => {
         const newSleep: SleepEntry = {
           id: Date.now().toString(),
@@ -289,9 +268,10 @@ export const useAppStore = create<AppState>()(
         set(state => ({
           sleepEntries: [...state.sleepEntries, newSleep]
         }));
+
+        get().addExperience(30);
       },
 
-      // === ACTIONS ACHIEVEMENTS ===
       unlockAchievement: (achievementId) => {
         set(state => ({
           achievements: state.achievements.map(achievement =>
@@ -301,11 +281,9 @@ export const useAppStore = create<AppState>()(
           )
         }));
 
-        // Add bonus points
         get().addExperience(100);
       },
 
-      // === ACTIONS PROFILE ===
       updateProfile: (updates) => {
         set(state => ({
           user: { ...state.user, ...updates }
@@ -315,7 +293,7 @@ export const useAppStore = create<AppState>()(
       addExperience: (points) => {
         set(state => {
           const newPoints = state.user.totalPoints + points;
-          const newLevel = Math.floor(newPoints / 200) + 1; // 200 points par niveau
+          const newLevel = Math.floor(newPoints / 200) + 1;
           
           return {
             user: {
@@ -327,7 +305,6 @@ export const useAppStore = create<AppState>()(
         });
       },
 
-      // === UTILS ===
       resetAllData: () => {
         set({
           user: initialUser,
@@ -341,7 +318,7 @@ export const useAppStore = create<AppState>()(
       }
     }),
     {
-      name: 'myfitherov4-storage', // nom unique pour localStorage
+      name: 'myfitherov4-storage',
       partialize: (state) => ({
         user: state.user,
         dailyGoals: state.dailyGoals,
