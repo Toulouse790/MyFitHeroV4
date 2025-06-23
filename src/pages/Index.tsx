@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Dumbbell, Apple, Moon, BarChart3, Medal, User, Settings } from 'lucide-react';
+import { ArrowRight, Dumbbell, Apple, Moon, BarChart3, Medal, User, Settings, Droplets } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
@@ -8,32 +8,36 @@ const Index = () => {
   // 4 PILIERS PRINCIPAUX
   const mainModules = [
     {
-      title: "Musculation",
-      description: "Plans personnalisés par niveau et objectif",
+      title: "Sport",
+      description: "Musculation, cardio et programmes personnalisés",
       bgClass: "bg-gradient-energy",
       icon: Dumbbell,
-      path: "/workout"
+      path: "/workout",
+      emoji: "🏋️"
     },
     {
       title: "Nutrition", 
-      description: "Plans nutritionnels adaptés à vos objectifs",
+      description: "Suivi alimentaire et plans nutritionnels",
       bgClass: "bg-gradient-growth",
       icon: Apple,
-      path: "/nutrition"
+      path: "/nutrition",
+      emoji: "🍎"
     },
     {
       title: "Sommeil",
-      description: "Suivi et amélioration de la qualité du sommeil", 
+      description: "Analyse et amélioration de la qualité du repos", 
       bgClass: "bg-gradient-hydration",
       icon: Moon,
-      path: "/sleep"
+      path: "/sleep",
+      emoji: "😴"
     },
     {
       title: "Hydratation",
       description: "Suivi de votre consommation d'eau quotidienne",
       bgClass: "bg-gradient-motivation", 
-      icon: BarChart3,
-      path: "/hydration"
+      icon: Droplets,
+      path: "/hydration",
+      emoji: "💧"
     }
   ];
 
@@ -52,14 +56,14 @@ const Index = () => {
           <div className="flex space-x-3">
             <button 
               onClick={() => navigate('/dashboard')}
-              className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg"
+              className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg hover:scale-105"
             >
               <BarChart3 size={18} />
               <span>Stats</span>
             </button>
             <button 
               onClick={() => navigate('/profile')}
-              className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg"
+              className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg hover:scale-105"
             >
               <User size={18} />
               <span>Profil</span>
@@ -83,14 +87,14 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
               onClick={() => navigate('/workout')}
-              className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl animate-slide-up"
+              className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl animate-slide-up hover:scale-105"
             >
               Commencer un workout
               <ArrowRight className="inline-block ml-2" size={20} />
             </button>
             <button 
               onClick={() => navigate('/dashboard')}
-              className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300"
+              className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 hover:scale-105"
             >
               Voir mes statistiques
             </button>
@@ -118,7 +122,7 @@ const Index = () => {
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                    <module.icon size={32} className="animate-pulse-soft" />
+                    <div className="text-3xl">{module.emoji}</div>
                   </div>
                   <ArrowRight size={24} className="opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
                 </div>
@@ -140,45 +144,76 @@ const Index = () => {
         </section>
 
         {/* Section motivation */}
-        <section className="mt-16 text-center">
+        <section className="mt-16">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">🚀 Votre transformation commence aujourd'hui</h3>
-            <p className="text-gray-600 mb-6">
-              Chaque petit pas compte. Commencez par un pilier et construisez progressivement vos habitudes.
-            </p>
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">🚀 Votre transformation commence aujourd'hui</h3>
+              <p className="text-gray-600 mb-6">
+                Chaque petit pas compte. Commencez par un pilier et construisez progressivement vos habitudes.
+              </p>
+            </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <button 
                 onClick={() => navigate('/workout')}
-                className="bg-fitness-energy text-white px-6 py-3 rounded-xl font-medium hover:bg-fitness-energy/90 transition-colors"
+                className="bg-fitness-energy text-white px-6 py-4 rounded-xl font-medium hover:bg-fitness-energy/90 transition-all duration-300 hover:scale-105 flex flex-col items-center"
               >
-                🏋️ Premier workout
+                <span className="text-2xl mb-1">🏋️</span>
+                <span>Premier workout</span>
               </button>
               <button 
                 onClick={() => navigate('/hydration')}
-                className="bg-fitness-hydration text-white px-6 py-3 rounded-xl font-medium hover:bg-fitness-hydration/90 transition-colors"
+                className="bg-fitness-hydration text-white px-6 py-4 rounded-xl font-medium hover:bg-fitness-hydration/90 transition-all duration-300 hover:scale-105 flex flex-col items-center"
               >
-                💧 Boire de l'eau
+                <span className="text-2xl mb-1">💧</span>
+                <span>Boire de l'eau</span>
               </button>
               <button 
                 onClick={() => navigate('/nutrition')}
-                className="bg-fitness-growth text-white px-6 py-3 rounded-xl font-medium hover:bg-fitness-growth/90 transition-colors"
+                className="bg-fitness-growth text-white px-6 py-4 rounded-xl font-medium hover:bg-fitness-growth/90 transition-all duration-300 hover:scale-105 flex flex-col items-center"
               >
-                🍎 Logger un repas
+                <span className="text-2xl mb-1">🍎</span>
+                <span>Logger un repas</span>
               </button>
             </div>
           </div>
         </section>
 
-        {/* Footer avec accès settings */}
-        <footer className="mt-16 text-center">
-          <button 
-            onClick={() => navigate('/profile')}
-            className="text-gray-500 hover:text-gray-700 transition-colors flex items-center mx-auto"
-          >
-            <Settings size={16} className="mr-2" />
-            Paramètres et profil
-          </button>
+        {/* Section statistiques rapides */}
+        <section className="mt-16">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-2xl border border-blue-100">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Accès rapide</h3>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
+                >
+                  <BarChart3 size={20} />
+                  <span>Dashboard complet</span>
+                </button>
+                <button 
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
+                >
+                  <User size={20} />
+                  <span>Mon profil</span>
+                </button>
+                <button 
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
+                >
+                  <Settings size={20} />
+                  <span>Paramètres</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="mt-16 text-center text-gray-500 text-sm">
+          <p>MyFitHero v4 • Votre compagnon fitness intelligent</p>
         </footer>
       </div>
     </div>
