@@ -3,8 +3,18 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+// Import des pages
 import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
+import Workout from "./pages/Workout";
+import Nutrition from "./pages/Nutrition";
+import Sleep from "./pages/Sleep";
+import Hydration from "./pages/Hydration";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+
+// Import des composants
 import BottomNav from "./components/BottomNav";
 
 const queryClient = new QueryClient();
@@ -19,21 +29,23 @@ const App = () => (
           {/* Contenu principal avec padding bottom pour la nav */}
           <main className="pb-20">
             <Routes>
+              {/* Page d'accueil */}
               <Route path="/" element={<Index />} />
-              <Route path="/workout" element={<div className="p-4 text-center">🏋️ Module Workout - En cours de développement</div>} />
-              <Route path="/nutrition" element={<div className="p-4 text-center">🍎 Module Nutrition - En cours de développement</div>} />
-             <Route path="/dashboard" element={
-  <div className="p-4 text-center">
-    <h2 className="text-2xl font-bold mb-4">📊 Dashboard</h2>
-    <p>Fichier Dashboard.tsx en cours de création...</p>
-  </div>
-} />
-              <Route path="/profile" element={<div className="p-4 text-center">👤 Profil - En cours de développement</div>} />
+              
+              {/* Pages principales avec navigation */}
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/workout" element={<Workout />} />
+              <Route path="/nutrition" element={<Nutrition />} />
+              <Route path="/sleep" element={<Sleep />} />
+              <Route path="/hydration" element={<Hydration />} />
+              <Route path="/profile" element={<Profile />} />
+              
+              {/* Page 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           
-          {/* Navigation bottom fixe */}
+          {/* Navigation bottom fixe - visible partout sauf sur Index */}
           <BottomNav />
         </div>
       </BrowserRouter>
