@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, Dumbbell, Apple, BarChart3, User } from 'lucide-react';
+import { Home, Dumbbell, Apple, BarChart3, User, Moon, Droplets } from 'lucide-react';
 
 interface NavItem {
   id: string;
@@ -33,6 +33,20 @@ const navItems: NavItem[] = [
     color: 'text-fitness-growth'
   },
   {
+    id: 'hydration',
+    label: 'Eau',
+    icon: Droplets,
+    path: '/hydration',
+    color: 'text-fitness-hydration'
+  },
+  {
+    id: 'sleep',
+    label: 'Sommeil',
+    icon: Moon,
+    path: '/sleep',
+    color: 'text-fitness-recovery'
+  },
+  {
     id: 'dashboard',
     label: 'Stats',
     icon: BarChart3,
@@ -54,10 +68,15 @@ const BottomNav = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Ne pas afficher la nav sur la page d'accueil
+  if (location.pathname === '/') {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 safe-area-pb">
-      <div className="flex items-center justify-around py-2">
-        {navItems.map((item) => {
+      <div className="flex items-center justify-around py-2 overflow-x-auto">
+        {navItems.slice(1).map((item) => { // Exclure l'accueil de la nav bottom
           const Icon = item.icon;
           const active = isActive(item.path);
           
@@ -75,7 +94,7 @@ const BottomNav = () => {
                 active ? 'bg-gray-100' : ''
               }`}>
                 <Icon 
-                  size={20} 
+                  size={18} 
                   className={`transition-all duration-200 ${
                     active ? 'animate-bounce-soft' : ''
                   }`} 
