@@ -8,7 +8,6 @@ interface NavItem {
   icon: React.ElementType;
   path: string;
   color: string;
-  description: string;
 }
 
 // 4 PILIERS PRINCIPAUX du fitness
@@ -18,32 +17,28 @@ const navItems: NavItem[] = [
     label: 'Sport',
     icon: Dumbbell,
     path: '/workout',
-    color: 'text-fitness-energy',
-    description: 'Musculation & Cardio'
+    color: 'text-fitness-energy'
   },
   {
     id: 'nutrition',
     label: 'Nutrition',
     icon: Apple,
     path: '/nutrition',
-    color: 'text-fitness-growth',
-    description: 'Alimentation & Macros'
+    color: 'text-fitness-growth'
   },
   {
     id: 'sleep',
     label: 'Sommeil',
     icon: Moon,
     path: '/sleep',
-    color: 'text-fitness-recovery',
-    description: 'Récupération & Repos'
+    color: 'text-fitness-recovery'
   },
   {
     id: 'hydration',
     label: 'Hydratation',
     icon: Droplets,
     path: '/hydration',
-    color: 'text-fitness-hydration',
-    description: 'Eau & Boissons'
+    color: 'text-fitness-hydration'
   }
 ];
 
