@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import BottomNav from "./components/BottomNav";
 
 const queryClient = new QueryClient();
 
@@ -14,10 +15,22 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <div className="min-h-screen bg-gray-50">
+          {/* Contenu principal avec padding bottom pour la nav */}
+          <main className="pb-20">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/workout" element={<div className="p-4 text-center">🏋️ Module Workout - En cours de développement</div>} />
+              <Route path="/nutrition" element={<div className="p-4 text-center">🍎 Module Nutrition - En cours de développement</div>} />
+              <Route path="/dashboard" element={<div className="p-4 text-center">📊 Dashboard - En cours de développement</div>} />
+              <Route path="/profile" element={<div className="p-4 text-center">👤 Profil - En cours de développement</div>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          
+          {/* Navigation bottom fixe */}
+          <BottomNav />
+        </div>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
