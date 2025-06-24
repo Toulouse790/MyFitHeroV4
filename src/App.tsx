@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Index from './pages/Index';
+import WorkoutPage from './pages/WorkoutPage';
 
 // Import des pages (à créer ensuite)
 // import WorkoutPage from './pages/WorkoutPage';
@@ -38,7 +39,7 @@ function App() {
           {/* Les 4 piliers principaux */}
           <Route 
             path="/workout" 
-            element={<TemporaryPage title="🏋️ Espace Sport" />} 
+            element={<WorkoutPage />} 
           />
           <Route 
             path="/nutrition" 
@@ -61,6 +62,10 @@ function App() {
           <Route 
             path="/profile" 
             element={<TemporaryPage title="👤 Mon Profil" />} 
+          />
+          <Route 
+            path="/settings" 
+            element={<TemporaryPage title="⚙️ Paramètres" />} 
           />
           
           {/* Route 404 */}
