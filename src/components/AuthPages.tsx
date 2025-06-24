@@ -62,9 +62,36 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     return password.length >= 6;
   };
 
-  // Validation pseudo
-  const isValidUsername = (username: string) => {
-    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+  // Gestion Magic Link (plus simple pour le dev)
+  const handleMagicLink = async () => {
+    if (!signUpForm.email || !isValidEmail(signUpForm.email)) {
+      setError('Veuillez saisir une adresse email valide');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: signUpForm.email,
+        options: {
+          data: {
+            username: signUpForm.username || signUpForm.email.split('@')[0],
+            full_name: signUpForm.username || signUpForm.email.split('@')[0]
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      setSuccess(`Magic Link envoyé à ${signUpForm.email} ! Vérifiez votre boîte mail et cliquez sur le lien pour vous connecter.`);
+
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors de l\'envoi du Magic Link');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Gestion inscription SIMPLIFIÉE
@@ -415,6 +442,20 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                   </>
                 )}
               </button>
+
+              {/* Magic Link alternatif */}
+              <div className="mt-4">
+                <div className="text-center text-sm text-gray-500 mb-3">ou</div>
+                <button
+                  type="button"
+                  onClick={handleMagicLink}
+                  disabled={isLoading || !signUpForm.email}
+                  className="w-full bg-blue-50 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-100 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  <Mail size={20} />
+                  <span>Magic Link (sans mot de passe)</span>
+                </button>
+              </div>
             </form>
           )}
 
