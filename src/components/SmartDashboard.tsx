@@ -1,3 +1,4 @@
+// src/components/SmartDashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { 
   MessageCircle, 
@@ -19,6 +20,8 @@ import {
   Clock,
   Fire
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 interface SmartDashboardProps {
   userProfile: any;
@@ -49,6 +52,7 @@ interface DailyProgram {
 }
 
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -62,7 +66,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Programme du jour basé sur le profil utilisateur
-  const dailyProgram: DailyProgram = {
+  const [dailyProgram, setDailyProgram] = useState<DailyProgram>({
     workout: {
       name: getTodayWorkout(),
       duration: 45,
@@ -83,6 +87,47 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       target_hours: 8,
       last_night_hours: 7.5,
       quality: 4
+    }
+  });
+
+  // Charger les données du jour depuis Supabase
+  useEffect(() => {
+    loadDailyStats();
+  }, [userProfile]);
+
+  const loadDailyStats = async () => {
+    if (!userProfile?.id) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data, error } = await supabase
+        .from('daily_stats')
+        .select('*')
+        .eq('user_id', userProfile.id)
+        .eq('stat_date', today)
+        .single();
+
+      if (data) {
+        setDailyProgram(prev => ({
+          ...prev,
+          workout: {
+            ...prev.workout,
+            completed: data.workouts_completed > 0
+          },
+          nutrition: {
+            ...prev.nutrition,
+            calories_current: data.total_calories || 0
+          },
+          hydration: {
+            ...prev.hydration,
+            current_ml: data.water_intake_ml || 0,
+            percentage: Math.round((data.water_intake_ml / data.hydration_goal_ml) * 100)
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('Erreur chargement stats:', error);
     }
   };
 
@@ -111,7 +156,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
   }
 
-  // Configuration de l'API n8n (à ajuster avec ton URL)
+  // Configuration de l'API n8n
   const N8N_WEBHOOK_URL = 'https://ton-n8n.app/webhook/89a7eb7b-c4d4-4461-aa1a-cd1214ad0d30';
 
   // Gestion des messages IA via ton workflow n8n
@@ -130,96 +175,99 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     setIsLoading(true);
 
     try {
-      // Appel à ton workflow n8n
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user_id: userProfile?.id || 'anonymous',
-          message: inputMessage,
-          type_demande: detectMessageType(inputMessage),
-          statut: 'en_attente'
+      // Créer une entrée dans ai_requests qui déclenchera le webhook
+      const { data: requestData, error: requestError } = await supabase
+        .from('ai_requests')
+        .insert({
+          user_id: userProfile?.id,
+          pillar_type: detectMessageType(inputMessage),
+          prompt: inputMessage,
+          context: {
+            user_profile: {
+              sport: userProfile?.sport,
+              goals: userProfile?.primary_goals,
+              fitness_level: userProfile?.fitness_experience
+            },
+            current_stats: dailyProgram
+          },
+          status: 'pending'
         })
-      });
+        .select()
+        .single();
 
-      if (!response.ok) {
-        throw new Error('Erreur réseau');
-      }
+      if (requestError) throw requestError;
 
-      const data = await response.json();
-      
-      // Attendre la réponse du workflow (tu peux implémenter un polling ou websocket)
-      setTimeout(async () => {
-        const aiResponse = await getAIResponse(userMessage.id);
-        setMessages(prev => [...prev, aiResponse]);
-        setIsLoading(false);
-      }, 2000);
+      // Attendre la réponse via realtime ou polling
+      const subscription = supabase
+        .channel(`ai_request:${requestData.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'ai_requests',
+            filter: `id=eq.${requestData.id}`
+          },
+          (payload: any) => {
+            if (payload.new.status === 'completed' && payload.new.webhook_response) {
+              const aiResponse = {
+                id: messages.length + 2,
+                type: 'ai',
+                content: payload.new.webhook_response.recommendation || 'Je réfléchis...',
+                timestamp: new Date()
+              };
+              setMessages(prev => [...prev, aiResponse]);
+              setIsLoading(false);
+              subscription.unsubscribe();
+            }
+          }
+        )
+        .subscribe();
+
+      // Timeout de sécurité
+      setTimeout(() => {
+        if (isLoading) {
+          setMessages(prev => [...prev, {
+            id: messages.length + 2,
+            type: 'ai',
+            content: 'Désolé, le traitement prend plus de temps que prévu. Réessayez dans un moment.',
+            timestamp: new Date()
+          }]);
+          setIsLoading(false);
+          subscription.unsubscribe();
+        }
+      }, 30000);
 
     } catch (error) {
       console.error('Erreur:', error);
-      const errorMessage = {
+      setMessages(prev => [...prev, {
         id: messages.length + 2,
         type: 'ai',
         content: 'Désolé, je rencontre un problème technique. Réessayez dans un moment.',
         timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      }]);
       setIsLoading(false);
     }
   };
 
   // Détecte le type de demande pour router vers le bon agent
-  const detectMessageType = (message: string) => {
+  const detectMessageType = (message: string): string => {
     const lowerMessage = message.toLowerCase();
     
     if (lowerMessage.includes('workout') || lowerMessage.includes('musculation') || lowerMessage.includes('exercice')) {
-      return 'sport';
+      return 'workout';
     }
     if (lowerMessage.includes('nutrition') || lowerMessage.includes('manger') || lowerMessage.includes('calories')) {
       return 'nutrition';
     }
     if (lowerMessage.includes('sommeil') || lowerMessage.includes('dormir') || lowerMessage.includes('repos')) {
-      return 'sommeil';
+      return 'sleep';
     }
     if (lowerMessage.includes('eau') || lowerMessage.includes('hydratation') || lowerMessage.includes('boire')) {
-      return 'hydratation';
+      return 'hydration';
     }
     
-    return 'general'; // Pour l'IA de coordination
-  };
-
-  // Récupère la réponse IA depuis Supabase (générée par ton workflow)
-  const getAIResponse = async (messageId: number) => {
-    try {
-      // Simulation - remplace par une vraie requête à ta table recommendations
-      const { data, error } = await supabase
-        .from('recommendations')
-        .select('*')
-        .eq('user_id', userProfile?.id)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (data && data[0]) {
-        return {
-          id: messageId + 1,
-          type: 'ai',
-          content: data[0].content,
-          timestamp: new Date()
-        };
-      }
-    } catch (error) {
-      console.error('Erreur récupération IA:', error);
-    }
-
-    // Fallback
-    return {
-      id: messageId + 1,
-      type: 'ai',
-      content: "Je réfléchis à votre demande... 🤔",
-      timestamp: new Date()
-    };
+    return 'general';
   };
 
   // Navigation entre piliers
@@ -230,7 +278,8 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       label: 'Sport',
       color: 'bg-red-500',
       progress: dailyProgram.workout.completed ? 100 : 0,
-      action: 'Commencer workout'
+      action: 'Commencer workout',
+      path: '/workout'
     },
     {
       id: 'nutrition',
@@ -238,7 +287,8 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       label: 'Nutrition',
       color: 'bg-green-500',
       progress: Math.round((dailyProgram.nutrition.calories_current / dailyProgram.nutrition.calories_target) * 100),
-      action: 'Logger repas'
+      action: 'Logger repas',
+      path: '/nutrition'
     },
     {
       id: 'hydration',
@@ -246,7 +296,8 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       label: 'Hydratation',
       color: 'bg-blue-500',
       progress: dailyProgram.hydration.percentage,
-      action: 'Boire eau'
+      action: 'Boire eau',
+      path: '/hydration'
     },
     {
       id: 'sleep',
@@ -254,9 +305,15 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       label: 'Sommeil',
       color: 'bg-purple-500',
       progress: Math.round((dailyProgram.sleep.last_night_hours / dailyProgram.sleep.target_hours) * 100),
-      action: 'Analyser sommeil'
+      action: 'Analyser sommeil',
+      path: '/sleep'
     }
   ];
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -273,10 +330,16 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <button className="p-2 text-gray-500 hover:text-gray-700">
+            <button 
+              onClick={() => navigate('/profile')}
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
               <User size={20} />
             </button>
-            <button className="p-2 text-gray-500 hover:text-gray-700">
+            <button 
+              onClick={handleSignOut}
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
               <Settings size={20} />
             </button>
           </div>
@@ -291,12 +354,22 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
               <Calendar className="mr-2 text-blue-600" size={24} />
               Programme du jour
             </h2>
-            <span className="text-sm text-gray-500">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+            <span className="text-sm text-gray-500">
+              {new Date().toLocaleDateString('fr-FR', { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long' 
+              })}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {pillarActions.map((pillar) => (
-              <div key={pillar.id} className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer">
+              <div 
+                key={pillar.id} 
+                onClick={() => navigate(pillar.path)}
+                className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
+              >
                 <div className="flex items-center space-x-3 mb-3">
                   <div className={`${pillar.color} p-2 rounded-lg`}>
                     <pillar.icon className="text-white" size={20} />
@@ -309,7 +382,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
                 <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
                   <div 
                     className={`${pillar.color} h-2 rounded-full transition-all duration-300`}
-                    style={{ width: `${pillar.progress}%` }}
+                    style={{ width: `${Math.min(pillar.progress, 100)}%` }}
                   />
                 </div>
                 <button className="text-xs text-gray-600 hover:text-gray-800 font-medium">
