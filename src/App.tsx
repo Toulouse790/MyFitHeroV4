@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
 import Index from './pages/Index';
 
 // Import des pages (à créer ensuite)
@@ -29,7 +30,7 @@ const TemporaryPage = ({ title }: { title: string }) => (
 function App() {
   return (
     <Router>
-      <div className="App">
+      <Layout>
         <Routes>
           {/* Page d'accueil */}
           <Route path="/" element={<Index />} />
@@ -81,7 +82,7 @@ function App() {
             } 
           />
         </Routes>
-      </div>
+      </Layout>
     </Router>
   );
 }
