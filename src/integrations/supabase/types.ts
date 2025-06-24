@@ -362,15 +362,26 @@ export type Database = {
         Row: {
           activity_level: string | null
           age: number | null
+          available_time_per_day: number | null
           avatar_url: string | null
           created_at: string | null
+          fitness_experience: string | null
           fitness_goal: string | null
           full_name: string | null
           gender: string | null
           height_cm: number | null
           id: string
+          injuries: string[] | null
+          lifestyle: string | null
+          motivation: string | null
           notifications_enabled: boolean | null
+          primary_goals: string[] | null
+          season_period: string | null
+          sport: string | null
+          sport_level: string | null
+          sport_position: string | null
           timezone: string | null
+          training_frequency: number | null
           updated_at: string | null
           username: string | null
           weight_kg: number | null
@@ -378,15 +389,26 @@ export type Database = {
         Insert: {
           activity_level?: string | null
           age?: number | null
+          available_time_per_day?: number | null
           avatar_url?: string | null
           created_at?: string | null
+          fitness_experience?: string | null
           fitness_goal?: string | null
           full_name?: string | null
           gender?: string | null
           height_cm?: number | null
           id: string
+          injuries?: string[] | null
+          lifestyle?: string | null
+          motivation?: string | null
           notifications_enabled?: boolean | null
+          primary_goals?: string[] | null
+          season_period?: string | null
+          sport?: string | null
+          sport_level?: string | null
+          sport_position?: string | null
           timezone?: string | null
+          training_frequency?: number | null
           updated_at?: string | null
           username?: string | null
           weight_kg?: number | null
@@ -394,15 +416,26 @@ export type Database = {
         Update: {
           activity_level?: string | null
           age?: number | null
+          available_time_per_day?: number | null
           avatar_url?: string | null
           created_at?: string | null
+          fitness_experience?: string | null
           fitness_goal?: string | null
           full_name?: string | null
           gender?: string | null
           height_cm?: number | null
           id?: string
+          injuries?: string[] | null
+          lifestyle?: string | null
+          motivation?: string | null
           notifications_enabled?: boolean | null
+          primary_goals?: string[] | null
+          season_period?: string | null
+          sport?: string | null
+          sport_level?: string | null
+          sport_position?: string | null
           timezone?: string | null
+          training_frequency?: number | null
           updated_at?: string | null
           username?: string | null
           weight_kg?: number | null
@@ -525,6 +558,10 @@ export type Database = {
           avg_sleep_quality: number
           days_with_data: number
         }[]
+      }
+      mark_onboarding_completed: {
+        Args: { user_uuid: string }
+        Returns: boolean
       }
     }
     Enums: {
