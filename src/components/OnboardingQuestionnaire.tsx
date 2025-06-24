@@ -316,89 +316,85 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
             </div>
           )}
 
-          {/* ÉTAPE 3: Contexte Sportif (conditionnel) */}
+          {/* ÉTAPE 3: Contexte Sportif */}
           {currentStep === 3 && (
             <div className="space-y-8">
               <div className="text-center mb-8">
                 <Dumbbell className="mx-auto text-green-600 mb-4" size={48} />
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">Contexte sportif</h2>
                 <p className="text-gray-600">
-                  {profile.primary_goals.includes('performance') 
-                    ? 'Configurons l\'IA pour votre sport spécifique'
-                    : 'Derniers réglages pour finaliser votre profil'
-                  }
+                  Configurons votre profil sportif pour un entraînement optimal
                 </p>
               </div>
 
-              {profile.primary_goals.includes('performance') && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Sport principal */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Sport principal</label>
-                    <select
-                      value={profile.sport || ''}
-                      onChange={(e) => updateProfile({ sport: e.target.value || null })}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Sélectionner un sport</option>
-                      {sportsOptions.map(sport => (
-                        <option key={sport} value={sport.toLowerCase()}>{sport}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Niveau sportif */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Niveau de pratique</label>
-                    <select
-                      value={profile.sport_level || ''}
-                      onChange={(e) => updateProfile({ sport_level: e.target.value as any })}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Sélectionner</option>
-                      <option value="recreational">Loisir</option>
-                      <option value="amateur_competitive">Amateur compétitif</option>
-                      <option value="semi_professional">Semi-professionnel</option>
-                      <option value="professional">Professionnel</option>
-                    </select>
-                  </div>
-
-                  {/* Fréquence d'entraînement */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Entraînements par semaine</label>
-                    <select
-                      value={profile.training_frequency || ''}
-                      onChange={(e) => updateProfile({ training_frequency: parseInt(e.target.value) || null })}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Sélectionner</option>
-                      <option value="1">1 fois par semaine</option>
-                      <option value="2">2 fois par semaine</option>
-                      <option value="3">3 fois par semaine</option>
-                      <option value="4">4 fois par semaine</option>
-                      <option value="5">5 fois par semaine</option>
-                      <option value="6">6 fois par semaine</option>
-                      <option value="7">Tous les jours</option>
-                    </select>
-                  </div>
-
-                  {/* Période de la saison */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Période actuelle</label>
-                    <select
-                      value={profile.season_period || ''}
-                      onChange={(e) => updateProfile({ season_period: e.target.value as any })}
-                      className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Sélectionner</option>
-                      <option value="off_season">Hors saison</option>
-                      <option value="pre_season">Pré-saison</option>
-                      <option value="in_season">En saison</option>
-                      <option value="recovery">Récupération</option>
-                    </select>
-                  </div>
+              {/* TOUJOURS afficher les questions sportives */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Sport principal */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Sport principal (optionnel)</label>
+                  <select
+                    value={profile.sport || ''}
+                    onChange={(e) => updateProfile({ sport: e.target.value || null })}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Aucun sport spécifique / Fitness général</option>
+                    {sportsOptions.map(sport => (
+                      <option key={sport} value={sport.toLowerCase()}>{sport}</option>
+                    ))}
+                  </select>
                 </div>
-              )}
+
+                {/* Niveau sportif */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Niveau de pratique</label>
+                  <select
+                    value={profile.sport_level || ''}
+                    onChange={(e) => updateProfile({ sport_level: e.target.value as any })}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Sélectionner</option>
+                    <option value="recreational">Loisir</option>
+                    <option value="amateur_competitive">Amateur compétitif</option>
+                    <option value="semi_professional">Semi-professionnel</option>
+                    <option value="professional">Professionnel</option>
+                  </select>
+                </div>
+
+                {/* Fréquence d'entraînement */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Entraînements par semaine</label>
+                  <select
+                    value={profile.training_frequency || ''}
+                    onChange={(e) => updateProfile({ training_frequency: parseInt(e.target.value) || null })}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Sélectionner</option>
+                    <option value="1">1 fois par semaine</option>
+                    <option value="2">2 fois par semaine</option>
+                    <option value="3">3 fois par semaine</option>
+                    <option value="4">4 fois par semaine</option>
+                    <option value="5">5 fois par semaine</option>
+                    <option value="6">6 fois par semaine</option>
+                    <option value="7">Tous les jours</option>
+                  </select>
+                </div>
+
+                {/* Période de la saison */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Période actuelle</label>
+                  <select
+                    value={profile.season_period || ''}
+                    onChange={(e) => updateProfile({ season_period: e.target.value as any })}
+                    className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Sélectionner</option>
+                    <option value="off_season">Hors saison</option>
+                    <option value="pre_season">Pré-saison</option>
+                    <option value="in_season">En saison</option>
+                    <option value="recovery">Récupération</option>
+                  </select>
+                </div>
+              </div>
 
               {/* Résumé final */}
               <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-xl">
@@ -428,6 +424,12 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                        profile.available_time_per_day && profile.available_time_per_day < 120 ? '1h-1h30/jour' : '2h+/jour'}
                     </p>
                   </div>
+                  {profile.sport && (
+                    <div>
+                      <span className="font-medium text-gray-700">Sport:</span>
+                      <p className="text-gray-600">{profile.sport} - {profile.sport_level}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
