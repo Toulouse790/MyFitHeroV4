@@ -32,194 +32,41 @@ const TemporaryPage = ({ title }: { title: string }) => (
 );
 
 function App() {
-  // États pour gérer l'authentification et l'onboarding
+  // ÉTAT SIMPLIFIÉ POUR FORCER L'AUTHENTIFICATION
+  const [showAuth, setShowAuth] = useState(true); // FORCE l'affichage auth au début
   const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Vérifier l'état d'authentification au chargement
-  useEffect(() => {
-    console.log('🔍 Vérification de l\'authentification...');
-    
-    // Forcer la déconnexion au début pour debug
-    supabase.auth.signOut().then(() => {
-      console.log('🔄 Déconnexion forcée pour reset');
-      
-      // Vérifier s'il y a une session active
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        console.log('📋 Session trouvée:', session);
-        
-        if (session?.user) {
-          console.log('✅ Utilisateur connecté:', session.user.email);
-          setUser(session.user);
-          setIsAuthenticated(true);
-          checkOnboardingStatus(session.user.id);
-        } else {
-          console.log('❌ Aucune session active, affichage de l\'authentification');
-          setIsAuthenticated(false);
-          setHasCompletedOnboarding(false);
-          setUserProfile(null);
-          setIsLoading(false);
-        }
-      });
-    });
-
-    // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔄 Changement d\'authentification:', event, session?.user?.email);
-      
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user);
-        setIsAuthenticated(true);
-        checkOnboardingStatus(session.user.id);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setIsAuthenticated(false);
-        setHasCompletedOnboarding(false);
-        setUserProfile(null);
-        setIsLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Vérifier si l'utilisateur a complété l'onboarding
-  const checkOnboardingStatus = async (userId: string) => {
-    try {
-      // Vérifier en base de données si le profil est complet
-      const { data: profile, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Erreur lors de la récupération du profil:', error);
-        setIsLoading(false);
-        return;
-      }
-
-      console.log('Profil récupéré:', profile);
-
-      // Vérifier si l'onboarding est complété 
-      // (age ET primary_goals doivent être renseignés)
-      if (profile && profile.age !== null && profile.primary_goals && profile.primary_goals.length > 0) {
-        console.log('✅ Onboarding complété, chargement de l\'app...');
-        setUserProfile(profile);
-        setHasCompletedOnboarding(true);
-      } else {
-        console.log('❌ Onboarding non complété, affichage du questionnaire...');
-        setHasCompletedOnboarding(false);
-      }
-      
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Erreur:', err);
-      setIsLoading(false);
-    }
-  };
+  console.log('🔍 État App:', { showAuth, user: !!user, hasCompletedOnboarding });
 
   // Fonction appelée lors de la connexion/inscription réussie
   const handleAuthSuccess = (user: any) => {
+    console.log('✅ Authentification réussie:', user.email);
     setUser(user);
-    setIsAuthenticated(true);
-    checkOnboardingStatus(user.id);
+    setShowAuth(false); // Masquer les pages d'auth
+    // On passera au questionnaire après
   };
 
   // Fonction appelée quand l'onboarding est terminé
   const handleOnboardingComplete = async (profile: any) => {
-    try {
-      if (!user) return;
-
-      console.log('Sauvegarde du profil complet:', profile);
-
-      // Sauvegarder le profil COMPLET en base de données
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          // Données personnelles
-          age: profile.age,
-          gender: profile.gender,
-          lifestyle: profile.lifestyle,
-          available_time_per_day: profile.available_time_per_day,
-          fitness_experience: profile.fitness_experience,
-          injuries: profile.injuries || [],
-          
-          // Objectifs et motivation
-          primary_goals: profile.primary_goals || [],
-          motivation: profile.motivation || '',
-          fitness_goal: profile.primary_goals?.[0] || null, // Premier objectif comme principal
-          
-          // Données sportives (si applicable)
-          sport: profile.sport,
-          sport_position: profile.sport_position,
-          sport_level: profile.sport_level,
-          training_frequency: profile.training_frequency,
-          season_period: profile.season_period,
-          
-          // Métadonnées
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
-
-      if (error) {
-        console.error('Erreur lors de la sauvegarde du profil:', error);
-        alert('Erreur lors de la sauvegarde du profil. Veuillez réessayer.');
-        return;
-      }
-
-      console.log('✅ Profil utilisateur sauvegardé avec succès !');
-      
-      // Mettre à jour l'état local
-      const updatedProfile = { ...userProfile, ...profile, id: user.id };
-      setUserProfile(updatedProfile);
-      setHasCompletedOnboarding(true);
-
-    } catch (err) {
-      console.error('Erreur lors de la sauvegarde:', err);
-      alert('Une erreur inattendue s\'est produite. Veuillez réessayer.');
-    }
+    console.log('✅ Onboarding complété:', profile);
+    setHasCompletedOnboarding(true);
   };
 
-  // Affichage du loading
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement de MyFitHero...</p>
-          
-          {/* Bouton de déconnexion forcée pour débugger */}
-          <button 
-            onClick={() => {
-              supabase.auth.signOut();
-              localStorage.clear();
-              sessionStorage.clear();
-              window.location.reload();
-            }}
-            className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg text-sm"
-          >
-            🔧 Forcer déconnexion (debug)
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Si non authentifié, afficher les pages d'authentification
-  if (!isAuthenticated) {
+  // FORCER L'AFFICHAGE DES PAGES D'AUTH
+  if (showAuth) {
+    console.log('🔐 Affichage des pages d\'authentification');
     return <AuthPages onAuthSuccess={handleAuthSuccess} />;
   }
 
   // Si authentifié mais onboarding non complété, afficher le questionnaire
-  if (!hasCompletedOnboarding) {
+  if (user && !hasCompletedOnboarding) {
+    console.log('📝 Affichage du questionnaire');
     return <OnboardingQuestionnaire onComplete={handleOnboardingComplete} />;
   }
 
   // Sinon, afficher l'application normale
+  console.log('🏠 Affichage de l\'application principale');
   return (
     <Router>
       <Layout>
