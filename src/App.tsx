@@ -41,19 +41,35 @@ function App() {
 
   // Vérifier l'état d'authentification au chargement
   useEffect(() => {
-    // Vérifier s'il y a une session active
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user);
-        setIsAuthenticated(true);
-        checkOnboardingStatus(session.user.id);
-      } else {
-        setIsLoading(false);
-      }
+    console.log('🔍 Vérification de l\'authentification...');
+    
+    // Forcer la déconnexion au début pour debug
+    supabase.auth.signOut().then(() => {
+      console.log('🔄 Déconnexion forcée pour reset');
+      
+      // Vérifier s'il y a une session active
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        console.log('📋 Session trouvée:', session);
+        
+        if (session?.user) {
+          console.log('✅ Utilisateur connecté:', session.user.email);
+          setUser(session.user);
+          setIsAuthenticated(true);
+          checkOnboardingStatus(session.user.id);
+        } else {
+          console.log('❌ Aucune session active, affichage de l\'authentification');
+          setIsAuthenticated(false);
+          setHasCompletedOnboarding(false);
+          setUserProfile(null);
+          setIsLoading(false);
+        }
+      });
     });
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Changement d\'authentification:', event, session?.user?.email);
+      
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user);
         setIsAuthenticated(true);
@@ -175,6 +191,19 @@ function App() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement de MyFitHero...</p>
+          
+          {/* Bouton de déconnexion forcée pour débugger */}
+          <button 
+            onClick={() => {
+              supabase.auth.signOut();
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.reload();
+            }}
+            className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            🔧 Forcer déconnexion (debug)
+          </button>
         </div>
       </div>
     );
