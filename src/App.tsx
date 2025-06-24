@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Index from './pages/Index';
 import WorkoutPage from './pages/WorkoutPage';
+import OnboardingQuestionnaire from './components/OnboardingQuestionnaire';
 
 // Import des pages (à créer ensuite)
 // import WorkoutPage from './pages/WorkoutPage';
@@ -29,6 +30,39 @@ const TemporaryPage = ({ title }: { title: string }) => (
 );
 
 function App() {
+  // État pour gérer si l'utilisateur a complété l'onboarding
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+
+  // Vérifier si l'onboarding a été complété (pour l'instant en localStorage, plus tard en Supabase)
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('myfitheroe_user_profile');
+    if (savedProfile) {
+      setUserProfile(JSON.parse(savedProfile));
+      setHasCompletedOnboarding(true);
+    }
+  }, []);
+
+  // Fonction appelée quand l'onboarding est terminé
+  const handleOnboardingComplete = (profile: any) => {
+    console.log('Profil utilisateur créé:', profile);
+    
+    // Sauvegarder le profil (temporairement en localStorage)
+    localStorage.setItem('myfitheroe_user_profile', JSON.stringify(profile));
+    
+    // Plus tard : sauvegarder en Supabase
+    // await supabase.from('user_profiles').insert(profile);
+    
+    setUserProfile(profile);
+    setHasCompletedOnboarding(true);
+  };
+
+  // Si l'onboarding n'est pas terminé, afficher le questionnaire
+  if (!hasCompletedOnboarding) {
+    return <OnboardingQuestionnaire onComplete={handleOnboardingComplete} />;
+  }
+
+  // Sinon, afficher l'application normale
   return (
     <Router>
       <Layout>
