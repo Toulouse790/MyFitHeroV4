@@ -119,7 +119,7 @@ const Profile = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-800">{user?.name || 'Utilisateur'}</h1>
-                <p className="text-gray-600">Niveau {user?.level || 1} • {user?.points || 0} points</p>
+                <p className="text-gray-600">Niveau {user?.level || 1} • {user?.level ? user.level * 100 : 0} points</p>
                 <div className="flex items-center mt-2">
                   <Crown className="text-yellow-500 mr-1" size={16} />
                   <span className="text-sm text-gray-600">{achievements.length} achievements</span>
@@ -224,7 +224,7 @@ const Profile = () => {
                             <Trophy size={24} />
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-800">{achievement.name}</h4>
+                            <h4 className="font-semibold text-gray-800">{achievement.title || 'Achievement'}</h4>
                             <p className="text-sm text-gray-600">{achievement.description}</p>
                           </div>
                         </div>
