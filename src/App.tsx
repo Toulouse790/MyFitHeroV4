@@ -41,8 +41,65 @@ function App() {
 
   // Fonction appelée quand l'onboarding est terminé
   const handleOnboardingComplete = async (profile: any) => {
-    console.log('✅ Onboarding complété:', profile);
-    setHasCompletedOnboarding(true);
+    console.log('✅ Onboarding - Données reçues:', profile);
+    
+    if (!user) {
+      console.error('❌ Pas d\'utilisateur connecté');
+      return;
+    }
+
+    try {
+      // Sauvegarder le profil COMPLET en base de données
+      const updateData = {
+        // Données personnelles
+        age: profile.age,
+        gender: profile.gender,
+        lifestyle: profile.lifestyle,
+        available_time_per_day: profile.available_time_per_day,
+        fitness_experience: profile.fitness_experience,
+        injuries: profile.injuries || [],
+        
+        // Objectifs et motivation
+        primary_goals: profile.primary_goals || [],
+        motivation: profile.motivation || '',
+        fitness_goal: profile.primary_goals?.[0] || null, // Premier objectif comme principal
+        
+        // Données sportives (si applicable)
+        sport: profile.sport,
+        sport_position: profile.sport_position,
+        sport_level: profile.sport_level,
+        training_frequency: profile.training_frequency,
+        season_period: profile.season_period,
+        
+        // Métadonnées
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('💾 Sauvegarde des données:', updateData);
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .update(updateData)
+        .eq('id', user.id)
+        .select(); // Récupérer les données mises à jour
+
+      if (error) {
+        console.error('❌ Erreur Supabase:', error);
+        alert('Erreur lors de la sauvegarde du profil. Veuillez réessayer.');
+        return;
+      }
+
+      console.log('✅ Profil sauvegardé avec succès:', data);
+      
+      // Mettre à jour l'état local
+      if (data && data[0]) {
+        setHasCompletedOnboarding(true);
+      }
+
+    } catch (err) {
+      console.error('❌ Erreur lors de la sauvegarde:', err);
+      alert('Une erreur inattendue s\'est produite. Veuillez réessayer.');
+    }
   };
 
   // FORCER L'AFFICHAGE DES PAGES D'AUTH
