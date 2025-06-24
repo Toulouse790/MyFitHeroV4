@@ -145,39 +145,24 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     }
   };
 
-  // Gestion connexion
+  // Gestion connexion SIMPLIFIÉE
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Récupérer l'email depuis le pseudo
-      const { data: userProfile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('id, username')
-        .eq('username', signInForm.username)
-        .single();
-
-      if (profileError || !userProfile) {
-        throw new Error('Pseudo ou mot de passe incorrect');
-      }
-
-      // Récupérer l'email de l'utilisateur
-      const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userProfile.id);
+      // MÉTHODE SIMPLIFIÉE : connexion directe avec email/mot de passe
+      // Pour l'instant, on demande l'email au lieu du pseudo
       
-      if (userError || !userData.user?.email) {
-        throw new Error('Erreur lors de la récupération des données utilisateur');
-      }
-
       // Connexion avec email/password
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: userData.user.email,
+        email: signInForm.username, // Temporairement, on utilise l'email ici
         password: signInForm.password
       });
 
       if (authError) {
-        throw new Error('Pseudo ou mot de passe incorrect');
+        throw new Error('Email ou mot de passe incorrect');
       }
 
       // Gestion "Se souvenir de moi"
@@ -267,19 +252,19 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
           {/* FORMULAIRE DE CONNEXION */}
           {currentView === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-6">
-              {/* Pseudo */}
+              {/* Email pour connexion (temporaire) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pseudo
+                  Email (temporaire - sera pseudo plus tard)
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
-                    type="text"
+                    type="email"
                     value={signInForm.username}
                     onChange={(e) => setSignInForm(prev => ({ ...prev, username: e.target.value }))}
                     className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Votre pseudo"
+                    placeholder="votre@email.com"
                     required
                   />
                 </div>
