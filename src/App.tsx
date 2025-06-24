@@ -86,10 +86,17 @@ function App() {
         return;
       }
 
-      // Vérifier si l'onboarding est complété (par exemple, si age est renseigné)
-      if (profile && profile.age !== null) {
+      console.log('Profil récupéré:', profile);
+
+      // Vérifier si l'onboarding est complété 
+      // (age ET primary_goals doivent être renseignés)
+      if (profile && profile.age !== null && profile.primary_goals && profile.primary_goals.length > 0) {
+        console.log('✅ Onboarding complété, chargement de l\'app...');
         setUserProfile(profile);
         setHasCompletedOnboarding(true);
+      } else {
+        console.log('❌ Onboarding non complété, affichage du questionnaire...');
+        setHasCompletedOnboarding(false);
       }
       
       setIsLoading(false);
@@ -111,30 +118,53 @@ function App() {
     try {
       if (!user) return;
 
-      // Sauvegarder le profil en base de données
+      console.log('Sauvegarde du profil complet:', profile);
+
+      // Sauvegarder le profil COMPLET en base de données
       const { error } = await supabase
         .from('user_profiles')
         .update({
+          // Données personnelles
           age: profile.age,
           gender: profile.gender,
-          activity_level: profile.lifestyle,
-          fitness_goal: profile.primary_goals[0], // Premier objectif comme principal
-          // Ajouter d'autres champs selon le profil
+          lifestyle: profile.lifestyle,
+          available_time_per_day: profile.available_time_per_day,
+          fitness_experience: profile.fitness_experience,
+          injuries: profile.injuries || [],
+          
+          // Objectifs et motivation
+          primary_goals: profile.primary_goals || [],
+          motivation: profile.motivation || '',
+          fitness_goal: profile.primary_goals?.[0] || null, // Premier objectif comme principal
+          
+          // Données sportives (si applicable)
+          sport: profile.sport,
+          sport_position: profile.sport_position,
+          sport_level: profile.sport_level,
+          training_frequency: profile.training_frequency,
+          season_period: profile.season_period,
+          
+          // Métadonnées
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
 
       if (error) {
         console.error('Erreur lors de la sauvegarde du profil:', error);
+        alert('Erreur lors de la sauvegarde du profil. Veuillez réessayer.');
         return;
       }
 
-      console.log('Profil utilisateur complété:', profile);
-      setUserProfile({ ...userProfile, ...profile });
+      console.log('✅ Profil utilisateur sauvegardé avec succès !');
+      
+      // Mettre à jour l'état local
+      const updatedProfile = { ...userProfile, ...profile, id: user.id };
+      setUserProfile(updatedProfile);
       setHasCompletedOnboarding(true);
 
     } catch (err) {
       console.error('Erreur lors de la sauvegarde:', err);
+      alert('Une erreur inattendue s\'est produite. Veuillez réessayer.');
     }
   };
 
