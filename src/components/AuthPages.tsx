@@ -67,7 +67,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
   };
 
-  // Gestion inscription
+  // Gestion inscription SIMPLIFIÉE
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -92,25 +92,15 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         throw new Error('Les mots de passe ne correspondent pas');
       }
 
-      // Vérifier si le pseudo est disponible
-      const { data: existingUser } = await supabase
-        .from('user_profiles')
-        .select('username')
-        .eq('username', signUpForm.username)
-        .single();
-
-      if (existingUser) {
-        throw new Error('Ce pseudo est déjà utilisé');
-      }
-
-      // Créer le compte Supabase Auth
+      // Créer le compte Supabase Auth SEULEMENT
+      // Le trigger se chargera de créer le profil automatiquement
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: signUpForm.email,
         password: signUpForm.password,
         options: {
           data: {
             username: signUpForm.username,
-            full_name: signUpForm.username // Temporaire, sera mis à jour dans le questionnaire
+            full_name: signUpForm.username
           }
         }
       });
@@ -118,27 +108,20 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
       if (authError) throw authError;
 
       if (authData.user) {
-        // Créer le profil utilisateur
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            id: authData.user.id,
-            username: signUpForm.username,
-            full_name: signUpForm.username,
-            notifications_enabled: true
-          });
-
-        if (profileError) throw profileError;
-
-        setSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre inscription.');
+        console.log('✅ Inscription réussie, utilisateur créé:', authData.user.id);
         
-        // Auto-connexion après inscription (si email confirmé)
         if (authData.session) {
+          // Connexion automatique après inscription
+          console.log('🔄 Session active, connexion automatique...');
           onAuthSuccess(authData.user);
+        } else {
+          // Email de confirmation requis
+          setSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.');
         }
       }
 
     } catch (err: any) {
+      console.error('❌ Erreur inscription:', err);
       setError(err.message || 'Erreur lors de la création du compte');
     } finally {
       setIsLoading(false);
