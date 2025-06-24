@@ -36,6 +36,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const quickActions = [
     { path: '/dashboard', icon: BarChart3, label: 'Stats' },
     { path: '/profile', icon: User, label: 'Profil' },
+    { path: '/settings', icon: Settings, label: 'Paramètres' },
   ];
 
   return (
