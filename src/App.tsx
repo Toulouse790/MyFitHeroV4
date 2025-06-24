@@ -5,6 +5,7 @@ import Index from './pages/Index';
 import WorkoutPage from './pages/WorkoutPage';
 import OnboardingQuestionnaire from './components/OnboardingQuestionnaire';
 import AuthPages from './components/AuthPages';
+import SmartDashboard from './components/SmartDashboard';
 import { supabase } from './lib/supabase';
 
 // Pages temporaires pour tester le routing
@@ -114,69 +115,9 @@ function App() {
     return <OnboardingQuestionnaire onComplete={handleOnboardingComplete} />;
   }
 
-  // Sinon, afficher l'application normale
-  console.log('🏠 Affichage de l\'application principale');
-  return (
-    <Router>
-      <Layout>
-        <Routes>
-          {/* Page d'accueil */}
-          <Route path="/" element={<Index />} />
-          
-          {/* Les 4 piliers principaux */}
-          <Route 
-            path="/workout" 
-            element={<WorkoutPage />} 
-          />
-          <Route 
-            path="/nutrition" 
-            element={<TemporaryPage title="🍎 Espace Nutrition" />} 
-          />
-          <Route 
-            path="/sleep" 
-            element={<TemporaryPage title="😴 Espace Sommeil" />} 
-          />
-          <Route 
-            path="/hydration" 
-            element={<TemporaryPage title="💧 Espace Hydratation" />} 
-          />
-          
-          {/* Pages secondaires */}
-          <Route 
-            path="/dashboard" 
-            element={<TemporaryPage title="📊 Dashboard" />} 
-          />
-          <Route 
-            path="/profile" 
-            element={<TemporaryPage title="👤 Mon Profil" />} 
-          />
-          <Route 
-            path="/settings" 
-            element={<TemporaryPage title="⚙️ Paramètres" />} 
-          />
-          
-          {/* Route 404 */}
-          <Route 
-            path="*" 
-            element={
-              <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="text-6xl font-bold text-gray-300 mb-4">404</h1>
-                  <p className="text-xl text-gray-600 mb-8">Page non trouvée</p>
-                  <button 
-                    onClick={() => window.location.href = '/'}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
-                  >
-                    ← Retour à l'accueil
-                  </button>
-                </div>
-              </div>
-            } 
-          />
-        </Routes>
-      </Layout>
-    </Router>
-  );
+  // Sinon, afficher le dashboard IA intelligent
+  console.log('🤖 Affichage du dashboard IA intelligent');
+  return <SmartDashboard userProfile={user} />;
 }
 
 export default App;
