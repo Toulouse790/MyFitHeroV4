@@ -1,5 +1,4 @@
-// src/components/SmartDashboard.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   MessageCircle, 
   Mic, 
@@ -18,16 +17,20 @@ import {
   Droplets,
   Brain,
   Clock,
-  Fire
+  Loader2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useAppStore } from '@/stores/useAppStore'; // Import du store Zustand
+import { DailyStats, AiRecommendation, UserProfile as SupabaseUserProfileType } from '@/lib/supabase'; // Import des types Supabase
+import { User as SupabaseUserAuthType } from '@supabase/supabase-js'; // Import du type User de Supabase pour userProfile
 
 interface SmartDashboardProps {
-  userProfile: any;
+  userProfile?: SupabaseUserAuthType; // Profil utilisateur de la session Supabase
 }
 
-interface DailyProgram {
+// Interface pour la structure du programme quotidien affiché
+interface DailyProgramDisplay {
   workout: {
     name: string;
     duration: number;
@@ -51,119 +54,170 @@ interface DailyProgram {
   };
 }
 
+// Structure des messages dans le chat
+interface ChatMessage {
+  id: number;
+  type: 'ai' | 'user';
+  content: string;
+  timestamp: Date;
+}
+
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'ai',
-      content: `Salut ${userProfile?.username || 'Champion'} ! 🔥 Prêt pour ta séance de ${getTodayWorkout()} ? J'ai adapté ton programme selon tes dernières performances.`,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]); // Messages du chat
   const [inputMessage, setInputMessage] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false); // Pour la reconnaissance vocale
+  const [isLoading, setIsLoading] = useState(false); // État de chargement de l'IA
 
-  // Programme du jour basé sur le profil utilisateur
-  const [dailyProgram, setDailyProgram] = useState<DailyProgram>({
-    workout: {
-      name: getTodayWorkout(),
-      duration: 45,
-      exercises: getPersonalizedExercises(),
-      completed: false
-    },
-    nutrition: {
-      calories_target: 2200,
-      calories_current: 1450,
-      next_meal: "Collation protéinée (16h)"
-    },
-    hydration: {
-      target_ml: 2500,
-      current_ml: 1200,
-      percentage: 48
-    },
-    sleep: {
-      target_hours: 8,
-      last_night_hours: 7.5,
-      quality: 4
-    }
-  });
+  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null); // Statistiques quotidiennes de l'utilisateur
+  const [loadingDailyStats, setLoadingDailyStats] = useState(true);
 
-  // Charger les données du jour depuis Supabase
-  useEffect(() => {
-    loadDailyStats();
-  }, [userProfile]);
+  // Accès aux fonctions du store Zustand
+  const {
+    dailyGoals, // Objectifs définis localement dans le store
+    fetchDailyStats,
+    fetchAiRecommendations,
+    user: initialUserProfileFromStore // Le profil utilisateur local du store (pour les objectifs, niveaux, etc.)
+  } = useAppStore();
 
-  const loadDailyStats = async () => {
-    if (!userProfile?.id) return;
+  const today = new Date().toISOString().split('T')[0]; // Date du jour
 
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const { data, error } = await supabase
-        .from('daily_stats')
-        .select('*')
-        .eq('user_id', userProfile.id)
-        .eq('stat_date', today)
-        .single();
-
-      if (data) {
-        setDailyProgram(prev => ({
-          ...prev,
-          workout: {
-            ...prev.workout,
-            completed: data.workouts_completed > 0
-          },
-          nutrition: {
-            ...prev.nutrition,
-            calories_current: data.total_calories || 0
-          },
-          hydration: {
-            ...prev.hydration,
-            current_ml: data.water_intake_ml || 0,
-            percentage: Math.round((data.water_intake_ml / data.hydration_goal_ml) * 100)
-          }
-        }));
-      }
-    } catch (error) {
-      console.error('Erreur chargement stats:', error);
-    }
-  };
-
-  // Détermine le workout du jour selon le profil
-  function getTodayWorkout() {
-    if (userProfile?.sport === 'rugby' && userProfile?.sport_position === 'pilier') {
+  // Détermine le workout du jour selon le profil (utilisé pour l'affichage initial)
+  // Déplacé ici pour être accessible par useCallback, et est lui-même stable
+  const getTodayWorkout = useCallback((profile: typeof initialUserProfileFromStore) => {
+    if (profile?.sport === 'rugby' && profile?.sport_position === 'pilier') {
       return 'Force Explosive - Mêlée';
     }
-    if (userProfile?.fitness_goal === 'muscle_gain') {
+    if (profile?.fitness_goal === 'muscle_gain') {
       return 'Hypertrophie Haut du Corps';
     }
     return 'Entraînement Personnalisé';
-  }
+  }, []); // Pas de dépendances internes car 'profile' est passé en argument
 
-  // Exercices personnalisés selon le profil
-  function getPersonalizedExercises() {
-    const sport = userProfile?.sport;
-    const goal = userProfile?.primary_goals?.[0];
+  // Exercices personnalisés selon le profil (utilisé pour l'affichage initial)
+  // Déplacé ici pour être accessible par useCallback, et est lui-même stable
+  const getPersonalizedExercises = useCallback((profile: typeof initialUserProfileFromStore) => {
+    const sport = profile?.sport;
+    const goals = profile?.primary_goals;
     
     if (sport === 'rugby') {
       return ['Squat lourd', 'Développé couché', 'Rowing barre', 'Poussée traîneau'];
     }
-    if (goal === 'weight_loss') {
+    if (goals && goals.includes('weight_loss')) {
       return ['HIIT 20min', 'Burpees', 'Mountain climbers', 'Planches'];
     }
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
-  }
+  }, []); // Pas de dépendances internes car 'profile' est passé en argument
 
-  // Configuration de l'API n8n
-  const N8N_WEBHOOK_URL = 'https://ton-n8n.app/webhook/89a7eb7b-c4d4-4461-aa1a-cd1214ad0d30';
 
-  // Gestion des messages IA via ton workflow n8n
+  // Programme du jour basé sur le profil utilisateur et les stats réelles
+  // Initialisé avec des valeurs par défaut qui seront mises à jour par dailyStats
+  const [dailyProgram, setDailyProgram] = useState<DailyProgramDisplay>({
+    workout: {
+      name: getTodayWorkout(initialUserProfileFromStore), // Utilise la fonction getTodayWorkout
+      duration: 45,
+      exercises: getPersonalizedExercises(initialUserProfileFromStore), // Utilise la fonction getPersonalizedExercises
+      completed: false
+    },
+    nutrition: {
+      calories_target: initialUserProfileFromStore.goal === 'Prise de masse' ? 2500 : 2000,
+      calories_current: 0,
+      next_meal: "Chargement..."
+    },
+    hydration: {
+      target_ml: dailyGoals.water * 1000,
+      current_ml: 0,
+      percentage: 0
+    },
+    sleep: {
+      target_hours: dailyGoals.sleep,
+      last_night_hours: 0,
+      quality: 0
+    }
+  });
+
+  // === Chargement des données au démarrage ===
+  const loadInitialData = useCallback(async () => {
+    if (!userProfile?.id) return;
+
+    setLoadingDailyStats(true);
+    try {
+      // Charger les stats journalières
+      const fetchedDailyStats = await fetchDailyStats(userProfile.id, today);
+      setDailyStats(fetchedDailyStats);
+
+      if (fetchedDailyStats) {
+        setDailyProgram(prev => ({
+          ...prev,
+          workout: {
+            ...prev.workout,
+            completed: (fetchedDailyStats.workouts_completed || 0) > 0,
+            name: getTodayWorkout(initialUserProfileFromStore)
+          },
+          nutrition: {
+            ...prev.nutrition,
+            calories_current: fetchedDailyStats.total_calories || 0
+          },
+          hydration: {
+            ...prev.hydration,
+            current_ml: fetchedDailyStats.water_intake_ml || 0,
+            percentage: Math.round(((fetchedDailyStats.water_intake_ml || 0) / (fetchedDailyStats.hydration_goal_ml || dailyGoals.water * 1000)) * 100)
+          },
+          sleep: {
+            ...prev.sleep,
+            last_night_hours: fetchedDailyStats.sleep_duration_minutes ? (fetchedDailyStats.sleep_duration_minutes / 60) : 0,
+            quality: fetchedDailyStats.sleep_quality || 0
+          }
+        }));
+      }
+
+      // Charger les dernières recommandations IA
+      const recentAiRecs = await fetchAiRecommendations(userProfile.id, 'general', 3); // 3 dernières recommandations générales
+      if (recentAiRecs.length > 0) {
+        setMessages(recentAiRecs.map((rec, index) => ({
+          id: index + 1,
+          type: 'ai',
+          content: rec.recommendation,
+          timestamp: new Date(rec.created_at)
+        })));
+      } else {
+        // Message d'accueil par défaut si aucune recommandation récente
+        setMessages([
+          {
+            id: 1,
+            type: 'ai',
+            content: `Salut ${initialUserProfileFromStore?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`,
+            timestamp: new Date()
+          }
+        ]);
+      }
+
+    } catch (error) {
+      console.error('Erreur chargement données dashboard:', error);
+      // Fallback à un message par défaut si erreur
+      setMessages([
+        {
+          id: 1,
+          type: 'ai',
+          content: `Salut ${initialUserProfileFromStore?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`,
+          timestamp: new Date()
+        }
+      ]);
+    } finally {
+      setLoadingDailyStats(false);
+    }
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water]); // getTodayWorkout et getPersonalizedExercises retirés des dépendances car ils sont stables
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
+
+
+  // Gestion des messages IA via le workflow n8n (via Supabase)
   const sendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || !userProfile?.id) return;
 
-    const userMessage = {
+    const userMessage: ChatMessage = {
       id: messages.length + 1,
       type: 'user',
       content: inputMessage,
@@ -175,20 +229,33 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     setIsLoading(true);
 
     try {
-      // Créer une entrée dans ai_requests qui déclenchera le webhook
+      // Créer une entrée dans ai_requests qui déclenchera le webhook n8n
       const { data: requestData, error: requestError } = await supabase
         .from('ai_requests')
         .insert({
-          user_id: userProfile?.id,
+          user_id: userProfile.id,
           pillar_type: detectMessageType(inputMessage),
           prompt: inputMessage,
-          context: {
+          context: { // Contexte riche pour l'IA
             user_profile: {
-              sport: userProfile?.sport,
-              goals: userProfile?.primary_goals,
-              fitness_level: userProfile?.fitness_experience
+              id: userProfile.id,
+              username: initialUserProfileFromStore.name, // Utilise le nom d'utilisateur du store
+              age: initialUserProfileFromStore.age,
+              gender: initialUserProfileFromStore.gender,
+              fitness_goal: initialUserProfileFromStore.goal, // Objectif principal
+              primary_goals: initialUserProfileFromStore.primary_goals,
+              sport: initialUserProfileFromStore.sport,
+              sport_position: initialUserProfileFromStore.sport_position,
+              fitness_experience: initialUserProfileFromStore.fitness_experience,
+              lifestyle: initialUserProfileFromStore.lifestyle,
+              available_time_per_day: initialUserProfileFromStore.available_time_per_day,
+              training_frequency: initialUserProfileFromStore.training_frequency,
+              season_period: initialUserProfileFromStore.season_period,
+              injuries: initialUserProfileFromStore.injuries,
             },
-            current_stats: dailyProgram
+            current_daily_stats: dailyStats, // Statistiques quotidiennes les plus récentes
+            daily_program: dailyProgram, // Programme du jour affiché
+            last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3), // 3 dernières recos IA
           },
           status: 'pending'
         })
@@ -208,12 +275,14 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             table: 'ai_requests',
             filter: `id=eq.${requestData.id}`
           },
-          (payload: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (payload: any) => { // Ajout du commentaire ESLint pour 'any'
             if (payload.new.status === 'completed' && payload.new.webhook_response) {
-              const aiResponse = {
+              const aiResponseContent = payload.new.webhook_response.recommendation || 'Je réfléchis...';
+              const aiResponse: ChatMessage = {
                 id: messages.length + 2,
                 type: 'ai',
-                content: payload.new.webhook_response.recommendation || 'Je réfléchis...',
+                content: aiResponseContent,
                 timestamp: new Date()
               };
               setMessages(prev => [...prev, aiResponse]);
@@ -234,12 +303,12 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             timestamp: new Date()
           }]);
           setIsLoading(false);
-          subscription.unsubscribe();
+          subscription.unsubscribe(); // Désabonnement même en cas de timeout
         }
-      }, 30000);
+      }, 30000); // 30 secondes de timeout
 
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('Erreur lors de l\'envoi du message:', error);
       setMessages(prev => [...prev, {
         id: messages.length + 2,
         type: 'ai',
@@ -250,27 +319,27 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
   };
 
-  // Détecte le type de demande pour router vers le bon agent
+  // Détecte le type de demande pour router vers le bon agent (pour le champ pillar_type dans ai_requests)
   const detectMessageType = (message: string): string => {
     const lowerMessage = message.toLowerCase();
     
-    if (lowerMessage.includes('workout') || lowerMessage.includes('musculation') || lowerMessage.includes('exercice')) {
+    if (lowerMessage.includes('sport') || lowerMessage.includes('workout') || lowerMessage.includes('musculation') || lowerMessage.includes('exercice') || lowerMessage.includes('entraînement')) {
       return 'workout';
     }
-    if (lowerMessage.includes('nutrition') || lowerMessage.includes('manger') || lowerMessage.includes('calories')) {
+    if (lowerMessage.includes('nutrition') || lowerMessage.includes('manger') || lowerMessage.includes('calories') || lowerMessage.includes('repas')) {
       return 'nutrition';
     }
-    if (lowerMessage.includes('sommeil') || lowerMessage.includes('dormir') || lowerMessage.includes('repos')) {
+    if (lowerMessage.includes('sommeil') || lowerMessage.includes('dormir') || lowerMessage.includes('repos') || lowerMessage.includes('nuit')) {
       return 'sleep';
     }
     if (lowerMessage.includes('eau') || lowerMessage.includes('hydratation') || lowerMessage.includes('boire')) {
       return 'hydration';
     }
     
-    return 'general';
+    return 'general'; // Pour l'IA de coordination si la demande n'est pas spécifique
   };
 
-  // Navigation entre piliers
+  // Navigation entre piliers (utilisé pour les boutons du programme du jour)
   const pillarActions = [
     {
       id: 'workout',
@@ -312,85 +381,93 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.reload();
+    // Recharger la page pour un reset complet de l'état
+    window.location.reload(); 
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header compact */}
       <div className="bg-white shadow-sm border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-              <Brain className="text-white" size={16} />
-            </div>
-            <div>
-              <h1 className="font-bold text-gray-800">MyFitHero</h1>
-              <p className="text-xs text-gray-500">Assistant IA Personnel</p>
-            </div>
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+            <Brain size={20} />
           </div>
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={() => navigate('/profile')}
-              className="p-2 text-gray-500 hover:text-gray-700"
-            >
-              <User size={20} />
-            </button>
-            <button 
-              onClick={handleSignOut}
-              className="p-2 text-gray-500 hover:text-gray-700"
-            >
-              <Settings size={20} />
-            </button>
+          <div>
+            <h1 className="font-bold text-gray-800">MyFitHero</h1>
+            <p className="text-xs text-gray-500">Assistant IA Personnel</p>
           </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={() => navigate('/profile')}
+            className="p-2 text-gray-500 hover:text-gray-700"
+          >
+            <User size={20} />
+          </button>
+          <button 
+            onClick={handleSignOut}
+            className="p-2 text-gray-500 hover:text-gray-700"
+          >
+            <Settings size={20} />
+          </button>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-4 max-w-4xl">
         {/* Programme du jour */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center">
-              <Calendar className="mr-2 text-blue-600" size={24} />
-              Programme du jour
-            </h2>
-            <span className="text-sm text-gray-500">
-              {new Date().toLocaleDateString('fr-FR', { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long' 
-              })}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {pillarActions.map((pillar) => (
-              <div 
-                key={pillar.id} 
-                onClick={() => navigate(pillar.path)}
-                className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <div className={`${pillar.color} p-2 rounded-lg`}>
-                    <pillar.icon className="text-white" size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-800 text-sm">{pillar.label}</h3>
-                    <p className="text-xs text-gray-500">{pillar.progress}%</p>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-                  <div 
-                    className={`${pillar.color} h-2 rounded-full transition-all duration-300`}
-                    style={{ width: `${Math.min(pillar.progress, 100)}%` }}
-                  />
-                </div>
-                <button className="text-xs text-gray-600 hover:text-gray-800 font-medium">
-                  {pillar.action}
-                </button>
+          {loadingDailyStats ? (
+            <div className="text-center py-8">
+              <Loader2 className="animate-spin mx-auto mb-4" size={24} />
+              <p className="text-gray-600">Chargement du programme du jour...</p>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                  <Calendar className="mr-2 text-blue-600" size={24} />
+                  Programme du jour
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {new Date().toLocaleDateString('fr-FR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long' 
+                  })}
+                </span>
               </div>
-            ))}
-          </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {pillarActions.map((pillar) => (
+                  <div 
+                    key={pillar.id} 
+                    onClick={() => navigate(pillar.path)}
+                    className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className={`${pillar.color} p-2 rounded-lg`}>
+                        <pillar.icon className="text-white" size={20} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 text-sm">{pillar.label}</h3>
+                        <p className="text-xs text-gray-500">{pillar.progress}%</p>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                      <div 
+                        className={`${pillar.color} h-2 rounded-full transition-all duration-300`}
+                        style={{ width: `${Math.min(pillar.progress, 100)}%` }}
+                      />
+                    </div>
+                    <button className="text-xs text-gray-600 hover:text-gray-800 font-medium">
+                      {pillar.action}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Chat IA principal */}
