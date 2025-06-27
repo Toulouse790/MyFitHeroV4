@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Droplets, 
   Plus, 
@@ -11,46 +11,120 @@ import {
   Thermometer,
   Award,
   Coffee,
-  Wine,
   Minus,
   RotateCcw,
   Bell
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
+import { HydrationEntry, DailyStats } from '@/lib/supabase'; // Importe les types de Supabase
+import { User } from '@supabase/supabase-js'; // Importe le type User de Supabase
 
-const Hydration = () => {
+interface HydrationProps {
+  userProfile?: User; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
+}
+
+const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
   const [selectedAmount, setSelectedAmount] = useState(250);
+  const [hydrationEntries, setHydrationEntries] = useState<HydrationEntry[]>([]);
+  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const [errorFetching, setErrorFetching] = useState<string | null>(null);
 
-  // === CONNEXION AU STORE ===
+  // === CONNEXION AU STORE ZUSTAND ===
   const {
-    hydrationEntries,
     dailyGoals,
-    user,
-    getTodayHydration,
-    getWeeklyStats,
-    addHydration,
-    removeLastHydration,
-    resetDailyHydration
+    user, // Le user du store (pour level/points)
+    addHydration: storeAddHydration,
+    removeLastHydration: storeRemoveLastHydration,
+    resetDailyHydration: storeResetDailyHydration,
+    fetchHydrationEntries,
+    fetchDailyStats,
+    unlockAchievement // Pour les achievements liés à l'hydratation
   } = useAppStore();
 
-  // === DONNÉES EN TEMPS RÉEL ===
-  const currentHydration = getTodayHydration();
-  const goalHydration = dailyGoals.water;
-  const weeklyStats = getWeeklyStats();
-  
-  // Calculs
-  const currentMl = currentHydration * 1000;
-  const goalMl = goalHydration * 1000;
+  // === CALCULS BASÉS SUR LES DONNÉES RÉELLES ===
+  const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+  const currentMl = dailyStats?.water_intake_ml || 0;
+  const goalMl = dailyStats?.hydration_goal_ml || (dailyGoals.water * 1000);
+  const currentHydrationL = currentMl / 1000;
+  const goalHydrationL = goalMl / 1000;
   const remaining = goalMl - currentMl;
   const percentage = Math.min((currentMl / goalMl) * 100, 100);
 
-  // Entrées d'aujourd'hui
-  const today = new Date().toDateString();
-  const todayIntakes = hydrationEntries
-    .filter(entry => new Date(entry.time).toDateString() === today)
-    .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-    .slice(0, 10); // Limiter à 10 dernières entrées
+  // === FONCTIONS DE RÉCUPÉRATION DES DONNÉES ===
+  const loadHydrationData = useCallback(async () => {
+    if (!userProfile?.id) return;
 
+    setLoadingData(true);
+    setErrorFetching(null);
+    try {
+      const fetchedEntries = await fetchHydrationEntries(userProfile.id, today);
+      setHydrationEntries(fetchedEntries);
+
+      const fetchedDailyStats = await fetchDailyStats(userProfile.id, today);
+      setDailyStats(fetchedDailyStats);
+
+      // Logique pour débloquer les achievements après avoir fetché les données
+      if (fetchedDailyStats && fetchedDailyStats.water_intake_ml >= dailyGoals.water * 1000) {
+        unlockAchievement('hydration-master'); // Exemple
+      }
+
+    } catch (err: unknown) {
+      setErrorFetching('Erreur lors du chargement des données: ' + (err instanceof Error ? err.message : String(err)));
+      console.error('Failed to load hydration data:', err);
+    } finally {
+      setLoadingData(false);
+    }
+  }, [userProfile?.id, today, fetchHydrationEntries, fetchDailyStats, dailyGoals.water, unlockAchievement]);
+
+  useEffect(() => {
+    loadHydrationData();
+  }, [loadHydrationData]);
+
+  // === ACTIONS D'HYDRATATION ===
+  const handleAddWater = async (amount: number, type: string = 'water') => {
+    if (!userProfile?.id) {
+      alert('Utilisateur non connecté.');
+      return;
+    }
+    setLoadingData(true);
+    const newEntry = await storeAddHydration(userProfile.id, amount, type);
+    if (newEntry) {
+      await loadHydrationData(); // Recharge les données après ajout
+    } else {
+      alert('Impossible d\'ajouter l\'entrée d\'hydratation.');
+    }
+  };
+
+  const handleRemoveLast = async () => {
+    if (!userProfile?.id) {
+      alert('Utilisateur non connecté.');
+      return;
+    }
+    setLoadingData(true);
+    const success = await storeRemoveLastHydration(userProfile.id);
+    if (success) {
+      await loadHydrationData(); // Recharge les données après suppression
+    } else {
+      alert('Impossible de supprimer la dernière entrée.');
+    }
+  };
+
+  const handleReset = async () => {
+    if (!userProfile?.id) {
+      alert('Utilisateur non connecté.');
+      return;
+    }
+    setLoadingData(true);
+    const success = await storeResetDailyHydration(userProfile.id);
+    if (success) {
+      await loadHydrationData(); // Recharge les données après réinitialisation
+    } else {
+      alert('Impossible de réinitialiser les entrées.');
+    }
+  };
+
+  // === COMPOSANTS DE PRÉSENTATION (inchangés ou adaptés pour les nouvelles données) ===
   const quickAmounts = [125, 250, 330, 500, 750];
 
   const hydrationTips = [
@@ -80,39 +154,13 @@ const Hydration = () => {
     }
   ];
 
+  // Achievements mockés - à connecter aux vrais achievements de l'utilisateur plus tard
   const achievements = [
-    { title: 'Hydratation parfaite', description: '7 jours d\'objectif atteint', emoji: '🏆', unlocked: true },
-    { title: 'Lève-tôt hydraté', description: 'Eau avant 8h pendant 5 jours', emoji: '🌅', unlocked: true },
+    { title: 'Hydratation parfaite', description: '7 jours d\'objectif atteint', emoji: '🏆', unlocked: false },
+    { title: 'Lève-tôt hydraté', description: 'Eau avant 8h pendant 5 jours', emoji: '🌅', unlocked: false },
     { title: 'Marathon hydratation', description: '30 jours consécutifs', emoji: '🏃‍♂️', unlocked: false },
     { title: 'Maître de l\'eau', description: '3L par jour pendant 7 jours', emoji: '💧', unlocked: false }
   ];
-
-  // === ACTIONS ===
-  const handleAddWater = (amount: number) => {
-    addHydration(amount, 'water');
-    console.log(`✅ Ajouté: ${amount}ml d'eau`);
-  };
-
-  const handleRemoveLast = () => {
-    removeLastHydration();
-    console.log('❌ Supprimé: dernière entrée');
-  };
-
-  const handleReset = () => {
-    resetDailyHydration();
-    console.log('🔄 Reset: hydratation du jour');
-  };
-
-  // === FONCTIONS UTILITAIRES ===
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'water': return 'text-blue-500';
-      case 'coffee': return 'text-brown-500';
-      case 'tea': return 'text-green-500';
-      case 'juice': return 'text-orange-500';
-      default: return 'text-blue-500';
-    }
-  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -130,7 +178,7 @@ const Hydration = () => {
     });
   };
 
-  const QuickAmountButton = ({ amount, isSelected, onClick }: any) => (
+  const QuickAmountButton = ({ amount, isSelected, onClick }: { amount: number, isSelected: boolean, onClick: (amount: number) => void }) => (
     <button
       onClick={() => onClick(amount)}
       className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
@@ -143,15 +191,24 @@ const Hydration = () => {
     </button>
   );
 
-  const IntakeItem = ({ intake }: any) => {
-    const IntakeIcon = intake.type === 'coffee' ? Coffee : Droplets;
+  const IntakeItem = ({ intake }: { intake: HydrationEntry }) => {
+    const IntakeIcon = intake.drink_type === 'coffee' ? Coffee : Droplets;
+    const getTypeColor = (type: string | null) => {
+      switch (type) {
+        case 'water': return 'text-blue-500';
+        case 'coffee': return 'text-brown-500';
+        case 'tea': return 'text-green-500';
+        case 'juice': return 'text-orange-500';
+        default: return 'text-blue-500';
+      }
+    };
     return (
       <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
         <div className="flex items-center space-x-3">
-          <IntakeIcon size={16} className={getTypeColor(intake.type)} />
-          <span className="text-sm text-gray-600">{formatTime(intake.time)}</span>
+          <IntakeIcon size={16} className={getTypeColor(intake.drink_type)} />
+          <span className="text-sm text-gray-600">{formatTime(intake.logged_at || new Date().toISOString())}</span>
         </div>
-        <span className="text-sm font-medium text-gray-800">{intake.amount}ml</span>
+        <span className="text-sm font-medium text-gray-800">{intake.amount_ml}ml</span>
       </div>
     );
   };
@@ -173,39 +230,47 @@ const Hydration = () => {
 
         {/* Objectif principal - DONNÉES EN TEMPS RÉEL */}
         <div className="bg-gradient-hydration p-5 rounded-xl text-white relative overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-lg">Aujourd'hui</h3>
-            <Target size={24} />
-          </div>
-          
-          <div className="text-center mb-4">
-            <div className="text-4xl font-bold mb-1">{(Math.round(currentHydration * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}L</div>
-            <div className="text-white/80">sur {goalHydration}L</div>
-            <div className="text-sm text-white/70 mt-1">
-              {remaining > 0 ? `${(Math.round((remaining/1000) * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}L restants` : 'Objectif atteint ! 🎉'}
-            </div>
-          </div>
+          {loadingData ? (
+            <div className="text-center py-8">Chargement des données...</div>
+          ) : errorFetching ? (
+            <div className="text-center py-8 text-red-100">{errorFetching}</div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-lg">Aujourd'hui</h3>
+                <Target size={24} />
+              </div>
+              
+              <div className="text-center mb-4">
+                <div className="text-4xl font-bold mb-1">{(currentHydrationL).toFixed(2).replace(/\.?0+$/, '')}L</div>
+                <div className="text-white/80">sur {goalHydrationL}L</div>
+                <div className="text-sm text-white/70 mt-1">
+                  {remaining > 0 ? `${(remaining/1000).toFixed(2).replace(/\.?0+$/, '')}L restants` : 'Objectif atteint ! 🎉'}
+                </div>
+              </div>
 
-          {/* Barre de progression avec données réelles */}
-          <div className="relative w-full bg-white/20 rounded-full h-4 mb-2 overflow-hidden">
-            <div 
-              className="bg-white rounded-full h-4 transition-all duration-500 relative"
-              style={{ width: `${percentage}%` }}
-            >
-              <div className="absolute inset-0 opacity-30 animate-pulse bg-blue-200 rounded-full"></div>
-            </div>
-          </div>
-          
-          <div className="text-center text-sm text-white/80">
-            {Math.round(percentage)}% de l'objectif atteint
-          </div>
+              {/* Barre de progression avec données réelles */}
+              <div className="relative w-full bg-white/20 rounded-full h-4 mb-2 overflow-hidden">
+                <div 
+                  className="bg-white rounded-full h-4 transition-all duration-500 relative"
+                  style={{ width: `${percentage}%` }}
+                >
+                  <div className="absolute inset-0 opacity-30 animate-pulse bg-blue-200 rounded-full"></div>
+                </div>
+              </div>
+              
+              <div className="text-center text-sm text-white/80">
+                {Math.round(percentage)}% de l'objectif atteint
+              </div>
 
-          {/* Effet de vagues en arrière-plan */}
-          <div className="absolute bottom-0 left-0 right-0 opacity-10">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-8">
-              <path d="M0,60 C300,100 900,20 1200,60 L1200,120 L0,120 Z" fill="white" className="animate-pulse"></path>
-            </svg>
-          </div>
+              {/* Effet de vagues en arrière-plan */}
+              <div className="absolute bottom-0 left-0 right-0 opacity-10">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-8">
+                  <path d="M0,60 C300,100 900,20 1200,60 L1200,120 L0,120 Z" fill="white" className="animate-pulse"></path>
+                </svg>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Actions rapides - FONCTIONNELLES */}
@@ -228,14 +293,15 @@ const Hydration = () => {
           <div className="grid grid-cols-3 gap-3">
             <button 
               onClick={() => handleAddWater(selectedAmount)}
-              className="bg-fitness-hydration text-white p-4 rounded-xl font-medium flex flex-col items-center hover:bg-fitness-hydration/90 transition-colors"
+              disabled={loadingData}
+              className="bg-fitness-hydration text-white p-4 rounded-xl font-medium flex flex-col items-center hover:bg-fitness-hydration/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus size={24} className="mb-1" />
               <span className="text-sm">Ajouter {selectedAmount}ml</span>
             </button>
             <button 
               onClick={handleRemoveLast}
-              disabled={todayIntakes.length === 0}
+              disabled={loadingData || hydrationEntries.length === 0}
               className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Minus size={24} className="mb-1" />
@@ -243,7 +309,8 @@ const Hydration = () => {
             </button>
             <button 
               onClick={handleReset}
-              className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors"
+              disabled={loadingData}
+              className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RotateCcw size={24} className="mb-1" />
               <span className="text-sm">Reset</span>
@@ -251,44 +318,64 @@ const Hydration = () => {
           </div>
         </div>
 
-        {/* Statistiques de la semaine - DONNÉES RÉELLES */}
+        {/* Statistiques de la semaine - DONNÉES RÉELLES (via dailyStats si dispo) */}
         <div className="bg-white p-4 rounded-xl border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Cette semaine</h3>
+            <h3 className="font-semibold text-gray-800">Aujourd'hui ({new Date(today).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })})</h3>
             <TrendingUp size={20} className="text-green-500" />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-800">{weeklyStats.avgHydration.toFixed(1)}L</div>
-              <div className="text-gray-600 text-sm">Moyenne/jour</div>
+          {loadingData ? (
+            <div className="text-center text-gray-500">Chargement...</div>
+          ) : dailyStats ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-800">{(dailyStats.water_intake_ml / 1000).toFixed(1).replace(/\.?0+$/, '')}L</div>
+                <div className="text-gray-600 text-sm">Bu aujourd'hui</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-800">{dailyStats.workouts_completed || 0}</div>
+                <div className="text-gray-600 text-sm">Workouts</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-800">{dailyStats.total_calories || 0}</div>
+                <div className="text-gray-600 text-sm">Calories ingérées</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-800">
+                  {dailyStats.sleep_duration_minutes ? (dailyStats.sleep_duration_minutes / 60).toFixed(1).replace(/\.?0+$/, '') + 'h' : 'N/A'}
+                </div>
+                <div className="text-gray-600 text-sm">Sommeil</div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-800">{weeklyStats.workouts}</div>
-              <div className="text-gray-600 text-sm">Workouts</div>
-            </div>
-          </div>
+          ) : (
+            <div className="text-center text-gray-500">Pas de données pour aujourd'hui.</div>
+          )}
           
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <div className="flex items-center space-x-2">
               <Award size={16} className="text-blue-500" />
-              <span className="text-sm text-gray-600">Série en cours</span>
+              <span className="text-sm text-gray-600">Série en cours (à implémenter)</span>
             </div>
-            <div className="text-sm text-gray-600">Total: {(Math.round((weeklyStats.avgHydration * 7) * 100) / 100).toFixed(2).replace(/\.?0+$/, '')}L</div>
+            <div className="text-sm text-gray-600">Total: {currentHydrationL.toFixed(2).replace(/\.?0+$/, '')}L</div>
           </div>
         </div>
 
         {/* Historique du jour - DONNÉES RÉELLES */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Aujourd'hui</h2>
-            <span className="text-sm text-gray-500">{todayIntakes.length} prises</span>
+            <h2 className="text-lg font-semibold text-gray-800">Historique du jour</h2>
+            <span className="text-sm text-gray-500">{hydrationEntries.length} prises</span>
           </div>
           
           <div className="bg-white p-4 rounded-xl border border-gray-100">
-            {todayIntakes.length > 0 ? (
+            {loadingData ? (
+              <div className="text-center py-8">Chargement de l'historique...</div>
+            ) : errorFetching ? (
+              <div className="text-center py-8 text-red-500">{errorFetching}</div>
+            ) : hydrationEntries.length > 0 ? (
               <div className="space-y-1 max-h-48 overflow-y-auto">
-                {todayIntakes.map((intake) => (
+                {hydrationEntries.map((intake) => (
                   <IntakeItem key={intake.id} intake={intake} />
                 ))}
               </div>
@@ -327,7 +414,7 @@ const Hydration = () => {
           </div>
         </div>
 
-        {/* Achievements */}
+        {/* Achievements (mockés pour l'instant) */}
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Award size={20} className="text-yellow-500" />
@@ -365,11 +452,6 @@ const Hydration = () => {
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Debug info (temporaire) */}
-        <div className="bg-gray-100 p-3 rounded-lg text-xs text-gray-600">
-          <p>🔧 Debug: {hydrationEntries.length} entrées • {currentHydration.toFixed(2)}L aujourd'hui</p>
         </div>
 
         {/* Espace pour la bottom nav */}

@@ -1,12 +1,19 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { supabase } from '../lib/supabase';
+// Import correct de TOUS les types de Supabase nécessaires
+import { HydrationEntry, DailyStats, Meal, UserProfile as SupabaseUserProfile, Json, SleepSession, Workout, Exercise, AiRecommendation, AiRequest } from '../lib/supabase'; // UserProfile de Supabase renommé en SupabaseUserProfile pour éviter les conflits de nom
 
 // === TYPES ===
-interface HydrationEntry {
-  id: string;
-  amount: number;
-  time: string;
-  type: 'water' | 'coffee' | 'tea' | 'juice';
+// L'interface UserProfile du store étend maintenant SupabaseUserProfile
+export interface UserProfile extends SupabaseUserProfile { 
+  // Champs locaux/calculés (non directement dans la table Supabase, mais gérés par l'app)
+  name: string; // Nom d'affichage, peut être full_name ou username
+  email: string; // Email de l'utilisateur (peut venir de auth.user)
+  goal: string; // Objectif principal résumé
+  level: number; // Niveau de l'utilisateur
+  totalPoints: number; // Points d'expérience
+  joinDate: string; // Date d'inscription
 }
 
 interface WorkoutSession {
@@ -18,26 +25,6 @@ interface WorkoutSession {
   exercises: number;
 }
 
-interface NutritionEntry {
-  id: string;
-  name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  meal: 'breakfast' | 'lunch' | 'snack' | 'dinner';
-  time: string;
-}
-
-interface SleepEntry {
-  id: string;
-  date: string;
-  bedtime: string;
-  wakeup: string;
-  duration: number;
-  quality: number;
-}
-
 interface Achievement {
   id: string;
   title: string;
@@ -45,19 +32,6 @@ interface Achievement {
   emoji: string;
   unlocked: boolean;
   unlockedDate?: string;
-}
-
-interface UserProfile {
-  name: string;
-  email: string;
-  avatar: string;
-  age: number;
-  weight: number;
-  height: number;
-  goal: string;
-  level: number;
-  totalPoints: number;
-  joinDate: string;
 }
 
 interface DailyGoals {
@@ -72,61 +46,96 @@ interface DailyGoals {
 }
 
 interface AppState {
-  user: UserProfile;
+  user: UserProfile; // Le user du store est maintenant le type UserProfile complet
   dailyGoals: DailyGoals;
-  hydrationEntries: HydrationEntry[];
-  workoutSessions: WorkoutSession[];
-  nutritionEntries: NutritionEntry[];
-  sleepEntries: SleepEntry[];
   achievements: Achievement[];
   
-  // === COMPUTED VALUES ===
-  getTodayHydration: () => number;
-  getTodayCalories: () => number;
-  getTodayWorkouts: () => number;
-  getWeeklyStats: () => any;
+  // === ACTIONS LIÉES À SUPABASE ===
+  addHydration: (userId: string, amount: number, type?: string) => Promise<HydrationEntry | null>;
+  removeLastHydration: (userId: string) => Promise<boolean>;
+  addSleepSession: (userId: string, sleepData: { sleep_date: string; bedtime: string; wake_time: string; duration_minutes: number; quality_rating?: number; mood_rating?: number; energy_level?: number; factors?: Json; notes?: string; }) => Promise<SleepSession | null>;
+  fetchHydrationEntries: (userId: string, date: string) => Promise<HydrationEntry[]>;
+  resetDailyHydration: (userId: string) => Promise<boolean>;
+  fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
+
+  // ACTIONS POUR LA NUTRITION
+  addMeal: (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<Meal | null>;
+  fetchMeals: (userId: string, date: string) => Promise<Meal[]>;
+
+  // ACTIONS POUR LE SOMMEIL
+  fetchSleepSessions: (userId: string, date: string) => Promise<SleepSession[]>;
+
+  // ACTIONS POUR LE SPORT (WORKOUT)
+  addWorkoutSession: (userId: string, workoutData: Omit<Workout, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => Promise<Workout | null>;
+  updateWorkoutSession: (workoutId: string, updates: Partial<Workout>) => Promise<Workout | null>;
+  fetchWorkoutSessions: (userId: string, startDate?: string, endDate?: string) => Promise<Workout[]>;
+  fetchExercisesLibrary: (category?: string, difficulty?: string) => Promise<Exercise[]>;
+
+  // ACTIONS POUR LES RECOMMANDATIONS IA
+  fetchAiRecommendations: (userId: string, pillarType?: string, limit?: number) => Promise<AiRecommendation[]>;
+
+
+  // === ACTIONS GLOBALES (restent dans le store) ===
   
-  // === ACTIONS ===
-  addHydration: (amount: number, type?: string) => void;
-  removeLastHydration: () => void;
-  resetDailyHydration: () => void;
-  addWorkout: (workout: Omit<WorkoutSession, 'id'>) => void;
-  addNutrition: (nutrition: Omit<NutritionEntry, 'id'>) => void;
-  addSleep: (sleep: Omit<SleepEntry, 'id'>) => void;
   unlockAchievement: (achievementId: string) => void;
-  updateProfile: (updates: Partial<UserProfile>) => void;
+  updateProfile: (updates: Partial<UserProfile>) => void; 
   addExperience: (points: number) => void;
   resetAllData: () => void;
 }
 
 // === DONNÉES INITIALES ===
+// Initialisation de l'utilisateur avec tous les champs possibles du SupabaseUserProfile ET les champs locaux
 const initialUser: UserProfile = {
-  name: 'Alex Martin',
-  email: 'alex.martin@email.com',
-  avatar: '👨‍💻',
-  age: 28,
-  weight: 75,
-  height: 180,
-  goal: 'Prise de masse',
-  level: 1,
-  totalPoints: 0,
-  joinDate: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  id: '', 
+  username: null,
+  full_name: null,
+  avatar_url: null,
+  age: null,
+  height_cm: null,
+  weight_kg: null,
+  gender: null,
+  activity_level: null,
+  fitness_goal: null,
+  timezone: 'Europe/Paris',
+  notifications_enabled: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  lifestyle: null,
+  available_time_per_day: null,
+  fitness_experience: null,
+  injuries: null,
+  primary_goals: null,
+  motivation: null,
+  sport: null,
+  sport_position: null,
+  sport_level: null,
+  training_frequency: null,
+  season_period: null,
+
+  // Champs locaux/calculés
+  name: 'Invité', 
+  email: '', 
+  goal: 'Non défini', 
+  level: 1, 
+  totalPoints: 0, 
+  joinDate: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) 
 };
 
+
 const initialGoals: DailyGoals = {
-  water: 2.5,
-  calories: 2200,
-  protein: 120,
-  carbs: 250,
-  fat: 70,
+  water: 2.5, // Litres
+  calories: 2200, // kcal
+  protein: 120, // g
+  carbs: 250, // g
+  fat: 70, // g
   steps: 10000,
   workouts: 1,
-  sleep: 8
+  sleep: 8 // hours
 };
 
 const initialAchievements: Achievement[] = [
   { id: 'first-workout', title: 'Premier workout', description: 'Terminez votre premier entraînement', emoji: '🎯', unlocked: false },
-  { id: 'perfect-week', title: 'Semaine parfaite', description: '7 jours d\'entraînement consécutifs', emoji: '🔥', unlocked: false },
+  { id: 'perfect-week', title: 'Semaine parfaite', description: "7 jours d'entraînement consécutifs", emoji: '🔥', unlocked: false }, 
   { id: 'hydration-master', title: 'Maître hydratation', description: 'Objectif eau atteint 7 jours', emoji: '💧', unlocked: false },
   { id: 'early-bird', title: 'Lève-tôt', description: 'Workout avant 8h', emoji: '🌅', unlocked: false },
   { id: 'marathon', title: 'Marathonien', description: '100 workouts terminés', emoji: '🏃‍♂️', unlocked: false },
@@ -137,141 +146,365 @@ const initialAchievements: Achievement[] = [
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      user: initialUser,
+      user: initialUser, 
       dailyGoals: initialGoals,
-      hydrationEntries: [],
-      workoutSessions: [],
-      nutritionEntries: [],
-      sleepEntries: [],
       achievements: initialAchievements,
 
-      getTodayHydration: () => {
-        const today = new Date().toDateString();
-        const todayEntries = get().hydrationEntries.filter(
-          entry => new Date(entry.time).toDateString() === today
-        );
-        return todayEntries.reduce((total, entry) => total + entry.amount, 0) / 1000;
-      },
+      // === ACTIONS DE BASE DE DONNÉES SUPABASE ===
 
-      getTodayCalories: () => {
-        const today = new Date().toDateString();
-        const todayEntries = get().nutritionEntries.filter(
-          entry => new Date(entry.time).toDateString() === today
-        );
-        return todayEntries.reduce((total, entry) => total + entry.calories, 0);
-      },
+      // Hydratation
+      addHydration: async (userId, amount, type = 'water') => {
+        try {
+          const { data, error } = await supabase
+            .from('hydration_logs')
+            .insert({ 
+                user_id: userId, 
+                amount_ml: amount, 
+                drink_type: type,
+                log_date: new Date().toISOString().split('T')[0],
+                logged_at: new Date().toISOString()
+            })
+            .select()
+            .single();
 
-      getTodayWorkouts: () => {
-        const today = new Date().toDateString();
-        return get().workoutSessions.filter(
-          session => new Date(session.date).toDateString() === today
-        ).length;
-      },
-
-      getWeeklyStats: () => {
-        const now = new Date();
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        
-        const weekWorkouts = get().workoutSessions.filter(
-          session => new Date(session.date) >= weekAgo
-        );
-        
-        const weekHydration = get().hydrationEntries.filter(
-          entry => new Date(entry.time) >= weekAgo
-        );
-
-        return {
-          workouts: weekWorkouts.length,
-          totalDuration: weekWorkouts.reduce((total, w) => total + w.duration, 0),
-          totalCalories: weekWorkouts.reduce((total, w) => total + w.calories, 0),
-          avgHydration: weekHydration.length > 0 
-            ? weekHydration.reduce((total, h) => total + h.amount, 0) / 7000
-            : 0
-        };
-      },
-
-      addHydration: (amount: number, type = 'water') => {
-        const newEntry: HydrationEntry = {
-          id: Date.now().toString(),
-          amount,
-          time: new Date().toISOString(),
-          type: type as any
-        };
-
-        set(state => ({
-          hydrationEntries: [...state.hydrationEntries, newEntry]
-        }));
-
-        get().addExperience(10);
-
-        const { getTodayHydration, dailyGoals, unlockAchievement } = get();
-        if (getTodayHydration() >= dailyGoals.water) {
-          unlockAchievement('hydration-master');
+          if (error) throw error;
+          
+          get().addExperience(10);
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+          
+          return data as HydrationEntry;
+        } catch (error: unknown) {
+          console.error('Erreur addHydration:', error);
+          return null;
         }
       },
 
-      removeLastHydration: () => {
-        set(state => ({
-          hydrationEntries: state.hydrationEntries.slice(0, -1)
-        }));
-      },
+      removeLastHydration: async (userId) => {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const { data: latestEntry, error: fetchError } = await supabase
+            .from('hydration_logs')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('log_date', today)
+            .order('logged_at', { ascending: false })
+            .limit(1)
+            .single();
 
-      resetDailyHydration: () => {
-        const today = new Date().toDateString();
-        set(state => ({
-          hydrationEntries: state.hydrationEntries.filter(
-            entry => new Date(entry.time).toDateString() !== today
-          )
-        }));
-      },
+          if (fetchError && fetchError.code !== 'PGRST116') {
+              throw fetchError;
+          }
+          
+          if (latestEntry) {
+            const { error: deleteError } = await supabase
+              .from('hydration_logs')
+              .delete()
+              .eq('id', latestEntry.id);
 
-      addWorkout: (workout) => {
-        const newWorkout: WorkoutSession = {
-          id: Date.now().toString(),
-          ...workout
-        };
+            if (deleteError) throw deleteError;
 
-        set(state => ({
-          workoutSessions: [...state.workoutSessions, newWorkout]
-        }));
-
-        get().addExperience(50);
-
-        const { workoutSessions, unlockAchievement } = get();
-        if (workoutSessions.length === 1) {
-          unlockAchievement('first-workout');
-        }
-        if (workoutSessions.length >= 100) {
-          unlockAchievement('marathon');
+            await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: today });
+            return true;
+          }
+          return false;
+        } catch (error: unknown) {
+          console.error('Erreur removeLastHydration:', error);
+          return false;
         }
       },
 
-      addNutrition: (nutrition) => {
-        const newNutrition: NutritionEntry = {
-          id: Date.now().toString(),
-          ...nutrition
-        };
+      resetDailyHydration: async (userId) => {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const { error } = await supabase
+            .from('hydration_logs')
+            .delete()
+            .eq('user_id', userId)
+            .eq('log_date', today);
 
-        set(state => ({
-          nutritionEntries: [...state.nutritionEntries, newNutrition]
-        }));
-
-        get().addExperience(20);
+          if (error) throw error;
+          
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: today });
+          return true;
+        } catch (error: unknown) {
+          console.error('Erreur resetDailyHydration:', error);
+          return false;
+        }
       },
 
-      addSleep: (sleep) => {
-        const newSleep: SleepEntry = {
-          id: Date.now().toString(),
-          ...sleep
-        };
+      fetchHydrationEntries: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('hydration_logs')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('log_date', date)
+            .order('logged_at', { ascending: false });
 
-        set(state => ({
-          sleepEntries: [...state.sleepEntries, newSleep]
-        }));
-
-        get().addExperience(30);
+          if (error) throw error;
+          return data as HydrationEntry[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchHydrationEntries:', error);
+          return [];
+        }
       },
 
+      fetchDailyStats: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('daily_stats')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('stat_date', date)
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            throw error;
+          }
+          return data as DailyStats | null;
+        } catch (error: unknown) {
+          console.error('Erreur fetchDailyStats:', error);
+          return null;
+        }
+      },
+
+      // Nutrition
+      addMeal: async (userId, mealType, foods, totalCalories, totalProtein, totalCarbs, totalFat) => {
+        try {
+          const { data, error } = await supabase
+            .from('meals')
+            .insert({
+                user_id: userId,
+                meal_type: mealType,
+                meal_date: new Date().toISOString().split('T')[0],
+                foods: foods, // JSONB
+                total_calories: totalCalories,
+                total_protein: totalProtein,
+                total_carbs: totalCarbs,
+                total_fat: totalFat
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          get().addExperience(20); // Ajouter de l'expérience pour l'ajout de repas
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+
+          return data as Meal;
+        } catch (error: unknown) {
+          console.error('Erreur addMeal:', error);
+          return null;
+        }
+      },
+
+      fetchMeals: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('meals')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('meal_date', date)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          return data as Meal[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchMeals:', error);
+          return [];
+        }
+      },
+
+      // Sommeil
+      addSleepSession: async (userId, sleepData) => {
+        try {
+          const { data, error } = await supabase
+            .from('sleep_sessions')
+            .insert({
+                user_id: userId,
+                sleep_date: sleepData.sleep_date,
+                bedtime: sleepData.bedtime,
+                wake_time: sleepData.wake_time,
+                duration_minutes: sleepData.duration_minutes,
+                quality_rating: sleepData.quality_rating,
+                mood_rating: sleepData.mood_rating,
+                energy_level: sleepData.energy_level,
+                factors: sleepData.factors, // JSONB
+                notes: sleepData.notes
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+
+          get().addExperience(30); // Ajouter de l'expérience pour l'enregistrement du sommeil
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: sleepData.sleep_date });
+          
+          return data as SleepSession;
+        } catch (error: unknown) {
+          console.error('Erreur addSleepSession:', error);
+          return null;
+        }
+      },
+
+      fetchSleepSessions: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('sleep_sessions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('sleep_date', date)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          return data as SleepSession[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchSleepSessions:', error);
+          return [];
+        }
+      },
+
+      // Sport (Workout)
+      addWorkoutSession: async (userId, workoutData) => {
+        try {
+          const { data, error } = await supabase
+            .from('workouts')
+            .insert({
+              user_id: userId,
+              name: workoutData.name,
+              description: workoutData.description,
+              workout_type: workoutData.workout_type,
+              duration_minutes: workoutData.duration_minutes,
+              calories_burned: workoutData.calories_burned,
+              difficulty: workoutData.difficulty,
+              exercises: workoutData.exercises,
+              notes: workoutData.notes,
+              started_at: workoutData.started_at,
+              completed_at: workoutData.completed_at
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+          
+          // Mettre à jour les stats journalières si l'entraînement est complété ou démarre
+          if (workoutData.completed_at || workoutData.started_at) {
+            await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+          }
+
+          get().addExperience(50); // Expérience pour l'entraînement
+
+          return data as Workout;
+        } catch (error: unknown) {
+          console.error('Erreur addWorkoutSession:', error);
+          return null;
+        }
+      },
+
+      updateWorkoutSession: async (workoutId, updates) => {
+        try {
+          const { data, error } = await supabase
+            .from('workouts')
+            .update(updates)
+            .eq('id', workoutId)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          // Recalculer les stats si la durée ou les calories changent
+          if (updates.duration_minutes || updates.calories_burned) {
+            const userId = data?.user_id; // Récupérer l'ID utilisateur de l'entraînement mis à jour
+            if (userId) {
+              await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+            }
+          }
+
+          return data as Workout;
+        } catch (error: unknown) {
+          console.error('Erreur updateWorkoutSession:', error);
+          return null;
+        }
+      },
+
+      fetchWorkoutSessions: async (userId, startDate, endDate) => {
+        try {
+          let query = supabase
+            .from('workouts')
+            .select('*');
+          
+          if (userId) { 
+            query = query.eq('user_id', userId);
+          }
+          query = query.order('created_at', { ascending: false });
+          
+          if (startDate) {
+            query = query.gte('created_at', startDate);
+          }
+          if (endDate) {
+            query = query.lte('created_at', endDate);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          return data as Workout[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchWorkoutSessions:', error);
+          return [];
+        }
+      },
+
+      fetchExercisesLibrary: async (category, difficulty) => {
+        try {
+          let query = supabase
+            .from('exercises_library')
+            .select('*');
+          
+          if (category) {
+            query = query.eq('category', category);
+          }
+          if (difficulty) {
+            query = query.eq('difficulty', difficulty);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          return data as Exercise[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchExercisesLibrary:', error);
+          return [];
+        }
+      },
+
+      fetchAiRecommendations: async (userId, pillarType, limit = 5) => {
+        try {
+          let query = supabase
+            .from('ai_recommendations')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+          
+          if (pillarType) {
+            query = query.eq('pillar_type', pillarType);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          const filteredData = data.filter(rec => rec.recommendation && rec.metadata);
+          return filteredData as AiRecommendation[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchAiRecommendations:', error);
+          return [];
+        }
+      },
+
+
+      // === ACTIONS GLOBALES ===
+      
       unlockAchievement: (achievementId) => {
         set(state => ({
           achievements: state.achievements.map(achievement =>
@@ -280,7 +513,6 @@ export const useAppStore = create<AppState>()(
               : achievement
           )
         }));
-
         get().addExperience(100);
       },
 
@@ -309,23 +541,16 @@ export const useAppStore = create<AppState>()(
         set({
           user: initialUser,
           dailyGoals: initialGoals,
-          hydrationEntries: [],
-          workoutSessions: [],
-          nutritionEntries: [],
-          sleepEntries: [],
           achievements: initialAchievements
         });
       }
     }),
     {
       name: 'myfitherov4-storage',
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
         dailyGoals: state.dailyGoals,
-        hydrationEntries: state.hydrationEntries,
-        workoutSessions: state.workoutSessions,
-        nutritionEntries: state.nutritionEntries,
-        sleepEntries: state.sleepEntries,
         achievements: state.achievements
       })
     }

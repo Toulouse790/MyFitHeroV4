@@ -1,291 +1,585 @@
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { supabase } from '../lib/supabase';
+// Import correct de TOUS les types de Supabase nécessaires
+import { HydrationEntry, DailyStats, Meal, UserProfile as SupabaseUserProfile, Json, SleepSession, Workout, Exercise, AiRecommendation, AiRequest } from '../lib/supabase'; // Renommé UserProfile de Supabase en SupabaseUserProfile pour éviter les conflits de nom
 
-import React, { useState } from 'react';
-import { 
-  User, 
-  Settings, 
-  Edit,
-  Camera,
-  Trophy,
-  Target,
-  Calendar,
-  Activity,
-  Heart,
-  Zap,
-  Award,
-  ChevronRight,
-  Share2,
-  Download,
-  Bell,
-  Shield,
-  HelpCircle,
-  LogOut,
-  Crown,
-  Flame,
-  TrendingUp,
-  Dumbbell,
-  Clock,
-  Droplets
-} from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+// === TYPES ===
+// Redéfinition de UserProfile pour inclure tous les champs de SupabaseUserProfile PLUS les champs locaux/calculés
+export interface UserProfile { // AJOUTÉ 'export' ici
+  // Champs de SupabaseUserProfile
+  id: string;
+  username: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  age: number | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  gender: string | null;
+  activity_level: string | null;
+  fitness_goal: string | null;
+  timezone: string | null;
+  notifications_enabled: boolean | null;
+  created_at: string;
+  updated_at: string;
+  lifestyle: string | null;
+  available_time_per_day: number | null;
+  fitness_experience: string | null;
+  injuries: string[] | null;
+  primary_goals: string[] | null;
+  motivation: string | null;
+  sport: string | null;
+  sport_position: string | null;
+  sport_level: string | null;
+  training_frequency: number | null;
+  season_period: string | null;
 
-const Profile = () => {
-  const [activeTab, setActiveTab] = useState('stats');
+  // Champs locaux/calculés (non directement dans la table Supabase, mais gérés par l'app)
+  name: string; // Nom d'affichage, peut être full_name ou username
+  email: string; // Email de l'utilisateur (peut venir de auth.user)
+  goal: string; // Objectif principal résumé
+  level: number; // Niveau de l'utilisateur
+  totalPoints: number; // Points d'expérience
+  joinDate: string; // Date d'inscription
+}
 
-  // === CONNEXION AU STORE ===
-  const {
-    user,
-    achievements,
-    workoutSessions,
-    hydrationEntries,
-    getWeeklyStats,
-    updateProfile,
-    resetAllData
-  } = useAppStore();
+interface WorkoutSession {
+  id: string;
+  name: string;
+  duration: number;
+  calories: number;
+  date: string;
+  exercises: number;
+}
 
-  // === DONNÉES CALCULÉES ===
-  const weeklyStats = getWeeklyStats();
-  const totalCaloriesBurned = workoutSessions.reduce((total, w) => total + w.calories, 0);
-  const averageWorkoutTime = workoutSessions.length > 0 
-    ? Math.round(workoutSessions.reduce((total, w) => total + w.duration, 0) / workoutSessions.length)
-    : 0;
+interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  emoji: string;
+  unlocked: boolean;
+  unlockedDate?: string;
+}
+
+interface DailyGoals {
+  water: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  steps: number;
+  workouts: number;
+  sleep: number;
+}
+
+interface AppState {
+  user: UserProfile; // Le user du store est maintenant le type UserProfile complet
+  dailyGoals: DailyGoals;
+  achievements: Achievement[];
   
-  // Calcul de la série actuelle (jours consécutifs avec au moins une action)
-  const calculateStreak = () => {
-    const today = new Date();
-    let streak = 0;
-    
-    for (let i = 0; i < 30; i++) {
-      const checkDate = new Date(today);
-      checkDate.setDate(today.getDate() - i);
-      const dateString = checkDate.toDateString();
-      
-      const hasActivity = 
-        workoutSessions.some(w => new Date(w.date).toDateString() === dateString) ||
-        hydrationEntries.some(h => new Date(h.time).toDateString() === dateString);
-      
-      if (hasActivity) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  };
+  // === ACTIONS LIÉES À SUPABASE ===
+  addHydration: (userId: string, amount: number, type?: string) => Promise<HydrationEntry | null>;
+  removeLastHydration: (userId: string) => Promise<boolean>;
+  resetDailyHydration: (userId: string) => Promise<boolean>;
+  fetchHydrationEntries: (userId: string, date: string) => Promise<HydrationEntry[]>;
+  fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
 
-  const currentStreak = calculateStreak();
+  // ACTIONS POUR LA NUTRITION
+  addMeal: (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<Meal | null>;
+  fetchMeals: (userId: string, date: string) => Promise<Meal[]>;
 
-  // Stats pour affichage
-  const stats = [
-    { 
-      label: 'Workouts terminés', 
-      value: workoutSessions.length, 
-      icon: Dumbbell,
-      color: 'text-blue-600'
-    },
-    { 
-      label: 'Calories brûlées', 
-      value: totalCaloriesBurned, 
-      icon: Flame,
-      color: 'text-red-600'
-    },
-    { 
-      label: 'Temps moyen', 
-      value: `${averageWorkoutTime}min`, 
-      icon: Clock,
-      color: 'text-green-600'
-    },
-    { 
-      label: 'Série actuelle', 
-      value: `${currentStreak} jours`, 
-      icon: TrendingUp,
-      color: 'text-purple-600'
-    }
-  ];
+  // ACTIONS POUR LE SOMMEIL
+  addSleepSession: (userId: string, sleepData: { sleep_date: string; bedtime: string; wake_time: string; duration_minutes: number; quality_rating?: number; mood_rating?: number; energy_level?: number; factors?: Json; notes?: string; }) => Promise<SleepSession | null>;
+  fetchSleepSessions: (userId: string, date: string) => Promise<SleepSession[]>;
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header Profile */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {user?.name?.charAt(0) || 'U'}
-                </div>
-                <button className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                  <Camera size={16} />
-                </button>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">{user?.name || 'Utilisateur'}</h1>
-                <p className="text-gray-600">Niveau {user?.level || 1} • {user?.level ? user.level * 100 : 0} points</p>
-                <div className="flex items-center mt-2">
-                  <Crown className="text-yellow-500 mr-1" size={16} />
-                  <span className="text-sm text-gray-600">{achievements.length} achievements</span>
-                </div>
-              </div>
-            </div>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition-colors flex items-center">
-              <Edit size={16} className="mr-2" />
-              Modifier
-            </button>
-          </div>
+  // ACTIONS POUR LE SPORT (WORKOUT)
+  addWorkoutSession: (userId: string, workoutData: Omit<Workout, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => Promise<Workout | null>;
+  updateWorkoutSession: (workoutId: string, updates: Partial<Workout>) => Promise<Workout | null>;
+  fetchWorkoutSessions: (userId: string, startDate?: string, endDate?: string) => Promise<Workout[]>;
+  fetchExercisesLibrary: (category?: string, difficulty?: string) => Promise<Exercise[]>;
 
-          {/* Stats rapides */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, index) => {
-              const IconComponent = stat.icon;
-              return (
-                <div key={index} className="bg-gray-50 rounded-xl p-4 text-center">
-                  <IconComponent className={`${stat.color} mx-auto mb-2`} size={24} />
-                  <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-                  <p className="text-sm text-gray-600">{stat.label}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+  // ACTIONS POUR LES RECOMMANDATIONS IA
+  fetchAiRecommendations: (userId: string, pillarType?: string, limit?: number) => Promise<AiRecommendation[]>;
 
-        {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="flex border-b border-gray-200">
-            {[
-              { id: 'stats', label: 'Statistiques', icon: Activity },
-              { id: 'achievements', label: 'Achievements', icon: Trophy },
-              { id: 'settings', label: 'Paramètres', icon: Settings }
-            ].map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 flex items-center justify-center p-4 transition-colors ${
-                    activeTab === tab.id
-                      ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
-                >
-                  <IconComponent size={20} className="mr-2" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
 
-          <div className="p-6">
-            {activeTab === 'stats' && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800">Statistiques détaillées</h3>
-                
-                {/* Graphique des performances (placeholder) */}
-                <div className="bg-gray-50 rounded-xl p-6 h-64 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <Activity size={48} className="mx-auto mb-4" />
-                    <p>Graphique des performances</p>
-                    <p className="text-sm">Bientôt disponible</p>
-                  </div>
-                </div>
+  // === ACTIONS GLOBALES (restent dans le store) ===
+  unlockAchievement: (achievementId: string) => void;
+  updateProfile: (updates: Partial<UserProfile>) => void; 
+  addExperience: (points: number) => void;
+  resetAllData: () => void;
+}
 
-                {/* Statistiques hebdomadaires */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-blue-600 font-semibold">Cette semaine</p>
-                        <p className="text-2xl font-bold text-blue-800">{weeklyStats.workouts} workouts</p>
-                      </div>
-                      <Dumbbell className="text-blue-600" size={32} />
-                    </div>
-                  </div>
-                  <div className="bg-green-50 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-green-600 font-semibold">Hydratation</p>
-                        <p className="text-2xl font-bold text-green-800">{weeklyStats.hydration}L</p>
-                      </div>
-                      <Droplets className="text-green-600" size={32} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+// === DONNÉES INITIALES ===
+const initialUser: UserProfile = {
+  id: '', // Sera mis à jour avec l'ID réel de Supabase Auth
+  username: null, // Peut être nul si non défini au début
+  full_name: null,
+  avatar_url: null,
+  age: null,
+  height_cm: null,
+  weight_kg: null,
+  gender: null,
+  activity_level: null,
+  fitness_goal: null,
+  timezone: 'Europe/Paris',
+  notifications_enabled: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+  lifestyle: null,
+  available_time_per_day: null,
+  fitness_experience: null,
+  injuries: null,
+  primary_goals: null,
+  motivation: null,
+  sport: null,
+  sport_position: null,
+  sport_level: null,
+  training_frequency: null,
+  season_period: null,
 
-            {activeTab === 'achievements' && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800">Mes achievements</h3>
-                
-                {achievements.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievements.map((achievement, index) => (
-                      <div key={index} className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
-                        <div className="flex items-center">
-                          <div className="bg-yellow-400 text-white p-3 rounded-full mr-4">
-                            <Trophy size={24} />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-800">{achievement.title || 'Achievement'}</h4>
-                            <p className="text-sm text-gray-600">{achievement.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Trophy size={48} className="mx-auto mb-4" />
-                    <p>Aucun achievement débloqué pour le moment</p>
-                    <p className="text-sm">Continuez vos efforts pour débloquer vos premiers achievements !</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800">Paramètres</h3>
-                
-                <div className="space-y-4">
-                  {[
-                    { icon: Bell, label: 'Notifications', action: 'Gérer' },
-                    { icon: Shield, label: 'Confidentialité', action: 'Modifier' },
-                    { icon: Download, label: 'Exporter mes données', action: 'Télécharger' },
-                    { icon: Share2, label: 'Partager l\'app', action: 'Partager' },
-                    { icon: HelpCircle, label: 'Aide & Support', action: 'Voir' },
-                    { icon: LogOut, label: 'Déconnexion', action: 'Se déconnecter', danger: true }
-                  ].map((setting, index) => {
-                    const IconComponent = setting.icon;
-                    return (
-                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                        <div className="flex items-center">
-                          <IconComponent 
-                            className={`mr-3 ${setting.danger ? 'text-red-600' : 'text-gray-600'}`} 
-                            size={20} 
-                          />
-                          <span className={`font-medium ${setting.danger ? 'text-red-600' : 'text-gray-800'}`}>
-                            {setting.label}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className={`text-sm mr-2 ${setting.danger ? 'text-red-600' : 'text-blue-600'}`}>
-                            {setting.action}
-                          </span>
-                          <ChevronRight 
-                            className={setting.danger ? 'text-red-600' : 'text-gray-400'} 
-                            size={16} 
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Champs locaux/calculés
+  name: 'Invité', // Nom d'affichage par défaut
+  email: '', // Sera mis à jour avec l'email de l'utilisateur authentifié
+  goal: 'Non défini', // Objectif par défaut
+  level: 1, // Niveau initial
+  totalPoints: 0, // Points initiaux
+  joinDate: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) // Date d'inscription par défaut
 };
 
-export default Profile;
+
+const initialGoals: DailyGoals = {
+  water: 2.5, // Litres
+  calories: 2200, // kcal
+  protein: 120, // g
+  carbs: 250, // g
+  fat: 70, // g
+  steps: 10000,
+  workouts: 1,
+  sleep: 8 // hours
+};
+
+const initialAchievements: Achievement[] = [
+  { id: 'first-workout', title: 'Premier workout', description: 'Terminez votre premier entraînement', emoji: '🎯', unlocked: false },
+  { id: 'perfect-week', title: 'Semaine parfaite', description: "7 jours d'entraînement consécutifs", emoji: '🔥', unlocked: false }, 
+  { id: 'hydration-master', title: 'Maître hydratation', description: 'Objectif eau atteint 7 jours', emoji: '💧', unlocked: false },
+  { id: 'early-bird', title: 'Lève-tôt', description: 'Workout avant 8h', emoji: '🌅', unlocked: false },
+  { id: 'marathon', title: 'Marathonien', description: '100 workouts terminés', emoji: '🏃‍♂️', unlocked: false },
+  { id: 'nutrition-pro', title: 'Pro nutrition', description: 'Objectif calories 30 jours', emoji: '🍎', unlocked: false }
+];
+
+// === STORE ZUSTAND ===
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      user: initialUser, 
+      dailyGoals: initialGoals,
+      achievements: initialAchievements,
+
+      // === ACTIONS DE BASE DE DONNÉES SUPABASE ===
+
+      // Hydratation
+      addHydration: async (userId, amount, type = 'water') => {
+        try {
+          const { data, error } = await supabase
+            .from('hydration_logs')
+            .insert({ 
+                user_id: userId, 
+                amount_ml: amount, 
+                drink_type: type,
+                log_date: new Date().toISOString().split('T')[0],
+                logged_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+          
+          get().addExperience(10);
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+          
+          return data as HydrationEntry;
+        } catch (error: unknown) {
+          console.error('Erreur addHydration:', error);
+          return null;
+        }
+      },
+
+      removeLastHydration: async (userId) => {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const { data: latestEntry, error: fetchError } = await supabase
+            .from('hydration_logs')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('log_date', today)
+            .order('logged_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (fetchError && fetchError.code !== 'PGRST116') {
+              throw fetchError;
+          }
+          
+          if (latestEntry) {
+            const { error: deleteError } = await supabase
+              .from('hydration_logs')
+              .delete()
+              .eq('id', latestEntry.id);
+
+            if (deleteError) throw deleteError;
+
+            await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: today });
+            return true;
+          }
+          return false;
+        } catch (error: unknown) {
+          console.error('Erreur removeLastHydration:', error);
+          return false;
+        }
+      },
+
+      resetDailyHydration: async (userId) => {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const { error } = await supabase
+            .from('hydration_logs')
+            .delete()
+            .eq('user_id', userId)
+            .eq('log_date', today);
+
+          if (error) throw error;
+          
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: today });
+          return true;
+        } catch (error: unknown) {
+          console.error('Erreur resetDailyHydration:', error);
+          return false;
+        }
+      },
+
+      fetchHydrationEntries: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('hydration_logs')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('log_date', date)
+            .order('logged_at', { ascending: false });
+
+          if (error) throw error;
+          return data as HydrationEntry[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchHydrationEntries:', error);
+          return [];
+        }
+      },
+
+      fetchDailyStats: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('daily_stats')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('stat_date', date)
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            throw error;
+          }
+          return data as DailyStats | null;
+        } catch (error: unknown) {
+          console.error('Erreur fetchDailyStats:', error);
+          return null;
+        }
+      },
+
+      // Nutrition
+      addMeal: async (userId, mealType, foods, totalCalories, totalProtein, totalCarbs, totalFat) => {
+        try {
+          const { data, error } = await supabase
+            .from('meals')
+            .insert({
+                user_id: userId,
+                meal_type: mealType,
+                meal_date: new Date().toISOString().split('T')[0],
+                foods: foods, // JSONB
+                total_calories: totalCalories,
+                total_protein: totalProtein,
+                total_carbs: totalCarbs,
+                total_fat: totalFat
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          get().addExperience(20); // Ajouter de l'expérience pour l'ajout de repas
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+
+          return data as Meal;
+        } catch (error: unknown) {
+          console.error('Erreur addMeal:', error);
+          return null;
+        }
+      },
+
+      fetchMeals: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('meals')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('meal_date', date)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          return data as Meal[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchMeals:', error);
+          return [];
+        }
+      },
+
+      // Sommeil
+      addSleepSession: async (userId, sleepData) => {
+        try {
+          const { data, error } = await supabase
+            .from('sleep_sessions')
+            .insert({
+                user_id: userId,
+                sleep_date: sleepData.sleep_date,
+                bedtime: sleepData.bedtime,
+                wake_time: sleepData.wake_time,
+                duration_minutes: sleepData.duration_minutes,
+                quality_rating: sleepData.quality_rating,
+                mood_rating: sleepData.mood_rating,
+                energy_level: sleepData.energy_level,
+                factors: sleepData.factors, // JSONB
+                notes: sleepData.notes
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+
+          get().addExperience(30); // Ajouter de l'expérience pour l'enregistrement du sommeil
+          await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: sleepData.sleep_date });
+          
+          return data as SleepSession;
+        } catch (error: unknown) {
+          console.error('Erreur addSleepSession:', error);
+          return null;
+        }
+      },
+
+      fetchSleepSessions: async (userId, date) => {
+        try {
+          const { data, error } = await supabase
+            .from('sleep_sessions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('sleep_date', date)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          return data as SleepSession[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchSleepSessions:', error);
+          return [];
+        }
+      },
+
+      // Sport (Workout)
+      addWorkoutSession: async (userId, workoutData) => {
+        try {
+          const { data, error } = await supabase
+            .from('workouts')
+            .insert({
+              user_id: userId,
+              name: workoutData.name,
+              description: workoutData.description,
+              workout_type: workoutData.workout_type,
+              duration_minutes: workoutData.duration_minutes,
+              calories_burned: workoutData.calories_burned,
+              difficulty: workoutData.difficulty,
+              exercises: workoutData.exercises,
+              notes: workoutData.notes,
+              started_at: workoutData.started_at,
+              completed_at: workoutData.completed_at
+            })
+            .select()
+            .single();
+          
+          if (error) throw error;
+          
+          // Mettre à jour les stats journalières si l'entraînement est complété ou démarre
+          if (workoutData.completed_at || workoutData.started_at) {
+            await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+          }
+
+          get().addExperience(50); // Expérience pour l'entraînement
+
+          return data as Workout;
+        } catch (error: unknown) {
+          console.error('Erreur addWorkoutSession:', error);
+          return null;
+        }
+      },
+
+      updateWorkoutSession: async (workoutId, updates) => {
+        try {
+          const { data, error } = await supabase
+            .from('workouts')
+            .update(updates)
+            .eq('id', workoutId)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          // Recalculer les stats si la durée ou les calories changent
+          if (updates.duration_minutes || updates.calories_burned) {
+            const userId = data?.user_id; // Récupérer l'ID utilisateur de l'entraînement mis à jour
+            if (userId) {
+              await supabase.rpc('calculate_daily_stats', { user_uuid: userId, target_date: new Date().toISOString().split('T')[0] });
+            }
+          }
+
+          return data as Workout;
+        } catch (error: unknown) {
+          console.error('Erreur updateWorkoutSession:', error);
+          return null;
+        }
+      },
+
+      fetchWorkoutSessions: async (userId, startDate, endDate) => {
+        try {
+          let query = supabase
+            .from('workouts')
+            .select('*');
+          
+          if (userId) { // Ajoutez la condition userId
+            query = query.eq('user_id', userId);
+          }
+          query = query.order('created_at', { ascending: false });
+          
+          if (startDate) {
+            query = query.gte('created_at', startDate);
+          }
+          if (endDate) {
+            query = query.lte('created_at', endDate);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          return data as Workout[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchWorkoutSessions:', error);
+          return [];
+        }
+      },
+
+      fetchExercisesLibrary: async (category, difficulty) => {
+        try {
+          let query = supabase
+            .from('exercises_library')
+            .select('*');
+          
+          if (category) {
+            query = query.eq('category', category);
+          }
+          if (difficulty) {
+            query = query.eq('difficulty', difficulty);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          return data as Exercise[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchExercisesLibrary:', error);
+          return [];
+        }
+      },
+
+      // Recommandations IA
+      fetchAiRecommendations: async (userId, pillarType, limit = 5) => {
+        try {
+          let query = supabase
+            .from('ai_recommendations')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+          
+          if (pillarType) {
+            query = query.eq('pillar_type', pillarType);
+          }
+
+          const { data, error } = await query;
+
+          if (error) throw error;
+          // Vérifier si recommendation et metadata sont présents et du bon format
+          const filteredData = data.filter(rec => rec.recommendation && rec.metadata);
+          return filteredData as AiRecommendation[];
+        } catch (error: unknown) {
+          console.error('Erreur fetchAiRecommendations:', error);
+          return [];
+        }
+      },
+
+
+      // === ACTIONS GLOBALES ===
+      
+      unlockAchievement: (achievementId) => {
+        set(state => ({
+          achievements: state.achievements.map(achievement =>
+            achievement.id === achievementId && !achievement.unlocked
+              ? { ...achievement, unlocked: true, unlockedDate: new Date().toISOString() }
+              : achievement
+          )
+        }));
+        get().addExperience(100);
+      },
+
+      updateProfile: (updates) => {
+        set(state => ({
+          user: { ...state.user, ...updates }
+        }));
+      },
+
+      addExperience: (points) => {
+        set(state => {
+          const newPoints = state.user.totalPoints + points;
+          const newLevel = Math.floor(newPoints / 200) + 1;
+          
+          return {
+            user: {
+              ...state.user,
+              totalPoints: newPoints,
+              level: newLevel
+            }
+          };
+        });
+      },
+
+      resetAllData: () => {
+        set({
+          user: initialUser,
+          dailyGoals: initialGoals,
+          achievements: initialAchievements
+        });
+      }
+    }),
+    {
+      name: 'myfitherov4-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        user: state.user,
+        dailyGoals: state.dailyGoals,
+        achievements: state.achievements
+      })
+    }
+  )
+);

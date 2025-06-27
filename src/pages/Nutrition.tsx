@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Plus, 
   Target, 
@@ -12,76 +12,169 @@ import {
   BarChart3,
   Droplets,
   Flame,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
+import { useAppStore } from '@/stores/useAppStore';
+import { Meal, DailyStats, Json } from '@/lib/supabase'; // Importe les types de Supabase, y compris Json
+import { User } from '@supabase/supabase-js'; // Importe le type User de Supabase
 
-const Nutrition = () => {
-  const [selectedMeal, setSelectedMeal] = useState('breakfast');
+interface NutritionProps {
+  userProfile?: User; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
+}
 
-  // Données mockées
-  const dailyGoals = {
-    calories: { current: 1650, goal: 2200, unit: 'kcal' },
-    protein: { current: 85, goal: 120, unit: 'g' },
-    carbs: { current: 180, goal: 250, unit: 'g' },
-    fat: { current: 45, goal: 70, unit: 'g' },
-    water: { current: 1.8, goal: 2.5, unit: 'L' }
-  };
+// Interface pour les aliments au sein d'un repas (correspond à la structure JSONB dans Supabase)
+// Cette interface est cruciale et DOIT correspondre à la structure de vos objets aliments
+interface FoodItem {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
 
-  const meals = {
-    breakfast: {
-      name: 'Petit-déjeuner',
-      icon: Coffee,
-      time: '08:30',
-      calories: 420,
-      foods: [
-        { name: 'Avoine avec banane', calories: 280, protein: 8, carbs: 45, fat: 6 },
-        { name: 'Café au lait', calories: 80, protein: 4, carbs: 8, fat: 3 },
-        { name: 'Amandes (20g)', calories: 60, protein: 2, carbs: 2, fat: 5 }
-      ]
-    },
-    lunch: {
-      name: 'Déjeuner',
-      icon: Sun,
-      time: '12:45',
-      calories: 680,
-      foods: [
-        { name: 'Salade de quinoa', calories: 350, protein: 15, carbs: 45, fat: 12 },
-        { name: 'Poulet grillé 150g', calories: 250, protein: 35, carbs: 0, fat: 8 },
-        { name: 'Avocat 1/2', calories: 80, protein: 1, carbs: 4, fat: 7 }
-      ]
-    },
-    snack: {
-      name: 'Collation',
-      icon: Apple,
-      time: '16:00',
-      calories: 180,
-      foods: [
-        { name: 'Yaourt grec', calories: 120, protein: 15, carbs: 8, fat: 5 },
-        { name: 'Myrtilles 50g', calories: 30, protein: 0, carbs: 7, fat: 0 },
-        { name: 'Noix 15g', calories: 30, protein: 1, carbs: 1, fat: 3 }
-      ]
-    },
-    dinner: {
-      name: 'Dîner',
-      icon: MoonIcon,
-      time: '19:30',
-      calories: 370,
-      foods: [
-        { name: 'Saumon grillé 120g', calories: 220, protein: 25, carbs: 0, fat: 12 },
-        { name: 'Légumes vapeur', calories: 80, protein: 3, carbs: 15, fat: 1 },
-        { name: 'Riz complet 60g', calories: 70, protein: 2, carbs: 14, fat: 1 }
-      ]
+// Repas prédéfinis pour la démo, avec des données calculées ou saisies par l'utilisateur
+const demoMealsStructure = {
+  breakfast: {
+    name: 'Petit-déjeuner',
+    icon: Coffee,
+    meal_type_db: 'breakfast', // Type à envoyer à la DB
+  },
+  lunch: {
+    name: 'Déjeuner',
+    icon: Sun,
+    meal_type_db: 'lunch',
+  },
+  snack: {
+    name: 'Collation',
+    icon: Apple,
+    meal_type_db: 'snack',
+  },
+  dinner: {
+    name: 'Dîner',
+    icon: MoonIcon,
+    meal_type_db: 'dinner',
+  }
+};
+
+
+const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
+  const [selectedMealType, setSelectedMealType] = useState<string>('breakfast'); // Change à 'mealType' pour la sélection
+  const [meals, setMeals] = useState<Meal[]>([]); // Données réelles des repas
+  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
+  const [errorFetching, setErrorFetching] = useState<string | null>(null);
+
+  // Pour le formulaire d'ajout rapide (peut être étendu)
+  const [newFoodName, setNewFoodName] = useState('');
+  const [newFoodCalories, setNewFoodCalories] = useState<number>(0);
+  const [newFoodProtein, setNewFoodProtein] = useState<number>(0);
+  const [newFoodCarbs, setNewFoodCarbs] = useState<number>(0);
+  const [newFoodFat, setNewFoodFat] = useState<number>(0);
+
+
+  // === CONNEXION AU STORE ZUSTAND ===
+  const {
+    dailyGoals, // Objectifs définis localement dans le store
+    addMeal,
+    fetchMeals,
+    fetchDailyStats,
+  } = useAppStore();
+
+  // === CALCULS BASÉS SUR LES DONNÉES RÉELLES ===
+  const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+
+  const currentCalories = dailyStats?.total_calories || 0;
+  const goalCalories = dailyGoals.calories;
+  const remainingCalories = goalCalories - currentCalories;
+  const caloriesPercentage = Math.min((currentCalories / goalCalories) * 100, 100);
+
+  const currentProtein = dailyStats?.total_protein || 0;
+  const goalProtein = dailyGoals.protein;
+  const proteinPercentage = Math.min((currentProtein / goalProtein) * 100, 100);
+
+  const currentCarbs = dailyStats?.total_carbs || 0;
+  const goalCarbs = dailyGoals.carbs;
+  const carbsPercentage = Math.min((currentCarbs / goalCarbs) * 100, 100);
+
+  const currentFat = dailyStats?.total_fat || 0;
+  const goalFat = dailyGoals.fat;
+  const fatPercentage = Math.min((currentFat / goalFat) * 100, 100);
+
+  // === FONCTIONS DE RÉCUPÉRATION DES DONNÉES ===
+  const loadNutritionData = useCallback(async () => {
+    if (!userProfile?.id) return;
+
+    setLoadingData(true);
+    setErrorFetching(null);
+    try {
+      const fetchedMeals = await fetchMeals(userProfile.id, today);
+      setMeals(fetchedMeals);
+
+      const fetchedDailyStats = await fetchDailyStats(userProfile.id, today);
+      setDailyStats(fetchedDailyStats);
+
+    } catch (err: unknown) {
+      setErrorFetching('Erreur lors du chargement des données: ' + (err instanceof Error ? err.message : String(err)));
+      console.error('Failed to load nutrition data:', err);
+    } finally {
+      setLoadingData(false);
+    }
+  }, [userProfile?.id, today, fetchMeals, fetchDailyStats]);
+
+  useEffect(() => {
+    loadNutritionData();
+  }, [loadNutritionData]);
+
+
+  // === ACTIONS D'AJOUT DE REPAS ===
+  const handleAddFoodToMeal = async () => {
+    if (!userProfile?.id || !newFoodName || !selectedMealType) {
+      alert('Veuillez remplir le nom de l\'aliment et sélectionner un type de repas.');
+      return;
+    }
+
+    setLoadingData(true);
+
+    // CRÉATION D'UNE NOUVELLE COPIE DU TABLEAU foodsInMeal pour éviter l'avertissement ESLint et garantir l'immutabilité
+    const currentMealData = meals.find(m => m.meal_type === selectedMealType);
+    // Assertion de type pour la lecture (Json vers FoodItem[])
+    const existingFoods: FoodItem[] = (currentMealData?.foods as unknown as FoodItem[] || []);
+    
+    // Crée un nouveau tableau avec l'ancien + le nouvel aliment
+    const updatedFoodsInMeal: FoodItem[] = [...existingFoods, {
+      name: newFoodName,
+      calories: newFoodCalories,
+      protein: newFoodProtein,
+      carbs: newFoodCarbs,
+      fat: newFoodFat
+    }];
+
+    // Recalculer les totaux pour ce repas (pour la nouvelle entrée)
+    const totalCals = updatedFoodsInMeal.reduce((sum, food) => sum + food.calories, 0);
+    const totalProt = updatedFoodsInMeal.reduce((sum, food) => sum + food.protein, 0);
+    const totalCarbs = updatedFoodsInMeal.reduce((sum, food) => sum + food.carbs, 0);
+    const totalFat = updatedFoodsInMeal.reduce((sum, food) => sum + food.fat, 0);
+
+    // Appel à addMeal pour enregistrer le nouveau repas/aliment
+    // CORRECTION ICI: Double assertion de type pour l'envoi (FoodItem[] vers Json)
+    const result = await addMeal(userProfile.id, selectedMealType, updatedFoodsInMeal as unknown as Json, totalCals, totalProt, totalCarbs, totalFat);
+
+    if (result) {
+      alert('Aliment ajouté avec succès !');
+      setNewFoodName('');
+      setNewFoodCalories(0);
+      setNewFoodProtein(0);
+      setNewFoodCarbs(0);
+      setNewFoodFat(0);
+      await loadNutritionData(); // Recharger toutes les données après l'ajout
+    } else {
+      alert('Échec de l\'ajout de l\'aliment.');
     }
   };
 
-  const quickActions = [
-    { name: 'Scanner', icon: Camera, color: 'bg-blue-500' },
-    { name: 'Eau', icon: Droplets, color: 'bg-cyan-500' },
-    { name: 'Recettes', icon: Utensils, color: 'bg-green-500' },
-    { name: 'Stats', icon: BarChart3, color: 'bg-purple-500' }
-  ];
-
-  const MacroCard = ({ title, current, goal, unit, color, percentage }) => (
+  // === COMPOSANTS DE PRÉSENTATION ===
+  const MacroCard = ({ title, current, goal, unit, color, percentage }: { title: string; current: number; goal: number; unit: string; color: string; percentage: number }) => (
     <div className="bg-white p-3 rounded-xl border border-gray-100">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-medium text-gray-600">{title}</h4>
@@ -95,16 +188,23 @@ const Nutrition = () => {
         <div 
           className={`${color} rounded-full h-2 transition-all duration-500`}
           style={{ width: `${Math.min(percentage, 100)}%` }}
-        ></div>
+        />
       </div>
     </div>
   );
 
-  const MealCard = ({ mealKey, meal, isSelected, onClick }) => {
-    const MealIcon = meal.icon;
+  const MealCard = ({ mealTypeKey, isSelected, onClick }: { mealTypeKey: string; isSelected: boolean; onClick: (key: string) => void }) => {
+    const mealDef = demoMealsStructure[mealTypeKey as keyof typeof demoMealsStructure];
+    if (!mealDef) return null;
+
+    const MealIcon = mealDef.icon;
+    const actualMeal = meals.find(m => m.meal_type === mealDef.meal_type_db);
+    const totalCals = actualMeal?.total_calories || 0;
+    const mealTime = actualMeal?.created_at ? new Date(actualMeal.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+
     return (
       <button
-        onClick={() => onClick(mealKey)}
+        onClick={() => onClick(mealTypeKey)}
         className={`w-full p-4 rounded-xl border transition-all duration-200 ${
           isSelected 
             ? 'border-fitness-growth bg-fitness-growth/5' 
@@ -117,16 +217,17 @@ const Nutrition = () => {
               <MealIcon size={20} />
             </div>
             <div className="text-left">
-              <h3 className="font-semibold text-gray-800">{meal.name}</h3>
-              <p className="text-sm text-gray-500">{meal.time} • {meal.calories} kcal</p>
+              <h3 className="font-semibold text-gray-800">{mealDef.name}</h3>
+              <p className="text-sm text-gray-500">{mealTime} • {totalCals} kcal</p>
             </div>
           </div>
           <ChevronRight size={20} className={isSelected ? 'text-fitness-growth' : 'text-gray-400'} />
         </div>
         
-        {isSelected && (
+        {isSelected && actualMeal && (
           <div className="mt-4 space-y-2 animate-slide-up">
-            {meal.foods.map((food, index) => (
+            {/* CORRECTION ICI: Assurer le typage correct des éléments 'foods' lors de l'affichage */}
+            {(actualMeal.foods as unknown as FoodItem[] || []).map((food: FoodItem, index: number) => (
               <div key={index} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-t-0">
                 <div>
                   <p className="font-medium text-gray-800 text-sm">{food.name}</p>
@@ -137,19 +238,66 @@ const Nutrition = () => {
                 <span className="text-sm font-medium text-gray-600">{food.calories} kcal</span>
               </div>
             ))}
-            <button className="w-full mt-3 py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 text-sm hover:border-fitness-growth hover:text-fitness-growth transition-colors">
-              + Ajouter un aliment
-            </button>
+            {/* Formulaire d'ajout rapide d'aliment */}
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg space-y-2">
+              <h4 className="font-semibold text-gray-800 text-sm">Ajouter un aliment à ce repas</h4>
+              <input
+                type="text"
+                placeholder="Nom de l'aliment"
+                value={newFoodName}
+                onChange={(e) => setNewFoodName(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Calories (kcal)"
+                value={newFoodCalories || ''}
+                onChange={(e) => setNewFoodCalories(parseInt(e.target.value) || 0)}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Protéines (g)"
+                value={newFoodProtein || ''}
+                onChange={(e) => setNewFoodProtein(parseFloat(e.target.value) || 0)}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Glucides (g)"
+                value={newFoodCarbs || ''}
+                onChange={(e) => setNewFoodCarbs(parseFloat(e.target.value) || 0)}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+              <input
+                type="number"
+                placeholder="Lipides (g)"
+                value={newFoodFat || ''}
+                onChange={(e) => setNewFoodFat(parseFloat(e.target.value) || 0)}
+                className="w-full p-2 border border-gray-300 rounded-md text-sm"
+              />
+              <button 
+                onClick={handleAddFoodToMeal}
+                className="w-full bg-fitness-growth text-white py-2 rounded-lg font-medium text-sm flex items-center justify-center disabled:opacity-50"
+                disabled={loadingData || !newFoodName}
+              >
+                {loadingData ? <Loader2 className="animate-spin mr-2" size={16} /> : <Plus size={16} className="mr-1" />}
+                Ajouter l'aliment
+              </button>
+            </div>
           </div>
         )}
       </button>
     );
   };
 
-  const currentCalories = dailyGoals.calories.current;
-  const goalCalories = dailyGoals.calories.goal;
-  const remainingCalories = goalCalories - currentCalories;
-  const caloriesPercentage = Math.round((currentCalories / goalCalories) * 100);
+  const quickActions = [
+    { name: 'Scanner', icon: Camera, color: 'bg-blue-500' },
+    { name: 'Eau', icon: Droplets, color: 'bg-cyan-500' },
+    { name: 'Recettes', icon: Utensils, color: 'bg-green-500' },
+    { name: 'Stats', icon: BarChart3, color: 'bg-purple-500' }
+  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -168,29 +316,37 @@ const Nutrition = () => {
 
         {/* Calories principales */}
         <div className="bg-gradient-growth p-5 rounded-xl text-white">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-lg">Calories aujourd'hui</h3>
-            <Target size={24} />
-          </div>
-          
-          <div className="text-center mb-4">
-            <div className="text-4xl font-bold mb-1">{currentCalories}</div>
-            <div className="text-white/80">sur {goalCalories} kcal</div>
-            <div className="text-sm text-white/70 mt-1">
-              {remainingCalories > 0 ? `${remainingCalories} kcal restantes` : `${Math.abs(remainingCalories)} kcal dépassées`}
-            </div>
-          </div>
+          {loadingData ? (
+            <div className="text-center py-8">Chargement des données...</div>
+          ) : errorFetching ? (
+            <div className="text-center py-8 text-red-100">{errorFetching}</div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-lg">Calories aujourd'hui</h3>
+                <Target size={24} />
+              </div>
+              
+              <div className="text-center mb-4">
+                <div className="text-4xl font-bold mb-1">{currentCalories}</div>
+                <div className="text-white/80">sur {goalCalories} kcal</div>
+                <div className="text-sm text-white/70 mt-1">
+                  {remainingCalories > 0 ? `${remainingCalories} kcal restantes` : `${Math.abs(remainingCalories)} kcal dépassées`}
+                </div>
+              </div>
 
-          <div className="w-full bg-white/20 rounded-full h-3 mb-2">
-            <div 
-              className="bg-white rounded-full h-3 transition-all duration-500"
-              style={{ width: `${Math.min(caloriesPercentage, 100)}%` }}
-            ></div>
-          </div>
-          
-          <div className="text-center text-sm text-white/80">
-            {caloriesPercentage}% de l'objectif atteint
-          </div>
+              <div className="w-full bg-white/20 rounded-full h-3 mb-2">
+                <div 
+                  className="bg-white rounded-full h-3 transition-all duration-500"
+                  style={{ width: `${Math.min(caloriesPercentage, 100)}%` }}
+                />
+              </div>
+              
+              <div className="text-center text-sm text-white/80">
+                {caloriesPercentage}% de l'objectif atteint
+              </div>
+            </>
+          )}
         </div>
 
         {/* Actions rapides */}
@@ -220,35 +376,36 @@ const Nutrition = () => {
           <div className="grid grid-cols-2 gap-3">
             <MacroCard
               title="Protéines"
-              current={dailyGoals.protein.current}
-              goal={dailyGoals.protein.goal}
-              unit={dailyGoals.protein.unit}
+              current={currentProtein}
+              goal={goalProtein}
+              unit="g"
               color="bg-red-500"
-              percentage={Math.round((dailyGoals.protein.current / dailyGoals.protein.goal) * 100)}
+              percentage={proteinPercentage}
             />
             <MacroCard
               title="Glucides"
-              current={dailyGoals.carbs.current}
-              goal={dailyGoals.carbs.goal}
-              unit={dailyGoals.carbs.unit}
+              current={currentCarbs}
+              goal={goalCarbs}
+              unit="g"
               color="bg-blue-500"
-              percentage={Math.round((dailyGoals.carbs.current / dailyGoals.carbs.goal) * 100)}
+              percentage={carbsPercentage}
             />
             <MacroCard
               title="Lipides"
-              current={dailyGoals.fat.current}
-              goal={dailyGoals.fat.goal}
-              unit={dailyGoals.fat.unit}
+              current={currentFat}
+              goal={goalFat}
+              unit="g"
               color="bg-yellow-500"
-              percentage={Math.round((dailyGoals.fat.current / dailyGoals.fat.goal) * 100)}
+              percentage={fatPercentage}
             />
+            {/* La MacroCard Hydratation n'a pas de propriété 'title' dans l'appel d'origine, ajoutons-la */}
             <MacroCard
               title="Hydratation"
-              current={dailyGoals.water.current}
-              goal={dailyGoals.water.goal}
-              unit={dailyGoals.water.unit}
+              current={dailyStats?.water_intake_ml ? (dailyStats.water_intake_ml / 1000) : 0}
+              goal={dailyGoals.water}
+              unit="L"
               color="bg-cyan-500"
-              percentage={Math.round((dailyGoals.water.current / dailyGoals.water.goal) * 100)}
+              percentage={dailyStats?.water_intake_ml ? Math.round((dailyStats.water_intake_ml / (dailyGoals.water * 1000)) * 100) : 0} 
             />
           </div>
         </div>
@@ -263,15 +420,27 @@ const Nutrition = () => {
           </div>
           
           <div className="space-y-3">
-            {Object.entries(meals).map(([key, meal]) => (
-              <MealCard
-                key={key}
-                mealKey={key}
-                meal={meal}
-                isSelected={selectedMeal === key}
-                onClick={setSelectedMeal}
-              />
-            ))}
+            {loadingData ? (
+                <div className="text-center py-8">Chargement des repas...</div>
+            ) : errorFetching ? (
+                <div className="text-center py-8 text-red-500">{errorFetching}</div>
+            ) : meals.length > 0 ? (
+                // Affiche les MealCards pour chaque type de repas défini
+                Object.keys(demoMealsStructure).map((mealTypeKey) => (
+                    <MealCard
+                        key={mealTypeKey}
+                        mealTypeKey={mealTypeKey}
+                        isSelected={selectedMealType === mealTypeKey}
+                        onClick={setSelectedMealType}
+                    />
+                ))
+            ) : (
+                <div className="text-center py-8 text-gray-500">
+                    <Apple size={48} className="mx-auto mb-2 opacity-50" />
+                    <p>Aucun repas enregistré aujourd'hui.</p>
+                    <p className="text-sm">Ajoutez votre premier repas !</p>
+                </div>
+            )}
           </div>
         </div>
 
