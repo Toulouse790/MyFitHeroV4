@@ -1,16 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { supabase } from '../lib/supabase';
-// Import correct de TOUS les types de Supabase nécessaires
-import { HydrationEntry, DailyStats, Meal, UserProfile as SupabaseUserProfile, Json, SleepSession, Workout, Exercise, AiRecommendation, AiRequest } from '../lib/supabase'; // UserProfile de Supabase renommé en SupabaseUserProfile pour éviter les conflits de nom
+// Importe tous les types nécessaires, y compris le UserProfile directement de lib/supabase
+import { HydrationEntry, DailyStats, Meal, Json, SleepSession, Workout, Exercise, AiRecommendation, AiRequest, UserProfile as SupabaseDBUserProfile } from '../lib/supabase';
 
 // === TYPES ===
-// L'interface UserProfile du store étend maintenant SupabaseUserProfile
-export interface UserProfile extends SupabaseUserProfile { 
-  // Champs locaux/calculés (non directement dans la table Supabase, mais gérés par l'app)
+// Le UserProfile du store étend maintenant le UserProfile de la DB Supabase
+export interface UserProfile extends SupabaseDBUserProfile { 
+  // Champs locaux/calculés qui ne sont pas directement dans la table Supabase,
+  // mais gérés par l'application ou dérivés des données Supabase.
   name: string; // Nom d'affichage, peut être full_name ou username
   email: string; // Email de l'utilisateur (peut venir de auth.user)
-  goal: string; // Objectif principal résumé
+  goal: string; // Objectif principal résumé (peut être dérivé de fitness_goal)
   level: number; // Niveau de l'utilisateur
   totalPoints: number; // Points d'expérience
   joinDate: string; // Date d'inscription
@@ -46,7 +47,7 @@ interface DailyGoals {
 }
 
 interface AppState {
-  user: UserProfile; // Le user du store est maintenant le type UserProfile complet
+  user: UserProfile; // Le user du store est maintenant le type UserProfile complet unifié
   dailyGoals: DailyGoals;
   achievements: Achievement[];
   
