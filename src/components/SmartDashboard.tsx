@@ -22,7 +22,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/stores/useAppStore';
-import { DailyStats, AiRecommendation, UserProfile as SupabaseUserProfileType } from '@/lib/supabase';
+import { DailyStats, AiRecommendation, UserProfile as SupabaseUserProfileType, Json } from '@/lib/supabase'; // Import de Json
 import { User as SupabaseUserAuthType } from '@supabase/supabase-js';
 
 interface SmartDashboardProps {
@@ -59,6 +59,34 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
 }
+
+// NOUVELLE INTERFACE : SmartDashboardContext pour typer l'objet context envoyé à Supabase
+// Note: 'Json' de Supabase est très générique. Pour un typage strict, il est préférable
+// d'avoir des types précis si vous savez ce que contient le JSON.
+// Ici, nous utilisons les types existants pour les parties connues.
+interface SmartDashboardContext extends Json { // Étend Json pour la compatibilité générale avec Supabase
+  user_profile?: {
+    id: string;
+    username: string | null;
+    age: number | null;
+    gender: string | null;
+    fitness_goal: string | null;
+    primary_goals: string[] | null;
+    sport: string | null;
+    sport_position: string | null;
+    fitness_experience: string | null;
+    lifestyle: string | null;
+    available_time_per_day: number | null;
+    training_frequency: number | null;
+    season_period: string | null;
+    injuries: string[] | null;
+  };
+  current_daily_stats?: DailyStats | null;
+  daily_program?: DailyProgramDisplay;
+  last_ai_recommendations?: string[];
+  // Ajoutez d'autres propriétés si nécessaire
+}
+
 
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const navigate = useNavigate();
@@ -191,7 +219,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     } finally {
       setLoadingDailyStats(false);
     }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water, getTodayWorkout, getPersonalizedExercises]); // Ajout de getTodayWorkout et getPersonalizedExercises dans les dépendances
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water, getTodayWorkout, getPersonalizedExercises]);
 
   useEffect(() => {
     loadInitialData();
@@ -212,33 +240,36 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     setIsLoading(true);
 
     try {
+      // Utilisation de la nouvelle interface SmartDashboardContext ici
+      const contextData: SmartDashboardContext = {
+          user_profile: {
+            id: userProfile.id,
+            username: initialUserProfileFromStore.name,
+            age: initialUserProfileFromStore.age,
+            gender: initialUserProfileFromStore.gender,
+            fitness_goal: initialUserProfileFromStore.goal,
+            primary_goals: initialUserProfileFromStore.primary_goals,
+            sport: initialUserProfileFromStore.sport,
+            sport_position: initialUserProfileFromStore.sport_position,
+            fitness_experience: initialUserProfileFromStore.fitness_experience,
+            lifestyle: initialUserProfileFromStore.lifestyle,
+            available_time_per_day: initialUserProfileFromStore.available_time_per_day,
+            training_frequency: initialUserProfileFromStore.training_frequency,
+            season_period: initialUserProfileFromStore.season_period,
+            injuries: initialUserProfileFromStore.injuries,
+          },
+          current_daily_stats: dailyStats,
+          daily_program: dailyProgram,
+          last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
+      };
+
       const { data: requestData, error: requestError } = await supabase
         .from('ai_requests')
         .insert({
           user_id: userProfile.id,
           pillar_type: detectMessageType(inputMessage),
           prompt: inputMessage,
-          context: {
-            user_profile: {
-              id: userProfile.id,
-              username: initialUserProfileFromStore.name,
-              age: initialUserProfileFromStore.age,
-              gender: initialUserProfileFromStore.gender,
-              fitness_goal: initialUserProfileFromStore.goal,
-              primary_goals: initialUserProfileFromStore.primary_goals,
-              sport: initialUserProfileFromStore.sport,
-              sport_position: initialUserProfileFromStore.sport_position,
-              fitness_experience: initialUserProfileFromStore.fitness_experience,
-              lifestyle: initialUserProfileFromStore.lifestyle,
-              available_time_per_day: initialUserProfileFromStore.available_time_per_day,
-              training_frequency: initialUserProfileFromStore.training_frequency,
-              season_period: initialUserProfileFromStore.season_period,
-              injuries: initialUserProfileFromStore.injuries,
-            },
-            current_daily_stats: dailyStats,
-            daily_program: dailyProgram,
-            last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
-          },
+          context: contextData as Json, // Cast vers Json, car Supabase attend Json
           status: 'pending'
         })
         .select()
