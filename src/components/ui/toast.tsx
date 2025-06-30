@@ -116,6 +116,9 @@ type ToasterProps = {
   toasts: ToastProps[]
 }
 
+// Exportation ajoutée pour ToastActionElement
+type ToastActionElement = React.ComponentPropsWithoutRef<typeof ToastAction>
+
 export {
   Toast,
   ToastAction,
@@ -126,4 +129,6 @@ export {
   ToastViewport,
   type ToastProps,
   type ToasterProps,
+  // Ajout de l'exportation manquante
+  type ToastActionElement,
 }
