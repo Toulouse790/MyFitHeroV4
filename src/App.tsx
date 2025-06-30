@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
 import Index from './pages/Index';
@@ -14,36 +13,16 @@ import SmartDashboard from './components/SmartDashboard';
 import { supabase } from './lib/supabase';
 import { Toaster } from './components/ui/toaster';
 import NotFound from './pages/NotFound';
-import { useAppStore } from '@/stores/useAppStore';
 
-// Import des types Supabase spécifiques pour une meilleure typification
 import { Session, User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { UserProfile as AppStoreUserProfileType } from '@/stores/useAppStore';
+import { UserProfile as AppStoreUserProfileType, useAppStore } from '@/stores/useAppStore';
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
-
-interface OnboardingProfileData {
-  age: number | null;
-  gender: string | null;
-  lifestyle: string | null;
-  available_time_per_day: number | null;
-  fitness_experience: string | null;
-  injuries: string[] | null;
-  primary_goals: string[] | null;
-  motivation: string | null;
-  fitness_goal: string | null;
-  sport: string | null;
-  sport_position: string | null;
-  sport_level: string | null;
-  training_frequency: number | null;
-  season_period: string | null;
-}
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
 
-  // Utiliser le store pour le profil utilisateur local
   const { user: appStoreUser, updateProfile: updateAppStoreUserProfile } = useAppStore();
 
   useEffect(() => {
@@ -52,7 +31,6 @@ function App() {
       setSession(currentSession);
       
       if (currentSession) {
-        // Charger le profil utilisateur de la DB
         const { data: userProfileData, error: profileError } = await supabase
           .from('user_profiles')
           .select('*')
@@ -63,11 +41,9 @@ function App() {
           console.error("Erreur chargement profil App.tsx:", profileError);
           setHasCompletedOnboarding(false);
         } else if (userProfileData) {
-          // Si le profil existe, vérifier si l'onboarding est complété
           const onboardingCompleted = userProfileData.primary_goals && userProfileData.primary_goals.length > 0;
           setHasCompletedOnboarding(onboardingCompleted);
 
-          // Mettre à jour le profil dans le store Zustand
           updateAppStoreUserProfile({
             ...userProfileData,
             name: userProfileData.full_name || userProfileData.username || 'Non défini',
@@ -147,7 +123,8 @@ function App() {
     setSession({ user, access_token: '', token_type: '' } as Session);
   };
 
-  const handleOnboardingComplete = async (profileData: OnboardingProfileData) => {
+  // CORRECTION ICI : Le type de profileData a été changé pour AppStoreUserProfileType
+  const handleOnboardingComplete = async (profileData: AppStoreUserProfileType) => {
     if (!session?.user) {
       console.error('Aucune session utilisateur trouvée pour la complétion de l\'onboarding');
       return;
@@ -226,7 +203,6 @@ function App() {
           path="/onboarding" 
           element={session && !hasCompletedOnboarding ? <OnboardingQuestionnaire onComplete={handleOnboardingComplete} /> : <Navigate to={session ? "/dashboard" : "/auth"} replace />} 
         />
-
         <Route element={<Layout><Outlet /></Layout>}>
           <Route path="/dashboard" element={<PrivateRoute><SmartDashboard userProfile={session?.user} /></PrivateRoute>} />
           <Route path="/workout" element={<PrivateRoute><WorkoutPage userProfile={session?.user} /></PrivateRoute>} />
@@ -235,7 +211,6 @@ function App() {
           <Route path="/hydration" element={<PrivateRoute><Hydration userProfile={session?.user} /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile userProfile={session?.user} /></PrivateRoute>} />
         </Route>
-
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster /> 
