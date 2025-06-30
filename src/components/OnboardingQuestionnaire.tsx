@@ -16,7 +16,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 
-interface UserProfile {
+// Exportation de cette interface pour être utilisée par App.tsx
+export interface UserProfileOnboarding { // Renommé pour éviter le conflit avec le UserProfile du store/DB
   // Étape 1 : Profil personnel
   age: number | null;
   gender: 'male' | 'female' | 'other' | null;
@@ -38,12 +39,12 @@ interface UserProfile {
 }
 
 interface OnboardingQuestionnaireProps {
-  onComplete: (profile: UserProfile) => void;
+  onComplete: (profile: UserProfileOnboarding) => void; // Utilise le type exporté
 }
 
 const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [profile, setProfile] = useState<UserProfile>({
+  const [profile, setProfile] = useState<UserProfileOnboarding>({ // Utilise le type exporté
     age: null,
     gender: null,
     lifestyle: null,
@@ -62,7 +63,6 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
   const totalSteps = 3;
   const progressPercentage = (currentStep / totalSteps) * 100;
 
-  // Options de données
   const goalOptions = [
     { id: 'performance', label: 'Performance sportive', icon: '🏆', description: 'Améliorer mes performances dans mon sport' },
     { id: 'muscle_gain', label: 'Prise de muscle', icon: '💪', description: 'Développer ma masse musculaire' },
@@ -80,7 +80,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     'Handball', 'Hockey', 'Escalade', 'Autre'
   ];
 
-  const updateProfile = (updates: Partial<UserProfile>) => {
+  const updateProfile = (updates: Partial<UserProfileOnboarding>) => { // Utilise le type exporté
     setProfile(prev => ({ ...prev, ...updates }));
   };
 
@@ -89,7 +89,6 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     if (currentGoals.includes(goalId)) {
       updateProfile({ primary_goals: currentGoals.filter(g => g !== goalId) });
     } else {
-      // Limite à 3 objectifs maximum
       if (currentGoals.length < 3) {
         updateProfile({ primary_goals: [...currentGoals, goalId] });
       }
@@ -104,7 +103,6 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
       case 2:
         return profile.primary_goals.length > 0;
       case 3:
-        // Si sport sélectionné, vérifier les champs sportifs
         if (profile.primary_goals.includes('performance')) {
           return profile.sport && profile.sport_level && profile.training_frequency;
         }
