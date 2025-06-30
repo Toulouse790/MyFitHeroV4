@@ -29,12 +29,11 @@ function App() {
 
   const handleAuthSuccess = (user: SupabaseAuthUserType) => {
     console.log('Auth success for user:', user.id);
-    // La gestion sera faite par useAuthStatus
   };
 
   const handleOnboardingComplete = async (profileData: UserProfileOnboarding) => {
     if (!session?.user) {
-      console.error('Aucune session utilisateur trouvée pour la complétion de l\'onboarding');
+      console.error('No user session found for onboarding completion');
       toast({
         title: "Erreur",
         description: "Session utilisateur introuvable. Veuillez vous reconnecter.",
