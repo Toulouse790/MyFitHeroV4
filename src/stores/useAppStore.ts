@@ -22,12 +22,12 @@ interface AppStore {
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
   fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
-  addHydration: (amount: number) => void;
-  removeLastHydration: () => void;
-  resetDailyHydration: () => void;
+  addHydration: (userId: string, amount: number, date: string) => Promise<boolean>;
+  removeLastHydration: (userId: string) => Promise<boolean>;
+  resetDailyHydration: (userId: string) => Promise<boolean>;
   fetchHydrationEntries: (userId: string, date: string) => Promise<any[]>;
   unlockAchievement: (achievement: string) => void;
-  addMeal: (meal: any) => void;
+  addMeal: (userId: string, meal: any, mealType: string, date: string, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<boolean>;
   fetchMeals: (userId: string, date: string) => Promise<any[]>;
   addSleepSession: (session: any) => void;
   fetchSleepSessions: (userId: string, date: string) => Promise<any[]>;
@@ -136,16 +136,63 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      addHydration: (amount: number) => {
-        console.log('Adding hydration:', amount);
+      addHydration: async (userId: string, amount: number, date: string) => {
+        try {
+          const { error } = await supabase
+            .from('hydration_logs')
+            .insert({
+              user_id: userId,
+              amount_ml: amount,
+              log_date: date
+            });
+
+          if (error) throw error;
+          return true;
+        } catch (error) {
+          console.error('Erreur lors de l\'ajout d\'hydratation:', error);
+          return false;
+        }
       },
 
-      removeLastHydration: () => {
-        console.log('Removing last hydration');
+      removeLastHydration: async (userId: string) => {
+        try {
+          const { data, error } = await supabase
+            .from('hydration_logs')
+            .select('id')
+            .eq('user_id', userId)
+            .order('logged_at', { ascending: false })
+            .limit(1);
+
+          if (error || !data || data.length === 0) return false;
+
+          const { error: deleteError } = await supabase
+            .from('hydration_logs')
+            .delete()
+            .eq('id', data[0].id);
+
+          if (deleteError) throw deleteError;
+          return true;
+        } catch (error) {
+          console.error('Erreur lors de la suppression d\'hydratation:', error);
+          return false;
+        }
       },
 
-      resetDailyHydration: () => {
-        console.log('Resetting daily hydration');
+      resetDailyHydration: async (userId: string) => {
+        try {
+          const today = new Date().toISOString().split('T')[0];
+          const { error } = await supabase
+            .from('hydration_logs')
+            .delete()
+            .eq('user_id', userId)
+            .eq('log_date', today);
+
+          if (error) throw error;
+          return true;
+        } catch (error) {
+          console.error('Erreur lors de la remise à zéro de l\'hydratation:', error);
+          return false;
+        }
       },
 
       fetchHydrationEntries: async (userId: string, date: string) => {
@@ -169,8 +216,27 @@ export const useAppStore = create<AppStore>()(
         console.log('Unlocking achievement:', achievement);
       },
 
-      addMeal: (meal: any) => {
-        console.log('Adding meal:', meal);
+      addMeal: async (userId: string, meal: any, mealType: string, date: string, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => {
+        try {
+          const { error } = await supabase
+            .from('meals')
+            .insert({
+              user_id: userId,
+              meal_type: mealType,
+              meal_date: date,
+              foods: meal,
+              total_calories: totalCalories,
+              total_protein: totalProtein,
+              total_carbs: totalCarbs,
+              total_fat: totalFat
+            });
+
+          if (error) throw error;
+          return true;
+        } catch (error) {
+          console.error('Erreur lors de l\'ajout du repas:', error);
+          return false;
+        }
       },
 
       fetchMeals: async (userId: string, date: string) => {

@@ -13,6 +13,7 @@ import {
   Shield
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useToast } from '../hooks/use-toast';
 
 interface AuthPagesProps {
   onAuthSuccess: (user: any) => void;
@@ -37,6 +38,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const { toast } = useToast();
 
   const [signUpForm, setSignUpForm] = useState<SignUpForm>({
     email: '',
@@ -59,7 +61,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     return password.length >= 6;
   };
 
-  // Ajout de la validation du nom d'utilisateur (pseudo)
   const isValidUsername = (username: string) => {
     return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
   };
@@ -72,12 +73,13 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
 
     setIsLoading(true);
     setError('');
-    setSuccess(''); // Réinitialise le message de succès
+    setSuccess('');
 
     try {
       const { data, error } = await supabase.auth.signInWithOtp({
         email: signUpForm.email,
         options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             username: signUpForm.username || signUpForm.email.split('@')[0],
             full_name: signUpForm.username || signUpForm.email.split('@')[0]
@@ -87,10 +89,20 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
 
       if (error) throw error;
 
+      toast({
+        title: "Magic Link envoyé !",
+        description: `Vérifiez votre boîte mail (${signUpForm.email}) et cliquez sur le lien pour vous connecter.`,
+      });
       setSuccess(`Magic Link envoyé à ${signUpForm.email} ! Vérifiez votre boîte mail et cliquez sur le lien pour vous connecter.`);
 
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'envoi du Magic Link');
+      const errorMessage = err.message || 'Erreur lors de l\'envoi du Magic Link';
+      setError(errorMessage);
+      toast({
+        title: "Erreur Magic Link",
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -123,6 +135,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         email: signUpForm.email,
         password: signUpForm.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             username: signUpForm.username,
             full_name: signUpForm.username
@@ -137,15 +150,29 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         
         if (authData.session) {
           console.log('🔄 Session active, connexion automatique...');
+          toast({
+            title: "Inscription réussie !",
+            description: "Bienvenue dans MyFitHero ! Vous allez être redirigé vers le questionnaire de profil.",
+          });
           onAuthSuccess(authData.user);
         } else {
+          toast({
+            title: "Inscription réussie !",
+            description: "Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.",
+          });
           setSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.');
         }
       }
 
     } catch (err: any) {
       console.error('❌ Erreur inscription:', err);
-      setError(err.message || 'Erreur lors de la création du compte');
+      const errorMessage = err.message || 'Erreur lors de la création du compte';
+      setError(errorMessage);
+      toast({
+        title: "Erreur d'inscription",
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -175,10 +202,21 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         localStorage.removeItem('myfitheroe_username');
       }
 
+      toast({
+        title: "Connexion réussie !",
+        description: "Bienvenue dans MyFitHero !",
+      });
+
       onAuthSuccess(authData.user);
 
     } catch (err: any) {
-      setError(err.message || 'Erreur lors de la connexion');
+      const errorMessage = err.message || 'Erreur lors de la connexion';
+      setError(errorMessage);
+      toast({
+        title: "Erreur de connexion",
+        description: errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
