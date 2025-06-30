@@ -31,10 +31,6 @@ interface SignInForm {
   rememberMe: boolean;
 }
 
-const isValidUsername = (username: string) => {
-  return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
-};
-
 const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   const [currentView, setCurrentView] = useState<'signin' | 'signup'>('signin');
   const [showPassword, setShowPassword] = useState(false);
@@ -42,7 +38,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
 
-  // États des formulaires
   const [signUpForm, setSignUpForm] = useState<SignUpForm>({
     email: '',
     username: '',
@@ -56,17 +51,19 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     rememberMe: false
   });
 
-  // Validation email
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Validation mot de passe
   const isValidPassword = (password: string) => {
     return password.length >= 6;
   };
 
-  // Gestion Magic Link (plus simple pour le dev)
+  // Ajout de la validation du nom d'utilisateur (pseudo)
+  const isValidUsername = (username: string) => {
+    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+  };
+
   const handleMagicLink = async () => {
     if (!signUpForm.email || !isValidEmail(signUpForm.email)) {
       setError('Veuillez saisir une adresse email valide');
@@ -75,6 +72,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
 
     setIsLoading(true);
     setError('');
+    setSuccess(''); // Réinitialise le message de succès
 
     try {
       const { data, error } = await supabase.auth.signInWithOtp({
@@ -98,7 +96,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     }
   };
 
-  // Gestion inscription SIMPLIFIÉE
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -106,7 +103,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     setIsLoading(true);
 
     try {
-      // Validations côté client
       if (!isValidEmail(signUpForm.email)) {
         throw new Error('Adresse email invalide');
       }
@@ -123,8 +119,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         throw new Error('Les mots de passe ne correspondent pas');
       }
 
-      // Créer le compte Supabase Auth SEULEMENT
-      // Le trigger se chargera de créer le profil automatiquement
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: signUpForm.email,
         password: signUpForm.password,
@@ -142,11 +136,9 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         console.log('✅ Inscription réussie, utilisateur créé:', authData.user.id);
         
         if (authData.session) {
-          // Connexion automatique après inscription
           console.log('🔄 Session active, connexion automatique...');
           onAuthSuccess(authData.user);
         } else {
-          // Email de confirmation requis
           setSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.');
         }
       }
@@ -159,19 +151,15 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     }
   };
 
-  // Gestion connexion SIMPLIFIÉE
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setIsLoading(true);
 
     try {
-      // MÉTHODE SIMPLIFIÉE : connexion directe avec email/mot de passe
-      // Pour l'instant, on demande l'email au lieu du pseudo
-      
-      // Connexion avec email/password
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: signInForm.username, // Temporairement, on utilise l'email ici
+        email: signInForm.username,
         password: signInForm.password
       });
 
@@ -179,7 +167,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         throw new Error('Email ou mot de passe incorrect');
       }
 
-      // Gestion "Se souvenir de moi"
       if (signInForm.rememberMe) {
         localStorage.setItem('myfitheroe_remember_me', 'true');
         localStorage.setItem('myfitheroe_username', signInForm.username);
@@ -197,7 +184,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     }
   };
 
-  // Charger les données "Se souvenir de moi" au chargement
   React.useEffect(() => {
     const rememberMe = localStorage.getItem('myfitheroe_remember_me');
     const savedUsername = localStorage.getItem('myfitheroe_username');
@@ -214,7 +200,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white text-center">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield size={32} className="text-white" />
@@ -224,7 +209,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         </div>
 
         <div className="p-8">
-          {/* Onglets */}
           <div className="flex bg-gray-100 rounded-xl p-1 mb-8">
             <button
               onClick={() => setCurrentView('signin')}
@@ -248,7 +232,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
             </button>
           </div>
 
-          {/* Messages d'erreur/succès */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3">
               <AlertCircle className="text-red-500 flex-shrink-0" size={20} />
@@ -263,13 +246,11 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
             </div>
           )}
 
-          {/* FORMULAIRE DE CONNEXION */}
           {currentView === 'signin' && (
             <form onSubmit={handleSignIn} className="space-y-6">
-              {/* Email pour connexion (temporaire) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email (temporaire - sera pseudo plus tard)
+                  Email
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -284,7 +265,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </div>
               </div>
 
-              {/* Mot de passe */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Mot de passe
@@ -309,7 +289,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </div>
               </div>
 
-              {/* Se souvenir de moi */}
               <div className="flex items-center justify-between">
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
@@ -325,7 +304,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </button>
               </div>
 
-              {/* Bouton connexion */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -343,10 +321,8 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
             </form>
           )}
 
-          {/* FORMULAIRE D'INSCRIPTION */}
           {currentView === 'signup' && (
             <form onSubmit={handleSignUp} className="space-y-6">
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Adresse email
@@ -364,7 +340,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </div>
               </div>
 
-              {/* Pseudo */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Pseudo
@@ -385,7 +360,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </p>
               </div>
 
-              {/* Mot de passe */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Mot de passe
@@ -413,7 +387,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </p>
               </div>
 
-              {/* Confirmation mot de passe */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Confirmer le mot de passe
@@ -431,7 +404,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 </div>
               </div>
 
-              {/* Bouton inscription */}
               <button
                 type="submit"
                 disabled={isLoading}
@@ -447,7 +419,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                 )}
               </button>
 
-              {/* Magic Link alternatif */}
               <div className="mt-4">
                 <div className="text-center text-sm text-gray-500 mb-3">ou</div>
                 <button
@@ -463,7 +434,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
             </form>
           )}
 
-          {/* Footer */}
           <div className="mt-8 text-center text-sm text-gray-500">
             <p>
               En vous inscrivant, vous acceptez nos{' '}
