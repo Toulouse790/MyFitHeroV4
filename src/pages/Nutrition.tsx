@@ -16,15 +16,13 @@ import {
   Loader2
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { Meal, DailyStats, Json } from '@/lib/supabase'; // Importe les types de Supabase, y compris Json
-import { User } from '@supabase/supabase-js'; // Importe le type User de Supabase
+import { Meal, DailyStats, Json } from '@/lib/supabase';
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Utilisation de SupabaseAuthUserType
 
 interface NutritionProps {
-  userProfile?: User; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
+  userProfile?: SupabaseAuthUserType; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
 }
 
-// Interface pour les aliments au sein d'un repas (correspond à la structure JSONB dans Supabase)
-// Cette interface est cruciale et DOIT correspondre à la structure de vos objets aliments
 interface FoodItem {
   name: string;
   calories: number;
@@ -33,12 +31,11 @@ interface FoodItem {
   fat: number;
 }
 
-// Repas prédéfinis pour la démo, avec des données calculées ou saisies par l'utilisateur
 const demoMealsStructure = {
   breakfast: {
     name: 'Petit-déjeuner',
     icon: Coffee,
-    meal_type_db: 'breakfast', // Type à envoyer à la DB
+    meal_type_db: 'breakfast',
   },
   lunch: {
     name: 'Déjeuner',
@@ -59,13 +56,12 @@ const demoMealsStructure = {
 
 
 const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
-  const [selectedMealType, setSelectedMealType] = useState<string>('breakfast'); // Change à 'mealType' pour la sélection
-  const [meals, setMeals] = useState<Meal[]>([]); // Données réelles des repas
+  const [selectedMealType, setSelectedMealType] = useState<string>('breakfast');
+  const [meals, setMeals] = useState<Meal[]>([]);
   const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [errorFetching, setErrorFetching] = useState<string | null>(null);
 
-  // Pour le formulaire d'ajout rapide (peut être étendu)
   const [newFoodName, setNewFoodName] = useState('');
   const [newFoodCalories, setNewFoodCalories] = useState<number>(0);
   const [newFoodProtein, setNewFoodProtein] = useState<number>(0);
@@ -73,16 +69,14 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
   const [newFoodFat, setNewFoodFat] = useState<number>(0);
 
 
-  // === CONNEXION AU STORE ZUSTAND ===
   const {
-    dailyGoals, // Objectifs définis localement dans le store
+    dailyGoals,
     addMeal,
     fetchMeals,
     fetchDailyStats,
   } = useAppStore();
 
-  // === CALCULS BASÉS SUR LES DONNÉES RÉELLES ===
-  const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
 
   const currentCalories = dailyStats?.total_calories || 0;
   const goalCalories = dailyGoals.calories;
@@ -101,7 +95,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
   const goalFat = dailyGoals.fat;
   const fatPercentage = Math.min((currentFat / goalFat) * 100, 100);
 
-  // === FONCTIONS DE RÉCUPÉRATION DES DONNÉES ===
   const loadNutritionData = useCallback(async () => {
     if (!userProfile?.id) return;
 
@@ -127,7 +120,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
   }, [loadNutritionData]);
 
 
-  // === ACTIONS D'AJOUT DE REPAS ===
   const handleAddFoodToMeal = async () => {
     if (!userProfile?.id || !newFoodName || !selectedMealType) {
       alert('Veuillez remplir le nom de l\'aliment et sélectionner un type de repas.');
@@ -136,12 +128,9 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
 
     setLoadingData(true);
 
-    // CRÉATION D'UNE NOUVELLE COPIE DU TABLEAU foodsInMeal pour éviter l'avertissement ESLint et garantir l'immutabilité
     const currentMealData = meals.find(m => m.meal_type === selectedMealType);
-    // Assertion de type pour la lecture (Json vers FoodItem[])
     const existingFoods: FoodItem[] = (currentMealData?.foods as unknown as FoodItem[] || []);
     
-    // Crée un nouveau tableau avec l'ancien + le nouvel aliment
     const updatedFoodsInMeal: FoodItem[] = [...existingFoods, {
       name: newFoodName,
       calories: newFoodCalories,
@@ -150,14 +139,11 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
       fat: newFoodFat
     }];
 
-    // Recalculer les totaux pour ce repas (pour la nouvelle entrée)
     const totalCals = updatedFoodsInMeal.reduce((sum, food) => sum + food.calories, 0);
     const totalProt = updatedFoodsInMeal.reduce((sum, food) => sum + food.protein, 0);
     const totalCarbs = updatedFoodsInMeal.reduce((sum, food) => sum + food.carbs, 0);
     const totalFat = updatedFoodsInMeal.reduce((sum, food) => sum + food.fat, 0);
 
-    // Appel à addMeal pour enregistrer le nouveau repas/aliment
-    // CORRECTION ICI: Double assertion de type pour l'envoi (FoodItem[] vers Json)
     const result = await addMeal(userProfile.id, selectedMealType, updatedFoodsInMeal as unknown as Json, totalCals, totalProt, totalCarbs, totalFat);
 
     if (result) {
@@ -167,13 +153,12 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
       setNewFoodProtein(0);
       setNewFoodCarbs(0);
       setNewFoodFat(0);
-      await loadNutritionData(); // Recharger toutes les données après l'ajout
+      await loadNutritionData();
     } else {
       alert('Échec de l\'ajout de l\'aliment.');
     }
   };
 
-  // === COMPOSANTS DE PRÉSENTATION ===
   const MacroCard = ({ title, current, goal, unit, color, percentage }: { title: string; current: number; goal: number; unit: string; color: string; percentage: number }) => (
     <div className="bg-white p-3 rounded-xl border border-gray-100">
       <div className="flex items-center justify-between mb-2">
@@ -226,7 +211,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
         
         {isSelected && actualMeal && (
           <div className="mt-4 space-y-2 animate-slide-up">
-            {/* CORRECTION ICI: Assurer le typage correct des éléments 'foods' lors de l'affichage */}
             {(actualMeal.foods as unknown as FoodItem[] || []).map((food: FoodItem, index: number) => (
               <div key={index} className="flex items-center justify-between py-2 border-t border-gray-100 first:border-t-0">
                 <div>
@@ -238,7 +222,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
                 <span className="text-sm font-medium text-gray-600">{food.calories} kcal</span>
               </div>
             ))}
-            {/* Formulaire d'ajout rapide d'aliment */}
             <div className="mt-4 p-3 bg-gray-50 rounded-lg space-y-2">
               <h4 className="font-semibold text-gray-800 text-sm">Ajouter un aliment à ce repas</h4>
               <input
@@ -398,7 +381,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
               color="bg-yellow-500"
               percentage={fatPercentage}
             />
-            {/* La MacroCard Hydratation n'a pas de propriété 'title' dans l'appel d'origine, ajoutons-la */}
             <MacroCard
               title="Hydratation"
               current={dailyStats?.water_intake_ml ? (dailyStats.water_intake_ml / 1000) : 0}
@@ -425,7 +407,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
             ) : errorFetching ? (
                 <div className="text-center py-8 text-red-500">{errorFetching}</div>
             ) : meals.length > 0 ? (
-                // Affiche les MealCards pour chaque type de repas défini
                 Object.keys(demoMealsStructure).map((mealTypeKey) => (
                     <MealCard
                         key={mealTypeKey}
