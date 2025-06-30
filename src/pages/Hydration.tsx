@@ -16,11 +16,11 @@ import {
   Bell
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { HydrationEntry, DailyStats } from '@/lib/supabase'; // Importe les types de Supabase
-import { User } from '@supabase/supabase-js'; // Importe le type User de Supabase
+import { HydrationEntry, DailyStats } from '@/lib/supabase';
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Utilisation de SupabaseAuthUserType
 
 interface HydrationProps {
-  userProfile?: User; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
+  userProfile?: SupabaseAuthUserType; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
 }
 
 const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
@@ -30,7 +30,6 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
   const [loadingData, setLoadingData] = useState(true);
   const [errorFetching, setErrorFetching] = useState<string | null>(null);
 
-  // === CONNEXION AU STORE ZUSTAND ===
   const {
     dailyGoals,
     user, // Le user du store (pour level/points)
@@ -39,11 +38,10 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     resetDailyHydration: storeResetDailyHydration,
     fetchHydrationEntries,
     fetchDailyStats,
-    unlockAchievement // Pour les achievements liés à l'hydratation
+    unlockAchievement
   } = useAppStore();
 
-  // === CALCULS BASÉS SUR LES DONNÉES RÉELLES ===
-  const today = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
   const currentMl = dailyStats?.water_intake_ml || 0;
   const goalMl = dailyStats?.hydration_goal_ml || (dailyGoals.water * 1000);
   const currentHydrationL = currentMl / 1000;
@@ -51,7 +49,6 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
   const remaining = goalMl - currentMl;
   const percentage = Math.min((currentMl / goalMl) * 100, 100);
 
-  // === FONCTIONS DE RÉCUPÉRATION DES DONNÉES ===
   const loadHydrationData = useCallback(async () => {
     if (!userProfile?.id) return;
 
@@ -64,9 +61,8 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
       const fetchedDailyStats = await fetchDailyStats(userProfile.id, today);
       setDailyStats(fetchedDailyStats);
 
-      // Logique pour débloquer les achievements après avoir fetché les données
       if (fetchedDailyStats && fetchedDailyStats.water_intake_ml >= dailyGoals.water * 1000) {
-        unlockAchievement('hydration-master'); // Exemple
+        unlockAchievement('hydration-master');
       }
 
     } catch (err: unknown) {
@@ -81,7 +77,6 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     loadHydrationData();
   }, [loadHydrationData]);
 
-  // === ACTIONS D'HYDRATATION ===
   const handleAddWater = async (amount: number, type: string = 'water') => {
     if (!userProfile?.id) {
       alert('Utilisateur non connecté.');
@@ -90,7 +85,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     setLoadingData(true);
     const newEntry = await storeAddHydration(userProfile.id, amount, type);
     if (newEntry) {
-      await loadHydrationData(); // Recharge les données après ajout
+      await loadHydrationData();
     } else {
       alert('Impossible d\'ajouter l\'entrée d\'hydratation.');
     }
@@ -104,7 +99,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     setLoadingData(true);
     const success = await storeRemoveLastHydration(userProfile.id);
     if (success) {
-      await loadHydrationData(); // Recharge les données après suppression
+      await loadHydrationData();
     } else {
       alert('Impossible de supprimer la dernière entrée.');
     }
@@ -118,13 +113,12 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     setLoadingData(true);
     const success = await storeResetDailyHydration(userProfile.id);
     if (success) {
-      await loadHydrationData(); // Recharge les données après réinitialisation
+      await loadHydrationData();
     } else {
       alert('Impossible de réinitialiser les entrées.');
     }
   };
 
-  // === COMPOSANTS DE PRÉSENTATION (inchangés ou adaptés pour les nouvelles données) ===
   const quickAmounts = [125, 250, 330, 500, 750];
 
   const hydrationTips = [
@@ -154,7 +148,6 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     }
   ];
 
-  // Achievements mockés - à connecter aux vrais achievements de l'utilisateur plus tard
   const achievements = [
     { title: 'Hydratation parfaite', description: '7 jours d\'objectif atteint', emoji: '🏆', unlocked: false },
     { title: 'Lève-tôt hydraté', description: 'Eau avant 8h pendant 5 jours', emoji: '🌅', unlocked: false },
