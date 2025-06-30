@@ -26,7 +26,7 @@ import {
   Star 
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { Workout, DailyStats, UserProfile, Exercise, Json, AiRecommendation } from '@/lib/supabase'; // Importe AiRecommendation
+import { Workout, DailyStats, UserProfile, Exercise, Json, AiRecommendation } from '@/lib/supabase';
 import { User as SupabaseUserAuthType } from '@supabase/supabase-js'; 
 import { supabase } from '@/lib/supabase';
 
@@ -34,7 +34,6 @@ interface WorkoutPageProps {
   userProfile?: SupabaseUserAuthType; 
 }
 
-// Interfaces pour les données de la page (certaines viendront de Supabase)
 interface SportProfileData {
   sport: string;
   position?: string;
@@ -44,12 +43,10 @@ interface SportProfileData {
   season_period?: string;
 }
 
-// Définir les types de workout et de difficulté/intensité tels qu'ils sont dans la DB
 type WorkoutType = 'strength' | 'cardio' | 'flexibility' | 'sports' | 'other' | null;
 type WorkoutDifficulty = 'beginner' | 'intermediate' | 'advanced' | null;
-type WorkoutIntensity = 'low' | 'moderate' | 'high' | 'very_high' | null; // Peut aussi venir en tant que string générique de l'IA
+type WorkoutIntensity = 'low' | 'moderate' | 'high' | 'very_high' | null;
 
-// NOUVELLE INTERFACE: Pour la structure attendue du champ 'metadata' de AiRecommendation
 interface AiRecommendationMetadata {
   workout_type?: WorkoutType;
   duration_minutes?: number;
@@ -57,24 +54,20 @@ interface AiRecommendationMetadata {
   target_muscles?: string[];
   sport_relevance?: number;
   recovery_time_hours?: number;
-  // Ajoutez d'autres propriétés si votre IA envoie plus de choses dans le metadata
 }
 
-// Structure de recommandation d'entraînement (VIENT DE L'IA, donc de AiRecommendation)
 interface DisplayWorkoutRecommendation {
-  id: string; // id de la recommandation AI (vient de AiRecommendation.id)
-  title: string; // Premier titre ou description de la recommandation
-  type: WorkoutType | 'general'; // CORRIGÉ: Ajout de 'general' pour les recos IA
+  id: string;
+  title: string;
+  type: WorkoutType | 'general';
   duration_minutes: number;
-  intensity: WorkoutIntensity | 'general'; // CORRIGÉ: Ajout de 'general' ou mapping des niveaux
+  intensity: WorkoutIntensity | 'general';
   target_muscles: string[]; 
   sport_relevance: number; 
   recovery_time_hours: number;
-  ai_reasoning: string; // Le texte complet de la recommandation
+  ai_reasoning: string;
 }
 
-
-// Structure de charge d'entraînement (mockée pour l'instant, viendra de daily_stats et IA)
 interface TrainingLoad {
   current_load: number;
   optimal_range: [number, number];
@@ -104,7 +97,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
   const [exercisesLibrary, setExercisesLibrary] = useState<Exercise[]>([]); 
   const [aiRecommendations, setAiRecommendations] = useState<DisplayWorkoutRecommendation[]>([]); 
 
-  // === CONNEXION AU STORE ZUSTAND ===
   const {
     user: initialUserProfileFromStore, 
     addWorkoutSession,
@@ -116,7 +108,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     updateProfile: updateUserProfileStore 
   } = useAppStore();
 
-  // === DONNÉES DE DÉMONSTRATION (seront remplacées par l'IA et Supabase) ===
   const sportsDataOptions = { 
     'rugby': {
       positions: ['Pilier', 'Talonneur', 'Deuxième ligne', 'Troisième ligne', 'Mêlée', 'Ouverture', 'Centre', 'Ailier', 'Arrière'],
@@ -145,14 +136,12 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     recovery_recommendation: 'Séance de récupération active recommandée demain' 
   };
 
-  // === FONCTIONS DE RÉCUPÉRATION DES DONNÉES ===
   const loadWorkoutData = useCallback(async () => {
     if (!userProfile?.id) return;
 
     setLoadingData(true);
     setErrorFetching(null);
     try {
-      // Récupérer le profil sportif de l'utilisateur
       const { data: fetchedUserProfile, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
@@ -174,34 +163,28 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
         });
       }
 
-      // Récupérer les entraînements de l'utilisateur pour les 30 derniers jours
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const fetchedWorkouts = await fetchWorkoutSessions(userProfile.id, thirtyDaysAgo.toISOString().split('T')[0], new Date().toISOString().split('T')[0]);
       setWorkoutsHistory(fetchedWorkouts);
 
-      // Récupérer les stats journalières pour la charge
       const todayDate = new Date().toISOString().split('T')[0];
       const fetchedDailyStats = await fetchDailyStats(userProfile.id, todayDate);
       setDailyStats(fetchedDailyStats);
 
-      // Récupérer des exercices (pour l'exemple)
       const fetchedExercises = await fetchExercisesLibrary(); 
       setExercisesLibrary(fetchedExercises);
 
-      // NOUVEAU: Récupérer les recommandations AI pour le pilier "workout"
-      const fetchedAiRecommendations = await fetchAiRecommendations(userProfile.id, 'workout', 5); // Limité à 5 recos Sport
-      // Mapper les AiRecommendation brutes vers DisplayWorkoutRecommendation
+      const fetchedAiRecommendations = await fetchAiRecommendations(userProfile.id, 'workout', 5);
       const displayRecos: DisplayWorkoutRecommendation[] = fetchedAiRecommendations.map(rec => {
-        // CORRIGÉ: Accès sécurisé aux propriétés de metadata via casting
         const metadata = rec.metadata as unknown as AiRecommendationMetadata; 
 
         return {
           id: rec.id,
           title: rec.recommendation.split('\n')[0] || 'Recommandation IA', 
-          type: (metadata.workout_type || 'general') as WorkoutType | 'general', // Cast vers le type combiné
+          type: (metadata.workout_type || 'general') as WorkoutType | 'general',
           duration_minutes: metadata.duration_minutes || 30,
-          intensity: (metadata.intensity || 'moderate') as WorkoutIntensity | 'general', // Cast vers le type combiné
+          intensity: (metadata.intensity || 'moderate') as WorkoutIntensity | 'general',
           target_muscles: metadata.target_muscles || [],
           sport_relevance: metadata.sport_relevance || 70,
           recovery_time_hours: metadata.recovery_time_hours || 24,
@@ -223,7 +206,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     loadWorkoutData();
   }, [loadWorkoutData]);
 
-  // Simulation timer workout
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isWorkoutActive && activeWorkoutSession) {
@@ -234,27 +216,24 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     return () => clearInterval(interval);
   }, [isWorkoutActive, activeWorkoutSession]);
 
-  // Formatage du temps
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // === ACTIONS WORKOUT ===
   const startWorkout = async (workoutRecommendation: DisplayWorkoutRecommendation) => { 
     if (!userProfile?.id) {
       alert('Utilisateur non connecté.');
       return;
     }
     setLoadingData(true);
-    // Créer une nouvelle session d'entraînement dans la DB
     const newWorkout: Omit<Workout, 'id' | 'created_at' | 'updated_at' | 'user_id'> = {
       name: workoutRecommendation.title,
       description: workoutRecommendation.ai_reasoning,
-      workout_type: workoutRecommendation.type === 'general' ? 'other' : workoutRecommendation.type, // Map 'general' à 'other' pour la DB
+      workout_type: workoutRecommendation.type === 'general' ? 'other' : workoutRecommendation.type,
       duration_minutes: workoutRecommendation.duration_minutes,
-      difficulty: workoutRecommendation.intensity === 'general' ? 'beginner' : workoutRecommendation.intensity, // Map 'general' à 'beginner' pour la DB
+      difficulty: workoutRecommendation.intensity === 'general' ? 'beginner' : workoutRecommendation.intensity,
       exercises: workoutRecommendation.target_muscles as Json, 
       started_at: new Date().toISOString(),
       completed_at: null,
@@ -302,7 +281,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     setLoadingData(false);
   };
 
-  // Fonction de calcul des calories brûlées (simplifiée)
   const calculateCaloriesBurned = (durationSeconds: number, difficulty: string | null): number => { 
     const baseCaloriesPerMinute = 5; 
     let difficultyMultiplier = 1;
@@ -311,7 +289,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     return Math.round((durationSeconds / 60) * baseCaloriesPerMinute * difficultyMultiplier);
   };
 
-  // === UI UTILITIES ===
   const getDifficultyColor = (difficulty: string | null) => { 
     switch (difficulty) {
       case 'beginner': return 'text-green-600 bg-green-100';
@@ -392,20 +369,18 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
   );
 
 
-  // Handle profile updates
   const handleProfileUpdate = async () => {
     if (!userProfile?.id) return;
     setLoadingData(true);
-    // Assurez-vous que les champs sport, position, level, etc. sont correctement mappés à la table user_profiles
     const updates: Partial<UserProfile> = {
-      sport: userSportProfile.sport || null, // null si vide
+      sport: userSportProfile.sport || null,
       sport_position: userSportProfile.position || null,
       sport_level: userSportProfile.level || null,
       training_frequency: userSportProfile.training_frequency || null,
       season_period: userSportProfile.season_period || null,
       fitness_experience: userSportProfile.level === 'recreational' ? 'beginner' : 
                           userSportProfile.level === 'amateur_competitive' ? 'intermediate' : 
-                          userSportProfile.level === 'semi_professional' ? 'advanced' : 'expert', // Simplifié
+                          userSportProfile.level === 'semi_professional' ? 'advanced' : 'expert',
     };
 
     const { data: resultData, error: updateError } = await supabase.from('user_profiles').update(updates).eq('id', userProfile.id).select().single();
@@ -413,7 +388,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
         alert('Échec de la mise à jour du profil: ' + updateError.message);
         console.error('Error updating user profile:', updateError);
     } else if (resultData) {
-        // Mettre à jour le store global si nécessaire
         updateUserProfileStore(updates);
         alert('Profil sportif mis à jour !');
     } else {
@@ -425,7 +399,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header avec profil sportif */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -437,7 +410,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
               <p className="text-gray-600 mt-1">IA multi-sports adaptée à votre profil</p>
             </div>
             
-            {/* Indicateur de charge d'entraînement */}
             <div className="bg-blue-50 p-4 rounded-xl">
               <div className="flex items-center space-x-3">
                 <Activity className="text-blue-600" size={20} />
@@ -464,7 +436,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
       </div>
 
       <div className="container mx-auto px-4 py-6">
-        {/* Affichage du chargement / erreur global */}
         {loadingData && (
           <div className="text-center py-8">
             <Loader2 className="animate-spin mx-auto mb-4" size={32} />
@@ -478,12 +449,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
           </div>
         )}
 
-        {/* Contenu principal une fois chargé */}
         {!loadingData && !errorFetching && (
           <>
-            {/* Configuration du profil sportif */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Profil sportif */}
               <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                   <Target className="mr-2 text-blue-600" size={20} />
@@ -548,7 +516,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
                 </button>
               </div>
 
-              {/* Workout actuel */}
               <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                   <Timer className="mr-2 text-green-600" size={20} />
@@ -599,7 +566,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
                 )}
               </div>
 
-              {/* Stats rapides */}
               <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
                   <BarChart3 className="mr-2 text-purple-600" size={20} />
@@ -632,7 +598,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
               </div>
             </div>
 
-            {/* Recommandations IA (Maintenant réelles !) */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
@@ -670,7 +635,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
               </div>
             </div>
 
-            {/* Alerte récupération si nécessaire */}
             {trainingLoad.fatigue_level === 'high' && (
               <div className="mt-6 bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <div className="flex items-center space-x-3">
