@@ -21,12 +21,12 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '@/stores/useAppStore';
-import { DailyStats, AiRecommendation, UserProfile as SupabaseUserProfileType, Json } from '@/lib/supabase'; // Import de Json
-import { User as SupabaseUserAuthType } from '@supabase/supabase-js';
+import { useAppStore, UserProfile as AppStoreUserProfile } from '@/stores/useAppStore'; // Renommé UserProfile de useAppStore
+import { DailyStats, AiRecommendation, Json } from '@/lib/supabase';
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 
 interface SmartDashboardProps {
-  userProfile?: SupabaseUserAuthType;
+  userProfile?: SupabaseAuthUserType; // Profil utilisateur de la session Supabase
 }
 
 interface DailyProgramDisplay {
@@ -60,11 +60,8 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-// NOUVELLE INTERFACE : SmartDashboardContext pour typer l'objet context envoyé à Supabase
-// Note: 'Json' de Supabase est très générique. Pour un typage strict, il est préférable
-// d'avoir des types précis si vous savez ce que contient le JSON.
-// Ici, nous utilisons les types existants pour les parties connues.
-interface SmartDashboardContext extends Json { // Étend Json pour la compatibilité générale avec Supabase
+// Interface pour le contexte envoyé à Supabase (pour ai_requests)
+interface SmartDashboardContext extends Json {
   user_profile?: {
     id: string;
     username: string | null;
@@ -84,7 +81,6 @@ interface SmartDashboardContext extends Json { // Étend Json pour la compatibil
   current_daily_stats?: DailyStats | null;
   daily_program?: DailyProgramDisplay;
   last_ai_recommendations?: string[];
-  // Ajoutez d'autres propriétés si nécessaire
 }
 
 
@@ -102,12 +98,12 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     dailyGoals,
     fetchDailyStats,
     fetchAiRecommendations,
-    user: initialUserProfileFromStore
+    user: appStoreUser // Utilisation du UserProfile du store ici
   } = useAppStore();
 
   const today = new Date().toISOString().split('T')[0];
 
-  const getTodayWorkout = useCallback((profile: typeof initialUserProfileFromStore) => {
+  const getTodayWorkout = useCallback((profile: AppStoreUserProfile) => { // Utilise AppStoreUserProfile
     if (profile?.sport === 'rugby' && profile?.sport_position === 'pilier') {
       return 'Force Explosive - Mêlée';
     }
@@ -117,7 +113,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return 'Entraînement Personnalisé';
   }, []);
 
-  const getPersonalizedExercises = useCallback((profile: typeof initialUserProfileFromStore) => {
+  const getPersonalizedExercises = useCallback((profile: AppStoreUserProfile) => { // Utilise AppStoreUserProfile
     const sport = profile?.sport;
     const goals = profile?.primary_goals;
     
@@ -130,15 +126,16 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
   }, []);
 
+
   const [dailyProgram, setDailyProgram] = useState<DailyProgramDisplay>({
     workout: {
-      name: getTodayWorkout(initialUserProfileFromStore),
+      name: getTodayWorkout(appStoreUser), // Utilise appStoreUser
       duration: 45,
-      exercises: getPersonalizedExercises(initialUserProfileFromStore),
+      exercises: getPersonalizedExercises(appStoreUser), // Utilise appStoreUser
       completed: false
     },
     nutrition: {
-      calories_target: initialUserProfileFromStore.goal === 'Prise de masse' ? 2500 : 2000,
+      calories_target: appStoreUser.goal === 'Prise de masse' ? 2500 : 2000,
       calories_current: 0,
       next_meal: "Chargement..."
     },
@@ -168,7 +165,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           workout: {
             ...prev.workout,
             completed: (fetchedDailyStats.workouts_completed || 0) > 0,
-            name: getTodayWorkout(initialUserProfileFromStore)
+            name: getTodayWorkout(appStoreUser) // Utilise appStoreUser
           },
           nutrition: {
             ...prev.nutrition,
@@ -200,7 +197,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           {
             id: 1,
             type: 'ai',
-            content: `Salut ${initialUserProfileFromStore?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`,
+            content: `Salut ${appStoreUser?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`, // Utilise appStoreUser
             timestamp: new Date()
           }
         ]);
@@ -212,14 +209,14 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         {
           id: 1,
           type: 'ai',
-          content: `Salut ${initialUserProfileFromStore?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`,
+          content: `Salut ${appStoreUser?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`, // Utilise appStoreUser
           timestamp: new Date()
         }
       ]);
     } finally {
       setLoadingDailyStats(false);
     }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water, getTodayWorkout, getPersonalizedExercises]);
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, appStoreUser, dailyGoals.water, getTodayWorkout, getPersonalizedExercises]);
 
   useEffect(() => {
     loadInitialData();
@@ -240,23 +237,22 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     setIsLoading(true);
 
     try {
-      // Utilisation de la nouvelle interface SmartDashboardContext ici
       const contextData: SmartDashboardContext = {
           user_profile: {
             id: userProfile.id,
-            username: initialUserProfileFromStore.name,
-            age: initialUserProfileFromStore.age,
-            gender: initialUserProfileFromStore.gender,
-            fitness_goal: initialUserProfileFromStore.goal,
-            primary_goals: initialUserProfileFromStore.primary_goals,
-            sport: initialUserProfileFromStore.sport,
-            sport_position: initialUserProfileFromStore.sport_position,
-            fitness_experience: initialUserProfileFromStore.fitness_experience,
-            lifestyle: initialUserProfileFromStore.lifestyle,
-            available_time_per_day: initialUserProfileFromStore.available_time_per_day,
-            training_frequency: initialUserProfileFromStore.training_frequency,
-            season_period: initialUserProfileFromStore.season_period,
-            injuries: initialUserProfileFromStore.injuries,
+            username: appStoreUser.name, // Utilise appStoreUser
+            age: appStoreUser.age,
+            gender: appStoreUser.gender,
+            fitness_goal: appStoreUser.goal, // Objectif principal du store
+            primary_goals: appStoreUser.primary_goals,
+            sport: appStoreUser.sport,
+            sport_position: appStoreUser.sport_position,
+            fitness_experience: appStoreUser.fitness_experience,
+            lifestyle: appStoreUser.lifestyle,
+            available_time_per_day: appStoreUser.available_time_per_day,
+            training_frequency: appStoreUser.training_frequency,
+            season_period: appStoreUser.season_period,
+            injuries: appStoreUser.injuries,
           },
           current_daily_stats: dailyStats,
           daily_program: dailyProgram,
@@ -269,7 +265,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           user_id: userProfile.id,
           pillar_type: detectMessageType(inputMessage),
           prompt: inputMessage,
-          context: contextData as Json, // Cast vers Json, car Supabase attend Json
+          context: contextData as Json,
           status: 'pending'
         })
         .select()
