@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   MessageCircle, 
@@ -192,7 +191,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     } finally {
       setLoadingDailyStats(false);
     }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water]);
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water, getTodayWorkout, getPersonalizedExercises]); // Ajout de getTodayWorkout et getPersonalizedExercises dans les dépendances
 
   useEffect(() => {
     loadInitialData();
@@ -213,40 +212,33 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     setIsLoading(true);
 
     try {
-      const contextData = {
-        user_profile: {
-          id: userProfile.id,
-          username: initialUserProfileFromStore.name,
-          age: initialUserProfileFromStore.age,
-          gender: initialUserProfileFromStore.gender,
-          fitness_goal: initialUserProfileFromStore.goal,
-          primary_goals: initialUserProfileFromStore.primary_goals,
-          sport: initialUserProfileFromStore.sport,
-          sport_position: initialUserProfileFromStore.sport_position,
-          fitness_experience: initialUserProfileFromStore.fitness_experience,
-          lifestyle: initialUserProfileFromStore.lifestyle,
-          available_time_per_day: initialUserProfileFromStore.available_time_per_day,
-          training_frequency: initialUserProfileFromStore.training_frequency,
-          season_period: initialUserProfileFromStore.season_period,
-          injuries: initialUserProfileFromStore.injuries,
-        },
-        current_daily_stats: dailyStats,
-        daily_program: {
-          workout: dailyProgram.workout,
-          nutrition: dailyProgram.nutrition,
-          hydration: dailyProgram.hydration,
-          sleep: dailyProgram.sleep
-        },
-        last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
-      };
-
       const { data: requestData, error: requestError } = await supabase
         .from('ai_requests')
         .insert({
           user_id: userProfile.id,
           pillar_type: detectMessageType(inputMessage),
           prompt: inputMessage,
-          context: contextData as any,
+          context: {
+            user_profile: {
+              id: userProfile.id,
+              username: initialUserProfileFromStore.name,
+              age: initialUserProfileFromStore.age,
+              gender: initialUserProfileFromStore.gender,
+              fitness_goal: initialUserProfileFromStore.goal,
+              primary_goals: initialUserProfileFromStore.primary_goals,
+              sport: initialUserProfileFromStore.sport,
+              sport_position: initialUserProfileFromStore.sport_position,
+              fitness_experience: initialUserProfileFromStore.fitness_experience,
+              lifestyle: initialUserProfileFromStore.lifestyle,
+              available_time_per_day: initialUserProfileFromStore.available_time_per_day,
+              training_frequency: initialUserProfileFromStore.training_frequency,
+              season_period: initialUserProfileFromStore.season_period,
+              injuries: initialUserProfileFromStore.injuries,
+            },
+            current_daily_stats: dailyStats,
+            daily_program: dailyProgram,
+            last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
+          },
           status: 'pending'
         })
         .select()
@@ -366,7 +358,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.reload(); 
+    window.location.reload();
   };
 
   return (
