@@ -10,7 +10,6 @@ interface NavItem {
   color: string;
 }
 
-// 4 PILIERS PRINCIPAUX du fitness
 const navItems: NavItem[] = [
   {
     id: 'workout',
@@ -48,7 +47,6 @@ const BottomNav = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Ne pas afficher la nav sur la page d'accueil
   if (location.pathname === '/') {
     return null;
   }
@@ -70,7 +68,6 @@ const BottomNav = () => {
                   : 'text-gray-400 hover:text-gray-600'
               }`}
             >
-              {/* Icône avec effet */}
               <div className={`p-3 rounded-2xl transition-all duration-300 ${
                 active 
                   ? 'bg-white shadow-lg border-2 border-current' 
@@ -84,14 +81,12 @@ const BottomNav = () => {
                 />
               </div>
               
-              {/* Label */}
               <span className={`text-sm mt-2 font-semibold transition-all duration-300 text-center ${
                 active ? 'text-gray-800' : 'text-gray-500'
               }`}>
                 {item.label}
               </span>
               
-              {/* Indicateur actif */}
               {active && (
                 <div className={`w-1 h-1 rounded-full mt-1 ${item.color.replace('text-', 'bg-')} animate-pulse`}></div>
               )}
@@ -100,7 +95,6 @@ const BottomNav = () => {
         })}
       </div>
       
-      {/* Barre colorée selon page active */}
       <div className="h-1 bg-gradient-to-r from-fitness-energy via-fitness-growth via-fitness-recovery to-fitness-hydration"></div>
     </nav>
   );
