@@ -21,6 +21,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   }
 });
 
+// Exportation des types directement dérivés de la base de données
 export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type Workout = Database['public']['Tables']['workouts']['Row'];
 export type Exercise = Database['public']['Tables']['exercises_library']['Row'];
