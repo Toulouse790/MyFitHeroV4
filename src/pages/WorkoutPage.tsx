@@ -25,16 +25,17 @@ import {
   Loader2,
   Star 
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
-import { Workout, DailyStats, UserProfile, Exercise, Json, AiRecommendation } from '@/lib/supabase';
-import { User as SupabaseUserAuthType } from '@supabase/supabase-js'; 
+import { useAppStore, UserProfile as AppStoreUserProfile } from '@/stores/useAppStore'; // Importe AppStoreUserProfile
+import { Workout, DailyStats, Exercise, Json, AiRecommendation } from '@/lib/supabase';
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; 
 import { supabase } from '@/lib/supabase';
 
 interface WorkoutPageProps {
-  userProfile?: SupabaseUserAuthType; 
+  userProfile?: SupabaseAuthUserType; 
 }
 
-interface SportProfileData {
+// Utilise le type du store AppStoreUserProfile pour la structure du profil sportif
+interface SportProfileData extends Partial<AppStoreUserProfile> { // Partial car tous les champs ne sont pas requis ici
   sport: string;
   position?: string;
   level: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional';
@@ -98,7 +99,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
   const [aiRecommendations, setAiRecommendations] = useState<DisplayWorkoutRecommendation[]>([]); 
 
   const {
-    user: initialUserProfileFromStore, 
+    user: appStoreUser, // Utilisation de appStoreUser du store pour les données de profil
     addWorkoutSession,
     updateWorkoutSession,
     fetchWorkoutSessions,
@@ -142,6 +143,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
     setLoadingData(true);
     setErrorFetching(null);
     try {
+      // Directement utiliser les données du store si disponibles et fiables
+      // Ou re-fetcher si l'on préfère la fraîcheur max de la DB
+      // Pour cet exemple, on va re-fetcher pour être sûr que userSportProfile est à jour avec la DB.
       const { data: fetchedUserProfile, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
@@ -372,7 +376,8 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
   const handleProfileUpdate = async () => {
     if (!userProfile?.id) return;
     setLoadingData(true);
-    const updates: Partial<UserProfile> = {
+    // Les mises à jour envoyées à Supabase doivent correspondre au SupabaseDBUserProfileType
+    const updates: Partial<SupabaseDBUserProfileType> = { // Utilise le type de la DB
       sport: userSportProfile.sport || null,
       sport_position: userSportProfile.position || null,
       sport_level: userSportProfile.level || null,
@@ -388,7 +393,8 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
         alert('Échec de la mise à jour du profil: ' + updateError.message);
         console.error('Error updating user profile:', updateError);
     } else if (resultData) {
-        updateUserProfileStore(updates);
+        // Mettre à jour le store global si nécessaire
+        updateUserProfileStore(updates); // Le type du store gère la conversion
         alert('Profil sportif mis à jour !');
     } else {
         alert('Échec inattendu de la mise à jour du profil.');
@@ -433,7 +439,6 @@ const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
             </div>
           </div>
         </div>
-      </div>
 
       <div className="container mx-auto px-4 py-6">
         {loadingData && (
