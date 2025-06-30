@@ -15,7 +15,9 @@ import { Toaster } from './components/ui/toaster';
 import NotFound from './pages/NotFound';
 
 import { Session, User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { UserProfile as AppStoreUserProfileType, useAppStore } from '@/stores/useAppStore';
+// Import du UserProfile unifié depuis le store
+import { UserProfile, useAppStore } from '@/stores/useAppStore'; 
+// Import du UserProfile de la DB pour les opérations de mise à jour de la DB
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
 
 function App() {
@@ -123,8 +125,7 @@ function App() {
     setSession({ user, access_token: '', token_type: '' } as Session);
   };
 
-  // CORRECTION ICI : Le type de profileData a été changé pour AppStoreUserProfileType
-  const handleOnboardingComplete = async (profileData: AppStoreUserProfileType) => {
+  const handleOnboardingComplete = async (profileData: UserProfile) => { // Type UserProfile du store
     if (!session?.user) {
       console.error('Aucune session utilisateur trouvée pour la complétion de l\'onboarding');
       return;
