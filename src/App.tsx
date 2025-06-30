@@ -24,12 +24,15 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const { toast } = useToast();
 
   const { user: appStoreUser, updateProfile: updateAppStoreUserProfile } = useAppStore();
 
   const loadUserProfile = async (userId: string, userSession: Session) => {
     try {
+      console.log('Loading user profile for:', userId);
+      
       const { data: userProfileData, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
@@ -41,6 +44,7 @@ function App() {
         
         // Tentative de création du profil si il n'existe pas
         if (profileError.code === 'PGRST116') {
+          console.log('Creating new profile for user:', userId);
           const { data: newProfile, error: createError } = await supabase
             .from('user_profiles')
             .insert({
@@ -63,6 +67,7 @@ function App() {
           }
 
           if (newProfile) {
+            console.log('New profile created:', newProfile);
             updateAppStoreUserProfile({
               ...newProfile,
               name: newProfile.full_name || newProfile.username || 'Non défini',
@@ -79,9 +84,12 @@ function App() {
       }
 
       if (userProfileData) {
+        console.log('Profile data loaded:', userProfileData);
         const onboardingCompleted = userProfileData.primary_goals && 
                                    Array.isArray(userProfileData.primary_goals) && 
                                    userProfileData.primary_goals.length > 0;
+        
+        console.log('Onboarding completed:', onboardingCompleted);
         setHasCompletedOnboarding(onboardingCompleted);
 
         updateAppStoreUserProfile({
@@ -95,6 +103,7 @@ function App() {
         });
         return true;
       } else {
+        console.log('No profile data found, onboarding needed');
         setHasCompletedOnboarding(false);
         return false;
       }
@@ -110,17 +119,25 @@ function App() {
   };
 
   useEffect(() => {
+    let mounted = true;
+    
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth...');
+        
         // Configurer le listener d'abord
         const { data: authListenerData } = supabase.auth.onAuthStateChange(
           async (event, newSession) => {
             console.log('Auth state change:', event, newSession?.user?.id);
-            setSession(newSession);
             
-            if (newSession?.user) {
+            if (!mounted) return;
+            
+            if (newSession?.user && event !== 'TOKEN_REFRESHED') {
+              setSession(newSession);
               await loadUserProfile(newSession.user.id, newSession);
-            } else {
+            } else if (!newSession) {
+              console.log('No session, resetting state');
+              setSession(null);
               setHasCompletedOnboarding(false);
               updateAppStoreUserProfile({
                 id: '', username: null, full_name: null, avatar_url: null, age: null, height_cm: null, weight_kg: null,
@@ -132,17 +149,26 @@ function App() {
                 joinDate: new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
               });
             }
-            setLoading(false);
+            
+            if (!isInitialized) {
+              setIsInitialized(true);
+              setLoading(false);
+            }
           }
         );
 
         // Puis vérifier la session existante
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (currentSession?.user) {
+        if (mounted && currentSession?.user) {
+          console.log('Current session found:', currentSession.user.id);
           setSession(currentSession);
           await loadUserProfile(currentSession.user.id, currentSession);
         }
-        setLoading(false);
+        
+        if (mounted && !isInitialized) {
+          setIsInitialized(true);
+          setLoading(false);
+        }
 
         return () => {
           if (authListenerData?.subscription) {
@@ -151,11 +177,18 @@ function App() {
         };
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'auth:', error);
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          setIsInitialized(true);
+        }
       }
     };
 
     initializeAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleAuthSuccess = (user: SupabaseAuthUserType) => {
@@ -175,6 +208,8 @@ function App() {
     }
 
     try {
+      console.log('Completing onboarding with data:', profileData);
+      
       const updatesToDb: Partial<SupabaseDBUserProfileType> = {
         age: profileData.age,
         gender: profileData.gender,
@@ -202,6 +237,7 @@ function App() {
       if (error) throw error;
       
       if (data && data[0]) {
+        console.log('Onboarding completed successfully:', data[0]);
         setHasCompletedOnboarding(true);
         updateAppStoreUserProfile({
           ...data[0],
@@ -218,7 +254,6 @@ function App() {
           description: "Bienvenue dans MyFitHero ! Votre profil a été configuré avec succès.",
         });
       }
-      console.log('Onboarding data saved and onboarding marked as complete:', data);
 
     } catch (error: unknown) {
       console.error('Error saving onboarding data:', error);
@@ -230,7 +265,7 @@ function App() {
     }
   };
 
-  if (loading) {
+  if (loading || !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -242,6 +277,8 @@ function App() {
   }
 
   const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
+    console.log('PrivateRoute check - session:', !!session, 'hasCompletedOnboarding:', hasCompletedOnboarding);
+    
     if (!session) {
       return <Navigate to="/auth" replace />;
     }
