@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
 import { UserProfile } from '@/types/user';
-import type { DailyStats, AiRecommendation } from '@/lib/supabase';
+import type { DailyStats, AiRecommendation, HydrationEntry, Meal, Json } from '@/lib/supabase';
 
 interface DailyGoals {
   water: number;
@@ -22,13 +22,13 @@ interface AppStore {
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
   fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
-  addHydration: (userId: string, amount: number, date: string) => Promise<boolean>;
+  addHydration: (userId: string, amount: number, date: string) => Promise<HydrationEntry | null>;
   removeLastHydration: (userId: string) => Promise<boolean>;
   resetDailyHydration: (userId: string) => Promise<boolean>;
-  fetchHydrationEntries: (userId: string, date: string) => Promise<any[]>;
+  fetchHydrationEntries: (userId: string, date: string) => Promise<HydrationEntry[]>;
   unlockAchievement: (achievement: string) => void;
-  addMeal: (userId: string, meal: any, mealType: string, date: string, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<boolean>;
-  fetchMeals: (userId: string, date: string) => Promise<any[]>;
+  addMeal: (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<Meal | null>;
+  fetchMeals: (userId: string, date: string) => Promise<Meal[]>;
   addSleepSession: (session: any) => void;
   fetchSleepSessions: (userId: string, date: string) => Promise<any[]>;
 }
@@ -138,19 +138,21 @@ export const useAppStore = create<AppStore>()(
 
       addHydration: async (userId: string, amount: number, date: string) => {
         try {
-          const { error } = await supabase
+          const { data, error } = await supabase
             .from('hydration_logs')
             .insert({
               user_id: userId,
               amount_ml: amount,
               log_date: date
-            });
+            })
+            .select()
+            .single();
 
           if (error) throw error;
-          return true;
+          return data as HydrationEntry;
         } catch (error) {
           console.error('Erreur lors de l\'ajout d\'hydratation:', error);
-          return false;
+          return null;
         }
       },
 
@@ -216,26 +218,29 @@ export const useAppStore = create<AppStore>()(
         console.log('Unlocking achievement:', achievement);
       },
 
-      addMeal: async (userId: string, meal: any, mealType: string, date: string, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => {
+      addMeal: async (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => {
         try {
-          const { error } = await supabase
+          const today = new Date().toISOString().split('T')[0];
+          const { data, error } = await supabase
             .from('meals')
             .insert({
               user_id: userId,
               meal_type: mealType,
-              meal_date: date,
-              foods: meal,
+              meal_date: today,
+              foods: foods,
               total_calories: totalCalories,
               total_protein: totalProtein,
               total_carbs: totalCarbs,
               total_fat: totalFat
-            });
+            })
+            .select()
+            .single();
 
           if (error) throw error;
-          return true;
+          return data as Meal;
         } catch (error) {
           console.error('Erreur lors de l\'ajout du repas:', error);
-          return false;
+          return null;
         }
       },
 

@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { HydrationEntry, DailyStats } from '@/lib/supabase';
-import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Utilisation de SupabaseAuthUserType
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 
 interface HydrationProps {
-  userProfile?: SupabaseAuthUserType; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
+  userProfile?: SupabaseAuthUserType;
 }
 
 const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
@@ -32,7 +32,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
 
   const {
     dailyGoals,
-    user, // Le user du store (pour level/points)
+    user,
     addHydration: storeAddHydration,
     removeLastHydration: storeRemoveLastHydration,
     resetDailyHydration: storeResetDailyHydration,
@@ -83,12 +83,13 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
       return;
     }
     setLoadingData(true);
-    const newEntry = await storeAddHydration(userProfile.id, amount, type);
+    const newEntry = await storeAddHydration(userProfile.id, amount, today);
     if (newEntry) {
       await loadHydrationData();
     } else {
       alert('Impossible d\'ajouter l\'entrée d\'hydratation.');
     }
+    setLoadingData(false);
   };
 
   const handleRemoveLast = async () => {
@@ -103,6 +104,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     } else {
       alert('Impossible de supprimer la dernière entrée.');
     }
+    setLoadingData(false);
   };
 
   const handleReset = async () => {
@@ -117,6 +119,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     } else {
       alert('Impossible de réinitialiser les entrées.');
     }
+    setLoadingData(false);
   };
 
   const quickAmounts = [125, 250, 330, 500, 750];

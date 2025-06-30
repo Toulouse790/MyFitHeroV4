@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { Meal, DailyStats, Json } from '@/lib/supabase';
-import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Utilisation de SupabaseAuthUserType
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 
 interface NutritionProps {
-  userProfile?: SupabaseAuthUserType; // Reçoit le profil utilisateur de App.tsx via PrivateRoute
+  userProfile?: SupabaseAuthUserType;
 }
 
 interface FoodItem {
@@ -54,7 +54,6 @@ const demoMealsStructure = {
   }
 };
 
-
 const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
   const [selectedMealType, setSelectedMealType] = useState<string>('breakfast');
   const [meals, setMeals] = useState<Meal[]>([]);
@@ -67,7 +66,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
   const [newFoodProtein, setNewFoodProtein] = useState<number>(0);
   const [newFoodCarbs, setNewFoodCarbs] = useState<number>(0);
   const [newFoodFat, setNewFoodFat] = useState<number>(0);
-
 
   const {
     dailyGoals,
@@ -119,7 +117,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
     loadNutritionData();
   }, [loadNutritionData]);
 
-
   const handleAddFoodToMeal = async () => {
     if (!userProfile?.id || !newFoodName || !selectedMealType) {
       alert('Veuillez remplir le nom de l\'aliment et sélectionner un type de repas.');
@@ -157,6 +154,7 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
     } else {
       alert('Échec de l\'ajout de l\'aliment.');
     }
+    setLoadingData(false);
   };
 
   const MacroCard = ({ title, current, goal, unit, color, percentage }: { title: string; current: number; goal: number; unit: string; color: string; percentage: number }) => (
@@ -280,7 +278,6 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
     { name: 'Recettes', icon: Utensils, color: 'bg-green-500' },
     { name: 'Stats', icon: BarChart3, color: 'bg-purple-500' }
   ];
-
 
   return (
     <div className="min-h-screen bg-gray-50">
