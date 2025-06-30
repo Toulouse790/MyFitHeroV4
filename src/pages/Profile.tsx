@@ -3,6 +3,7 @@ import { User as UserIcon, Calendar, Target, TrendingUp, Mail, Ruler, Scale, Hea
 import { useAppStore, UserProfile as AppStoreUserProfile } from '@/stores/useAppStore'; // Importe le UserProfile unifié du store
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Importe le type User de Supabase
 import { supabase, UserProfile as SupabaseDBUserProfileType } from '../lib/supabase'; // Importe le type UserProfile de la DB Supabase
+import { UserProfile } from '@/types/user';
 
 interface ProfileProps {
   userProfile?: SupabaseAuthUserType; // Le user de la session Supabase
@@ -72,7 +73,6 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
     }
 
     try {
-      // Les mises à jour envoyées à Supabase doivent correspondre au SupabaseDBUserProfileType
       const updates: Partial<SupabaseDBUserProfileType> = {
         full_name: formValues.fullName,
         username: formValues.username,
@@ -106,17 +106,15 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
       if (error) throw error;
 
       if (data) {
-        // Mettre à jour le store Zustand avec les données fraîchement sauvegardées,
-        // en combinant les données de la DB avec les champs locaux du store.
         updateProfile({
           ...data,
           name: data.full_name || data.username || 'Non défini',
-          email: userProfile.email || '', // Conserver l'email de l'authentification
+          email: userProfile.email || '',
           goal: data.fitness_goal || 'Non défini',
-          level: appStoreUser.level, // Conserver les valeurs locales
+          level: appStoreUser.level,
           totalPoints: appStoreUser.totalPoints,
           joinDate: new Date(data.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-        } as AppStoreUserProfile); // Cast pour s'assurer que c'est le type complet du store
+        } as UserProfile);
         setIsEditing(false);
         alert('Profil mis à jour avec succès !');
       }

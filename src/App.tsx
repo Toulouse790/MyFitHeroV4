@@ -16,7 +16,7 @@ import NotFound from './pages/NotFound';
 
 import { Session, User as SupabaseAuthUserType } from '@supabase/supabase-js';
 // Import du UserProfile unifié depuis le store
-import { UserProfile, useAppStore } from '@/stores/useAppStore'; 
+import { UserProfile, UserProfileOnboarding, useAppStore } from '@/stores/useAppStore'; 
 // Import du UserProfile de la DB pour les opérations de mise à jour de la DB
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
 
@@ -125,13 +125,13 @@ function App() {
     setSession({ user, access_token: '', token_type: '' } as Session);
   };
 
-  const handleOnboardingComplete = async (profileData: UserProfile) => { // Type UserProfile du store
+  const handleOnboardingComplete = async (profileData: UserProfileOnboarding) => {
     if (!session?.user) {
       console.error('Aucune session utilisateur trouvée pour la complétion de l\'onboarding');
       return;
     }
     try {
-      const updatesToDb: Partial<SupabaseDBUserProfileType> = {
+      const updatesToDb = {
         age: profileData.age,
         gender: profileData.gender,
         lifestyle: profileData.lifestyle,

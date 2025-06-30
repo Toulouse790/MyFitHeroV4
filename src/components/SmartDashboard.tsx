@@ -21,36 +21,14 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore, UserProfile as AppStoreUserProfile } from '@/stores/useAppStore'; // Renommé UserProfile de useAppStore
+import { useAppStore } from '@/stores/useAppStore';
+import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';
 import { DailyStats, AiRecommendation, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
+import { UserProfile } from '@/types/user';
 
 interface SmartDashboardProps {
-  userProfile?: SupabaseAuthUserType; // Profil utilisateur de la session Supabase
-}
-
-interface DailyProgramDisplay {
-  workout: {
-    name: string;
-    duration: number;
-    exercises: string[];
-    completed: boolean;
-  };
-  nutrition: {
-    calories_target: number;
-    calories_current: number;
-    next_meal: string;
-  };
-  hydration: {
-    target_ml: number;
-    current_ml: number;
-    percentage: number;
-  };
-  sleep: {
-    target_hours: number;
-    last_night_hours: number;
-    quality: number;
-  };
+  userProfile?: SupabaseAuthUserType;
 }
 
 interface ChatMessage {
@@ -59,30 +37,6 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
 }
-
-// Interface pour le contexte envoyé à Supabase (pour ai_requests)
-interface SmartDashboardContext extends Json {
-  user_profile?: {
-    id: string;
-    username: string | null;
-    age: number | null;
-    gender: string | null;
-    fitness_goal: string | null;
-    primary_goals: string[] | null;
-    sport: string | null;
-    sport_position: string | null;
-    fitness_experience: string | null;
-    lifestyle: string | null;
-    available_time_per_day: number | null;
-    training_frequency: number | null;
-    season_period: string | null;
-    injuries: string[] | null;
-  };
-  current_daily_stats?: DailyStats | null;
-  daily_program?: DailyProgramDisplay;
-  last_ai_recommendations?: string[];
-}
-
 
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const navigate = useNavigate();
@@ -98,12 +52,12 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     dailyGoals,
     fetchDailyStats,
     fetchAiRecommendations,
-    user: appStoreUser // Utilisation du UserProfile du store ici
+    user: appStoreUser
   } = useAppStore();
 
   const today = new Date().toISOString().split('T')[0];
 
-  const getTodayWorkout = useCallback((profile: AppStoreUserProfile) => { // Utilise AppStoreUserProfile
+  const getTodayWorkout = useCallback((profile: UserProfile) => {
     if (profile?.sport === 'rugby' && profile?.sport_position === 'pilier') {
       return 'Force Explosive - Mêlée';
     }
@@ -113,7 +67,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return 'Entraînement Personnalisé';
   }, []);
 
-  const getPersonalizedExercises = useCallback((profile: AppStoreUserProfile) => { // Utilise AppStoreUserProfile
+  const getPersonalizedExercises = useCallback((profile: UserProfile) => {
     const sport = profile?.sport;
     const goals = profile?.primary_goals;
     
@@ -129,9 +83,9 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
   const [dailyProgram, setDailyProgram] = useState<DailyProgramDisplay>({
     workout: {
-      name: getTodayWorkout(appStoreUser), // Utilise appStoreUser
+      name: getTodayWorkout(appStoreUser),
       duration: 45,
-      exercises: getPersonalizedExercises(appStoreUser), // Utilise appStoreUser
+      exercises: getPersonalizedExercises(appStoreUser),
       completed: false
     },
     nutrition: {
@@ -165,7 +119,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           workout: {
             ...prev.workout,
             completed: (fetchedDailyStats.workouts_completed || 0) > 0,
-            name: getTodayWorkout(appStoreUser) // Utilise appStoreUser
+            name: getTodayWorkout(appStoreUser)
           },
           nutrition: {
             ...prev.nutrition,
@@ -197,7 +151,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           {
             id: 1,
             type: 'ai',
-            content: `Salut ${appStoreUser?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`, // Utilise appStoreUser
+            content: `Salut ${appStoreUser?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`,
             timestamp: new Date()
           }
         ]);
@@ -209,7 +163,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         {
           id: 1,
           type: 'ai',
-          content: `Salut ${appStoreUser?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`, // Utilise appStoreUser
+          content: `Salut ${appStoreUser?.name || 'Champion'} ! 🔥 Prêt à optimiser ta journée ? Demande-moi n'importe quoi sur ton bien-être.`,
           timestamp: new Date()
         }
       ]);
@@ -240,10 +194,10 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       const contextData: SmartDashboardContext = {
           user_profile: {
             id: userProfile.id,
-            username: appStoreUser.name, // Utilise appStoreUser
+            username: appStoreUser.name,
             age: appStoreUser.age,
             gender: appStoreUser.gender,
-            fitness_goal: appStoreUser.goal, // Objectif principal du store
+            fitness_goal: appStoreUser.goal,
             primary_goals: appStoreUser.primary_goals,
             sport: appStoreUser.sport,
             sport_position: appStoreUser.sport_position,
