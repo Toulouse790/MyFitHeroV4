@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   MessageCircle, 
@@ -21,15 +22,14 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '@/stores/useAppStore'; // Import du store Zustand
-import { DailyStats, AiRecommendation, UserProfile as SupabaseUserProfileType } from '@/lib/supabase'; // Import des types Supabase
-import { User as SupabaseUserAuthType } from '@supabase/supabase-js'; // Import du type User de Supabase pour userProfile
+import { useAppStore } from '@/stores/useAppStore';
+import { DailyStats, AiRecommendation, UserProfile as SupabaseUserProfileType } from '@/lib/supabase';
+import { User as SupabaseUserAuthType } from '@supabase/supabase-js';
 
 interface SmartDashboardProps {
-  userProfile?: SupabaseUserAuthType; // Profil utilisateur de la session Supabase
+  userProfile?: SupabaseUserAuthType;
 }
 
-// Interface pour la structure du programme quotidien affiché
 interface DailyProgramDisplay {
   workout: {
     name: string;
@@ -54,7 +54,6 @@ interface DailyProgramDisplay {
   };
 }
 
-// Structure des messages dans le chat
 interface ChatMessage {
   id: number;
   type: 'ai' | 'user';
@@ -64,26 +63,23 @@ interface ChatMessage {
 
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<ChatMessage[]>([]); // Messages du chat
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [isListening, setIsListening] = useState(false); // Pour la reconnaissance vocale
-  const [isLoading, setIsLoading] = useState(false); // État de chargement de l'IA
+  const [isListening, setIsListening] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null); // Statistiques quotidiennes de l'utilisateur
+  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
   const [loadingDailyStats, setLoadingDailyStats] = useState(true);
 
-  // Accès aux fonctions du store Zustand
   const {
-    dailyGoals, // Objectifs définis localement dans le store
+    dailyGoals,
     fetchDailyStats,
     fetchAiRecommendations,
-    user: initialUserProfileFromStore // Le profil utilisateur local du store (pour les objectifs, niveaux, etc.)
+    user: initialUserProfileFromStore
   } = useAppStore();
 
-  const today = new Date().toISOString().split('T')[0]; // Date du jour
+  const today = new Date().toISOString().split('T')[0];
 
-  // Détermine le workout du jour selon le profil (utilisé pour l'affichage initial)
-  // Déplacé ici pour être accessible par useCallback, et est lui-même stable
   const getTodayWorkout = useCallback((profile: typeof initialUserProfileFromStore) => {
     if (profile?.sport === 'rugby' && profile?.sport_position === 'pilier') {
       return 'Force Explosive - Mêlée';
@@ -92,10 +88,8 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       return 'Hypertrophie Haut du Corps';
     }
     return 'Entraînement Personnalisé';
-  }, []); // Pas de dépendances internes car 'profile' est passé en argument
+  }, []);
 
-  // Exercices personnalisés selon le profil (utilisé pour l'affichage initial)
-  // Déplacé ici pour être accessible par useCallback, et est lui-même stable
   const getPersonalizedExercises = useCallback((profile: typeof initialUserProfileFromStore) => {
     const sport = profile?.sport;
     const goals = profile?.primary_goals;
@@ -107,16 +101,13 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       return ['HIIT 20min', 'Burpees', 'Mountain climbers', 'Planches'];
     }
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
-  }, []); // Pas de dépendances internes car 'profile' est passé en argument
+  }, []);
 
-
-  // Programme du jour basé sur le profil utilisateur et les stats réelles
-  // Initialisé avec des valeurs par défaut qui seront mises à jour par dailyStats
   const [dailyProgram, setDailyProgram] = useState<DailyProgramDisplay>({
     workout: {
-      name: getTodayWorkout(initialUserProfileFromStore), // Utilise la fonction getTodayWorkout
+      name: getTodayWorkout(initialUserProfileFromStore),
       duration: 45,
-      exercises: getPersonalizedExercises(initialUserProfileFromStore), // Utilise la fonction getPersonalizedExercises
+      exercises: getPersonalizedExercises(initialUserProfileFromStore),
       completed: false
     },
     nutrition: {
@@ -136,13 +127,11 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
   });
 
-  // === Chargement des données au démarrage ===
   const loadInitialData = useCallback(async () => {
     if (!userProfile?.id) return;
 
     setLoadingDailyStats(true);
     try {
-      // Charger les stats journalières
       const fetchedDailyStats = await fetchDailyStats(userProfile.id, today);
       setDailyStats(fetchedDailyStats);
 
@@ -171,8 +160,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         }));
       }
 
-      // Charger les dernières recommandations IA
-      const recentAiRecs = await fetchAiRecommendations(userProfile.id, 'general', 3); // 3 dernières recommandations générales
+      const recentAiRecs = await fetchAiRecommendations(userProfile.id, 'general', 3);
       if (recentAiRecs.length > 0) {
         setMessages(recentAiRecs.map((rec, index) => ({
           id: index + 1,
@@ -181,7 +169,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           timestamp: new Date(rec.created_at)
         })));
       } else {
-        // Message d'accueil par défaut si aucune recommandation récente
         setMessages([
           {
             id: 1,
@@ -194,7 +181,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
     } catch (error) {
       console.error('Erreur chargement données dashboard:', error);
-      // Fallback à un message par défaut si erreur
       setMessages([
         {
           id: 1,
@@ -206,14 +192,12 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     } finally {
       setLoadingDailyStats(false);
     }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water]); // getTodayWorkout et getPersonalizedExercises retirés des dépendances car ils sont stables
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, initialUserProfileFromStore, dailyGoals.water]);
 
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
 
-
-  // Gestion des messages IA via le workflow n8n (via Supabase)
   const sendMessage = async () => {
     if (!inputMessage.trim() || !userProfile?.id) return;
 
@@ -229,34 +213,40 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     setIsLoading(true);
 
     try {
-      // Créer une entrée dans ai_requests qui déclenchera le webhook n8n
+      const contextData = {
+        user_profile: {
+          id: userProfile.id,
+          username: initialUserProfileFromStore.name,
+          age: initialUserProfileFromStore.age,
+          gender: initialUserProfileFromStore.gender,
+          fitness_goal: initialUserProfileFromStore.goal,
+          primary_goals: initialUserProfileFromStore.primary_goals,
+          sport: initialUserProfileFromStore.sport,
+          sport_position: initialUserProfileFromStore.sport_position,
+          fitness_experience: initialUserProfileFromStore.fitness_experience,
+          lifestyle: initialUserProfileFromStore.lifestyle,
+          available_time_per_day: initialUserProfileFromStore.available_time_per_day,
+          training_frequency: initialUserProfileFromStore.training_frequency,
+          season_period: initialUserProfileFromStore.season_period,
+          injuries: initialUserProfileFromStore.injuries,
+        },
+        current_daily_stats: dailyStats,
+        daily_program: {
+          workout: dailyProgram.workout,
+          nutrition: dailyProgram.nutrition,
+          hydration: dailyProgram.hydration,
+          sleep: dailyProgram.sleep
+        },
+        last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
+      };
+
       const { data: requestData, error: requestError } = await supabase
         .from('ai_requests')
         .insert({
           user_id: userProfile.id,
           pillar_type: detectMessageType(inputMessage),
           prompt: inputMessage,
-          context: { // Contexte riche pour l'IA
-            user_profile: {
-              id: userProfile.id,
-              username: initialUserProfileFromStore.name, // Utilise le nom d'utilisateur du store
-              age: initialUserProfileFromStore.age,
-              gender: initialUserProfileFromStore.gender,
-              fitness_goal: initialUserProfileFromStore.goal, // Objectif principal
-              primary_goals: initialUserProfileFromStore.primary_goals,
-              sport: initialUserProfileFromStore.sport,
-              sport_position: initialUserProfileFromStore.sport_position,
-              fitness_experience: initialUserProfileFromStore.fitness_experience,
-              lifestyle: initialUserProfileFromStore.lifestyle,
-              available_time_per_day: initialUserProfileFromStore.available_time_per_day,
-              training_frequency: initialUserProfileFromStore.training_frequency,
-              season_period: initialUserProfileFromStore.season_period,
-              injuries: initialUserProfileFromStore.injuries,
-            },
-            current_daily_stats: dailyStats, // Statistiques quotidiennes les plus récentes
-            daily_program: dailyProgram, // Programme du jour affiché
-            last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3), // 3 dernières recos IA
-          },
+          context: contextData as any,
           status: 'pending'
         })
         .select()
@@ -264,7 +254,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
       if (requestError) throw requestError;
 
-      // Attendre la réponse via realtime ou polling
       const subscription = supabase
         .channel(`ai_request:${requestData.id}`)
         .on(
@@ -275,8 +264,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             table: 'ai_requests',
             filter: `id=eq.${requestData.id}`
           },
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (payload: any) => { // Ajout du commentaire ESLint pour 'any'
+          (payload: any) => {
             if (payload.new.status === 'completed' && payload.new.webhook_response) {
               const aiResponseContent = payload.new.webhook_response.recommendation || 'Je réfléchis...';
               const aiResponse: ChatMessage = {
@@ -293,7 +281,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         )
         .subscribe();
 
-      // Timeout de sécurité
       setTimeout(() => {
         if (isLoading) {
           setMessages(prev => [...prev, {
@@ -303,9 +290,9 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             timestamp: new Date()
           }]);
           setIsLoading(false);
-          subscription.unsubscribe(); // Désabonnement même en cas de timeout
+          subscription.unsubscribe();
         }
-      }, 30000); // 30 secondes de timeout
+      }, 30000);
 
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
@@ -319,7 +306,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
   };
 
-  // Détecte le type de demande pour router vers le bon agent (pour le champ pillar_type dans ai_requests)
   const detectMessageType = (message: string): string => {
     const lowerMessage = message.toLowerCase();
     
@@ -336,10 +322,9 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       return 'hydration';
     }
     
-    return 'general'; // Pour l'IA de coordination si la demande n'est pas spécifique
+    return 'general';
   };
 
-  // Navigation entre piliers (utilisé pour les boutons du programme du jour)
   const pillarActions = [
     {
       id: 'workout',
@@ -381,13 +366,11 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    // Recharger la page pour un reset complet de l'état
     window.location.reload(); 
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header compact */}
       <div className="bg-white shadow-sm border-b px-4 py-3">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
@@ -415,7 +398,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       </div>
 
       <div className="container mx-auto px-4 py-4 max-w-4xl">
-        {/* Programme du jour */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           {loadingDailyStats ? (
             <div className="text-center py-8">
@@ -470,9 +452,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           )}
         </div>
 
-        {/* Chat IA principal */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {/* Header chat */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -489,7 +469,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             </div>
           </div>
 
-          {/* Messages */}
           <div className="h-96 overflow-y-auto p-4 space-y-4">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -519,7 +498,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             )}
           </div>
 
-          {/* Input chat */}
           <div className="border-t p-4">
             <div className="flex items-center space-x-3">
               <button
@@ -551,7 +529,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
               </button>
             </div>
 
-            {/* Suggestions rapides */}
             <div className="flex flex-wrap gap-2 mt-3">
               {['Commencer workout', 'Mes calories du jour', 'Objectif hydratation', 'Qualité sommeil'].map((suggestion) => (
                 <button

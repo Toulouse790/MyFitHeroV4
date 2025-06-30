@@ -1,4 +1,5 @@
-import React, { useState, useEffect, ReactNode } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
 import Index from './pages/Index';
@@ -6,18 +7,36 @@ import WorkoutPage from './pages/WorkoutPage';
 import Nutrition from './pages/Nutrition';
 import Sleep from './pages/Sleep';
 import Hydration from './pages/Hydration';
-import Profile from './pages/Profile'; // CORRIGÉ: Importe Profile comme exportation par défaut
+import Profile from './pages/Profile';
 import OnboardingQuestionnaire from './components/OnboardingQuestionnaire';
 import AuthPages from './components/AuthPages';
 import SmartDashboard from './components/SmartDashboard';
-import { supabase } from './lib/supabase'; // Importe l'instance supabase
+import { supabase } from './lib/supabase';
 import { Toaster } from './components/ui/toaster';
-import NotFound from './pages/NotFound'; // Importe NotFound
+import NotFound from './pages/NotFound';
+import { useAppStore } from '@/stores/useAppStore';
 
 // Import des types Supabase spécifiques pour une meilleure typification
-import { Session, User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Renommé User en SupabaseAuthUserType
-import { UserProfile as AppStoreUserProfileType } from '@/stores/useAppStore'; // Import du type UserProfile complet du store
-import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase'; // Import du type UserProfile de la DB
+import { Session, User as SupabaseAuthUserType } from '@supabase/supabase-js';
+import { UserProfile as AppStoreUserProfileType } from '@/stores/useAppStore';
+import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
+
+interface OnboardingProfileData {
+  age: number | null;
+  gender: string | null;
+  lifestyle: string | null;
+  available_time_per_day: number | null;
+  fitness_experience: string | null;
+  injuries: string[] | null;
+  primary_goals: string[] | null;
+  motivation: string | null;
+  fitness_goal: string | null;
+  sport: string | null;
+  sport_position: string | null;
+  sport_level: string | null;
+  training_frequency: number | null;
+  season_period: string | null;
+}
 
 function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -54,17 +73,15 @@ function App() {
             name: userProfileData.full_name || userProfileData.username || 'Non défini',
             email: currentSession.user.email || '',
             goal: userProfileData.fitness_goal || 'Non défini',
-            level: appStoreUser.level, // Conserver le niveau du store
-            totalPoints: appStoreUser.totalPoints, // Conserver les points du store
+            level: appStoreUser.level,
+            totalPoints: appStoreUser.totalPoints,
             joinDate: new Date(userProfileData.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
           });
 
         } else {
-          // Pas de profil trouvé, donc onboarding non complété
           setHasCompletedOnboarding(false);
         }
       } else {
-        // Pas de session, donc pas d'onboarding complété
         setHasCompletedOnboarding(false);
       }
       setLoading(false);
@@ -72,7 +89,6 @@ function App() {
 
     checkSessionAndProfile();
 
-    // S'abonner aux changements d'état d'authentification
     const { data: authListenerData } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
         setSession(newSession);
@@ -104,8 +120,7 @@ function App() {
             setHasCompletedOnboarding(false);
           }
         } else {
-          setHasCompletedOnboarding(false); // Réinitialiser si déconnecté
-          // Réinitialiser le profil dans le store à l'initialUser par défaut
+          setHasCompletedOnboarding(false);
           updateAppStoreUserProfile({
             id: '', username: null, full_name: null, avatar_url: null, age: null, height_cm: null, weight_kg: null,
             gender: null, activity_level: null, fitness_goal: null, timezone: null, notifications_enabled: null,
@@ -125,30 +140,27 @@ function App() {
         authListenerData.subscription.unsubscribe(); 
       }
     };
-  }, [appStoreUser.level, appStoreUser.totalPoints, updateAppStoreUserProfile, appStoreUser.joinDate]);
+  }, [appStoreUser.level, appStoreUser.totalPoints, updateAppStoreUserProfile]);
 
 
-  const handleAuthSuccess = (user: SupabaseAuthUserType) => { // Type User de Supabase
-    setSession({ user, access_token: '', token_type: '' } as Session); // Crée un objet session minimal
-    // La logique de l'useEffect va maintenant charger le profil et gérer l'onboarding
+  const handleAuthSuccess = (user: SupabaseAuthUserType) => {
+    setSession({ user, access_token: '', token_type: '' } as Session);
   };
 
-  const handleOnboardingComplete = async (profileData: AppStoreUserProfileType) => {
+  const handleOnboardingComplete = async (profileData: OnboardingProfileData) => {
     if (!session?.user) {
       console.error('Aucune session utilisateur trouvée pour la complétion de l\'onboarding');
       return;
     }
     try {
-      // Les données sont déjà formatées pour la DB dans OnboardingQuestionnaire
-      // et le type AppStoreUserProfileType est un sur-ensemble du type DB
-      const updatesToDb: Partial<SupabaseDBUserProfileType> = { // Utilise le type de la DB
+      const updatesToDb: Partial<SupabaseDBUserProfileType> = {
         age: profileData.age,
         gender: profileData.gender,
         lifestyle: profileData.lifestyle,
         available_time_per_day: profileData.available_time_per_day,
         fitness_experience: profileData.fitness_experience,
-        injuries: profileData.injuries, // Doit être un tableau JSONB ou géré comme tel
-        primary_goals: profileData.primary_goals, // Doit être un tableau JSONB
+        injuries: profileData.injuries,
+        primary_goals: profileData.primary_goals,
         motivation: profileData.motivation,
         fitness_goal: profileData.fitness_goal,
         sport: profileData.sport,
@@ -169,13 +181,12 @@ function App() {
       
       if (data && data[0]) {
         setHasCompletedOnboarding(true);
-        // Mettre à jour le store Zustand avec les nouvelles données du profil de la DB
         updateAppStoreUserProfile({
-          ...data[0], // Données Supabase mises à jour
+          ...data[0],
           name: data[0].full_name || data[0].username || 'Non défini',
           email: session.user.email || '',
           goal: data[0].fitness_goal || 'Non défini',
-          level: appStoreUser.level, // Conserver les valeurs locales
+          level: appStoreUser.level,
           totalPoints: appStoreUser.totalPoints,
           joinDate: new Date(data[0].created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
         });
@@ -196,7 +207,6 @@ function App() {
     );
   }
 
-  // Composant de route privée
   const PrivateRoute = ({ children }: { children: React.ReactElement }) => {
     if (!session) {
       return <Navigate to="/auth" replace />;
@@ -204,26 +214,19 @@ function App() {
     if (!hasCompletedOnboarding) {
       return <Navigate to="/onboarding" replace />;
     }
-    // Passe l'objet User (authentification) de Supabase aux pages des piliers
     return React.cloneElement(children, { userProfile: session.user });
   };
 
   return (
     <Router>
       <Routes>
-        {/* Route publique pour la page d'accueil */}
         <Route path="/" element={<Index />} />
-
-        {/* Route pour l'authentification */}
         <Route path="/auth" element={<AuthPages onAuthSuccess={handleAuthSuccess} />} />
-
-        {/* Route pour le questionnaire d'onboarding (accessible si authentifié mais onboarding non complet) */}
         <Route 
           path="/onboarding" 
           element={session && !hasCompletedOnboarding ? <OnboardingQuestionnaire onComplete={handleOnboardingComplete} /> : <Navigate to={session ? "/dashboard" : "/auth"} replace />} 
         />
 
-        {/* Routes privées nécessitant authentification et onboarding */}
         <Route element={<Layout><Outlet /></Layout>}>
           <Route path="/dashboard" element={<PrivateRoute><SmartDashboard userProfile={session?.user} /></PrivateRoute>} />
           <Route path="/workout" element={<PrivateRoute><WorkoutPage userProfile={session?.user} /></PrivateRoute>} />
@@ -233,7 +236,6 @@ function App() {
           <Route path="/profile" element={<PrivateRoute><Profile userProfile={session?.user} /></PrivateRoute>} />
         </Route>
 
-        {/* Route 404 - doit être la dernière */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster /> 

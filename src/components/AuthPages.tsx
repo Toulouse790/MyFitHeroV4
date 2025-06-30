@@ -31,6 +31,10 @@ interface SignInForm {
   rememberMe: boolean;
 }
 
+const isValidUsername = (username: string) => {
+  return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
+};
+
 const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   const [currentView, setCurrentView] = useState<'signin' | 'signup'>('signin');
   const [showPassword, setShowPassword] = useState(false);
