@@ -20,12 +20,12 @@ import {
   Loader2
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { SleepSession, DailyStats, Json } from '@/lib/supabase'; // Importe les types de Supabase
-import { User } from '@supabase/supabase-js'; // Importe le type User de Supabase
-import { supabase } from '@/lib/supabase'; // CORRIGÉ: Import de Supabase
+import { SleepSession, DailyStats, Json } from '@/lib/supabase';
+import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Utilisation de SupabaseAuthUserType
+import { supabase } from '@/lib/supabase';
 
 interface SleepProps {
-  userProfile?: User; // Reçoit le profil utilisateur de App.tsx
+  userProfile?: SupabaseAuthUserType; // Reçoit le profil utilisateur de App.tsx
 }
 
 const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
@@ -34,24 +34,21 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
   const [loadingData, setLoadingData] = useState(true);
   const [errorFetching, setErrorFetching] = useState<string | null>(null);
 
-  // Pour l'enregistrement rapide d'une session
-  const [currentBedtimeInput, setCurrentBedtimeInput] = useState<string>(''); // Renommé pour éviter le conflit
-  const [currentWakeTimeInput, setCurrentWakeTimeInput] = useState<string>(''); // Renommé
-  const [currentDurationInput, setCurrentDurationInput] = useState<number>(0); // Renommé
-  const [currentQualityInput, setCurrentQualityInput] = useState<number | undefined>(undefined); // Renommé pour éviter conflit avec le "currentQuality" du calcul
+  const [currentBedtimeInput, setCurrentBedtimeInput] = useState<string>('');
+  const [currentWakeTimeInput, setCurrentWakeTimeInput] = useState<string>('');
+  const [currentDurationInput, setCurrentDurationInput] = useState<number>(0);
+  const [currentQualityInput, setCurrentQualityInput] = useState<number | undefined>(undefined);
 
-  // === CONNEXION AU STORE ZUSTAND ===
   const {
     dailyGoals,
-    user, // Pour le level/points du store
+    user,
     addSleepSession,
     fetchSleepSessions,
     fetchDailyStats,
   } = useAppStore();
 
-  // === CALCULS BASÉS SUR LES DONNÉES RÉELLES ===
-  const today = new Date().toISOString().split('T')[0]; // Format dès le début pour la date
-  const lastNightSession = sleepSessions[0]; // Supposons la dernière session est celle d'hier soir/cette nuit
+  const today = new Date().toISOString().split('T')[0];
+  const lastNightSession = sleepSessions[0];
 
   const currentDurationHours = lastNightSession?.duration_minutes ? (lastNightSession.duration_minutes / 60) : 0;
   const displayedQuality = lastNightSession?.quality_rating || 0; 
@@ -60,24 +57,22 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
     avgDuration: dailyStats?.sleep_duration_minutes ? (dailyStats.sleep_duration_minutes / 60) : 0, 
     avgQuality: dailyStats?.sleep_quality || 0,
     goalDuration: dailyGoals.sleep,
-    streak: 0 // La série doit être calculée depuis l'historique des dailyStats
+    streak: 0
   };
 
-  // === FONCTIONS DE RÉCUPÉRATION DES DONNÉES ===
   const loadSleepData = useCallback(async () => {
     if (!userProfile?.id) return;
 
     setLoadingData(true);
     setErrorFetching(null);
     try {
-      const fetchedSessions = await fetchSleepSessions(userProfile.id, today); // Récupère les sessions du jour
+      const fetchedSessions = await fetchSleepSessions(userProfile.id, today);
       fetchedSessions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       setSleepSessions(fetchedSessions);
 
       const fetchedDailyStats = await fetchDailyStats(userProfile.id, today);
       setDailyStats(fetchedDailyStats);
 
-      // Met à jour les valeurs des inputs si une session pour aujourd'hui existe
       if (fetchedSessions.length > 0) {
         const latest = fetchedSessions[0];
         setCurrentBedtimeInput(latest.bedtime ? new Date(latest.bedtime).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '');
@@ -85,7 +80,6 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
         setCurrentDurationInput(latest.duration_minutes || 0);
         setCurrentQualityInput(latest.quality_rating || undefined);
       } else {
-        // Réinitialise les inputs si pas de session pour le jour
         setCurrentBedtimeInput('');
         setCurrentWakeTimeInput('');
         setCurrentDurationInput(0);
@@ -104,7 +98,6 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
     loadSleepData();
   }, [loadSleepData]);
 
-  // === ACTIONS D'ENREGISTREMENT DU SOMMEIL ===
   const handleLogSleep = async (action: 'bedtime' | 'wake_time' | 'full_session') => {
     if (!userProfile?.id) {
       alert('Utilisateur non connecté.');
@@ -114,14 +107,11 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
     setErrorFetching(null);
 
     const sleepDate = today;
-    // CORRIGÉ: utilisation de const car non réassignée, et typage plus précis
     const sleepSessionToInsert: Partial<SleepSession> = { user_id: userProfile.id, sleep_date: sleepDate };
 
     try {
-      // Trouver la session existante du jour s'il y en a une pour la mettre à jour
       const existingSessionForToday = sleepSessions.find(s => s.sleep_date === sleepDate);
       
-      // CORRIGÉ: utilisation de const car non réassignée, et initialisation complète
       const finalSleepData = { 
         sleep_date: sleepDate,
         bedtime: existingSessionForToday?.bedtime || null,
@@ -167,20 +157,18 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
 
       let result = null;
       if (existingSessionForToday) {
-        // Mise à jour de la session existante
         const { data, error } = await supabase
           .from('sleep_sessions')
-          .update(finalSleepData) // Utilise finalSleepData ici
+          .update(finalSleepData)
           .eq('id', existingSessionForToday.id)
           .select()
           .single();
         if (error) throw error;
         result = data;
       } else {
-        // Insertion d'une nouvelle session
         const { data, error } = await supabase
           .from('sleep_sessions')
-          .insert(finalSleepData as SleepSession) // Cast pour s'assurer que le type est correct pour l'insertion
+          .insert(finalSleepData as SleepSession)
           .select()
           .single();
         if (error) throw error;
@@ -188,7 +176,7 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
       }
       
       if (result) {
-        await loadSleepData(); // Recharge toutes les données après l'enregistrement
+        await loadSleepData();
       } else {
         alert('Échec de l\'enregistrement de la session de sommeil.');
       }
@@ -201,7 +189,6 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
   };
 
 
-  // Données de présentation (mockées pour l'instant)
   const sleepTips = [
     {
       icon: Phone,
@@ -236,7 +223,6 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
     { icon: Zap, title: 'Énergie', value: '+18%', color: 'text-yellow-500' }
   ];
   
-  // Utilise la qualité affichée pour la couleur
   const qualityColorClass = displayedQuality >= 4 ? 'text-green-500' : 
                        displayedQuality >= 3 ? 'text-yellow-500' : 'text-red-500';
   
@@ -334,7 +320,7 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
                   <div className="text-white/80 text-sm">Durée totale</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold">{displayedQuality}/5</div> {/* Affiche 5 car la qualité est sur 5 */}
+                  <div className="text-3xl font-bold">{displayedQuality}/5</div>
                   <div className="text-white/80 text-sm">Qualité</div>
                 </div>
               </div>
