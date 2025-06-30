@@ -16,7 +16,6 @@ import { supabase } from './lib/supabase';
 import { Toaster } from './components/ui/toaster';
 import { useToast } from './hooks/use-toast';
 import NotFound from './pages/NotFound';
-
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { useAppStore } from '@/stores/useAppStore';
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
@@ -115,11 +114,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         
-        <Route path="/auth" element={
-          session ? 
-            <Navigate to={hasCompletedOnboarding ? "/dashboard" : "/onboarding"} replace /> : 
-            <AuthPages onAuthSuccess={handleAuthSuccess} />
-        } />
+        <Route 
+          path="/auth" 
+          element={
+            session ? 
+              <Navigate to={hasCompletedOnboarding ? "/dashboard" : "/onboarding"} replace /> : 
+              <AuthPages onAuthSuccess={handleAuthSuccess} />
+          } 
+        />
         
         <Route 
           path="/onboarding" 

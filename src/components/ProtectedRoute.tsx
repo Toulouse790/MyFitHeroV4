@@ -29,7 +29,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <Navigate to="/onboarding" replace />;
   }
 
-  return React.cloneElement(children, { userProfile: session.user });
+  return children;
 };
 
 export default ProtectedRoute;
