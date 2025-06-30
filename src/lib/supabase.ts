@@ -1,13 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-// Importe la définition de Database et Json depuis le fichier auto-généré
 import { Database as DBType, Json as JsonType } from '@/integrations/supabase/types';
 
-// Utilise la Database importée de types.ts
 export type Database = DBType;
-// Ré-exporte directement le type Json importé de types.ts
-export type Json = JsonType; 
+export type Json = JsonType;
 
-// Configuration Supabase
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -17,7 +13,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Client Supabase configuré avec les types
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
@@ -26,7 +21,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Types utilitaires exportés (dérivés de la Database importée)
 export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type Workout = Database['public']['Tables']['workouts']['Row'];
 export type Exercise = Database['public']['Tables']['exercises_library']['Row'];
@@ -41,7 +35,6 @@ export type UserGoal = Database['public']['Tables']['user_goals']['Row'];
 export type PillarCoordination = Database['public']['Tables']['pillar_coordination']['Row'];
 
 
-// Helper pour la gestion d'erreurs Supabase
 export const handleSupabaseError = (error: unknown, context: string = '') => {
   let message = 'Une erreur inattendue s\'est produite';
   if (error instanceof Error) {
@@ -53,7 +46,6 @@ export const handleSupabaseError = (error: unknown, context: string = '') => {
   return message;
 };
 
-// Helper pour vérifier l'authentification
 export const requireAuth = () => {
   return supabase.auth.getUser();
 };
