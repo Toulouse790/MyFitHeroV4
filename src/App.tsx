@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -7,7 +8,7 @@ import Nutrition from './pages/Nutrition';
 import Sleep from './pages/Sleep';
 import Hydration from './pages/Hydration';
 import Profile from './pages/Profile';
-import OnboardingQuestionnaire from './components/OnboardingQuestionnaire';
+import OnboardingQuestionnaire, { UserProfileOnboarding } from './components/OnboardingQuestionnaire';
 import AuthPages from './components/AuthPages';
 import SmartDashboard from './components/SmartDashboard';
 import { supabase } from './lib/supabase';
@@ -15,9 +16,7 @@ import { Toaster } from './components/ui/toaster';
 import NotFound from './pages/NotFound';
 
 import { Session, User as SupabaseAuthUserType } from '@supabase/supabase-js';
-// Import du UserProfile unifié depuis le store
-import { UserProfile, UserProfileOnboarding, useAppStore } from '@/stores/useAppStore'; 
-// Import du UserProfile de la DB pour les opérations de mise à jour de la DB
+import { UserProfile, useAppStore } from '@/stores/useAppStore'; 
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
 
 function App() {
@@ -120,7 +119,6 @@ function App() {
     };
   }, [appStoreUser.level, appStoreUser.totalPoints, updateAppStoreUserProfile]);
 
-
   const handleAuthSuccess = (user: SupabaseAuthUserType) => {
     setSession({ user, access_token: '', token_type: '' } as Session);
   };
@@ -131,7 +129,7 @@ function App() {
       return;
     }
     try {
-      const updatesToDb = {
+      const updatesToDb: Partial<SupabaseDBUserProfileType> = {
         age: profileData.age,
         gender: profileData.gender,
         lifestyle: profileData.lifestyle,

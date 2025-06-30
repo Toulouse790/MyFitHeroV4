@@ -1,6 +1,7 @@
 
 import {
   Toast,
+  ToastAction,
   ToastClose,
   ToastDescription,
   ToastProvider,
@@ -21,7 +22,7 @@ export function Toaster() {
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && <ToastDescription>{description}</ToastDescription>}
             </div>
-            {action}
+            {action && React.isValidElement(action) ? action : null}
             <ToastClose />
           </Toast>
         )

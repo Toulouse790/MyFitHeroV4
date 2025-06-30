@@ -17,8 +17,7 @@ import {
 } from 'lucide-react';
 
 // Exportation de cette interface pour être utilisée par App.tsx
-export interface UserProfileOnboarding { // Renommé pour éviter le conflit avec le UserProfile du store/DB
-  // Étape 1 : Profil personnel
+export interface UserProfileOnboarding {
   age: number | null;
   gender: 'male' | 'female' | 'other' | null;
   lifestyle: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
@@ -26,11 +25,10 @@ export interface UserProfileOnboarding { // Renommé pour éviter le conflit ave
   fitness_experience: 'beginner' | 'intermediate' | 'advanced' | 'expert' | null;
   injuries: string[];
   
-  // Étape 2 : Objectifs prioritaires
   primary_goals: string[];
   motivation: string;
   
-  // Étape 3 : Contexte sportif (conditionnel)
+  fitness_goal?: string | null;
   sport: string | null;
   sport_position: string | null;
   sport_level: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
@@ -116,7 +114,11 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      onComplete(profile);
+      const finalProfile = {
+        ...profile,
+        fitness_goal: profile.primary_goals.length > 0 ? profile.primary_goals[0] : null
+      };
+      onComplete(finalProfile);
     }
   };
 

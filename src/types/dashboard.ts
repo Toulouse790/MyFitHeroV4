@@ -1,7 +1,6 @@
 
 import { DailyStats } from '@/lib/supabase';
 
-// Interface pour le contexte du dashboard (sans extends Json)
 export interface SmartDashboardContext {
   user_profile?: {
     id: string;

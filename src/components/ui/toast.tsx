@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -116,7 +117,6 @@ type ToasterProps = {
   toasts: ToastProps[]
 }
 
-// Exportation ajoutée pour ToastActionElement
 type ToastActionElement = React.ComponentPropsWithoutRef<typeof ToastAction>
 
 export {
@@ -129,6 +129,5 @@ export {
   ToastViewport,
   type ToastProps,
   type ToasterProps,
-  // Ajout de l'exportation manquante
   type ToastActionElement,
 }

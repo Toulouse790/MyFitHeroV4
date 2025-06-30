@@ -9,6 +9,8 @@ interface DailyGoals {
   water: number;
   calories: number;
   protein: number;
+  carbs: number;
+  fat: number;
   sleep: number;
   workouts: number;
 }
@@ -20,10 +22,18 @@ interface AppStore {
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
   fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
+  addHydration: (amount: number) => void;
+  removeLastHydration: () => void;
+  resetDailyHydration: () => void;
+  fetchHydrationEntries: (userId: string, date: string) => Promise<any[]>;
+  unlockAchievement: (achievement: string) => void;
+  addMeal: (meal: any) => void;
+  fetchMeals: (userId: string, date: string) => Promise<any[]>;
+  addSleepSession: (session: any) => void;
+  fetchSleepSessions: (userId: string, date: string) => Promise<any[]>;
 }
 
 const defaultUser: UserProfile = {
-  // Champs de la DB
   id: '',
   username: null,
   full_name: null,
@@ -49,7 +59,6 @@ const defaultUser: UserProfile = {
   sport_level: null,
   training_frequency: null,
   season_period: null,
-  // Champs calculés
   name: 'Invité',
   email: '',
   goal: 'Non défini',
@@ -66,6 +75,8 @@ export const useAppStore = create<AppStore>()(
         water: 2.5,
         calories: 2000,
         protein: 120,
+        carbs: 250,
+        fat: 70,
         sleep: 8,
         workouts: 1
       },
@@ -123,6 +134,81 @@ export const useAppStore = create<AppStore>()(
           console.error('Erreur lors du fetch des recommandations IA:', error);
           return [];
         }
+      },
+
+      addHydration: (amount: number) => {
+        console.log('Adding hydration:', amount);
+      },
+
+      removeLastHydration: () => {
+        console.log('Removing last hydration');
+      },
+
+      resetDailyHydration: () => {
+        console.log('Resetting daily hydration');
+      },
+
+      fetchHydrationEntries: async (userId: string, date: string) => {
+        try {
+          const { data, error } = await supabase
+            .from('hydration_logs')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('log_date', date)
+            .order('logged_at', { ascending: false });
+
+          if (error) throw error;
+          return data || [];
+        } catch (error) {
+          console.error('Erreur lors du fetch des entrées d\'hydratation:', error);
+          return [];
+        }
+      },
+
+      unlockAchievement: (achievement: string) => {
+        console.log('Unlocking achievement:', achievement);
+      },
+
+      addMeal: (meal: any) => {
+        console.log('Adding meal:', meal);
+      },
+
+      fetchMeals: async (userId: string, date: string) => {
+        try {
+          const { data, error } = await supabase
+            .from('meals')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('meal_date', date)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          return data || [];
+        } catch (error) {
+          console.error('Erreur lors du fetch des repas:', error);
+          return [];
+        }
+      },
+
+      addSleepSession: (session: any) => {
+        console.log('Adding sleep session:', session);
+      },
+
+      fetchSleepSessions: async (userId: string, date: string) => {
+        try {
+          const { data, error } = await supabase
+            .from('sleep_sessions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('sleep_date', date)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          return data || [];
+        } catch (error) {
+          console.error('Erreur lors du fetch des sessions de sommeil:', error);
+          return [];
+        }
       }
     }),
     {
@@ -135,5 +221,4 @@ export const useAppStore = create<AppStore>()(
   )
 );
 
-// Export du type UserProfile pour compatibilité
 export type { UserProfile };
