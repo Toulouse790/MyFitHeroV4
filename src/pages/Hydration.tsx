@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Droplets, 
-  Plus, 
+import {
+  Droplets,
+  Plus,
   Target,
   TrendingUp,
   Clock,
@@ -124,19 +124,41 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
       });
       await loadHydrationData();
     } else {
+      toast({
+        title: "Erreur de suppression",
+        description: "Impossible de supprimer la dernière entrée d'hydratation. Peut-être n'y en a-t-il pas ?",
+        variant: "destructive",
+      });
+    }
+    setLoadingData(false);
+  }; // FIN CORRECTE de handleRemoveLast
+
+  const handleReset = async () => { // DÉBUT DE LA FONCTION handleReset
     if (!userProfile?.id) {
-      alert('Utilisateur non connecté.');
+      toast({
+        title: "Erreur de réinitialisation",
+        description: "Utilisateur non connecté.",
+        variant: "destructive",
+      });
       return;
     }
     setLoadingData(true);
     const success = await storeResetDailyHydration(userProfile.id);
     if (success) {
+      toast({
+        title: "Réinitialisation réussie",
+        description: "Votre historique d'hydratation du jour a été réinitialisé.",
+      });
       await loadHydrationData();
     } else {
-      alert('Impossible de réinitialiser les entrées.');
+      toast({
+        title: "Erreur de réinitialisation",
+        description: "Impossible de réinitialiser les entrées d'hydratation.",
+        variant: "destructive",
+      });
     }
     setLoadingData(false);
-  };
+  }; // FIN CORRECTE de handleReset
 
   const quickAmounts = [125, 250, 330, 500, 750];
 
@@ -184,9 +206,9 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
   };
 
   const formatTime = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(isoString).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -194,8 +216,8 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
     <button
       onClick={() => onClick(amount)}
       className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
-        isSelected 
-          ? 'bg-fitness-hydration text-white shadow-sm' 
+        isSelected
+          ? 'bg-fitness-hydration text-white shadow-sm'
           : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
       }`}
     >
@@ -228,7 +250,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -252,7 +274,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
                 <h3 className="font-semibold text-lg">Aujourd'hui</h3>
                 <Target size={24} />
               </div>
-              
+
               <div className="text-center mb-4">
                 <div className="text-4xl font-bold mb-1">{(currentHydrationL).toFixed(2).replace(/\.?0+$/, '')}L</div>
                 <div className="text-white/80">sur {goalHydrationL}L</div>
@@ -263,14 +285,14 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
 
               {/* Barre de progression avec données réelles */}
               <div className="relative w-full bg-white/20 rounded-full h-4 mb-2 overflow-hidden">
-                <div 
+                <div
                   className="bg-white rounded-full h-4 transition-all duration-500 relative"
                   style={{ width: `${percentage}%` }}
                 >
                   <div className="absolute inset-0 opacity-30 animate-pulse bg-blue-200 rounded-full"></div>
                 </div>
               </div>
-              
+
               <div className="text-center text-sm text-white/80">
                 {Math.round(percentage)}% de l'objectif atteint
               </div>
@@ -288,7 +310,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
         {/* Actions rapides - FONCTIONNELLES */}
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-800">Ajouter de l'eau</h2>
-          
+
           {/* Quantités rapides */}
           <div className="flex space-x-2 overflow-x-auto pb-2">
             {quickAmounts.map((amount) => (
@@ -303,7 +325,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
 
           {/* Boutons d'action - CONNECTÉS AU STORE */}
           <div className="grid grid-cols-3 gap-3">
-            <button 
+            <button
               onClick={() => handleAddWater(selectedAmount)}
               disabled={loadingData}
               className="bg-fitness-hydration text-white p-4 rounded-xl font-medium flex flex-col items-center hover:bg-fitness-hydration/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -311,7 +333,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
               <Plus size={24} className="mb-1" />
               <span className="text-sm">Ajouter {selectedAmount}ml</span>
             </button>
-            <button 
+            <button
               onClick={handleRemoveLast}
               disabled={loadingData || hydrationEntries.length === 0}
               className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -319,7 +341,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
               <Minus size={24} className="mb-1" />
               <span className="text-sm">Annuler</span>
             </button>
-            <button 
+            <button
               onClick={handleReset}
               disabled={loadingData}
               className="bg-white text-gray-600 p-4 rounded-xl font-medium flex flex-col items-center border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -336,7 +358,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
             <h3 className="font-semibold text-gray-800">Aujourd'hui ({new Date(today).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })})</h3>
             <TrendingUp size={20} className="text-green-500" />
           </div>
-          
+
           {loadingData ? (
             <div className="text-center text-gray-500">Chargement...</div>
           ) : dailyStats ? (
@@ -363,7 +385,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
           ) : (
             <div className="text-center text-gray-500">Pas de données pour aujourd'hui.</div>
           )}
-          
+
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
             <div className="flex items-center space-x-2">
               <Award size={16} className="text-blue-500" />
@@ -379,7 +401,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
             <h2 className="text-lg font-semibold text-gray-800">Historique du jour</h2>
             <span className="text-sm text-gray-500">{hydrationEntries.length} prises</span>
           </div>
-          
+
           <div className="bg-white p-4 rounded-xl border border-gray-100">
             {loadingData ? (
               <div className="text-center py-8">Chargement de l'historique...</div>
@@ -407,7 +429,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
             <Zap size={20} className="text-yellow-500" />
             <h2 className="text-lg font-semibold text-gray-800">Conseils d'hydratation</h2>
           </div>
-          
+
           <div className="space-y-3">
             {hydrationTips.map((tip, index) => {
               const TipIcon = tip.icon;
@@ -432,14 +454,14 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
             <Award size={20} className="text-yellow-500" />
             <h2 className="text-lg font-semibold text-gray-800">Achievements</h2>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             {achievements.map((achievement, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`p-3 rounded-xl border transition-all duration-200 ${
-                  achievement.unlocked 
-                    ? 'bg-yellow-50 border-yellow-200' 
+                  achievement.unlocked
+                    ? 'bg-yellow-50 border-yellow-200'
                     : 'bg-gray-50 border-gray-200 opacity-60'
                 }`}
               >
