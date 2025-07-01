@@ -16,7 +16,7 @@ import { Toaster } from './components/ui/toaster';
 import { useToast } from './hooks/use-toast';
 import { useAuthStatus } from './hooks/useAuthStatus'; // Assurez-vous que ce chemin est correct
 import NotFound from './pages/NotFound';
-
+import { lazy, Suspense } from 'react';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { useAppStore } from '@/stores/useAppStore';
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
