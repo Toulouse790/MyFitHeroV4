@@ -1,9 +1,8 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
 import { UserProfile } from '@/types/user';
-import type { DailyStats, AiRecommendation, HydrationEntry, Meal, Json } from '@/lib/supabase';
+import type { DailyStats, AiRecommendation, HydrationEntry, Meal, Json, SleepSession } from '@/lib/supabase';
 
 interface DailyGoals {
   water: number;
@@ -13,6 +12,19 @@ interface DailyGoals {
   fat: number;
   sleep: number;
   workouts: number;
+}
+
+interface SleepSessionInput {
+  user_id: string;
+  sleep_date: string;
+  bedtime?: string;
+  wake_time?: string;
+  duration_minutes?: number;
+  quality_rating?: number;
+  mood_rating?: number;
+  energy_level?: number;
+  factors?: Json;
+  notes?: string;
 }
 
 interface AppStore {
@@ -29,8 +41,8 @@ interface AppStore {
   unlockAchievement: (achievement: string) => void;
   addMeal: (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<Meal | null>;
   fetchMeals: (userId: string, date: string) => Promise<Meal[]>;
-  addSleepSession: (session: any) => void;
-  fetchSleepSessions: (userId: string, date: string) => Promise<any[]>;
+  addSleepSession: (session: SleepSessionInput) => void;
+  fetchSleepSessions: (userId: string, date: string) => Promise<SleepSession[]>;
 }
 
 const defaultUser: UserProfile = {
@@ -261,7 +273,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      addSleepSession: (session: any) => {
+      addSleepSession: (session: SleepSessionInput) => {
         console.log('Adding sleep session:', session);
       },
 
@@ -291,5 +303,3 @@ export const useAppStore = create<AppStore>()(
     }
   )
 );
-
-export type { UserProfile };
