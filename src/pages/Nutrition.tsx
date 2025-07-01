@@ -19,6 +19,7 @@ import { useAppStore } from '@/stores/useAppStore';
 import { Meal, DailyStats, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 
+import { useToast } from '@/hooks/use-toast';
 interface NutritionProps {
   userProfile?: SupabaseAuthUserType;
 }
@@ -66,6 +67,8 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
   const [newFoodProtein, setNewFoodProtein] = useState<number>(0);
   const [newFoodCarbs, setNewFoodCarbs] = useState<number>(0);
   const [newFoodFat, setNewFoodFat] = useState<number>(0);
+
+  const { toast } = useToast();
 
   const {
     dailyGoals,
@@ -119,7 +122,13 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
 
   const handleAddFoodToMeal = async () => {
     if (!userProfile?.id || !newFoodName || !selectedMealType) {
-      alert('Veuillez remplir le nom de l\'aliment et sélectionner un type de repas.');
+      toast({
+        title: 'Erreur',
+        description: 'Veuillez remplir le nom de l\'aliment et sélectionner un type de repas.',
+        variant: 'destructive',
+      });
+      setLoadingData(false); // Ensure loading is false on validation error
+
       return;
     }
 
@@ -141,18 +150,28 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
     const totalCarbs = updatedFoodsInMeal.reduce((sum, food) => sum + food.carbs, 0);
     const totalFat = updatedFoodsInMeal.reduce((sum, food) => sum + food.fat, 0);
 
-    const result = await addMeal(userProfile.id, selectedMealType, updatedFoodsInMeal as unknown as Json, totalCals, totalProt, totalCarbs, totalFat);
+    try {
+      const result = await addMeal(userProfile.id, selectedMealType, updatedFoodsInMeal as unknown as Json, totalCals, totalProt, totalCarbs, totalFat);
 
-    if (result) {
-      alert('Aliment ajouté avec succès !');
+      if (result) {
+        toast({
+          title: 'Succès !',
+          description: 'Aliment ajouté avec succès !',
+          variant: 'default',
+        });
+        setNewFoodName('');
+        setNewFoodCalories(0);
+        setNewFoodProtein(0);
+        setNewFoodCarbs(0);
+        setNewFoodFat(0);
+        await loadNutritionData();
+      } else {
+         // This case might indicate an issue even if the store didn't throw
+         throw new Error('L\'ajout du repas a échoué sans erreur spécifique.');
+      }
+    } catch (err: any) { // Catch potential errors thrown by addMeal
       setNewFoodName('');
-      setNewFoodCalories(0);
-      setNewFoodProtein(0);
-      setNewFoodCarbs(0);
-      setNewFoodFat(0);
-      await loadNutritionData();
-    } else {
-      alert('Échec de l\'ajout de l\'aliment.');
+      toast({ title: 'Erreur', description: `Échec de l'ajout de l'aliment: ${err.message || err}`, variant: 'destructive' });
     }
     setLoadingData(false);
   };

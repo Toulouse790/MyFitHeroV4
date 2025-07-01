@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
 import { UserProfile } from '@/types/user';
-import type { DailyStats, AiRecommendation, HydrationEntry, Meal, Json, SleepSession } from '@/lib/supabase';
+import type { DailyStats, AiRecommendation, HydrationEntry, Meal, Json, SleepSession, UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
 
 interface DailyGoals {
   water: number;
@@ -30,7 +30,7 @@ interface SleepSessionInput {
 interface AppStore {
   user: UserProfile;
   dailyGoals: DailyGoals;
-  updateProfile: (profile: Partial<UserProfile>) => void;
+  updateProfile: (userId: string, profile: Partial<SupabaseDBUserProfileType>) => Promise<UserProfile | null>; // Updated signature
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
   fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
@@ -41,7 +41,7 @@ interface AppStore {
   unlockAchievement: (achievement: string) => void;
   addMeal: (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => Promise<Meal | null>;
   fetchMeals: (userId: string, date: string) => Promise<Meal[]>;
-  addSleepSession: (session: SleepSessionInput) => void;
+  addSleepSession: (session: SleepSessionInput) => Promise<SleepSession | null>; // Changed return type to Promise<SleepSession | null>
   fetchSleepSessions: (userId: string, date: string) => Promise<SleepSession[]>;
 }
 
@@ -93,10 +93,35 @@ export const useAppStore = create<AppStore>()(
         workouts: 1
       },
 
-      updateProfile: (profile) => {
-        set(state => ({
-          user: { ...state.user, ...profile }
-        }));
+      updateProfile: async (userId: string, profileUpdates: Partial<SupabaseDBUserProfileType>) => {
+        try {
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .update(profileUpdates)
+            .eq('id', userId)
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          if (data) {
+            const updatedUserState: UserProfile = {
+               ...get().user, // Keep existing local fields
+               ...data, // Overlay with fresh data from DB
+               // Recalculate derived fields if necessary, or rely on the component to do it on load
+               name: data.full_name || data.username || 'Non défini',
+               goal: data.fitness_goal || 'Non défini',
+               joinDate: new Date(data.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) // created_at from data might be needed
+            };
+            set({ user: updatedUserState });
+            return updatedUserState;
+          }
+           return null;
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour du profil Supabase:', error);
+          // Propagate error or return null depending on desired handling
+          throw error; // Or return null;
+        }
       },
 
       updateDailyGoals: (goals) => {
@@ -228,14 +253,26 @@ export const useAppStore = create<AppStore>()(
 
       unlockAchievement: (achievement: string) => {
         console.log('Unlocking achievement:', achievement);
+        // TODO: Implement backend logic to track achievements
       },
 
       addMeal: async (userId: string, mealType: string, foods: Json, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number) => {
         try {
+          // Check if a meal of this type already exists for the day and user
           const today = new Date().toISOString().split('T')[0];
-          const { data, error } = await supabase
+          const { data: existingMeal, error: fetchError } = await supabase
             .from('meals')
-            .insert({
+            .select('id')
+            .eq('user_id', userId)
+            .eq('meal_type', mealType)
+            .eq('meal_date', today)
+            .single();
+
+          if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 means 'no rows found'
+            throw fetchError;
+          }
+
+          const mealData = {
               user_id: userId,
               meal_type: mealType,
               meal_date: today,
@@ -244,12 +281,35 @@ export const useAppStore = create<AppStore>()(
               total_protein: totalProtein,
               total_carbs: totalCarbs,
               total_fat: totalFat
-            })
+          };
+
+          let result;
+          if (existingMeal) {
+             // Update existing meal
+            const { data, error } = await supabase
+              .from('meals')
+              .update(mealData)
+              .eq('id', existingMeal.id)
+              .select()
             .select()
             .single();
 
+            if (error) throw error;
+            result = data;
+          } else {
+            // Insert new meal
+            const { data, error } = await supabase
+              .from('meals')
+              .insert(mealData)
+              .select()
+              .single();
+
+            if (error) throw error;
+            result = data;
+          }
+
           if (error) throw error;
-          return data as Meal;
+          return result as Meal;
         } catch (error) {
           console.error('Erreur lors de l\'ajout du repas:', error);
           return null;
@@ -273,8 +333,24 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      addSleepSession: (session: SleepSessionInput) => {
-        console.log('Adding sleep session:', session);
+      addSleepSession: async (session: SleepSessionInput) => {
+         try {
+            // TODO: Check for existing sleep session for the day and UPSET or UPDATE
+            const { data, error } = await supabase
+                .from('sleep_sessions')
+                .insert(session)
+                .select()
+                .single();
+
+            if (error) throw error;
+            console.log('Sleep session added:', data);
+            // Optionally update store state with new session
+            // set(state => ({ sleepSessions: [...state.sleepSessions, data] }));
+            return data as SleepSession; // Assuming SleepSessionInput maps directly to SleepSession Row type
+         } catch (error) {
+            console.error('Erreur lors de l\'ajout de la session de sommeil:', error);
+            throw error; // Propagate error for component to handle
+         }
       },
 
       fetchSleepSessions: async (userId: string, date: string) => {

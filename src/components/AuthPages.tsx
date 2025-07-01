@@ -13,6 +13,7 @@ import {
   Shield
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '../hooks/use-toast';
 
 interface AuthPagesProps {
@@ -38,6 +39,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [signUpForm, setSignUpForm] = useState<SignUpForm>({
@@ -75,11 +77,11 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     // Utiliser un petit délai pour laisser le toast s'afficher
     setTimeout(() => {
       // Forcer le rechargement complet pour mettre à jour l'état global
-      if (hasCompletedOnboarding) {
-        window.location.href = '/dashboard';
-      } else {
-        window.location.href = '/onboarding';
-      }
+ navigate(hasCompletedOnboarding ? '/dashboard' : '/onboarding', { replace: true });
+ // Ancien code avec window.location.href:
+      // if (hasCompletedOnboarding) {
+      //   window.location.href = '/dashboard';
+      // } else { window.location.href = '/onboarding'; }
     }, 500);
   };
 
@@ -111,7 +113,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         title: "Magic Link envoyé !",
         description: `Vérifiez votre boîte mail (${signUpForm.email}) et cliquez sur le lien pour vous connecter.`,
       });
-      setSuccess(`Magic Link envoyé à ${signUpForm.email} ! Vérifiez votre boîte mail et cliquez sur le lien pour vous connecter.`);
 
     } catch (err: any) {
       const errorMessage = err.message || 'Erreur lors de l\'envoi du Magic Link';
@@ -189,7 +190,6 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
             title: "Inscription réussie !",
             description: "Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.",
           });
-          setSuccess('Compte créé avec succès ! Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.');
         }
       }
 

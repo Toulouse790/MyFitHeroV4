@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { User as UserIcon, Calendar, Target, TrendingUp, Mail, Ruler, Scale, Heart, Shield, Dumbbell as DumbbellIcon, PlusCircle, PenTool, BarChart3, Clock, Zap } from 'lucide-react';
-import { useAppStore, UserProfile as AppStoreUserProfile } from '@/stores/useAppStore'; // Importe le UserProfile unifié du store
+import { useAppStore } from '@/stores/useAppStore'; // Importe le UserProfile unifié du store
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js'; // Importe le type User de Supabase
-import { supabase, UserProfile as SupabaseDBUserProfileType } from '../lib/supabase'; // Importe le type UserProfile de la DB Supabase
-import { UserProfile } from '@/types/user';
+import type { UserProfile as SupabaseDBUserProfileType } from '../integrations/supabase/types'; // Importe le type UserProfile de la DB Supabase
+import { useToast } from '@/hooks/use-toast'; // Importe le hook useToast
 
 interface ProfileProps {
   userProfile?: SupabaseAuthUserType; // Le user de la session Supabase
@@ -11,6 +11,7 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
   const { user: appStoreUser, updateProfile } = useAppStore();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formValues, setFormValues] = useState({
     fullName: appStoreUser.full_name || '',
@@ -68,7 +69,11 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
 
   const handleSave = async () => {
     if (!userProfile?.id) {
-      alert('Utilisateur non connecté.');
+      toast({
+        title: 'Erreur',
+        description: 'Utilisateur non connecté.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -96,27 +101,23 @@ const Profile: React.FC<ProfileProps> = ({ userProfile }) => {
         updated_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .update(updates)
-        .eq('id', userProfile.id)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const updatedUser = await updateProfile(userProfile.id, updates);
 
       if (data) {
-        updateProfile({
-          ...data,
-          name: data.full_name || data.username || 'Non défini',
-          email: userProfile.email || '',
-          goal: data.fitness_goal || 'Non défini',
-          level: appStoreUser.level,
-          totalPoints: appStoreUser.totalPoints,
-          joinDate: new Date(data.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-        } as UserProfile);
         setIsEditing(false);
-        alert('Profil mis à jour avec succès !');
+        toast({
+          title: 'Succès',
+          description: 'Profil mis à jour avec succès !',
+          variant: 'success',
+        });
+      } else {
+        // This case should theoretically be caught by the store's error handling,
+        // but added as a fallback.
+        toast({
+          title: 'Erreur',
+          description: 'Erreur lors de la mise à jour du profil. Veuillez réessayer.',
+          variant: 'destructive',
+        });
       }
     } catch (error: any) {
       console.error('Erreur lors de la mise à jour du profil:', error.message);

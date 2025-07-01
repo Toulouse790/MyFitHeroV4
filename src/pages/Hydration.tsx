@@ -16,6 +16,7 @@ import {
   Bell
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
+import { useToast } from '@/hooks/use-toast';
 import { HydrationEntry, DailyStats } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 
@@ -29,6 +30,7 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
   const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [errorFetching, setErrorFetching] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const {
     dailyGoals,
@@ -79,35 +81,49 @@ const Hydration: React.FC<HydrationProps> = ({ userProfile }) => {
 
   const handleAddWater = async (amount: number, type: string = 'water') => {
     if (!userProfile?.id) {
-      alert('Utilisateur non connecté.');
+      toast({
+        title: "Erreur d'ajout",
+        description: "Utilisateur non connecté.",
+        variant: "destructive",
+      });
       return;
     }
     setLoadingData(true);
     const newEntry = await storeAddHydration(userProfile.id, amount, today);
     if (newEntry) {
+      toast({
+        title: "Hydratation ajoutée !",
+        description: `${amount}ml ${type === 'water' ? 'd\'eau' : 'ajoutés'}`,
+      });
       await loadHydrationData();
     } else {
-      alert('Impossible d\'ajouter l\'entrée d\'hydratation.');
+      toast({
+        title: "Erreur d'ajout",
+        description: "Impossible d'ajouter l'entrée d'hydratation.",
+        variant: "destructive",
+      });
     }
     setLoadingData(false);
   };
 
   const handleRemoveLast = async () => {
     if (!userProfile?.id) {
-      alert('Utilisateur non connecté.');
+      toast({
+        title: "Erreur de suppression",
+        description: "Utilisateur non connecté.",
+        variant: "destructive",
+      });
       return;
     }
     setLoadingData(true);
     const success = await storeRemoveLastHydration(userProfile.id);
     if (success) {
+      toast({
+        title: "Dernière entrée supprimée",
+        description: "La dernière entrée d'hydratation a été retirée.",
+      });
       await loadHydrationData();
     } else {
-      alert('Impossible de supprimer la dernière entrée.');
-    }
-    setLoadingData(false);
-  };
-
-  const handleReset = async () => {
     if (!userProfile?.id) {
       alert('Utilisateur non connecté.');
       return;
