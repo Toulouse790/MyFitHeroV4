@@ -11,6 +11,7 @@ import {
   Settings,
   ArrowLeft
 } from 'lucide-react';
+import BottomNav from './BottomNav'; // Import du composant BottomNav
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -130,6 +131,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </button>
         </div>
       )}
+      <BottomNav /> {/* Ajout du composant BottomNav */}
     </div>
   );
 };
