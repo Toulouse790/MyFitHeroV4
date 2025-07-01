@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 interface ProtectedRouteProps {
@@ -9,6 +8,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { session, loading, hasCompletedOnboarding } = useAuthStatus();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -22,7 +22,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!session) {
-    return <Navigate to="/auth" replace />;
+    // Sauvegarde de la route demandée pour redirection après connexion
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   if (!hasCompletedOnboarding) {
