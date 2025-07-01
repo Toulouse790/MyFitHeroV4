@@ -1,5 +1,7 @@
 import React, { useState, useEffect, ReactNode, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import Layout from './components/Layout';
 import Index from './pages/Index';
 import WorkoutPage from './pages/WorkoutPage';
@@ -10,28 +12,24 @@ import Profile from './pages/Profile';
 import OnboardingQuestionnaire, { UserProfileOnboarding } from './components/OnboardingQuestionnaire';
 import AuthPages from './components/AuthPages';
 import SmartDashboard from './components/SmartDashboard';
-import ProtectedRoute from './components/ProtectedRoute'; // Assurez-vous que ce chemin est correct
+import ProtectedRoute from './components/ProtectedRoute';
 import { supabase } from './lib/supabase';
 import { Toaster } from './components/ui/toaster';
 import { useToast } from './hooks/use-toast';
-import { useAuthStatus } from './hooks/useAuthStatus'; // Assurez-vous que ce chemin est correct
+import { useAuthStatus } from './hooks/useAuthStatus';
 import NotFound from './pages/NotFound';
-import { lazy, Suspense } from 'react';
+
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { useAppStore } from '@/stores/useAppStore';
 import { UserProfile as SupabaseDBUserProfileType } from '@/lib/supabase';
-
 
 function App() {
   const { session, loading, hasCompletedOnboarding } = useAuthStatus();
   const { user: appStoreUser, updateProfile: updateAppStoreUserProfile } = useAppStore();
   const { toast } = useToast();
 
-  // Cette fonction n'est plus utilisée directement pour la redirection mais peut rester pour le log
   const handleAuthSuccess = (user: SupabaseAuthUserType) => {
     console.log('Auth success for user:', user.id);
-    // La gestion de l'état global et la redirection sont maintenant prises en charge par useAuthStatus
-    // et les redirections de route définies ci-dessous.
   };
 
   const handleOnboardingComplete = async (profileData: UserProfileOnboarding) => {
@@ -76,7 +74,6 @@ function App() {
       
       if (data && data[0]) {
         console.log('Onboarding completed successfully:', data[0]);
-        // Mise à jour du store Zustand, useAuthStatus va redétecter le changement
         updateAppStoreUserProfile({
           ...data[0],
           name: data[0].full_name || data[0].username || 'Non défini',
@@ -91,8 +88,6 @@ function App() {
           title: "Profil complété !",
           description: "Bienvenue dans MyFitHero ! Votre profil a été configuré avec succès.",
         });
-        // Pas besoin de redirection explicite ici, useAuthStatus se mettra à jour
-        // et la logique de routage globale prendra le relais.
       }
 
     } catch (error: unknown) {
@@ -105,7 +100,6 @@ function App() {
     }
   };
 
-  // Affichage du spinner de chargement global tant que l'état d'authentification n'est pas résolu
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -117,58 +111,73 @@ function App() {
     );
   }
 
-  // Logique de redirection centralisée après que 'loading' est passé à false
-  // C'est le point de décision principal pour les redirections initiales
   if (session && !hasCompletedOnboarding) {
-    // Si l'utilisateur est connecté mais n'a pas complété l'onboarding, on le dirige vers l'onboarding
     if (window.location.pathname !== '/onboarding') {
       return <Navigate to="/onboarding" replace />;
     }
   } else if (session && hasCompletedOnboarding) {
-    // Si l'utilisateur est connecté et a complété l'onboarding, on le dirige vers le tableau de bord
     if (window.location.pathname === '/auth' || window.location.pathname === '/onboarding' || window.location.pathname === '/') {
         return <Navigate to="/dashboard" replace />;
     }
   } else if (!session) {
-    // Si l'utilisateur n'est pas connecté, on le dirige vers l'authentification
-    if (window.location.pathname !== '/auth' && window.location.pathname !== '/') { // Évite la redirection si déjà sur /auth ou /
+    if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
         return <Navigate to="/auth" replace />;
     }
   }
 
-
   return (
-    <Router>
-      <Routes>
-        {/* Route publique pour la page d'accueil (Index) */}
-        <Route path="/" element={<Index />} />
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<AuthPages onAuthSuccess={handleAuthSuccess} />} />
+          <Route 
+            path="/onboarding" 
+            element={<OnboardingQuestionnaire onComplete={handleOnboardingComplete} />} 
+          />
+          
+          <Route element={<Layout><Outlet /></Layout>}>
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <SmartDashboard userProfile={session?.user} />
+              </ProtectedRoute>
+            } />
+            <Route path="/workout" element={
+              <ProtectedRoute>
+                <WorkoutPage userProfile={session?.user} />
+              </ProtectedRoute>
+            } />
+            <Route path="/nutrition" element={
+              <ProtectedRoute>
+                <Nutrition userProfile={session?.user} />
+              </ProtectedRoute>
+            } />
+            <Route path="/sleep" element={
+              <ProtectedRoute>
+                <Sleep userProfile={session?.user} />
+              </ProtectedRoute>
+            } />
+            <Route path="/hydration" element={
+              <ProtectedRoute>
+                <Hydration userProfile={session?.user} />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile userProfile={session?.user} />
+              </ProtectedRoute>
+            } />
+          </Route>
 
-        {/* Route pour l'authentification - rend TOUJOURS AuthPages */}
-        <Route path="/auth" element={<AuthPages onAuthSuccess={handleAuthSuccess} />} />
-
-        {/* Route pour le questionnaire d'onboarding - rend TOUJOURS OnboardingQuestionnaire */}
-        {/* Les redirections vers /dashboard ou /auth sont gérées par la logique centrale ci-dessus ou ProtectedRoute. */}
-        <Route 
-          path="/onboarding" 
-          element={<OnboardingQuestionnaire onComplete={handleOnboardingComplete} />} 
-        />
-        
-        {/* Routes protégées - utilisent le ProtectedRoute wrapper */}
-        {/* ProtectedRoute gérera les redirections si l'utilisateur n'est pas connecté ou si l'onboarding n'est pas fait */}
-        <Route element={<Layout><Outlet /></Layout>}>
-          <Route path="/dashboard" element={<ProtectedRoute><SmartDashboard /></ProtectedRoute>} />
-          <Route path="/workout" element={<ProtectedRoute><WorkoutPage /></ProtectedRoute>} />
-          <Route path="/nutrition" element={<ProtectedRoute><Nutrition /></ProtectedRoute>} />
-          <Route path="/sleep" element={<ProtectedRoute><Sleep /></ProtectedRoute>} />
-          <Route path="/hydration" element={<ProtectedRoute><Hydration /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        </Route>
-
-        {/* Route 404 - doit être la dernière */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster /> 
-    </Router>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster /> 
+      </Router>
+      
+      {/* Vercel Analytics - Tracking des pages vues et performances */}
+      <Analytics />
+      <SpeedInsights />
+    </>
   );
 }
 
