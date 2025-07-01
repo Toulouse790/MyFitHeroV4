@@ -1,9 +1,6 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
-/**
- * Configuration Tailwind CSS optimisée pour MyFitHero
- * Version propre et performante
- */
 export default {
   darkMode: ["class"],
   content: [
@@ -22,7 +19,6 @@ export default {
     },
     extend: {
       colors: {
-        // === COULEURS SYSTÈME ===
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -58,29 +54,20 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
 
-        // === PALETTE FITNESS ===
+        // Couleurs Fitness définies
         fitness: {
-          // Entraînement & Sport
-          energy: "#dc2626",    // Rouge énergie
-          power: "#ea580c",     // Orange puissance
-          
-          // Progression & Santé  
-          growth: "#16a34a",    // Vert progression
-          wellness: "#059669",  // Vert bien-être
-          
-          // Récupération & Hydratation
-          hydration: "#0891b2", // Bleu hydratation
-          recovery: "#7c3aed",  // Violet récupération
-          
-          // Motivation & Social
-          motivation: "#f59e0b", // Jaune motivation
-          achievement: "#d97706", // Bronze achievement
+          energy: "#dc2626",
+          power: "#ea580c",
+          growth: "#16a34a",
+          wellness: "#059669",
+          hydration: "#0891b2",
+          recovery: "#7c3aed",
+          motivation: "#f59e0b",
+          achievement: "#d97706",
         }
       },
       
-      // === ANIMATIONS FITNESS ===
       keyframes: {
-        // Animations de base
         "fade-in": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
@@ -89,8 +76,6 @@ export default {
           "0%": { transform: "translateY(10px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
-        
-        // Animations fitness spécifiques
         "heartbeat": {
           "0%, 100%": { transform: "scale(1)" },
           "50%": { transform: "scale(1.05)" },
@@ -113,7 +98,6 @@ export default {
         "bounce-soft": "bounce-soft 2s ease-in-out infinite",
       },
       
-      // === GRADIENTS FITNESS ===
       backgroundImage: {
         "gradient-energy": "linear-gradient(135deg, #dc2626 0%, #ea580c 100%)",
         "gradient-growth": "linear-gradient(135deg, #16a34a 0%, #059669 100%)",
@@ -122,5 +106,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;
