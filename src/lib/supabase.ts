@@ -9,7 +9,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'Variables d\'environnement Supabase manquantes. Créez un fichier .env avec VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY'
+    'Variables d\'environnement Supabase manquantes. Vérifiez votre fichier .env.local'
   );
 }
 
@@ -17,11 +17,17 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    flowType: 'pkce'
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 2
+    }
   }
 });
 
-// Exportation des types directement dérivés de la base de données
+// Exportations des types
 export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
 export type Workout = Database['public']['Tables']['workouts']['Row'];
 export type Exercise = Database['public']['Tables']['exercises_library']['Row'];
@@ -34,7 +40,6 @@ export type AiRequest = Database['public']['Tables']['ai_requests']['Row'];
 export type FoodLibraryEntry = Database['public']['Tables']['foods_library']['Row'];
 export type UserGoal = Database['public']['Tables']['user_goals']['Row'];
 export type PillarCoordination = Database['public']['Tables']['pillar_coordination']['Row'];
-
 
 export const handleSupabaseError = (error: unknown, context: string = '') => {
   let message = 'Une erreur inattendue s\'est produite';
