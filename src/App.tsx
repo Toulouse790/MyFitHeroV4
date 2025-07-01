@@ -1,7 +1,5 @@
 import React, { useState, useEffect, ReactNode, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
 import Layout from './components/Layout';
 import Index from './pages/Index';
 import WorkoutPage from './pages/WorkoutPage';
@@ -100,6 +98,27 @@ function App() {
     }
   };
 
+  // 🔥 CORRECTION: useEffect pour les redirections au lieu de Navigate direct
+  useEffect(() => {
+    if (loading) return; // Attend que le loading soit terminé
+    
+    const currentPath = window.location.pathname;
+    
+    if (session && !hasCompletedOnboarding) {
+      if (currentPath !== '/onboarding') {
+        window.location.href = '/onboarding';
+      }
+    } else if (session && hasCompletedOnboarding) {
+      if (currentPath === '/auth' || currentPath === '/onboarding' || currentPath === '/') {
+        window.location.href = '/dashboard';
+      }
+    } else if (!session) {
+      if (currentPath !== '/auth' && currentPath !== '/') {
+        window.location.href = '/auth';
+      }
+    }
+  }, [session, loading, hasCompletedOnboarding]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -111,73 +130,53 @@ function App() {
     );
   }
 
-  if (session && !hasCompletedOnboarding) {
-    if (window.location.pathname !== '/onboarding') {
-      return <Navigate to="/onboarding" replace />;
-    }
-  } else if (session && hasCompletedOnboarding) {
-    if (window.location.pathname === '/auth' || window.location.pathname === '/onboarding' || window.location.pathname === '/') {
-        return <Navigate to="/dashboard" replace />;
-    }
-  } else if (!session) {
-    if (window.location.pathname !== '/auth' && window.location.pathname !== '/') {
-        return <Navigate to="/auth" replace />;
-    }
-  }
-
   return (
-    <>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<AuthPages onAuthSuccess={handleAuthSuccess} />} />
-          <Route 
-            path="/onboarding" 
-            element={<OnboardingQuestionnaire onComplete={handleOnboardingComplete} />} 
-          />
-          
-          <Route element={<Layout><Outlet /></Layout>}>
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <SmartDashboard userProfile={session?.user} />
-              </ProtectedRoute>
-            } />
-            <Route path="/workout" element={
-              <ProtectedRoute>
-                <WorkoutPage userProfile={session?.user} />
-              </ProtectedRoute>
-            } />
-            <Route path="/nutrition" element={
-              <ProtectedRoute>
-                <Nutrition userProfile={session?.user} />
-              </ProtectedRoute>
-            } />
-            <Route path="/sleep" element={
-              <ProtectedRoute>
-                <Sleep userProfile={session?.user} />
-              </ProtectedRoute>
-            } />
-            <Route path="/hydration" element={
-              <ProtectedRoute>
-                <Hydration userProfile={session?.user} />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile userProfile={session?.user} />
-              </ProtectedRoute>
-            } />
-          </Route>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthPages onAuthSuccess={handleAuthSuccess} />} />
+        <Route 
+          path="/onboarding" 
+          element={<OnboardingQuestionnaire onComplete={handleOnboardingComplete} />} 
+        />
+        
+        <Route element={<Layout><Outlet /></Layout>}>
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <SmartDashboard userProfile={session?.user} />
+            </ProtectedRoute>
+          } />
+          <Route path="/workout" element={
+            <ProtectedRoute>
+              <WorkoutPage userProfile={session?.user} />
+            </ProtectedRoute>
+          } />
+          <Route path="/nutrition" element={
+            <ProtectedRoute>
+              <Nutrition userProfile={session?.user} />
+            </ProtectedRoute>
+          } />
+          <Route path="/sleep" element={
+            <ProtectedRoute>
+              <Sleep userProfile={session?.user} />
+            </ProtectedRoute>
+          } />
+          <Route path="/hydration" element={
+            <ProtectedRoute>
+              <Hydration userProfile={session?.user} />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile userProfile={session?.user} />
+            </ProtectedRoute>
+          } />
+        </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster /> 
-      </Router>
-      
-      {/* Vercel Analytics - Tracking des pages vues et performances */}
-      <Analytics />
-      <SpeedInsights />
-    </>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster /> 
+    </Router>
   );
 }
 
