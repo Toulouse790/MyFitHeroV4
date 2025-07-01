@@ -15,19 +15,40 @@ import {
   Users
 } from 'lucide-react';
 
-const Workout = () => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+interface WorkoutInterface {
+  id: number;
+  title: string;
+  duration: number;
+  difficulty: string;
+  calories: number;
+  exercises: number;
+  category: string;
+  rating: number;
+  participants: number;
+  image: string;
+  tags: string[];
+  description: string;
+}
+
+interface CategoryInterface {
+  id: string;
+  name: string;
+  count: number;
+}
+
+const Workout: React.FC = () => {
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Données mockées des workouts
-  const workoutCategories = [
+  const workoutCategories: CategoryInterface[] = [
     { id: 'all', name: 'Tous', count: 24 },
     { id: 'strength', name: 'Musculation', count: 12 },
     { id: 'cardio', name: 'Cardio', count: 8 },
     { id: 'hiit', name: 'HIIT', count: 4 }
   ];
 
-  const workouts = [
+  const workouts: WorkoutInterface[] = [
     {
       id: 1,
       title: 'Push Day - Pectoraux & Triceps',
@@ -121,7 +142,7 @@ const Workout = () => {
     return matchesFilter && matchesSearch;
   });
 
-  const getDifficultyColor = (difficulty) => {
+  const getDifficultyColor = (difficulty: string): string => {
     switch (difficulty) {
       case 'Débutant': return 'text-green-600 bg-green-100';
       case 'Intermédiaire': return 'text-yellow-600 bg-yellow-100';
@@ -130,7 +151,7 @@ const Workout = () => {
     }
   };
 
-  const WorkoutCard = ({ workout }) => (
+  const WorkoutCard: React.FC<{ workout: WorkoutInterface }> = ({ workout }) => (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
       {/* Header avec image et rating */}
       <div className="p-4 pb-2">
@@ -187,7 +208,7 @@ const Workout = () => {
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(workout.difficulty)}`}>
             {workout.difficulty}
           </span>
-          <button className="bg-fitness-energy text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center hover:bg-fitness-energy/90 transition-colors">
+          <button className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center hover:bg-red-700 transition-colors">
             <Play size={14} className="mr-1" />
             Commencer
           </button>
@@ -212,7 +233,7 @@ const Workout = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="bg-gradient-energy p-4 rounded-xl text-white">
+        <div className="bg-red-600 p-4 rounded-xl text-white">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold">Cette semaine</h3>
             <Timer size={20} />
@@ -241,7 +262,7 @@ const Workout = () => {
             placeholder="Rechercher un workout..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-fitness-energy/20 focus:border-fitness-energy"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
           />
         </div>
 
@@ -253,7 +274,7 @@ const Workout = () => {
               onClick={() => setActiveFilter(category.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-200 ${
                 activeFilter === category.id
-                  ? 'bg-fitness-energy text-white shadow-sm'
+                  ? 'bg-red-600 text-white shadow-sm'
                   : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
               }`}
             >
@@ -268,7 +289,7 @@ const Workout = () => {
             <h2 className="text-lg font-semibold text-gray-800">
               {filteredWorkouts.length} workout{filteredWorkouts.length > 1 ? 's' : ''} disponible{filteredWorkouts.length > 1 ? 's' : ''}
             </h2>
-            <button className="text-fitness-energy text-sm font-medium flex items-center">
+            <button className="text-red-600 text-sm font-medium flex items-center">
               Trier <ChevronRight size={16} className="ml-1" />
             </button>
           </div>
