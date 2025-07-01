@@ -86,6 +86,9 @@ function App() {
           title: "Profil complété !",
           description: "Bienvenue dans MyFitHero ! Votre profil a été configuré avec succès.",
         });
+
+        // Redirection après onboarding complété
+        window.location.href = '/dashboard';
       }
 
     } catch (error: unknown) {
@@ -97,27 +100,6 @@ function App() {
       });
     }
   };
-
-  // 🔥 CORRECTION: useEffect pour les redirections au lieu de Navigate direct
-  useEffect(() => {
-    if (loading) return; // Attend que le loading soit terminé
-    
-    const currentPath = window.location.pathname;
-    
-    if (session && !hasCompletedOnboarding) {
-      if (currentPath !== '/onboarding') {
-        window.location.href = '/onboarding';
-      }
-    } else if (session && hasCompletedOnboarding) {
-      if (currentPath === '/auth' || currentPath === '/onboarding' || currentPath === '/') {
-        window.location.href = '/dashboard';
-      }
-    } else if (!session) {
-      if (currentPath !== '/auth' && currentPath !== '/') {
-        window.location.href = '/auth';
-      }
-    }
-  }, [session, loading, hasCompletedOnboarding]);
 
   if (loading) {
     return (
@@ -133,13 +115,27 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<AuthPages onAuthSuccess={handleAuthSuccess} />} />
+        {/* Routes publiques */}
+        <Route path="/" element={!session ? <Index /> : <Navigate to="/dashboard" replace />} />
+        <Route path="/auth" element={!session ? <AuthPages onAuthSuccess={handleAuthSuccess} /> : <Navigate to="/dashboard" replace />} />
+        
+        {/* Route onboarding - seulement pour les utilisateurs connectés sans profil complété */}
         <Route 
           path="/onboarding" 
-          element={<OnboardingQuestionnaire onComplete={handleOnboardingComplete} />} 
+          element={
+            session ? (
+              hasCompletedOnboarding ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <OnboardingQuestionnaire onComplete={handleOnboardingComplete} />
+              )
+            ) : (
+              <Navigate to="/auth" replace />
+            )
+          } 
         />
         
+        {/* Routes protégées avec Layout */}
         <Route element={<Layout><Outlet /></Layout>}>
           <Route path="/dashboard" element={
             <ProtectedRoute>
@@ -173,6 +169,7 @@ function App() {
           } />
         </Route>
 
+        {/* Route 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster /> 
