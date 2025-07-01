@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Dumbbell, Apple, Moon, Droplets } from 'lucide-react';
+import { Dumbbell, Apple, Moon, Droplets, Home } from 'lucide-react';
 
 interface NavItem {
   id: string;
@@ -11,6 +11,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  {
+    id: 'home',
+    label: 'Accueil',
+    icon: Home,
+    path: '/dashboard',
+    color: 'text-blue-600'
+  },
   {
     id: 'workout',
     label: 'Sport',
@@ -47,13 +54,15 @@ const BottomNav = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  if (location.pathname === '/') {
+  // Ne pas afficher sur les pages publiques
+  const publicPaths = ['/', '/auth', '/onboarding'];
+  if (publicPaths.includes(location.pathname)) {
     return null;
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg">
-      <div className="flex items-center justify-around py-3 px-2">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 shadow-lg md:hidden">
+      <div className="flex items-center justify-around py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -62,26 +71,20 @@ const BottomNav = () => {
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-2 transition-all duration-300 hover:scale-105 ${
+              className={`flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1 transition-all duration-300 ${
                 active 
                   ? `${item.color} scale-110` 
-                  : 'text-gray-400 hover:text-gray-600'
+                  : 'text-gray-400'
               }`}
             >
-              <div className={`p-3 rounded-2xl transition-all duration-300 ${
-                active 
-                  ? 'bg-white shadow-lg border-2 border-current' 
-                  : 'bg-gray-50 hover:bg-gray-100'
-              }`}>
-                <Icon 
-                  size={24} 
-                  className={`transition-all duration-300 ${
-                    active ? 'animate-pulse' : ''
-                  }`} 
-                />
-              </div>
+              <Icon 
+                size={22} 
+                className={`transition-all duration-300 ${
+                  active ? 'mb-1' : ''
+                }`} 
+              />
               
-              <span className={`text-sm mt-2 font-semibold transition-all duration-300 text-center ${
+              <span className={`text-xs font-medium transition-all duration-300 ${
                 active ? 'text-gray-800' : 'text-gray-500'
               }`}>
                 {item.label}
@@ -94,8 +97,6 @@ const BottomNav = () => {
           );
         })}
       </div>
-      
-      <div className="h-1 bg-gradient-to-r from-fitness-energy via-fitness-growth via-fitness-recovery to-fitness-hydration"></div>
     </nav>
   );
 };
