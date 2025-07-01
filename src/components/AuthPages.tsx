@@ -131,11 +131,12 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         throw new Error('Les mots de passe ne correspondent pas');
       }
 
+      // 🔥 CORRECTION CRITIQUE: Redirection automatique
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: signUpForm.email,
         password: signUpForm.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/onboarding`, // ✅ REDIRECTION VERS ONBOARDING
           data: {
             username: signUpForm.username,
             full_name: signUpForm.username
@@ -148,13 +149,33 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
       if (authData.user) {
         console.log('✅ Inscription réussie, utilisateur créé:', authData.user.id);
         
+        // 🔥 CORRECTION: Créer immédiatement le profil dans user_profiles
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: authData.user.id,
+            username: signUpForm.username,
+            full_name: signUpForm.username,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.warn('⚠️ Erreur création profil (non-bloquant):', profileError);
+        }
+        
         if (authData.session) {
-          console.log('🔄 Session active, connexion automatique...');
+          console.log('🔄 Session active, redirection vers onboarding...');
           toast({
             title: "Inscription réussie !",
             description: "Bienvenue dans MyFitHero ! Vous allez être redirigé vers le questionnaire de profil.",
           });
-          onAuthSuccess(authData.user);
+          
+          // 🔥 REDIRECTION IMMÉDIATE
+          setTimeout(() => {
+            window.location.href = '/onboarding';
+          }, 1000);
+          
         } else {
           toast({
             title: "Inscription réussie !",
@@ -202,12 +223,30 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         localStorage.removeItem('myfitheroe_username');
       }
 
+      // 🔥 CORRECTION CRITIQUE: Vérifier si l'onboarding est complété
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('primary_goals')
+        .eq('id', authData.user.id)
+        .single();
+
+      const hasCompletedOnboarding = profileData?.primary_goals && 
+                                    Array.isArray(profileData.primary_goals) && 
+                                    profileData.primary_goals.length > 0;
+
       toast({
         title: "Connexion réussie !",
         description: "Bienvenue dans MyFitHero !",
       });
 
-      onAuthSuccess(authData.user);
+      // 🔥 REDIRECTION CONDITIONNELLE
+      setTimeout(() => {
+        if (hasCompletedOnboarding) {
+          window.location.href = '/dashboard'; // ✅ UTILISATEUR EXISTANT → DASHBOARD
+        } else {
+          window.location.href = '/onboarding'; // ✅ ONBOARDING INCOMPLET → QUESTIONNAIRE
+        }
+      }, 1000);
 
     } catch (err: any) {
       const errorMessage = err.message || 'Erreur lors de la connexion';
