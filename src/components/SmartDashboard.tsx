@@ -38,6 +38,15 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+interface WebhookPayload {
+  new: {
+    status: string;
+    webhook_response?: {
+      recommendation?: string;
+    };
+  };
+}
+
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -57,7 +66,9 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const getTodayWorkout = useCallback((profile: UserProfile) => {
+  const getTodayWorkout = useCallback((profile: UserProfile | null) => {
+    if (!profile) return 'Entraînement Général';
+    
     if (profile?.sport === 'rugby' && profile?.sport_position === 'pilier') {
       return 'Force Explosive - Mêlée';
     }
@@ -67,7 +78,9 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return 'Entraînement Personnalisé';
   }, []);
 
-  const getPersonalizedExercises = useCallback((profile: UserProfile) => {
+  const getPersonalizedExercises = useCallback((profile: UserProfile | null) => {
+    if (!profile) return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
+    
     const sport = profile?.sport;
     const goals = profile?.primary_goals;
     
@@ -79,7 +92,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
   }, []);
-
 
   const [dailyProgram, setDailyProgram] = useState<DailyProgramDisplay>({
     workout: {
@@ -170,7 +182,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     } finally {
       setLoadingDailyStats(false);
     }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, appStoreUser, dailyGoals.water, getTodayWorkout, getPersonalizedExercises]);
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, appStoreUser, dailyGoals, getTodayWorkout, getPersonalizedExercises]);
 
   useEffect(() => {
     loadInitialData();
@@ -237,7 +249,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             table: 'ai_requests',
             filter: `id=eq.${requestData.id}`
           },
-          (payload: any) => {
+          (payload: WebhookPayload) => {
             if (payload.new.status === 'completed' && payload.new.webhook_response) {
               const aiResponseContent = payload.new.webhook_response.recommendation || 'Je réfléchis...';
               const aiResponse: ChatMessage = {
@@ -345,28 +357,30 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow-sm border-b px-4 py-3">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-            <Brain size={20} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+              <Brain size={20} className="text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-gray-800">MyFitHero</h1>
+              <p className="text-xs text-gray-500">Assistant IA Personnel</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-bold text-gray-800">MyFitHero</h1>
-            <p className="text-xs text-gray-500">Assistant IA Personnel</p>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => navigate('/profile')}
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
+              <User size={20} />
+            </button>
+            <button 
+              onClick={handleSignOut}
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
+              <Settings size={20} />
+            </button>
           </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <button 
-            onClick={() => navigate('/profile')}
-            className="p-2 text-gray-500 hover:text-gray-700"
-          >
-            <User size={20} />
-          </button>
-          <button 
-            onClick={handleSignOut}
-            className="p-2 text-gray-500 hover:text-gray-700"
-          >
-            <Settings size={20} />
-          </button>
         </div>
       </div>
 
