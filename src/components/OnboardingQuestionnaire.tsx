@@ -21,7 +21,8 @@ import {
 // Exportation de cette interface pour être utilisée par App.tsx
 export interface UserProfileOnboarding {
   age: number | null;
-  gender: 'male' | 'female' | 'other' | null;
+  gender: 'male' | 'female' | 'other' | null; // L'interface garde 'other' pour la compatibilité si des profils existants l'ont.
+                                              // Le UI ne le proposera plus.
   lifestyle: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
   available_time_per_day: number | null; // minutes
   fitness_experience: 'beginner' | 'intermediate' | 'advanced' | 'expert' | null;
@@ -64,7 +65,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     season_period: null
   });
 
-  const totalSteps = 3; // Le nombre d'étapes reste le même, mais leur contenu change
+  const totalSteps = 3;
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   const goalOptions = [
@@ -84,7 +85,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     'Handball', 'Hockey', 'Escalade', 'Autre'
   ];
 
-  const updateProfile = (updates: Partial<UserProfileOnboarding>) => { // Utilise le type exporté
+  const updateProfile = (updates: Partial<UserProfileOnboarding>) => {
     setProfile(prev => ({ ...prev, ...updates }));
   };
 
@@ -93,7 +94,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     if (currentGoals.includes(goalId)) {
       updateProfile({ primary_goals: currentGoals.filter(g => g !== goalId) });
     } else {
-      if (currentGoals.length < 3) { // Limite à 3 objectifs pour le moment
+      if (currentGoals.length < 3) {
         updateProfile({ primary_goals: [...currentGoals, goalId] });
       }
     }
@@ -108,10 +109,11 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
       case 2: // ÉTAPE 2: Profil Personnel (Infos générales + Poids/Taille)
         return profile.age && profile.gender && profile.lifestyle &&
                profile.available_time_per_day && profile.fitness_experience &&
-               profile.height_cm && profile.weight_kg &&
-               profile.height_cm > 0 && profile.weight_kg > 0;
+               profile.height_cm !== null && profile.weight_kg !== null && // Vérifie si non null
+               profile.height_cm > 0 && profile.weight_kg > 0; // Vérifie si > 0
       case 3: // ÉTAPE 3: Contexte Sportif (Conditionnel si objectif "Performance")
         if (hasPerformanceGoal) {
+          // Si objectif performance, tous ces champs doivent être remplis
           return profile.sport && profile.sport_level && profile.training_frequency;
         }
         return true; // Si pas d'objectif performance, cette étape n'est pas bloquante
@@ -127,7 +129,6 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
       } else {
         const finalProfile = {
           ...profile,
-          // S'assurer que fitness_goal est défini même si un seul objectif est choisi
           fitness_goal: profile.primary_goals.length > 0 ? profile.primary_goals[0] : null
         };
         onComplete(finalProfile);
@@ -251,8 +252,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                 {/* Genre */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Genre</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['male', 'female', 'other'] as const).map((gender) => (
+                  <div className="grid grid-cols-2 gap-2"> {/* Modifié pour 2 colonnes */}
+                    {(['male', 'female'] as const).map((gender) => ( {/* Retire 'other' */}
                       <button
                         key={gender}
                         onClick={() => updateProfile({ gender })}
@@ -262,7 +263,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                             : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
                         }`}
                       >
-                        {gender === 'male' ? 'Homme' : gender === 'female' ? 'Femme' : 'Autre'}
+                        {gender === 'male' ? 'Homme' : 'Femme'}
                       </button>
                     ))}
                   </div>
