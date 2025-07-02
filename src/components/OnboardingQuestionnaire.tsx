@@ -37,6 +37,10 @@ export interface UserProfileOnboarding {
   sport_level: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
   training_frequency: number | null;
   season_period: 'off_season' | 'pre_season' | 'in_season' | 'recovery' | null;
+  dietary_preference?: string | null;
+  food_allergies?: string[];
+  dietary_restrictions?: string[];
+  food_dislikes?: string[];
 }
 
 interface OnboardingQuestionnaireProps {
@@ -61,7 +65,11 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     sport_position: null,
     sport_level: null,
     training_frequency: null,
-    season_period: null
+    season_period: null,
+    dietary_preference: 'omnivore',
+    food_allergies: [],
+    dietary_restrictions: [],
+    food_dislikes: []
   });
 
   // Types de profils disponibles
@@ -100,7 +108,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     }
   ];
 
-  const totalSteps = profile.modules.includes('sport') ? 4 : 3;
+  const totalSteps = profile.modules.includes('sport') ? 5 : profile.modules.includes('nutrition') ? 4 : 3;
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   const goalOptions = [
@@ -386,8 +394,84 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
             </div>
           )}
 
-          {/* ÉTAPE 2: Objectifs */}
-          {currentStep === 2 && (
+          {/* ÉTAPE 2: Préférences alimentaires (si nutrition incluse) */}
+          {currentStep === 2 && profile.modules.includes('nutrition') && (
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <Apple className="mx-auto text-green-600 mb-4" size={48} />
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">Vos préférences alimentaires</h2>
+                <p className="text-gray-600">Pour des recommandations nutritionnelles personnalisées</p>
+              </div>
+
+              {/* Régime alimentaire */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Régime alimentaire</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    { id: 'omnivore', label: '🍖 Omnivore', desc: 'Je mange de tout' },
+                    { id: 'vegetarian', label: '🥗 Végétarien', desc: 'Pas de viande ni poisson' },
+                    { id: 'vegan', label: '🌱 Végétalien', desc: 'Aucun produit animal' },
+                    { id: 'pescatarian', label: '🐟 Pescétarien', desc: 'Poisson mais pas de viande' },
+                    { id: 'flexitarian', label: '🥦 Flexitarien', desc: 'Principalement végétarien' },
+                    { id: 'keto', label: '🥑 Keto', desc: 'Pauvre en glucides' },
+                    { id: 'paleo', label: '🥩 Paléo', desc: 'Alimentation ancestrale' },
+                    { id: 'mediterranean', label: '🫒 Méditerranéen', desc: 'Riche en oméga-3' },
+                  ].map((diet) => (
+                    <button
+                      key={diet.id}
+                      onClick={() => updateProfile({ dietary_preference: diet.id as any })}
+                      className={`p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                        profile.dietary_preference === diet.id
+                          ? 'border-green-600 bg-green-50'
+                          : 'border-gray-200 bg-white hover:border-green-400'
+                      }`}
+                    >
+                      <div className="font-medium text-gray-800 mb-1">{diet.label}</div>
+                      <div className="text-sm text-gray-600">{diet.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Allergies et intolérances */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Allergies et intolérances</label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {[
+                    { id: 'gluten', label: '🌾 Gluten' },
+                    { id: 'lactose', label: '🥛 Lactose' },
+                    { id: 'nuts', label: '🥜 Fruits à coque' },
+                    { id: 'eggs', label: '🥚 Œufs' },
+                    { id: 'soy', label: '🌱 Soja' },
+                    { id: 'shellfish', label: '🦐 Crustacés' },
+                  ].map((allergy) => (
+                    <label
+                      key={allergy.id}
+                      className="flex items-center space-x-2 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={profile.food_allergies?.includes(allergy.id) || false}
+                        onChange={(e) => {
+                          const allergies = profile.food_allergies || [];
+                          if (e.target.checked) {
+                            updateProfile({ food_allergies: [...allergies, allergy.id] });
+                          } else {
+                            updateProfile({ food_allergies: allergies.filter(a => a !== allergy.id) });
+                          }
+                        }}
+                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{allergy.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ÉTAPE 3: Objectifs (décalée d'une étape) */}
+          {currentStep === 3 && (
             <div className="space-y-8">
               <div className="text-center mb-8">
                 <Target className="mx-auto text-purple-600 mb-4" size={48} />
@@ -432,8 +516,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
             </div>
           )}
 
-          {/* ÉTAPE 3: Sport (si inclus dans les modules) */}
-          {currentStep === 3 && profile.modules.includes('sport') && (
+          {/* ÉTAPE 4: Sport (si inclus dans les modules) */}
+          {currentStep === 4 && profile.modules.includes('sport') && (
             <div className="space-y-8">
               <div className="text-center mb-8">
                 <Dumbbell className="mx-auto text-green-600 mb-4" size={48} />
