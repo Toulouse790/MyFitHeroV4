@@ -28,13 +28,54 @@ const handleOnboardingComplete = async (profileData: UserProfileOnboarding) => {
       }
     };
 
+    // CALCUL AUTOMATIQUE CALORIES
+    const calculateDailyCalories = (age: number, gender: string, lifestyle: string, fitnessGoal: string) => {
+      const weight = 70; // Poids moyen par défaut
+      
+      // BMR (Métabolisme de base)
+      const bmr = gender === 'male' 
+        ? 88.362 + (13.397 * weight) + (4.799 * 175) - (5.677 * age)
+        : 447.593 + (9.247 * weight) + (3.098 * 160) - (4.330 * age);
+      
+      // Facteur d'activité selon lifestyle
+      const activityFactors = {
+        'student': 1.4,
+        'office_worker': 1.3,
+        'physical_job': 1.6,
+        'retired': 1.2
+      };
+      
+      const activityFactor = activityFactors[lifestyle as keyof typeof activityFactors] || 1.4;
+      
+      // Ajustement selon l'objectif
+      const goalAdjustment = {
+        'weight_loss': -300,
+        'muscle_gain': +400,
+        'performance': +200,
+        'general': 0
+      };
+      
+      const adjustment = goalAdjustment[fitnessGoal as keyof typeof goalAdjustment] || 0;
+      
+      return Math.round(bmr * activityFactor + adjustment);
+    };
+
     const activeModules = getActiveModules(profileData.profile_type);
+    const dailyCalories = calculateDailyCalories(
+      profileData.age || 25, 
+      profileData.gender || 'male', 
+      profileData.lifestyle || 'office_worker', 
+      profileData.fitness_goal || 'general'
+    );
     
     const updatesToDb: Partial<SupabaseDBUserProfileType> = {
       // NOUVEAUX champs critiques
       profile_type: profileData.profile_type,
       modules: ['sport', 'nutrition', 'sleep', 'hydration'], // Toujours les 4 disponibles
       active_modules: activeModules, // Modules activés selon le profil
+      
+      // CALCUL AUTOMATIQUE CALORIES
+      daily_calories: dailyCalories,
       
       // Champs existants
       age: profileData.age,
@@ -55,6 +96,7 @@ const handleOnboardingComplete = async (profileData: UserProfileOnboarding) => {
     };
     
     console.log('Saving to DB with active_modules:', activeModules);
+    console.log('Daily calories calculated:', dailyCalories);
     
     const { data, error } = await supabase
       .from('user_profiles')
