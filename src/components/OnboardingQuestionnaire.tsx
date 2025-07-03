@@ -22,7 +22,8 @@ import {
 
 export interface UserProfileOnboarding {
   profile_type: 'complete' | 'wellness' | 'sport_only' | 'sleep_focus';
-  modules: string[];
+  modules: string[]; // Toujours ['sport', 'nutrition', 'sleep', 'hydration']
+  active_modules?: string[]; // Les modules activés selon profile_type
   age: number | null;
   gender: 'male' | 'female' | null;
   lifestyle: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
@@ -52,7 +53,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
   const [currentStep, setCurrentStep] = useState(0);
   const [profile, setProfile] = useState<UserProfileOnboarding>({
     profile_type: 'complete',
-    modules: [],
+    modules: ['sport', 'nutrition', 'sleep', 'hydration'], // Toujours les 4 disponibles
+    active_modules: ['sport', 'nutrition', 'sleep', 'hydration'], // Par défaut complete
     age: null,
     gender: null,
     lifestyle: null,
@@ -72,7 +74,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     food_dislikes: []
   });
 
-  // Types de profils disponibles
+  // Types de profils disponibles avec mapping exact
   const profileTypes = [
     {
       id: 'complete',
@@ -112,8 +114,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
   const getTotalSteps = () => {
     let steps = 3; // Étape 0: Type, Étape 1: Infos perso, Étape 2: Objectifs
     
-    if (profile.modules.includes('nutrition')) steps++; // Étape préférences alimentaires
-    if (profile.modules.includes('sport')) steps++; // Étape sport
+    if (profile.active_modules?.includes('nutrition')) steps++; // Étape préférences alimentaires
+    if (profile.active_modules?.includes('sport')) steps++; // Étape sport
     
     return steps;
   };
@@ -173,7 +175,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     if (selectedType) {
       updateProfile({
         profile_type: typeId as any,
-        modules: selectedType.modules
+        active_modules: selectedType.modules // Mettre à jour les modules actifs
       });
     }
   };
@@ -192,7 +194,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
   const canProceedToNextStep = () => {
     switch (currentStep) {
       case 0: // Choix du type de profil
-        return profile.profile_type && profile.modules.length > 0;
+        return profile.profile_type && profile.active_modules && profile.active_modules.length > 0;
       case 1: // Infos personnelles
         return profile.age && profile.gender && profile.lifestyle;
       case 2: // Objectifs
@@ -207,8 +209,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     
     // Si on est après les objectifs, déterminer quelle étape afficher
     if (stepIndex > 2) {
-      const hasNutrition = profile.modules.includes('nutrition');
-      const hasSport = profile.modules.includes('sport');
+      const hasNutrition = profile.active_modules?.includes('nutrition');
+      const hasSport = profile.active_modules?.includes('sport');
       
       if (stepIndex === 3) {
         if (hasNutrition) return 'nutrition';
@@ -228,20 +230,37 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      // FINALISATION
+      // FINALISATION AVEC ACTIVE_MODULES
       try {
-        const finalProfile = {
+        const finalProfile: UserProfileOnboarding = {
           ...profile,
+          // CRITIQUES: Assurer la cohérence des modules
+          modules: ['sport', 'nutrition', 'sleep', 'hydration'], // Toujours les 4 disponibles
+          active_modules: profile.active_modules || [], // Les modules choisis selon profile_type
+          
+          // Autres champs obligatoires avec fallbacks
           fitness_goal: profile.primary_goals.length > 0 ? profile.primary_goals[0] : 'general',
-          // Valeurs par défaut pour éviter les erreurs
           sport: profile.sport || 'none',
           sport_level: profile.sport_level || 'recreational',
           training_frequency: profile.training_frequency || 0,
           season_period: profile.season_period || 'off_season',
-          available_time_per_day: profile.modules.includes('sport') ? (profile.available_time_per_day || 30) : 0
+          available_time_per_day: profile.active_modules?.includes('sport') ? (profile.available_time_per_day || 30) : 0,
+          
+          // Assurer les valeurs par défaut pour éviter les erreurs
+          dietary_preference: profile.dietary_preference || 'omnivore',
+          food_allergies: profile.food_allergies || [],
+          dietary_restrictions: profile.dietary_restrictions || [],
+          food_dislikes: profile.food_dislikes || [],
+          injuries: profile.injuries || [],
+          motivation: profile.motivation || ''
         };
         
-        console.log('Envoi du profil final:', finalProfile);
+        console.log('🚀 Profil final avec active_modules:', {
+          profile_type: finalProfile.profile_type,
+          modules: finalProfile.modules,
+          active_modules: finalProfile.active_modules,
+          total_active: finalProfile.active_modules?.length
+        });
         
         // Appeler onComplete
         if (typeof onComplete === 'function') {
@@ -326,7 +345,9 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                           {isSelected && (
                             <div className="mt-2 flex items-center text-blue-600">
                               <CheckCircle size={16} className="mr-1" />
-                              <span className="text-sm font-medium">Sélectionné</span>
+                              <span className="text-sm font-medium">
+                                {type.modules.length} module(s) activé(s)
+                              </span>
                             </div>
                           )}
                         </div>
@@ -362,7 +383,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                   />
                 </div>
 
-                {/* Genre - SANS "Autre" */}
+                {/* Genre */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Genre</label>
                   <div className="grid grid-cols-2 gap-2">
@@ -399,7 +420,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                 </div>
 
                 {/* Temps disponible - SEULEMENT si module sport */}
-                {profile.modules.includes('sport') && (
+                {profile.active_modules?.includes('sport') && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Temps disponible par jour</label>
                     <select
@@ -417,7 +438,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                 )}
 
                 {/* Expérience fitness - SEULEMENT si module sport */}
-                {profile.modules.includes('sport') && (
+                {profile.active_modules?.includes('sport') && (
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Expérience en fitness</label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -668,6 +689,19 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ onCom
                   <AlertCircle size={16} className="text-orange-500" />
                   <span>Veuillez remplir les champs requis</span>
                 </>
+              )}
+              {/* Indicateur des modules actifs */}
+              {profile.active_modules && profile.active_modules.length > 0 && (
+                <div className="hidden md:flex items-center space-x-1 text-blue-600">
+                  <span className="text-xs">Modules:</span>
+                  {profile.active_modules.map((module, index) => (
+                    <span key={module} className="text-xs bg-blue-100 px-2 py-1 rounded">
+                      {module === 'sport' ? '🏋️' : 
+                       module === 'nutrition' ? '🍎' : 
+                       module === 'sleep' ? '😴' : '💧'}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 
