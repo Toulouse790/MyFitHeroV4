@@ -512,6 +512,14 @@ export type Database = {
           updated_at: string | null
           username: string | null
           weight_kg: number | null
+          profile_type: string | null
+          modules: string[] | null
+          active_modules: string[] | null
+          dietary_preference: string | null
+          dietary_restrictions: string[] | null
+          food_allergies: string[] | null
+          food_dislikes: string[] | null
+          country_code: string | null
         }
         Insert: {
           activity_level?: string | null
@@ -539,6 +547,14 @@ export type Database = {
           updated_at?: string | null
           username?: string | null
           weight_kg?: number | null
+          profile_type?: string | null
+          modules?: string[] | null
+          active_modules?: string[] | null
+          dietary_preference?: string | null
+          dietary_restrictions?: string[] | null
+          food_allergies?: string[] | null
+          food_dislikes?: string[] | null
+          country_code?: string | null
         }
         Update: {
           activity_level?: string | null
@@ -566,6 +582,14 @@ export type Database = {
           updated_at?: string | null
           username?: string | null
           weight_kg?: number | null
+          profile_type?: string | null
+          modules?: string[] | null
+          active_modules?: string[] | null
+          dietary_preference?: string | null
+          dietary_restrictions?: string[] | null
+          food_allergies?: string[] | null
+          food_dislikes?: string[] | null
+          country_code?: string | null
         }
         Relationships: []
       }
@@ -810,3 +834,11 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
+// Types additionnels pour l'export
+export type UserProfile = Tables<'user_profiles'>
+export type HydrationEntry = Tables<'hydration_logs'>
+export type Meal = Tables<'meals'>
+export type SleepSession = Tables<'sleep_sessions'>
+export type DailyStats = Tables<'daily_stats'>
+export type AiRecommendation = Tables<'ai_recommendations'>
