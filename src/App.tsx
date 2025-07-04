@@ -143,3 +143,4 @@ const handleOnboardingComplete = async (profileData: UserProfileOnboarding) => {
     });
   }
 };
+export default App;
