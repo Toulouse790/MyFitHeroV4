@@ -48,9 +48,10 @@ const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Store et hooks
-  const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
+  const { appStoreUser, updateAppStoreUserProfile, setUser, clearUser } = useAppStore();
   const { toast } = useToast();
 
   console.log('📦 Store user:', appStoreUser);
@@ -59,33 +60,52 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log('🔄 Checking auth session...');
 
-    // Récupérer la session actuelle
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('📱 Current session:', session ? 'Found' : 'None');
-      setSession(session);
-      
-      if (session?.user) {
-        checkOnboardingStatus(session.user.id);
-      } else {
+    const initializeAuth = async () => {
+      try {
+        // Récupérer la session actuelle
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('❌ Erreur de session:', sessionError);
+          setError(sessionError.message);
+          setLoading(false);
+          return;
+        }
+
+        console.log('📱 Current session:', session ? 'Found' : 'None');
+        setSession(session);
+        
+        if (session?.user) {
+          await checkOnboardingStatus(session.user.id);
+        } else {
+          clearUser();
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('❌ Erreur lors de l\'initialisation auth:', err);
+        setError('Erreur de connexion');
         setLoading(false);
       }
-    });
+    };
+
+    initializeAuth();
 
     // Écouter les changements d'auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('🔄 Auth state changed:', _event);
       setSession(session);
       
       if (session?.user) {
-        checkOnboardingStatus(session.user.id);
+        await checkOnboardingStatus(session.user.id);
       } else {
         setHasCompletedOnboarding(false);
+        clearUser();
         setLoading(false);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [clearUser]);
 
   // Vérifier le statut onboarding
   const checkOnboardingStatus = async (userId: string) => {
@@ -100,19 +120,21 @@ const App: React.FC = () => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('❌ Error checking onboarding:', error);
+        setError('Erreur lors de la vérification du profil');
         setLoading(false);
         return;
       }
 
-      if (data && data.age && data.gender && data.sport) {
+      if (data && data.age && data.gender && data.profile_type) {
         console.log('✅ Onboarding completed');
         setHasCompletedOnboarding(true);
         
         // Mettre à jour le store avec les données utilisateur
-        updateAppStoreUserProfile({
+        const userData = {
           id: data.id,
-          name: data.full_name || data.username || 'Utilisateur',
-          email: data.email || '',
+          username: data.username,
+          full_name: data.full_name,
+          email: data.email || session?.user?.email || '',
           age: data.age,
           gender: data.gender,
           sport: data.sport,
@@ -128,14 +150,23 @@ const App: React.FC = () => {
           active_modules: data.active_modules || ['sport'],
           modules: data.modules || ['sport', 'nutrition', 'sleep', 'hydration'],
           profile_type: data.profile_type,
-          sport_specific_stats: data.sport_specific_stats || {}
-        });
+          sport_specific_stats: data.sport_specific_stats || {},
+          level: 1, // Valeur par défaut
+          totalPoints: 0, // Valeur par défaut
+          joinDate: new Date(data.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+          injuries: data.injuries || [],
+          motivation: data.motivation || '',
+          fitness_goal: data.fitness_goal
+        };
+
+        setUser(userData);
       } else {
         console.log('⚠️ Onboarding not completed');
         setHasCompletedOnboarding(false);
       }
     } catch (error) {
       console.error('❌ Error in checkOnboardingStatus:', error);
+      setError('Erreur lors de la vérification du profil');
     } finally {
       setLoading(false);
     }
@@ -259,9 +290,10 @@ const App: React.FC = () => {
         console.log('✅ Onboarding completed successfully:', data[0]);
         
         // Mettre à jour le store
-        updateAppStoreUserProfile({
+        const userData = {
           id: data[0].id,
-          name: data[0].full_name || data[0].username || 'Utilisateur',
+          username: data[0].username,
+          full_name: data[0].full_name,
           email: session.user.email || '',
           age: data[0].age,
           gender: data[0].gender,
@@ -278,11 +310,16 @@ const App: React.FC = () => {
           active_modules: data[0].active_modules || activeModules,
           modules: data[0].modules || ['sport', 'nutrition', 'sleep', 'hydration'],
           profile_type: data[0].profile_type,
-          level: appStoreUser.level || 1,
-          totalPoints: appStoreUser.totalPoints || 0,
-          joinDate: new Date(data[0].created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-        });
+          level: 1,
+          totalPoints: 0,
+          joinDate: new Date(data[0].created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+          sport_specific_stats: data[0].sport_specific_stats || {},
+          injuries: data[0].injuries || [],
+          motivation: data[0].motivation || '',
+          fitness_goal: data[0].fitness_goal
+        };
         
+        setUser(userData);
         setHasCompletedOnboarding(true);
         
         toast({
@@ -313,6 +350,24 @@ const App: React.FC = () => {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4 text-red-600">Erreur</h1>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Pas de session = redirection auth
   if (!session) {
     return (
@@ -322,7 +377,7 @@ const App: React.FC = () => {
           <p className="text-gray-600 mb-4">Veuillez vous connecter</p>
           <button 
             onClick={() => window.location.href = '/auth'}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Se connecter
           </button>
