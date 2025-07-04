@@ -31,12 +31,12 @@ import {
   BarChart3
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { useAppStore } from '@/stores/useAppStore';
 import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';
 import { DailyStats, AiRecommendation, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { AppUser } from '@/stores/useAppStore';
+import { UserProfile } from '@/types/user';
 
 interface SmartDashboardProps {
   userProfile?: SupabaseAuthUserType;
@@ -69,16 +69,8 @@ interface PersonalizedWidget {
   path?: string;
 }
 
-interface SportConfig {
-  emoji: string;
-  positions: string[];
-  workoutTypes: string[];
-  motivationalPhrases: string[];
-  specificExercises: string[];
-}
-
 const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isListening, setIsListening] = useState(false);
@@ -91,114 +83,24 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     dailyGoals,
     fetchDailyStats,
     fetchAiRecommendations,
-    appStoreUser
+    user: appStoreUser
   } = useAppStore();
 
   const today = new Date().toISOString().split('T')[0];
 
-  // ===== CONFIGURATION DYNAMIQUE PAR SPORT =====
-  const getSportConfig = useCallback((sport: string | null | undefined): SportConfig => {
-    const sportConfigs: Record<string, SportConfig> = {
-      // SPORTS US (marché principal)
-      'american_football': {
-        emoji: '🏈',
-        positions: ['quarterback', 'running_back', 'wide_receiver', 'tight_end', 'offensive_line', 'defensive_line', 'linebacker', 'cornerback', 'safety'],
-        workoutTypes: ['Explosive Power', 'Speed & Agility', 'Strength Training', 'Conditioning'],
-        motivationalPhrases: [
-          'Time to dominate the field!',
-          'Champions are made in the gym!',
-          'Every rep gets you closer to the endzone!'
-        ],
-        specificExercises: ['Power cleans', 'Box jumps', '40-yard dashes', 'Bench press', 'Squats']
-      },
-      'basketball': {
-        emoji: '🏀',
-        positions: ['point_guard', 'shooting_guard', 'small_forward', 'power_forward', 'center'],
-        workoutTypes: ['Vertical Jump', 'Agility Training', 'Court Conditioning', 'Shot Mechanics'],
-        motivationalPhrases: [
-          'Shoot for greatness!',
-          'Ball is life, grind is everything!',
-          'Every shot counts, every rep matters!'
-        ],
-        specificExercises: ['Jump squats', 'Ladder drills', 'Free throws', 'Defensive slides', 'Plyometrics']
-      },
-      'baseball': {
-        emoji: '⚾',
-        positions: ['pitcher', 'catcher', 'first_base', 'second_base', 'third_base', 'shortstop', 'outfield'],
-        workoutTypes: ['Rotational Power', 'Arm Strength', 'Base Running', 'Core Stability'],
-        motivationalPhrases: [
-          'Swing for the fences!',
-          'Champions play 162 games!',
-          'Every at-bat is a new opportunity!'
-        ],
-        specificExercises: ['Medicine ball throws', 'Batting practice', 'Sprint intervals', 'Rotational core', 'Arm care']
-      },
-      'tennis': {
-        emoji: '🎾',
-        positions: ['singles', 'doubles'],
-        workoutTypes: ['Court Movement', 'Serve Power', 'Endurance', 'Recovery'],
-        motivationalPhrases: [
-          'Game, set, match your goals!',
-          'Every point is a new beginning!',
-          'Champions never give up!'
-        ],
-        specificExercises: ['Lateral movements', 'Serve practice', 'Cardio intervals', 'Flexibility', 'Reaction drills']
-      },
-      'golf': {
-        emoji: '⛳',
-        positions: ['driver', 'iron_play', 'putting', 'short_game'],
-        workoutTypes: ['Swing Mechanics', 'Core Rotation', 'Balance', 'Mental Game'],
-        motivationalPhrases: [
-          'Drive for perfection!',
-          'Every swing is practice!',
-          'Par excellence, birdie mentality!'
-        ],
-        specificExercises: ['Core rotations', 'Balance drills', 'Flexibility', 'Putting practice', 'Swing analysis']
-      },
-      // SPORTS INTERNATIONAUX
-      'football': {
-        emoji: '⚽',
-        positions: ['goalkeeper', 'defender', 'midfielder', 'forward', 'winger'],
-        workoutTypes: ['Ball Control', 'Conditioning', 'Tactical Training', 'Speed Work'],
-        motivationalPhrases: [
-          'The beautiful game awaits!',
-          'Every touch matters!',
-          'Play with passion, train with purpose!'
-        ],
-        specificExercises: ['Ball drills', 'Sprint intervals', 'Agility cones', 'Shooting practice', 'Tactical runs']
-      },
-      // Valeur par défaut
-      'general': {
-        emoji: '💪',
-        positions: ['athlete'],
-        workoutTypes: ['Strength Training', 'Cardio', 'Flexibility', 'Functional Fitness'],
-        motivationalPhrases: [
-          'Push your limits!',
-          'Every workout counts!',
-          'Be your best self!'
-        ],
-        specificExercises: ['Squats', 'Push-ups', 'Planks', 'Burpees', 'Mountain climbers']
-      }
-    };
-
-    return sportConfigs[sport?.toLowerCase().replace(/\s+/g, '_') || 'general'] || sportConfigs['general'];
-  }, []);
-
-  // ===== FONCTIONS DE PERSONNALISATION DYNAMIQUE =====
+  // ===== FONCTIONS DE PERSONNALISATION ULTRA-POUSSÉE =====
 
   const getPersonalizedGreeting = useCallback(() => {
     const hour = new Date().getHours();
     const user = appStoreUser;
     const firstName = user?.username?.split(' ')[0] || user?.full_name?.split(' ')[0] || 'Champion';
-    const sportConfig = getSportConfig(user?.sport);
     
-    // Salutations selon l'heure ET le sport
+    // Salutations selon l'heure ET le profil sportif
     if (hour < 6) {
-      return `🌙 ${firstName}, encore debout ? ${sportConfig.emoji} Les champions se lèvent tôt !`;
+      return `🌙 ${firstName}, encore debout ? ${user?.sport === 'rugby' ? 'Les piliers se lèvent tôt !' : 'Repos = gains !'}`;
     } else if (hour < 12) {
-      if (user?.sport) {
-        const randomPhrase = sportConfig.motivationalPhrases[Math.floor(Math.random() * sportConfig.motivationalPhrases.length)];
-        return `${sportConfig.emoji} Bonjour ${firstName} ! ${randomPhrase}`;
+      if (user?.sport === 'rugby' && user?.sport_position === 'pilier') {
+        return `🏉 Bonjour ${firstName} ! Prêt à dominer la mêlée aujourd'hui ?`;
       } else if (user?.primary_goals?.includes('weight_loss')) {
         return `🔥 Salut ${firstName} ! Ready to burn some calories ?`;
       } else if (user?.primary_goals?.includes('muscle_gain')) {
@@ -207,38 +109,35 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         return `☀️ Bonjour ${firstName} ! Prêt à conquérir cette journée ?`;
       }
     } else if (hour < 18) {
-      return `👋 Salut ${firstName} ! ${user?.sport ? `Comment se passe ta prep ${sportConfig.emoji} ?` : 'Tu gères ta journée !'}`;
+      return `👋 Salut ${firstName} ! ${user?.sport ? 'Comment se passe ta prep ?' : 'Tu gères ta journée !'}`;
     } else {
-      return `🌆 Bonsoir ${firstName} ! ${user?.primary_goals?.includes('sleep_quality') ? 'Time to wind down ?' : `Fini ta journée ${sportConfig.emoji} ?`}`;
+      return `🌆 Bonsoir ${firstName} ! ${user?.primary_goals?.includes('sleep_quality') ? 'Time to wind down ?' : 'Fini ta journée fitness ?'}`;
     }
-  }, [appStoreUser, getSportConfig]);
+  }, [appStoreUser]);
 
-  const getPersonalizedWorkout = useCallback((profile: AppUser | null) => {
+  const getPersonalizedWorkout = useCallback((profile: UserProfile | null) => {
     if (!profile) return 'Entraînement Général';
     
     const day = new Date().getDay(); // 0 = dimanche, 1 = lundi, etc.
-    const sportConfig = getSportConfig(profile.sport);
     
     // Programme ultra-spécifique selon sport + poste + jour
-    if (profile.sport && sportConfig.workoutTypes.length > 0) {
-      if (profile.sport_position && sportConfig.positions.includes(profile.sport_position)) {
-        // Position-specific workout
-        const positionName = profile.sport_position.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    if (profile.sport === 'rugby') {
+      if (profile.sport_position === 'pilier') {
         if ([1, 3, 5].includes(day)) { // Lun, Mer, Ven
-          return `${sportConfig.emoji} ${sportConfig.workoutTypes[0]} - ${positionName}`;
+          return '🏉 Force Explosive - Mêlée';
         } else if ([2, 4].includes(day)) { // Mar, Jeu
-          return `${sportConfig.emoji} ${sportConfig.workoutTypes[1]} - ${positionName}`;
+          return '🏃 Mobilité & Cardio Rugby';
         } else {
-          return `${sportConfig.emoji} Recovery - ${positionName}`;
+          return '😌 Récupération Active - Pilier';
         }
+      } else if (profile.sport_position?.includes('arrière')) {
+        return '⚡ Vitesse & Agilité - Arrière';
       } else {
-        // General sport workout
-        const workoutType = sportConfig.workoutTypes[day % sportConfig.workoutTypes.length];
-        return `${sportConfig.emoji} ${workoutType}`;
+        return '🏉 Entraînement Rugby - ' + (profile.sport_position || 'All Positions');
       }
     }
     
-    // Programme selon objectifs (fallback)
+    // Programme selon objectifs
     if (profile.primary_goals?.includes('muscle_gain')) {
       const workouts = ['💪 Hypertrophie Pectoraux', '🎯 Dos & Largeur', '🦵 Leg Day Intense', '🔥 Bras & Épaules'];
       return workouts[day % workouts.length];
@@ -254,19 +153,21 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
     
     return 'Entraînement Personnalisé';
-  }, [getSportConfig]);
+  }, []);
 
-  const getPersonalizedExercises = useCallback((profile: AppUser | null) => {
+  const getPersonalizedExercises = useCallback((profile: UserProfile | null) => {
     if (!profile) return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
     
-    const sportConfig = getSportConfig(profile.sport);
-    
     // Exercices spécifiques au sport
-    if (profile.sport && sportConfig.specificExercises.length > 0) {
-      return sportConfig.specificExercises.slice(0, 4); // Prendre les 4 premiers
+    if (profile.sport === 'rugby' && profile.sport_position === 'pilier') {
+      return ['Squat lourd 5x3', 'Développé couché 4x6', 'Rowing barre 4x8', 'Poussée traîneau 3x20m'];
     }
     
-    // Exercices selon objectifs (fallback)
+    if (profile.sport === 'rugby' && profile.sport_position?.includes('arrière')) {
+      return ['Sprint 40m x6', 'Pliométrie', 'Agilité échelle', 'Récupération ballon'];
+    }
+    
+    // Exercices selon objectifs
     if (profile.primary_goals?.includes('weight_loss')) {
       return ['HIIT 20min', 'Burpees 4x15', 'Mountain climbers 3x30s', 'Jump squats 4x12'];
     }
@@ -276,25 +177,23 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
     
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
-  }, [getSportConfig]);
+  }, []);
 
-  const getSmartReminders = useCallback((profile: AppUser | null, stats: DailyStats | null) => {
+  const getSmartReminders = useCallback((profile: UserProfile | null, stats: DailyStats | null) => {
     const reminders: PersonalizedWidget[] = [];
     const firstName = profile?.username?.split(' ')[0] || 'Champion';
-    const sportConfig = getSportConfig(profile?.sport);
     
-    // Reminders hyper-contextuels selon sport
+    // Reminders hyper-contextuels
     if (!stats?.workouts_completed) {
-      if (profile?.sport) {
-        const randomPhrase = sportConfig.motivationalPhrases[Math.floor(Math.random() * sportConfig.motivationalPhrases.length)];
+      if (profile?.sport === 'rugby' && profile?.sport_position === 'pilier') {
         reminders.push({
-          id: 'workout_sport',
-          title: `${sportConfig.emoji} Time to train!`,
-          content: `${firstName}, ${randomPhrase}`,
+          id: 'workout_rugby',
+          title: '🏉 Ton pack d\'avant t\'attend !',
+          content: `${firstName}, la mêlée ne se gagnera pas toute seule ! Time to hit the gym 💪`,
           icon: Dumbbell,
           color: 'bg-red-500',
           priority: 'high',
-          action: 'Let\'s go',
+          action: 'Commencer',
           path: '/workout'
         });
       } else if (profile?.primary_goals?.includes('weight_loss')) {
@@ -305,7 +204,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           icon: Flame,
           color: 'bg-orange-500',
           priority: 'high',
-          action: 'Burn it',
+          action: 'Let\'s go',
           path: '/workout'
         });
       } else {
@@ -345,7 +244,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       reminders.push({
         id: 'calories_over',
         title: '⚠️ Calories dépassées',
-        content: `${firstName}, +${cals - calorieGoal} kcal. Un petit cardio ce soir ?`,
+        content: `${firstName}, +${cals - calorieGoal} kcal. Un petit HIIT ce soir ?`,
         icon: AlertCircle,
         color: 'bg-yellow-500',
         priority: 'low',
@@ -369,17 +268,16 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       const priority = { high: 3, medium: 2, low: 1 };
       return priority[b.priority] - priority[a.priority];
     }).slice(0, 2); // Max 2 reminders
-  }, [dailyGoals, getSportConfig]);
+  }, [dailyGoals]);
 
-  const getPersonalizedMotivation = useCallback((profile: AppUser | null, stats: DailyStats | null) => {
+  const getPersonalizedMotivation = useCallback((profile: UserProfile | null, stats: DailyStats | null) => {
     const firstName = profile?.username?.split(' ')[0] || 'Champion';
-    const sportConfig = getSportConfig(profile?.sport);
     const motivations: string[] = [];
     
     // Motivation selon progression
     if (stats?.workouts_completed && stats.workouts_completed > 0) {
-      if (profile?.sport) {
-        motivations.push(`${sportConfig.emoji} ${firstName}, encore un workout de warrior ! You're crushing it !`);
+      if (profile?.sport === 'rugby') {
+        motivations.push(`🏉 ${firstName}, encore un workout de warrior ! La mêlée sera à toi !`);
       } else {
         motivations.push(`🔥 ${firstName}, encore une victoire ! Tu es unstoppable !`);
       }
@@ -394,23 +292,18 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       motivations.push(`🎯 ${firstName}, tu contrôles ton alimentation comme un pro !`);
     }
     
-    // Motivation par défaut avec sport
+    // Motivation par défaut
     if (motivations.length === 0) {
       const hour = new Date().getHours();
       if (hour < 12) {
-        if (profile?.sport) {
-          const randomPhrase = sportConfig.motivationalPhrases[Math.floor(Math.random() * sportConfig.motivationalPhrases.length)];
-          motivations.push(`${sportConfig.emoji} ${firstName}, ${randomPhrase}`);
-        } else {
-          motivations.push(`💪 ${firstName}, prêt à transformer cette journée en victoire ?`);
-        }
+        motivations.push(`💪 ${firstName}, prêt à transformer cette journée en victoire ?`);
       } else {
         motivations.push(`🌟 ${firstName}, continue comme ça, tu es sur la bonne voie !`);
       }
     }
     
     return motivations[0];
-  }, [dailyGoals, getSportConfig]);
+  }, [dailyGoals]);
 
   // ===== ÉTAT INITIAL ET DONNÉES =====
 
@@ -471,72 +364,26 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           }
         }));
       }
-
-      const recentAiRecs = await fetchAiRecommendations(userProfile.id, 'general', 3);
-      if (recentAiRecs.length > 0) {
-        setMessages(recentAiRecs.map((rec, index) => ({
-          id: index + 1,
-          type: 'ai',
-          content: rec.recommendation,
-          timestamp: new Date(rec.created_at)
-        })));
-      } else {
-        // Message d'accueil ultra-personnalisé
-        setMessages([
-          {
-            id: 1,
-            type: 'ai',
-            content: getPersonalizedGreeting(),
-            timestamp: new Date()
-          }
-        ]);
-      }
-
     } catch (error) {
-      console.error('Erreur chargement données dashboard:', error);
-      setMessages([
-        {
-          id: 1,
-          type: 'ai',
-          content: getPersonalizedGreeting(),
-          timestamp: new Date()
-        }
-      ]);
+      console.error('Error loading daily stats:', error);
     } finally {
       setLoadingDailyStats(false);
     }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, appStoreUser, dailyGoals, getPersonalizedWorkout, getPersonalizedGreeting]);
+  }, [userProfile, today, fetchDailyStats, appStoreUser, dailyGoals, getPersonalizedWorkout]);
 
   useEffect(() => {
     loadInitialData();
   }, [loadInitialData]);
 
-  const detectMessageType = (message: string): string => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('sport') || lowerMessage.includes('workout') || lowerMessage.includes('musculation') || lowerMessage.includes('exercice') || lowerMessage.includes('entraînement')) {
-      return 'workout';
-    }
-    if (lowerMessage.includes('nutrition') || lowerMessage.includes('manger') || lowerMessage.includes('calories') || lowerMessage.includes('repas')) {
-      return 'nutrition';
-    }
-    if (lowerMessage.includes('sommeil') || lowerMessage.includes('dormir') || lowerMessage.includes('repos') || lowerMessage.includes('nuit')) {
-      return 'sleep';
-    }
-    if (lowerMessage.includes('eau') || lowerMessage.includes('hydratation') || lowerMessage.includes('boire')) {
-      return 'hydration';
-    }
-    
-    return 'general';
-  };
+  // ===== CHAT ET IA =====
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || !userProfile?.id) return;
+  const sendMessage = useCallback(async (message: string) => {
+    if (!message.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
-      id: messages.length + 1,
+      id: Date.now(),
       type: 'user',
-      content: inputMessage,
+      content: message,
       timestamp: new Date()
     };
 
@@ -546,535 +393,408 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
     try {
       const contextData: SmartDashboardContext = {
-        user_profile: {
-          id: userProfile.id,
-          username: appStoreUser.username,
-          age: appStoreUser.age,
-          gender: appStoreUser.gender,
-          fitness_goal: appStoreUser.goal,
-          primary_goals: appStoreUser.primary_goals,
-          sport: appStoreUser.sport,
-          sport_position: appStoreUser.sport_position,
-          fitness_experience: appStoreUser.fitness_experience,
-          lifestyle: appStoreUser.lifestyle,
-          available_time_per_day: appStoreUser.available_time_per_day,
-          training_frequency: appStoreUser.training_frequency,
-          season_period: appStoreUser.season_period,
-          injuries: appStoreUser.injuries,
-        },
-        current_daily_stats: dailyStats,
-        daily_program: dailyProgram,
-        last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
+        userProfile: appStoreUser,
+        dailyStats: dailyStats,
+        currentGoals: dailyGoals,
+        currentProgram: dailyProgram,
+        personalizedGreeting: getPersonalizedGreeting(),
+        personalizedWorkout: getPersonalizedWorkout(appStoreUser),
+        personalizedExercises: getPersonalizedExercises(appStoreUser),
+        smartReminders: getSmartReminders(appStoreUser, dailyStats),
+        personalizedMotivation: getPersonalizedMotivation(appStoreUser, dailyStats)
       };
 
-      const { data: requestData, error: requestError } = await supabase
+      const { data, error } = await supabase
         .from('ai_requests')
         .insert({
-          user_id: userProfile.id,
-          pillar_type: detectMessageType(inputMessage),
-          prompt: inputMessage,
-          context: contextData as Json,
+          user_id: userProfile?.id,
+          pillar_type: 'dashboard',
+          context: contextData,
+          request_details: {
+            message: message,
+            timestamp: new Date().toISOString()
+          },
           status: 'pending'
         })
         .select()
         .single();
 
-      if (requestError) throw requestError;
+      if (error) throw error;
 
-      const subscription = supabase
-        .channel(`ai_request:${requestData.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'ai_requests',
-            filter: `id=eq.${requestData.id}`
-          },
+      // Écouter les réponses de l'IA
+      const channel = supabase
+        .channel('ai_responses')
+        .on('postgres_changes', 
+          { event: 'UPDATE', schema: 'public', table: 'ai_requests', filter: `id=eq.${data.id}` },
           (payload: WebhookPayload) => {
-            if (payload.new.status === 'completed' && payload.new.webhook_response) {
-              const aiResponseContent = payload.new.webhook_response.recommendation || 'Je réfléchis...';
+            if (payload.new.status === 'completed' && payload.new.webhook_response?.recommendation) {
               const aiResponse: ChatMessage = {
-                id: messages.length + 2,
+                id: Date.now() + 1,
                 type: 'ai',
-                content: aiResponseContent,
+                content: payload.new.webhook_response.recommendation,
                 timestamp: new Date()
               };
               setMessages(prev => [...prev, aiResponse]);
               setIsLoading(false);
-              subscription.unsubscribe();
             }
           }
         )
         .subscribe();
 
+      // Nettoyage après 30 secondes
       setTimeout(() => {
-        if (isLoading) {
-          setMessages(prev => [...prev, {
-            id: messages.length + 2,
-            type: 'ai',
-            content: 'Désolé, le traitement prend plus de temps que prévu. Réessayez dans un moment.',
-            timestamp: new Date()
-          }]);
-          setIsLoading(false);
-          subscription.unsubscribe();
-        }
+        channel.unsubscribe();
+        setIsLoading(false);
       }, 30000);
 
     } catch (error) {
-      console.error('Erreur lors de l\'envoi du message:', error);
-      setMessages(prev => [...prev, {
-        id: messages.length + 2,
-        type: 'ai',
-        content: 'Désolé, je rencontre un problème technique. Réessayez dans un moment.',
-        timestamp: new Date()
-      }]);
+      console.error('Error sending message:', error);
       setIsLoading(false);
     }
+  }, [isLoading, userProfile, appStoreUser, dailyStats, dailyGoals, dailyProgram, getPersonalizedGreeting, getPersonalizedWorkout, getPersonalizedExercises, getSmartReminders, getPersonalizedMotivation]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMessage(inputMessage);
   };
 
-  // Calcul des actions avec progression dynamique
-  const pillarActions = [
-    {
-      id: 'workout',
-      icon: Dumbbell,
-      label: 'Sport',
-      subtitle: dailyProgram.workout.name,
-      color: 'bg-red-500',
-      progress: dailyProgram.workout.completed ? 100 : 0,
-      action: dailyProgram.workout.completed ? 'Workout fait ✓' : 'Commencer',
-      path: '/workout',
-      status: dailyProgram.workout.completed ? 'completed' : 'pending'
-    },
-    {
-      id: 'nutrition',
-      icon: Apple,
-      label: 'Nutrition',
-      subtitle: `${dailyProgram.nutrition.calories_current}/${dailyProgram.nutrition.calories_target} kcal`,
-      color: 'bg-green-500',
-      progress: Math.round((dailyProgram.nutrition.calories_current / dailyProgram.nutrition.calories_target) * 100),
-      action: 'Logger repas',
-      path: '/nutrition',
-      status: dailyProgram.nutrition.calories_current >= dailyProgram.nutrition.calories_target * 0.8 ? 'good' : 'pending'
-    },
-    {
-      id: 'hydration',
-      icon: Droplets,
-      label: 'Hydratation',
-      subtitle: `${Math.round(dailyProgram.hydration.current_ml/1000*10)/10}L/${dailyProgram.hydration.target_ml/1000}L`,
-      color: 'bg-blue-500',
-      progress: dailyProgram.hydration.percentage,
-      action: 'Boire eau',
-      path: '/hydration',
-      status: dailyProgram.hydration.percentage >= 80 ? 'good' : 'pending'
-    },
-    {
-      id: 'sleep',
-      icon: Moon,
-      label: 'Sommeil',
-      subtitle: `${dailyProgram.sleep.last_night_hours.toFixed(1)}h/${dailyProgram.sleep.target_hours}h`,
-      color: 'bg-purple-500',
-      progress: Math.round((dailyProgram.sleep.last_night_hours / dailyProgram.sleep.target_hours) * 100),
-      action: 'Analyser',
-      path: '/sleep',
-      status: dailyProgram.sleep.last_night_hours >= dailyProgram.sleep.target_hours * 0.9 ? 'good' : 'pending'
+  // ===== RECONNAISSANCE VOCALE =====
+
+  const startListening = useCallback(() => {
+    if ('webkitSpeechRecognition' in window) {
+      const recognition = new (window as any).webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'fr-FR';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInputMessage(transcript);
+        setIsListening(false);
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
     }
-  ];
+  }, []);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
+  // ===== INTERFACES =====
+
+  interface SportConfig {
+    emoji: string;
+    positions: string[];
+    workoutTypes: string[];
+    motivationalPhrases: string[];
+    specificExercises: string[];
+  }
+
+  const getSportConfig = useCallback((sport: string | null | undefined): SportConfig => {
+    const configs: Record<string, SportConfig> = {
+      rugby: {
+        emoji: '🏉',
+        positions: ['pilier', 'talonneur', 'deuxième ligne', 'troisième ligne', 'mêlée', 'ouverture', 'centre', 'ailier', 'arrière'],
+        workoutTypes: ['Force explosive', 'Endurance musculaire', 'Agilité', 'Récupération'],
+        motivationalPhrases: [
+          'La mêlée se gagne avant le match !',
+          'Chaque plaquage compte !',
+          'Force, vitesse, rugby !',
+          'Ensemble on est plus forts !'
+        ],
+        specificExercises: ['Squat explosif', 'Développé couché', 'Rowing', 'Burpees', 'Sprint', 'Planche']
+      },
+      football: {
+        emoji: '⚽',
+        positions: ['gardien', 'défenseur', 'milieu', 'attaquant'],
+        workoutTypes: ['Endurance', 'Vitesse', 'Agilité', 'Technique'],
+        motivationalPhrases: [
+          'Chaque touche compte !',
+          'Vitesse et précision !',
+          'Le terrain t\'attend !',
+          'Champion attitude !'
+        ],
+        specificExercises: ['Course d\'endurance', 'Sprints', 'Agilité', 'Frappes', 'Passes', 'Coordination']
+      },
+      basketball: {
+        emoji: '🏀',
+        positions: ['meneur', 'arrière', 'ailier', 'pivot'],
+        workoutTypes: ['Détente', 'Agilité', 'Endurance', 'Précision'],
+        motivationalPhrases: [
+          'Shoot your shot !',
+          'Défense aggressive !',
+          'Chaque panier compte !',
+          'Hustle and flow !'
+        ],
+        specificExercises: ['Sauts', 'Sprints', 'Dribbles', 'Tirs', 'Passes', 'Défense']
+      },
+      musculation: {
+        emoji: '💪',
+        positions: ['débutant', 'intermédiaire', 'avancé'],
+        workoutTypes: ['Hypertrophie', 'Force', 'Endurance', 'Définition'],
+        motivationalPhrases: [
+          'No pain, no gain !',
+          'Chaque rep compte !',
+          'Build your body !',
+          'Stronger every day !'
+        ],
+        specificExercises: ['Squat', 'Développé couché', 'Soulevé de terre', 'Tractions', 'Dips', 'Rowing']
+      }
+    };
+
+    return configs[sport || 'musculation'] || configs.musculation;
+  }, []);
 
   const smartReminders = getSmartReminders(appStoreUser, dailyStats);
   const personalizedMotivation = getPersonalizedMotivation(appStoreUser, dailyStats);
-  const sportConfig = getSportConfig(appStoreUser?.sport);
-
-  // Suggestions contextuelles pour le chat
-  const getPersonalizedSuggestions = () => {
-    const suggestions = [];
-    
-    if (!dailyProgram.workout.completed) {
-      suggestions.push(dailyProgram.workout.name);
-    }
-    
-    suggestions.push('Mes calories du jour');
-    
-    if (dailyProgram.hydration.percentage < 60) {
-      suggestions.push('Rappel hydratation');
-    }
-    
-    if (appStoreUser?.sport) {
-      suggestions.push(`Conseil ${appStoreUser.sport}`);
-    }
-    
-    suggestions.push('Ma progression');
-    
-    return suggestions.slice(0, 4);
-  };
-
-  // Placeholder dynamique selon sport
-  const getChatPlaceholder = () => {
-    if (appStoreUser?.sport) {
-      const sportName = appStoreUser.sport.replace(/_/g, ' ');
-      return `Demande-moi des conseils ${sportName}, nutrition, récupération...`;
-    } else if (appStoreUser?.primary_goals?.includes('weight_loss')) {
-      return "Conseils brûle-graisse, cardio, nutrition...";
-    } else if (appStoreUser?.primary_goals?.includes('muscle_gain')) {
-      return "Conseils musculation, prise de masse...";
-    } else {
-      return "Demande-moi n'importe quoi sur ton fitness...";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header Personnalisé */}
-      <div className="bg-white shadow-sm border-b px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-              <Brain size={20} className="text-white" />
-            </div>
+      {/* Header personnalisé */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-bold text-gray-800">
-                {appStoreUser?.username?.split(' ')[0] || 'MyFitHero'}
-                {appStoreUser?.sport && ` ${sportConfig.emoji}`}
-                {appStoreUser?.primary_goals?.includes('muscle_gain') && ' 💪'}
-                {appStoreUser?.primary_goals?.includes('weight_loss') && ' 🔥'}
+              <h1 className="text-2xl font-bold text-gray-900">
+                {getPersonalizedGreeting()}
               </h1>
-              <p className="text-xs text-gray-500">
-                {appStoreUser?.sport && appStoreUser?.sport_position ? 
-                  `${appStoreUser.sport.replace(/_/g, ' ')} - ${appStoreUser.sport_position.replace(/_/g, ' ')}` : 
-                  'Assistant IA Personnel'
-                }
-              </p>
+              <p className="text-gray-600 mt-1">{personalizedMotivation}</p>
             </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="text-right">
-              <p className="text-sm font-semibold text-gray-800">Niveau {appStoreUser?.level}</p>
-              <p className="text-xs text-gray-500">{appStoreUser?.totalPoints} XP</p>
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm text-gray-500">Streak</p>
+                <p className="text-lg font-bold text-green-600">7 jours</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <User className="text-white" size={20} />
+              </div>
             </div>
-            <button 
-              onClick={() => navigate('/profile')}
-              className="p-2 text-gray-500 hover:text-gray-700"
-            >
-              <User size={20} />
-            </button>
-            <button 
-              onClick={handleSignOut}
-              className="p-2 text-gray-500 hover:text-gray-700"
-            >
-              <Settings size={20} />
-            </button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-4 max-w-4xl">
-        
-        {/* Motivation Personnalisée */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-2xl mb-6">
-          <div className="flex items-center space-x-3">
-            <Star size={24} className="text-yellow-300" />
-            <div>
-              <p className="font-semibold text-lg">{personalizedMotivation}</p>
-              <p className="text-purple-100 text-sm">
-                {new Date().toLocaleDateString('fr-FR', { 
-                  weekday: 'long', 
-                  day: 'numeric', 
-                  month: 'long' 
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Smart Reminders */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Widgets de rappel intelligents */}
         {smartReminders.length > 0 && (
           <div className="mb-6 space-y-3">
-            {smartReminders.map((reminder) => {
-              const Icon = reminder.icon;
-              return (
-                <div
-                  key={reminder.id}
-                  onClick={() => reminder.path && navigate(reminder.path)}
-                  className="bg-white rounded-xl p-4 border-l-4 border-orange-500 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className={`${reminder.color} p-2 rounded-lg`}>
-                        <Icon className="text-white" size={20} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">{reminder.title}</h3>
-                        <p className="text-sm text-gray-600">{reminder.content}</p>
-                      </div>
+            {smartReminders.map((reminder) => (
+              <div
+                key={reminder.id}
+                className={`${reminder.color} text-white p-4 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:scale-105`}
+                onClick={() => reminder.path && navigate(reminder.path)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <reminder.icon size={24} />
+                    <div>
+                      <h3 className="font-bold text-lg">{reminder.title}</h3>
+                      <p className="text-sm opacity-90">{reminder.content}</p>
                     </div>
-                    {reminder.action && (
-                      <button className="bg-orange-500 text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors">
-                        {reminder.action}
-                      </button>
-                    )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Programme du Jour - Version Ultra Détaillée */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          {loadingDailyStats ? (
-            <div className="text-center py-8">
-              <Loader2 className="animate-spin mx-auto mb-4" size={24} />
-              <p className="text-gray-600">Chargement de ton programme personnalisé...</p>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                  <Calendar className="mr-2 text-blue-600" size={24} />
-                  Ton Programme du Jour {appStoreUser?.sport && sportConfig.emoji}
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">
-                    {new Date().toLocaleDateString('fr-FR', { 
-                      weekday: 'long', 
-                      day: 'numeric', 
-                      month: 'long' 
-                    })}
-                  </span>
-                  <button 
-                    onClick={() => navigate('/profile')}
-                    className="text-blue-600 text-sm font-medium"
-                  >
-                    Personnaliser
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {pillarActions.map((pillar) => {
-                  const Icon = pillar.icon;
-                  const getStatusBadge = (status: string) => {
-                    switch (status) {
-                      case 'completed':
-                        return <CheckCircle size={16} className="text-green-500" />;
-                      case 'good':
-                        return <Star size={16} className="text-yellow-500" />;
-                      default:
-                        return <Clock size={16} className="text-gray-400" />;
-                    }
-                  };
-
-                  return (
-                    <div 
-                      key={pillar.id} 
-                      onClick={() => navigate(pillar.path)}
-                      className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer hover:scale-105 border border-gray-100"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <div className={`${pillar.color} p-3 rounded-xl shadow-sm`}>
-                            <Icon className="text-white" size={20} />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-800 text-sm">{pillar.label}</h3>
-                            <p className="text-xs text-gray-600 mt-1">{pillar.subtitle}</p>
-                          </div>
-                        </div>
-                        {getStatusBadge(pillar.status)}
-                      </div>
-                      
-                      {/* Barre de progression personnalisée */}
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-gray-500">Progression</span>
-                          <span className="text-xs font-semibold text-gray-700">{Math.min(pillar.progress, 100)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`${pillar.color} h-2 rounded-full transition-all duration-500 relative overflow-hidden`}
-                            style={{ width: `${Math.min(pillar.progress, 100)}%` }}
-                          >
-                            <div className="absolute inset-0 bg-white opacity-30 animate-pulse"></div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <button className="w-full text-xs text-gray-600 hover:text-gray-800 font-medium flex items-center justify-center space-x-1 py-2 rounded-lg hover:bg-white transition-all">
-                        <span>{pillar.action}</span>
-                        <ArrowRight size={12} />
-                      </button>
+                  {reminder.action && (
+                    <div className="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
+                      <span className="text-sm font-medium">{reminder.action}</span>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Workout Preview spécifique */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-800 flex items-center">
-                    <Dumbbell className="mr-2 text-red-600" size={18} />
-                    {dailyProgram.workout.name}
-                  </h3>
-                  <span className="text-sm text-red-600 font-medium">
-                    ~{dailyProgram.workout.duration}min
-                  </span>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {dailyProgram.workout.exercises.slice(0, 3).map((exercise, index) => (
-                    <span key={index} className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium">
-                      {exercise}
-                    </span>
-                  ))}
-                  {dailyProgram.workout.exercises.length > 3 && (
-                    <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                      +{dailyProgram.workout.exercises.length - 3} autres
-                    </span>
                   )}
-                </div>
-                
-                {!dailyProgram.workout.completed && (
-                  <button 
-                    onClick={() => navigate('/workout')}
-                    className="w-full bg-red-600 text-white py-2 rounded-lg font-medium text-sm hover:bg-red-700 transition-colors flex items-center justify-center space-x-2"
-                  >
-                    <Play size={16} />
-                    <span>Commencer maintenant</span>
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Chat IA Ultra-Personnalisé */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Brain size={20} />
-              </div>
-              <div>
-                <h3 className="font-semibold">
-                  Coach {appStoreUser?.sport ? `${appStoreUser.sport.replace(/_/g, ' ')} ` : ''}IA
-                  {appStoreUser?.sport && ` ${sportConfig.emoji}`}
-                </h3>
-                <p className="text-sm opacity-90">
-                  {appStoreUser?.sport_position ? 
-                    `Spécialiste ${appStoreUser.sport_position.replace(/_/g, ' ')}` : 
-                    'Votre coach personnel intelligent'
-                  }
-                </p>
-              </div>
-              <div className="ml-auto flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-sm">En ligne</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="h-96 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
-                  message.type === 'user' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p className="text-xs opacity-70 mt-2">
-                    {message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
                 </div>
               </div>
             ))}
-            
+          </div>
+        )}
+
+        {/* Programme du jour ultra-personnalisé */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              {getSportConfig(appStoreUser?.sport).emoji} Ton programme aujourd'hui
+            </h2>
+            <div className="flex items-center space-x-2">
+              <Calendar className="text-gray-400" size={16} />
+              <span className="text-sm text-gray-500">
+                {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              </span>
+            </div>
+          </div>
+
+          {/* Workout personnalisé */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900">{dailyProgram.workout.name}</h3>
+              <div className="flex items-center space-x-2">
+                <Clock className="text-gray-400" size={14} />
+                <span className="text-sm text-gray-500">{dailyProgram.workout.duration} min</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {dailyProgram.workout.exercises.map((exercise, index) => (
+                <span
+                  key={index}
+                  className="bg-white px-3 py-1 rounded-full text-xs font-medium text-gray-700 shadow-sm"
+                >
+                  {exercise}
+                </span>
+              ))}
+            </div>
+            <button
+              onClick={() => navigate('/workout')}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+            >
+              {dailyProgram.workout.completed ? '✓ Terminé' : 'Commencer l\'entraînement'}
+            </button>
+          </div>
+
+          {/* Nutrition intelligente */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="bg-green-50 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Apple className="text-green-600" size={16} />
+                <span className="text-sm font-medium text-gray-700">Calories</span>
+              </div>
+              <p className="text-lg font-bold text-gray-900">
+                {dailyProgram.nutrition.calories_current} / {dailyProgram.nutrition.calories_target}
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div
+                  className="bg-green-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((dailyProgram.nutrition.calories_current / dailyProgram.nutrition.calories_target) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <Droplets className="text-blue-600" size={16} />
+                <span className="text-sm font-medium text-gray-700">Hydratation</span>
+              </div>
+              <p className="text-lg font-bold text-gray-900">
+                {Math.round(dailyProgram.hydration.current_ml / 1000 * 10) / 10}L / {Math.round(dailyProgram.hydration.target_ml / 1000 * 10) / 10}L
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(dailyProgram.hydration.percentage, 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Sommeil */}
+          <div className="bg-purple-50 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <Moon className="text-purple-600" size={16} />
+                <span className="text-sm font-medium text-gray-700">Sommeil</span>
+              </div>
+              <span className="text-sm text-gray-500">
+                {dailyProgram.sleep.last_night_hours.toFixed(1)}h / {dailyProgram.sleep.target_hours}h
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="flex-1 bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-purple-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((dailyProgram.sleep.last_night_hours / dailyProgram.sleep.target_hours) * 100, 100)}%` }}
+                />
+              </div>
+              <span className="text-xs text-gray-500">
+                {dailyProgram.sleep.quality > 0 ? `${Math.round(dailyProgram.sleep.quality * 100)}%` : 'N/A'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat IA personnalisé */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <MessageCircle className="text-blue-600" size={20} />
+            <h2 className="text-xl font-bold text-gray-900">
+              {appStoreUser?.sport === 'rugby' ? 'Ton coach rugby' : 'Ton coach IA'}
+            </h2>
+          </div>
+
+          <div className="space-y-4 mb-4 max-h-60 overflow-y-auto">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-xs px-4 py-2 rounded-lg ${
+                    message.type === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  <p className="text-sm">{message.content}</p>
+                  <span className="text-xs opacity-75">
+                    {message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="animate-spin" size={16} />
+                    <span className="text-sm">Ton coach réfléchit...</span>
                   </div>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-t p-4">
-            <div className="flex items-center space-x-3 mb-3">
-              <button
-                onClick={() => setIsListening(!isListening)}
-                className={`p-3 rounded-full transition-colors ${
-                  isListening ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-              </button>
-              
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  placeholder={getChatPlaceholder()}
-                  className="w-full px-4 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              <button
-                onClick={sendMessage}
-                disabled={!inputMessage.trim() || isLoading}
-                className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                <Send size={20} />
-              </button>
-            </div>
-
-            {/* Suggestions ultra-personnalisées */}
-            <div className="flex flex-wrap gap-2">
-              {getPersonalizedSuggestions().map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => setInputMessage(suggestion)}
-                  className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm hover:bg-blue-100 transition-colors"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          </div>
+          <form onSubmit={handleSubmit} className="flex space-x-2">
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder={`Demande conseil à ton coach ${appStoreUser?.sport || 'fitness'}...`}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={startListening}
+              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                isListening
+                  ? 'bg-red-500 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              disabled={isLoading}
+            >
+              {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 disabled:opacity-50"
+              disabled={isLoading || !inputMessage.trim()}
+            >
+              <Send size={20} />
+            </button>
+          </form>
         </div>
 
-        {/* Quick Stats Personnalisées */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Stats rapides */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex items-center space-x-2 mb-2">
-              <Flame className="text-orange-500" size={16} />
-              <span className="text-sm font-medium text-gray-600">Calories</span>
+              <Target className="text-green-500" size={16} />
+              <span className="text-sm font-medium text-gray-600">Objectifs</span>
             </div>
             <p className="text-lg font-bold text-gray-800">
-              {dailyProgram.nutrition.calories_current}
+              {appStoreUser?.primary_goals?.length || 0}
             </p>
-            <p className="text-xs text-gray-500">sur {dailyProgram.nutrition.calories_target}</p>
-          </div>
-          
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center space-x-2 mb-2">
-              <Droplets className="text-blue-500" size={16} />
-              <span className="text-sm font-medium text-gray-600">Hydratation</span>
-            </div>
-            <p className="text-lg font-bold text-gray-800">
-              {Math.round(dailyProgram.hydration.current_ml/1000*10)/10}L
-            </p>
-            <p className="text-xs text-gray-500">sur {dailyProgram.hydration.target_ml/1000}L</p>
+            <p className="text-xs text-gray-500">Actifs</p>
           </div>
           
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -1100,28 +820,12 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           </div>
         </div>
 
-        {/* Citation motivante selon profil/sport */}
+        {/* Citation motivante selon profil */}
         <div className="mt-6 bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-2xl">
           <div className="text-center">
             <h3 className="font-bold text-lg mb-2">
-              {appStoreUser?.sport === 'american_football' ? 
-                '🏈 "Champions are made in the 4th quarter"' :
-              appStoreUser?.sport === 'basketball' ?
-                '🏀 "Ball is life, dedication is everything"' :
-              appStoreUser?.sport === 'baseball' ?
-                '⚾ "It\'s not whether you get knocked down, it\'s whether you get up"' :
-              appStoreUser?.sport === 'tennis' ?
-                '🎾 "Champions keep playing until they get it right"' :
-              appStoreUser?.sport === 'football' ?
-                '⚽ "The ball is round, the game is 90 minutes"' :
-              appStoreUser?.sport === 'rugby' ? 
+              {appStoreUser?.sport === 'rugby' ? 
                 '🏉 "La mêlée se gagne avant le match"' :
-              appStoreUser?.sport === 'volleyball' ?
-                '🏐 "Good things come to those who spike"' :
-              appStoreUser?.sport === 'swimming' ?
-                '🏊‍♂️ "Champions train when others rest"' :
-              appStoreUser?.sport === 'boxing' ?
-                '🥊 "Float like a butterfly, sting like a bee"' :
               appStoreUser?.primary_goals?.includes('muscle_gain') ?
                 '💪 "Les muscles se construisent dans la cuisine"' :
               appStoreUser?.primary_goals?.includes('weight_loss') ?
@@ -1130,8 +834,8 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
               }
             </h3>
             <p className="text-gray-300 text-sm">
-              {appStoreUser?.sport ? 
-                `Become the ${appStoreUser.sport.replace(/_/g, ' ')} champion you're meant to be` :
+              {appStoreUser?.sport === 'rugby' ? 
+                'Prépare-toi comme un warrior' :
               appStoreUser?.primary_goals?.includes('performance') ?
                 'Excellence is a habit' :
                 'Consistency beats perfection'
