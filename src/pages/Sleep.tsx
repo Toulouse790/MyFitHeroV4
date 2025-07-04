@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Moon, 
   Sun, 
@@ -13,23 +13,15 @@ import {
   Brain,
   Shield,
   Zap,
-  Loader2,
   Trophy,
-  Users
+  Users,
+  Eye
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { SleepSession, DailyStats, Json } from '@/lib/supabase';
-import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 
-// --- TYPES & INTERFACES DE PERSONNALISATION ---
-
+// --- TYPES ---
 type SportCategory = 'contact' | 'endurance' | 'precision' | 'team';
-
-interface User {
-  name: string;
-  sportCategory: SportCategory;
-}
 
 interface SportSleepConfig {
   emoji: string;
@@ -50,7 +42,6 @@ interface SportSleepConfig {
 }
 
 // --- CONFIGURATION DU SOMMEIL PAR SPORT ---
-
 const sportsSleepData: Record<SportCategory, SportSleepConfig> = {
   contact: {
     emoji: '🛡️',
@@ -118,32 +109,114 @@ const sportsSleepData: Record<SportCategory, SportSleepConfig> = {
   }
 };
 
+const Sleep: React.FC = () => {
+  // --- DONNÉES RÉELLES DU STORE ---
+  const { appStoreUser } = useAppStore();
+  const { toast } = useToast();
 
-const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
-  // --- SIMULATION UTILISATEUR & CONFIG ---
-  const currentUser: User = {
-    name: 'Alex',
-    sportCategory: 'precision', // Changez ici: 'contact', 'endurance', 'team'
+  // --- MAPPING SPORT VERS CATÉGORIE ---
+  const getSportCategory = (sport: string): SportCategory => {
+    const mappings: Record<string, SportCategory> = {
+      'american_football': 'contact',
+      'rugby': 'contact', 
+      'hockey': 'contact',
+      'boxing': 'contact',
+      'basketball': 'team',
+      'football': 'team',
+      'volleyball': 'team',
+      'handball': 'team',
+      'tennis': 'precision',
+      'golf': 'precision',
+      'snooker': 'precision',
+      'archery': 'precision',
+      'running': 'endurance',
+      'cycling': 'endurance',
+      'swimming': 'endurance',
+      'triathlon': 'endurance'
+    };
+    return mappings[sport?.toLowerCase()] || 'team';
   };
 
-  const sportConfig = sportsSleepData[currentUser.sportCategory];
+  const userSportCategory = getSportCategory(appStoreUser.sport || 'none');
+  const sportConfig = sportsSleepData[userSportCategory];
 
-  // --- STATES & STORE (inchangés) ---
-  const [sleepSessions, setSleepSessions] = useState<SleepSession[]>([]);
-  // ... autres états
-  
-  // --- LOGIQUE (avec adaptation pour l'objectif) ---
-  
-  // L'objectif vient maintenant de notre config personnalisée
-  const weeklyStats = {
-    // ... autres stats
-    goalDuration: sportConfig.sleepGoalHours,
-    // ...
+  // --- CALCUL OBJECTIF PERSONNALISÉ ---
+  const personalizedSleepGoal = useMemo(() => {
+    let goalHours = sportConfig.sleepGoalHours;
+    
+    // Ajustements selon l'âge
+    if (appStoreUser.age) {
+      if (appStoreUser.age < 25) goalHours += 0.5; // Plus jeune = plus de sommeil
+      if (appStoreUser.age > 45) goalHours += 0.5; // Plus âgé = plus de récupération
+    }
+    
+    // Ajustements selon les objectifs
+    if (appStoreUser.primary_goals?.includes('muscle_gain')) goalHours += 0.5;
+    if (appStoreUser.primary_goals?.includes('performance')) goalHours += 0.5;
+    
+    // Ajustement selon la fréquence d'entraînement
+    if (appStoreUser.training_frequency && appStoreUser.training_frequency > 5) {
+      goalHours += 0.5; // Entraînement intensif = plus de récupération
+    }
+    
+    return Math.min(goalHours, 10); // Maximum 10h
+  }, [appStoreUser, sportConfig.sleepGoalHours]);
+
+  // --- ÉTATS ---
+  const [currentSleepHours, setCurrentSleepHours] = useState(7.5); // Simulation
+  const [sleepQuality, setSleepQuality] = useState(75); // %
+  const [bedTime, setBedTime] = useState('23:30');
+  const [wakeTime, setWakeTime] = useState('07:00');
+
+  // --- CALCULS ---
+  const sleepPercentage = (currentSleepHours / personalizedSleepGoal) * 100;
+  const sleepDeficit = Math.max(0, personalizedSleepGoal - currentSleepHours);
+
+  // --- COMPOSANTS ---
+  const TipCard = ({ tip }: { tip: any }) => {
+    const TipIcon = tip.icon;
+    const statusColors = {
+      done: 'border-l-green-500 bg-green-50',
+      warning: 'border-l-yellow-500 bg-yellow-50', 
+      todo: 'border-l-red-500 bg-red-50'
+    };
+    
+    return (
+      <div className={`p-4 rounded-xl border-l-4 ${statusColors[tip.status]}`}>
+        <div className="flex items-start space-x-3">
+          <TipIcon size={20} className="text-gray-600 mt-0.5" />
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">{tip.title}</h3>
+            <p className="text-sm text-gray-600">{tip.description}</p>
+          </div>
+        </div>
+      </div>
+    );
   };
-  
-  // ... (fonctions de chargement et d'enregistrement du sommeil existantes) ...
 
-  // --- RENDER ---
+  // --- MESSAGES PERSONNALISÉS ---
+  const getPersonalizedMessage = () => {
+    const userName = appStoreUser.name || 'Champion';
+    const progress = (currentSleepHours / personalizedSleepGoal) * 100;
+    
+    if (progress >= 95) {
+      return `😴 Parfait ${userName} ! Sommeil optimal pour ${appStoreUser.sport}`;
+    } else if (progress >= 80) {
+      return `💤 Très bien ${userName}, ta récupération est sur la bonne voie !`;
+    } else if (progress >= 60) {
+      return `⏰ ${userName}, quelques heures de plus t'aideraient pour ${appStoreUser.sport}`;
+    } else {
+      return `🚨 ${userName}, ton corps a besoin de plus de récupération !`;
+    }
+  };
+
+  const getPersonalizedRecommendation = () => {
+    const deficit = Math.round(sleepDeficit * 60); // en minutes
+    if (deficit > 0) {
+      return `Pour optimiser vos performances en ${appStoreUser.sport}, couchez-vous ${deficit} minutes plus tôt.`;
+    }
+    return `Votre sommeil est parfaitement adapté à vos besoins en ${appStoreUser.sport} !`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,38 +229,75 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
                <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
                Sommeil
             </h1>
-            <p className="text-gray-600">{sportConfig.motivationalMessage}</p>
+            <p className="text-gray-600">
+              {appStoreUser.name} • {appStoreUser.sport} • Objectif: {personalizedSleepGoal}h
+            </p>
           </div>
           <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
             <Calendar size={20} className="text-gray-600" />
           </button>
         </div>
 
-        {/* Résumé de la nuit (inchangé) */}
-        {/* ... */}
-        
-        {/* Statistiques hebdomadaires avec Objectif Personnalisé */}
-        <div className="bg-white p-4 rounded-xl border border-gray-100">
+        {/* Message Personnalisé */}
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-xl text-white">
+          <p className="font-semibold text-center">{getPersonalizedMessage()}</p>
+        </div>
+
+        {/* Résumé de la nuit avec Données Personnalisées */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-xl text-white">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Cette semaine</h3>
-            <BarChart3 size={20} className="text-gray-500" />
+            <h3 className="font-semibold text-lg">Dernière Nuit</h3>
+            <Moon size={24} />
           </div>
-          {/* ... (affichage des moyennes) ... */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Target size={16} className="text-fitness-recovery" />
-              <span className="text-sm text-gray-600">Objectif: {sportConfig.sleepGoalHours}h</span>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1">{currentSleepHours}h</div>
+              <div className="text-white/80 text-sm">Durée</div>
             </div>
-            {/* ... */}
+            <div className="text-center">
+              <div className="text-3xl font-bold mb-1">{sleepQuality}%</div>
+              <div className="text-white/80 text-sm">Qualité</div>
+            </div>
+          </div>
+          <div className="text-center mb-4">
+            <div className="text-white/80 text-sm">
+              Couché: {bedTime} • Levé: {wakeTime}
+            </div>
+            <div className="text-white/90 text-sm mt-2">
+              Objectif {userSportCategory}: {personalizedSleepGoal}h
+            </div>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-3">
+            <div 
+              className="bg-white rounded-full h-3 transition-all duration-500"
+              style={{ width: `${Math.min(sleepPercentage, 100)}%` }}
+            />
           </div>
         </div>
 
-        {/* Formulaire d'enregistrement (inchangé) */}
-        {/* ... */}
+        {/* Recommandation Personnalisée */}
+        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+          <div className="flex items-start space-x-3">
+            <Target size={20} className="text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-blue-800 mb-1">Recommandation Personnalisée</h3>
+              <p className="text-blue-700 text-sm">{getPersonalizedRecommendation()}</p>
+              {sleepDeficit > 0 && (
+                <div className="mt-2 p-2 bg-blue-100 rounded-md">
+                  <p className="text-xs text-blue-800">
+                    <strong>Déficit:</strong> -{Math.round(sleepDeficit * 60)} minutes pour un sommeil optimal
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-        {/* Bénéfices Personnalisés */}
+        {/* Bénéfices Personnalisés selon le Sport */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-800">Bénéfices pour votre sport</h2>
+          <h2 className="text-lg font-semibold text-gray-800">
+            Bénéfices pour {appStoreUser.sport || 'votre sport'}
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {sportConfig.benefits.map((benefit, index) => {
               const BenefitIcon = benefit.icon;
@@ -206,28 +316,54 @@ const Sleep: React.FC<SleepProps> = ({ userProfile }) => {
           </div>
         </div>
 
+        {/* Analyse du Profil */}
+        <div className="bg-gradient-to-r from-gray-50 to-purple-50 p-4 rounded-xl border border-purple-100">
+          <div className="flex items-start space-x-3">
+            <Brain size={20} className="text-purple-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-purple-800 mb-1">Analyse de votre Profil</h3>
+              <p className="text-purple-700 text-sm mb-2">
+                En tant que {appStoreUser.gender === 'male' ? 'pratiquant' : 'pratiquante'} de {appStoreUser.sport} 
+                de {appStoreUser.age || '?'} ans, votre objectif de sommeil est ajusté à {personalizedSleepGoal}h.
+              </p>
+              <div className="text-xs text-purple-600 space-y-1">
+                <p>• Sport {userSportCategory}: +{(sportConfig.sleepGoalHours - 8).toFixed(1)}h de base</p>
+                {appStoreUser.training_frequency && appStoreUser.training_frequency > 5 && (
+                  <p>• Entraînement intensif ({appStoreUser.training_frequency}x/sem): +0.5h</p>
+                )}
+                {appStoreUser.primary_goals?.includes('muscle_gain') && (
+                  <p>• Objectif prise de masse: +0.5h récupération</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Conseils Personnalisés */}
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Lightbulb size={20} className="text-yellow-500" />
-            <h2 className="text-lg font-semibold text-gray-800">Vos Conseils Personnalisés</h2>
+            <h2 className="text-lg font-semibold text-gray-800">
+              Conseils pour {userSportCategory}
+            </h2>
           </div>
           <div className="space-y-3">
             {sportConfig.tips.map((tip, index) => (
-              // Le composant TipCard est réutilisé tel quel
               <TipCard key={index} tip={tip} />
             ))}
-          ediv>
+          </div>
         </div>
-        
+
+        {/* Message de Motivation */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 rounded-xl text-white text-center">
+          <h3 className="font-bold mb-2">{sportConfig.motivationalMessage}</h3>
+          <p className="text-purple-100 text-sm">
+            Le sommeil n'est pas du temps perdu, c'est votre arme secrète pour exceller en {appStoreUser.sport} !
+          </p>
+        </div>
       </div>
     </div>
   );
-};
-
-// Le TipCard reste inchangé car il est déjà générique
-const TipCard = ({ tip }: { tip: { icon: React.ElementType; title: string; description: string; status: string; } }) => {
-    // ... (code du composant TipCard existant)
 };
 
 export default Sleep;
