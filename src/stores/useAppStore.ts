@@ -1,37 +1,46 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
+import type { DailyStats, AiRecommendation } from '@/lib/supabase';
 
 // --- TYPES & INTERFACES ---
 
 // Interface pour l'utilisateur dans le store (simplifié pour éviter les conflits)
-interface AppUser {
-  id?: string;
-  name?: string;
+export interface AppUser {
+  id: string;
+  username?: string | null;
+  full_name?: string | null;
   email?: string;
-  age?: number;
+  age?: number | null;
   gender?: 'male' | 'female' | null;
-  sport?: string;
-  sport_position?: string;
-  sport_level?: string;
-  lifestyle?: string;
-  fitness_experience?: string;
+  sport?: string | null;
+  sport_position?: string | null;
+  sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
+  lifestyle?: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
+  fitness_experience?: 'beginner' | 'intermediate' | 'advanced' | 'expert' | null;
   primary_goals?: string[];
-  training_frequency?: number;
-  season_period?: string;
-  available_time_per_day?: number;
-  daily_calories?: number;
+  training_frequency?: number | null;
+  season_period?: 'off_season' | 'pre_season' | 'in_season' | 'recovery' | null;
+  available_time_per_day?: number | null;
+  daily_calories?: number | null;
   active_modules?: string[];
   modules?: string[];
   level?: number;
   totalPoints?: number;
   joinDate?: string;
-  profile_type?: string;
+  profile_type?: 'complete' | 'wellness' | 'sport_only' | 'sleep_focus';
   sport_specific_stats?: Record<string, number>;
+  injuries?: string[];
+  motivation?: string;
+  fitness_goal?: string;
+  
+  // Champs calculés locaux
+  name?: string;
+  goal?: string;
 }
 
 // Interface pour les objectifs quotidiens
-interface DailyGoals {
+export interface DailyGoals {
   water: number;
   calories: number;
   protein: number;
@@ -39,18 +48,6 @@ interface DailyGoals {
   fat: number;
   sleep: number;
   workouts: number;
-}
-
-// Interface pour les stats quotidiennes
-interface DailyStats {
-  total_calories?: number;
-  total_protein?: number;
-  total_carbs?: number;
-  total_fat?: number;
-  water_intake_ml?: number;
-  hydration_goal_ml?: number;
-  sleep_hours?: number;
-  workouts_completed?: number;
 }
 
 // --- HELPER : CALCUL DES OBJECTIFS PERSONNALISÉS ---
@@ -134,13 +131,18 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
   if (user.age && user.age > 45) sleepHours += 0.5;
   if (user.training_frequency && user.training_frequency > 5) sleepHours += 0.5;
 
+  // Hydratation selon sport et poids
+  let waterGoal = 2.5; // Base 2.5L
+  if (user.sport?.includes('endurance') || user.sport === 'running') waterGoal = 3.0;
+  if (user.sport?.includes('american_football') || user.sport === 'rugby') waterGoal = 3.5;
+
   return {
     calories: finalCalories,
     protein,
     carbs,
     fat,
     sleep: sleepHours,
-    water: 2.5, // Base 2.5L, peut être ajusté selon le poids
+    water: waterGoal,
     workouts: user.training_frequency || 3
   };
 };
@@ -150,10 +152,12 @@ interface AppStore {
   // État
   appStoreUser: AppUser;
   dailyGoals: DailyGoals;
+  isLoading: boolean;
   
   // Actions pour l'utilisateur
   updateAppStoreUserProfile: (updates: Partial<AppUser>) => void;
   setUser: (user: AppUser) => void;
+  clearUser: () => void;
   
   // Actions pour les objectifs
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
@@ -161,38 +165,47 @@ interface AppStore {
   
   // Actions pour les données
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
+  fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
   addHydration: (amount: number, type?: string) => Promise<boolean>;
   addMeal: (meal: any) => Promise<boolean>;
   addSleepSession: (sleepData: any) => Promise<boolean>;
   
   // Actions pour les modules
   activateModule: (moduleId: string) => Promise<boolean>;
+  deactivateModule: (moduleId: string) => Promise<boolean>;
+  isModuleActive: (moduleId: string) => boolean;
 }
 
 // --- UTILISATEUR PAR DÉFAUT ---
 const defaultUser: AppUser = {
   id: '',
-  name: 'Utilisateur',
+  username: '',
+  full_name: '',
   email: '',
-  age: 25,
-  gender: 'male',
-  sport: 'musculation',
-  sport_position: '',
-  sport_level: 'recreational',
-  lifestyle: 'office_worker',
-  fitness_experience: 'intermediate',
-  primary_goals: ['general_health'],
-  training_frequency: 3,
-  season_period: 'off_season',
-  available_time_per_day: 60,
-  daily_calories: 2000,
-  active_modules: ['sport'],
+  age: null,
+  gender: null,
+  sport: null,
+  sport_position: null,
+  sport_level: null,
+  lifestyle: null,
+  fitness_experience: null,
+  primary_goals: [],
+  training_frequency: null,
+  season_period: null,
+  available_time_per_day: null,
+  daily_calories: null,
+  active_modules: [],
   modules: ['sport', 'nutrition', 'sleep', 'hydration'],
   level: 1,
   totalPoints: 0,
-  joinDate: 'Nouveau membre',
+  joinDate: '',
   profile_type: 'complete',
-  sport_specific_stats: {}
+  sport_specific_stats: {},
+  injuries: [],
+  motivation: '',
+  fitness_goal: '',
+  name: '',
+  goal: ''
 };
 
 // --- CRÉATION DU STORE ---
@@ -210,12 +223,26 @@ export const useAppStore = create<AppStore>()(
         sleep: 8,
         workouts: 3
       },
+      isLoading: false,
 
       // --- ACTIONS UTILISATEUR ---
       updateAppStoreUserProfile: (updates: Partial<AppUser>) => {
-        set(state => ({
-          appStoreUser: { ...state.appStoreUser, ...updates }
-        }));
+        set(state => {
+          const updatedUser = { ...state.appStoreUser, ...updates };
+          
+          // Champs calculés
+          if (!updatedUser.name) {
+            updatedUser.name = updatedUser.full_name || updatedUser.username || 'Utilisateur';
+          }
+          
+          if (!updatedUser.goal && updatedUser.primary_goals?.length) {
+            updatedUser.goal = updatedUser.primary_goals[0];
+          }
+
+          return {
+            appStoreUser: updatedUser
+          };
+        });
         
         // Recalculer les objectifs après mise à jour
         setTimeout(() => {
@@ -224,8 +251,21 @@ export const useAppStore = create<AppStore>()(
       },
 
       setUser: (user: AppUser) => {
+        // Champs calculés
+        if (!user.name) {
+          user.name = user.full_name || user.username || 'Utilisateur';
+        }
+        
+        if (!user.goal && user.primary_goals?.length) {
+          user.goal = user.primary_goals[0];
+        }
+
         set({ appStoreUser: user });
         get().calculateAndSetDailyGoals();
+      },
+
+      clearUser: () => {
+        set({ appStoreUser: defaultUser });
       },
 
       // --- ACTIONS OBJECTIFS ---
@@ -237,14 +277,18 @@ export const useAppStore = create<AppStore>()(
 
       calculateAndSetDailyGoals: () => {
         const { appStoreUser } = get();
-        const newGoals = calculatePersonalizedGoals(appStoreUser);
-        set({ dailyGoals: newGoals });
-        console.log('🎯 Objectifs personnalisés calculés:', newGoals);
+        if (appStoreUser.id) {
+          const newGoals = calculatePersonalizedGoals(appStoreUser);
+          set({ dailyGoals: newGoals });
+          console.log('🎯 Objectifs personnalisés calculés:', newGoals);
+        }
       },
 
       // --- ACTIONS DONNÉES ---
       fetchDailyStats: async (userId: string, date: string): Promise<DailyStats | null> => {
         try {
+          set({ isLoading: true });
+          
           const { data, error } = await supabase
             .from('daily_stats')
             .select('*')
@@ -261,6 +305,30 @@ export const useAppStore = create<AppStore>()(
         } catch (error) {
           console.error('Erreur fetchDailyStats:', error);
           return null;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      fetchAiRecommendations: async (userId: string, pillarType: string, limit: number = 5): Promise<AiRecommendation[]> => {
+        try {
+          const { data, error } = await supabase
+            .from('ai_recommendations')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('pillar_type', pillarType)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+          if (error) {
+            console.error('Erreur fetch AI recommendations:', error);
+            return [];
+          }
+
+          return data || [];
+        } catch (error) {
+          console.error('Erreur fetchAiRecommendations:', error);
+          return [];
         }
       },
 
@@ -350,7 +418,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      // --- ACTION ACTIVATION MODULE ---
+      // --- ACTIONS MODULES ---
       activateModule: async (moduleId: string): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
@@ -386,10 +454,52 @@ export const useAppStore = create<AppStore>()(
           console.error('Erreur activateModule:', error);
           return false;
         }
+      },
+
+      deactivateModule: async (moduleId: string): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+          const currentActiveModules = appStoreUser.active_modules || [];
+          
+          if (!currentActiveModules.includes(moduleId)) {
+            console.log(`Module ${moduleId} déjà inactif`);
+            return true;
+          }
+
+          const newActiveModules = currentActiveModules.filter(module => module !== moduleId);
+
+          // Mise à jour en base
+          const { error } = await supabase
+            .from('user_profiles')
+            .update({ 
+              active_modules: newActiveModules,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', appStoreUser.id);
+
+          if (error) {
+            console.error('Erreur désactivation module:', error);
+            return false;
+          }
+
+          // Mise à jour du store
+          get().updateAppStoreUserProfile({ active_modules: newActiveModules });
+
+          console.log(`✅ Module ${moduleId} désactivé avec succès`);
+          return true;
+        } catch (error) {
+          console.error('Erreur deactivateModule:', error);
+          return false;
+        }
+      },
+
+      isModuleActive: (moduleId: string): boolean => {
+        const { appStoreUser } = get();
+        return appStoreUser.active_modules?.includes(moduleId) || false;
       }
     }),
     {
-      name: 'myfit-hero-store',
+      name: 'myfithero-app-store',
       partialize: (state) => ({
         appStoreUser: state.appStoreUser,
         dailyGoals: state.dailyGoals
