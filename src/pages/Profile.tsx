@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   User as UserIcon, Calendar, Target, PenTool, BarChart3, Clock, Zap, 
   Ruler, Scale, Mail, PlusCircle, Dumbbell, Star, Shield, Wind, 
-  Maximize, Brain, Heart, Trophy, Award, TrendingUp
+  Maximize, Brain, Heart, Trophy, Award, TrendingUp, Flame 
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -268,14 +268,7 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6">
-        
-        {/* Header Personnalisé */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-              <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
-              Mon Profil
-            </h1>
+    
         {/* Header Personnalisé */}
         <div className="flex items-center justify-between">
           <div>
