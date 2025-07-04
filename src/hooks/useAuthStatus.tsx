@@ -1,91 +1,60 @@
-import { useState, useEffect, useRef } from 'react';
-import { Session } from '@supabase/supabase-js';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useAppStore } from '@/stores/useAppStore';
+import type { Session } from '@supabase/supabase-js';
 
 export const useAuthStatus = () => {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
-  const mounted = useRef(true);
+  const [loading, setLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const { appStoreUser } = useAppStore();
 
   useEffect(() => {
-    mounted.current = true;
-
-    // Fonction pour vérifier le profil utilisateur
-    const checkUserProfile = async (userId: string) => {
+    // Vérifier la session existante
+    const getSession = async () => {
       try {
-        const { data: userProfileData, error } = await supabase
-          .from('user_profiles')
-          .select('primary_goals')
-          .eq('id', userId)
-          .single();
-
-        if (error && error.code !== 'PGRST116') { // Ignore "Row not found" errors
-          console.error("Erreur chargement profil:", error);
-          return false;
-        }
-
-        return userProfileData?.primary_goals && 
-               Array.isArray(userProfileData.primary_goals) && 
-               userProfileData.primary_goals.length > 0;
-      } catch (error) {
-        console.error("Erreur vérification profil:", error);
-        return false;
-      }
-    };
-
-    // Charger la session initiale
-    const loadInitialSession = async () => {
-      try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        if (mounted.current) {
-          setSession(initialSession);
-          
-          if (initialSession?.user) {
-            const profileCompleted = await checkUserProfile(initialSession.user.id);
-            if (mounted.current) {
-              setHasCompletedOnboarding(profileCompleted);
-            }
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Erreur session:', error);
+        } else {
+          setSession(session);
+          // Vérifier l'onboarding basé sur les données du store
+          if (session && appStoreUser.id && appStoreUser.age && appStoreUser.gender) {
+            setHasCompletedOnboarding(true);
           }
-          
-          setLoading(false);
         }
       } catch (error) {
-        console.error("Erreur chargement session initiale:", error);
-        if (mounted.current) {
-          setLoading(false);
-        }
+        console.error('Erreur récupération session:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadInitialSession();
+    getSession();
 
-    // Écouter les changements d'authentification
+    // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state change:', event);
+      async (event, session) => {
+        setSession(session);
         
-        if (!mounted.current) return;
-        
-        setSession(newSession);
-        
-        if (newSession?.user && event !== 'TOKEN_REFRESHED') {
-          const profileCompleted = await checkUserProfile(newSession.user.id);
-          if (mounted.current) {
-            setHasCompletedOnboarding(profileCompleted);
-          }
-        } else if (!newSession) {
+        if (session && appStoreUser.id && appStoreUser.age && appStoreUser.gender) {
+          setHasCompletedOnboarding(true);
+        } else {
           setHasCompletedOnboarding(false);
         }
+        
+        setLoading(false);
       }
     );
 
-    return () => {
-      mounted.current = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+    return () => subscription.unsubscribe();
+  }, [appStoreUser]);
 
-  return { session, loading, hasCompletedOnboarding };
+  return {
+    session,
+    loading,
+    hasCompletedOnboarding,
+    isAuthenticated: !!session,
+    userId: session?.user?.id || null
+  };
 };
