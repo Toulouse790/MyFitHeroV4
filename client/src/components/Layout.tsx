@@ -1,24 +1,40 @@
 import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Settings, BarChart3 } from 'lucide-react';
+import { useLocation, Link } from 'wouter';
+import { ArrowLeft, User, BarChart3 } from 'lucide-react';
 import BottomNav from './BottomNav';
 
 interface LayoutProps {
   children?: React.ReactNode;
 }
 
+function getPageTitle(pathname: string): string {
+  const titles: { [key: string]: string } = {
+    '/': 'Accueil',
+    '/dashboard': 'Tableau de bord',
+    '/hydration': 'Hydratation',
+    '/nutrition': 'Nutrition',
+    '/sleep': 'Sommeil',
+    '/workout': 'Entraînement',
+    '/profile': 'Profil'
+  };
+  return titles[pathname] || 'MyFitHero';
+}
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [location] = useLocation();
   
-  const isHomePage = location.pathname === '/';
-  const isDashboard = location.pathname === '/dashboard';
+  const isHomePage = location === '/';
+  const isDashboard = location === '/dashboard';
   const showBackButton = !isHomePage && !isDashboard;
   
   const quickActions = [
     { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
     { path: '/profile', icon: User, label: 'Profil' },
   ];
+
+  const handleBack = () => {
+    window.history.back();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -32,7 +48,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {showBackButton && (
                   <>
                     <button
-                      onClick={() => navigate(-1)}
+                      onClick={handleBack}
                       className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
                     >
                       <ArrowLeft size={20} />
@@ -45,7 +61,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div>
                   <h1 className="text-xl font-bold text-gray-800">MyFitHero</h1>
                   <p className="text-sm text-gray-500 hidden sm:block">
-                    {getPageTitle(location.pathname)}
+                    {getPageTitle(location)}
                   </p>
                 </div>
               </div>
@@ -53,18 +69,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {/* Actions rapides - desktop uniquement */}
               <div className="hidden md:flex items-center space-x-2">
                 {quickActions.map((action) => (
-                  <button
+                  <Link
                     key={action.path}
-                    onClick={() => navigate(action.path)}
+                    to={action.path}
                     className={`flex items-center space-x-1 px-3 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      location.pathname === action.path
+                      location === action.path
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <action.icon size={16} />
                     <span>{action.label}</span>
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -74,7 +90,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Contenu principal */}
       <main className="flex-1 pb-20 md:pb-0">
-        {children || <Outlet />}
+        {children}
       </main>
 
       {/* Navigation mobile */}
@@ -82,19 +98,5 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 };
-
-// Fonction utilitaire pour obtenir le titre de la page
-function getPageTitle(pathname: string): string {
-  const titles: Record<string, string> = {
-    '/dashboard': 'Tableau de bord',
-    '/workout': 'Entraînement',
-    '/nutrition': 'Nutrition',
-    '/sleep': 'Sommeil',
-    '/hydration': 'Hydratation',
-    '/profile': 'Mon Profil',
-  };
-  
-  return titles[pathname] || 'MyFitHero';
-}
 
 export default Layout;

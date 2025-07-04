@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'wouter';
 import { Dumbbell, Apple, Moon, Droplets, Home } from 'lucide-react';
 
 interface NavItem {
@@ -49,14 +49,13 @@ const navItems: NavItem[] = [
 ];
 
 const BottomNav = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [location, setLocation] = useLocation();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location === path;
 
   // Ne pas afficher sur les pages publiques
   const publicPaths = ['/', '/auth', '/onboarding'];
-  if (publicPaths.includes(location.pathname)) {
+  if (publicPaths.includes(location)) {
     return null;
   }
 
@@ -68,9 +67,9 @@ const BottomNav = () => {
           const active = isActive(item.path);
           
           return (
-            <button
+            <Link
               key={item.id}
-              onClick={() => navigate(item.path)}
+              to={item.path}
               className={`flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1 transition-all duration-300 ${
                 active 
                   ? `${item.color} scale-110` 
@@ -93,7 +92,7 @@ const BottomNav = () => {
               {active && (
                 <div className={`w-1 h-1 rounded-full mt-1 ${item.color.replace('text-', 'bg-')} animate-pulse`}></div>
               )}
-            </button>
+            </Link>
           );
         })}
       </div>

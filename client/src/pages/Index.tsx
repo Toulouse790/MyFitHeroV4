@@ -1,9 +1,9 @@
 import React from 'react';
 import { ArrowRight, Dumbbell, Apple, Moon, BarChart3, Medal, User, Settings, Droplets } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'wouter';
 
 const Index = () => {
-  const navigate = useNavigate();
+  const [location, setLocation] = useLocation();
 
   // 4 PILIERS PRINCIPAUX
   const mainModules = [
@@ -55,14 +55,14 @@ const Index = () => {
           {/* Boutons d'accès rapide */}
           <div className="flex space-x-3">
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => setLocation('/dashboard')}
               className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg hover:scale-105"
             >
               <BarChart3 size={18} />
               <span>Stats</span>
             </button>
             <button 
-              onClick={() => navigate('/profile')}
+              onClick={() => setLocation('/profile')}
               className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-800 transition-colors shadow-lg hover:scale-105"
             >
               <User size={18} />
@@ -86,14 +86,14 @@ const Index = () => {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
-              onClick={() => navigate('/workout')}
+              onClick={() => setLocation('/workout')}
               className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl animate-slide-up hover:scale-105"
             >
               Commencer un workout
               <ArrowRight className="inline-block ml-2" size={20} />
             </button>
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => setLocation('/dashboard')}
               className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 hover:scale-105"
             >
               Voir mes statistiques
@@ -118,7 +118,7 @@ const Index = () => {
                 key={module.title}
                 className={`${module.bgClass} text-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer animate-slide-up group`}
                 style={{ animationDelay: `${index * 150}ms` }}
-                onClick={() => navigate(module.path)}
+                onClick={() => setLocation(module.path)}
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="bg-white/20 p-4 rounded-2xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
@@ -155,21 +155,21 @@ const Index = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <button 
-                onClick={() => navigate('/workout')}
+                onClick={() => setLocation('/workout')}
                 className="bg-fitness-energy text-white px-6 py-4 rounded-xl font-medium hover:bg-fitness-energy/90 transition-all duration-300 hover:scale-105 flex flex-col items-center"
               >
                 <span className="text-2xl mb-1">🏋️</span>
                 <span>Premier workout</span>
               </button>
               <button 
-                onClick={() => navigate('/hydration')}
+                onClick={() => setLocation('/hydration')}
                 className="bg-fitness-hydration text-white px-6 py-4 rounded-xl font-medium hover:bg-fitness-hydration/90 transition-all duration-300 hover:scale-105 flex flex-col items-center"
               >
                 <span className="text-2xl mb-1">💧</span>
                 <span>Boire de l'eau</span>
               </button>
               <button 
-                onClick={() => navigate('/nutrition')}
+                onClick={() => setLocation('/nutrition')}
                 className="bg-fitness-growth text-white px-6 py-4 rounded-xl font-medium hover:bg-fitness-growth/90 transition-all duration-300 hover:scale-105 flex flex-col items-center"
               >
                 <span className="text-2xl mb-1">🍎</span>
@@ -186,21 +186,21 @@ const Index = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Accès rapide</h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => setLocation('/dashboard')}
                   className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
                 >
                   <BarChart3 size={20} />
                   <span>Dashboard complet</span>
                 </button>
                 <button 
-                  onClick={() => navigate('/profile')}
+                  onClick={() => setLocation('/profile')}
                   className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
                 >
                   <User size={20} />
                   <span>Mon profil</span>
                 </button>
                 <button 
-                  onClick={() => navigate('/profile')}
+                  onClick={() => setLocation('/profile')}
                   className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
                 >
                   <Settings size={20} />
