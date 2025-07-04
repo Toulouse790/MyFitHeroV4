@@ -1,59 +1,76 @@
-import { createClient } from '@supabase/supabase-js';
-import { Database as DBType, Json as JsonType } from '@/integrations/supabase/types';
+// This file replaces the old Supabase setup with local types
+// Migration: Now using local auth system and Drizzle/Neon Postgres
 
-export type Database = DBType;
-export type Json = JsonType;
+export type Database = any;
+export type Json = any;
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export type UserProfile = {
+  id: string;
+  username?: string | null;
+  full_name?: string | null;
+  email?: string;
+  age?: number | null;
+  gender?: 'male' | 'female' | null;
+  sport?: string | null;
+  sport_position?: string | null;
+  sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
+  lifestyle?: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
+  fitness_experience?: 'beginner' | 'intermediate' | 'advanced' | 'expert' | null;
+  primary_goals?: string[];
+  training_frequency?: number | null;
+  season_period?: 'off_season' | 'pre_season' | 'in_season' | 'recovery' | null;
+  available_time_per_day?: number | null;
+  active_modules?: string[];
+  modules?: string[];
+  profile_type?: 'complete' | 'wellness' | 'sport_only' | 'sleep_focus';
+  sport_specific_stats?: Record<string, number>;
+  injuries?: string[];
+  motivation?: string;
+  fitness_goal?: string;
+};
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Variables d\'environnement Supabase manquantes. Vérifiez votre fichier .env.local'
-  );
-}
+export type Workout = any;
+export type Exercise = any;
+export type DailyStats = any;
+export type HydrationEntry = any;
+export type Meal = any;
+export type SleepSession = any;
+export type AiRecommendation = any;
+export type AiRequest = any;
+export type FoodLibraryEntry = any;
+export type UserGoal = any;
+export type PillarCoordination = any;
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce'
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 2
-    }
-  }
-});
-
-// Exportations des types
-export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
-export type Workout = Database['public']['Tables']['workouts']['Row'];
-export type Exercise = Database['public']['Tables']['exercises_library']['Row'];
-export type DailyStats = Database['public']['Tables']['daily_stats']['Row'];
-export type HydrationEntry = Database['public']['Tables']['hydration_logs']['Row'];
-export type Meal = Database['public']['Tables']['meals']['Row'];
-export type SleepSession = Database['public']['Tables']['sleep_sessions']['Row'];
-export type AiRecommendation = Database['public']['Tables']['ai_recommendations']['Row'];
-export type AiRequest = Database['public']['Tables']['ai_requests']['Row'];
-export type FoodLibraryEntry = Database['public']['Tables']['foods_library']['Row'];
-export type UserGoal = Database['public']['Tables']['user_goals']['Row'];
-export type PillarCoordination = Database['public']['Tables']['pillar_coordination']['Row'];
+export type SupabaseAuthUserType = UserProfile & {
+  level?: number;
+  totalPoints?: number;
+  joinDate?: string;
+  name?: string;
+  goal?: string;
+};
 
 export const handleSupabaseError = (error: unknown, context: string = '') => {
-  let message = 'Une erreur inattendue s\'est produite';
-  if (error instanceof Error) {
-    message = error.message;
-  } else if (typeof error === 'string') {
-    message = error;
+  console.error(`Error ${context}:`, error);
+  
+  if (error && typeof error === 'object' && 'message' in error) {
+    return error.message as string;
   }
-  console.error(`Erreur Supabase${context ? ` (${context})` : ''}:`, error);
-  return message;
+  
+  return 'Une erreur inattendue s\'est produite';
 };
 
 export const requireAuth = () => {
-  return supabase.auth.getUser();
+  // This is now handled by our local auth system
+  return null;
+};
+
+// Legacy compatibility - these will be migrated away
+export const supabase = {
+  auth: {
+    signOut: () => Promise.resolve(),
+    getUser: () => Promise.resolve({ data: { user: null } }),
+    onAuthStateChange: () => ({ data: { subscription: null } })
+  }
 };
 
 export default supabase;

@@ -1,20 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  LogIn, 
-  UserPlus,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  Shield
-} from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '../hooks/use-toast';
+import { authClient } from '@/lib/auth';
+import { useToast } from '@/hooks/use-toast';
+import { Eye, EyeOff, Mail, User, Lock } from 'lucide-react';
 
 interface AuthPagesProps {
   onAuthSuccess: (user: any) => void;
@@ -28,18 +15,15 @@ interface SignUpForm {
 }
 
 interface SignInForm {
-  username: string;
+  email: string;
   password: string;
   rememberMe: boolean;
 }
 
 const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
-  const [currentView, setCurrentView] = useState<'signin' | 'signup'>('signin');
+  const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const [signUpForm, setSignUpForm] = useState<SignUpForm>({
@@ -50,471 +34,286 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
   });
 
   const [signInForm, setSignInForm] = useState<SignInForm>({
-    username: '',
+    email: '',
     password: '',
     rememberMe: false
   });
 
-  const isValidEmail = (email: string) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
-
-  const isValidPassword = (password: string) => {
-    return password.length >= 6;
-  };
-
-  const isValidUsername = (username: string) => {
-    return username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username);
-  };
-
-  // Fonction centralisée pour gérer les redirections après authentification
-  const handleSuccessfulAuth = (hasCompletedOnboarding: boolean) => {
-    toast({
-      title: "Connexion réussie !",
-      description: "Redirection en cours...",
-    });
-
-    // Utiliser un petit délai pour laisser le toast s'afficher
-    setTimeout(() => {
-      // Forcer le rechargement complet pour mettre à jour l'état global
- navigate(hasCompletedOnboarding ? '/dashboard' : '/onboarding', { replace: true });
- // Ancien code avec window.location.href:
-      // if (hasCompletedOnboarding) {
-      //   window.location.href = '/dashboard';
-      // } else { window.location.href = '/onboarding'; }
-    }, 500);
-  };
-
-  const handleMagicLink = async () => {
-    if (!signUpForm.email || !isValidEmail(signUpForm.email)) {
-      setError('Veuillez saisir une adresse email valide');
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (signUpForm.password !== signUpForm.confirmPassword) {
+      toast({
+        title: 'Erreur',
+        description: 'Les mots de passe ne correspondent pas',
+        variant: 'destructive'
+      });
       return;
     }
 
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email: signUpForm.email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            username: signUpForm.username || signUpForm.email.split('@')[0],
-            full_name: signUpForm.username || signUpForm.email.split('@')[0]
-          }
-        }
-      });
-
-      if (error) throw error;
-
+    if (signUpForm.password.length < 6) {
       toast({
-        title: "Magic Link envoyé !",
-        description: `Vérifiez votre boîte mail (${signUpForm.email}) et cliquez sur le lien pour vous connecter.`,
+        title: 'Erreur',
+        description: 'Le mot de passe doit contenir au moins 6 caractères',
+        variant: 'destructive'
       });
-
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de l\'envoi du Magic Link';
-      setError(errorMessage);
-      toast({
-        title: "Erreur Magic Link",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setIsLoading(true);
-
+    setLoading(true);
+    
     try {
-      if (!isValidEmail(signUpForm.email)) {
-        throw new Error('Adresse email invalide');
+      const result = await authClient.register(signUpForm.email, signUpForm.username, signUpForm.password);
+      
+      if (result.error) {
+        toast({
+          title: 'Erreur d\'inscription',
+          description: result.error,
+          variant: 'destructive'
+        });
+      } else if (result.user) {
+        toast({
+          title: 'Inscription réussie',
+          description: 'Bienvenue sur MyFitHero !',
+          variant: 'success'
+        });
+        onAuthSuccess(result.user);
       }
-
-      if (!isValidUsername(signUpForm.username)) {
-        throw new Error('Le pseudo doit contenir au moins 3 caractères (lettres, chiffres, underscore uniquement)');
-      }
-
-      if (!isValidPassword(signUpForm.password)) {
-        throw new Error('Le mot de passe doit contenir au moins 6 caractères');
-      }
-
-      if (signUpForm.password !== signUpForm.confirmPassword) {
-        throw new Error('Les mots de passe ne correspondent pas');
-      }
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: signUpForm.email,
-        password: signUpForm.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/onboarding`,
-          data: {
-            username: signUpForm.username,
-            full_name: signUpForm.username
-          }
-        }
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        console.log('✅ Inscription réussie, utilisateur créé:', authData.user.id);
-        
-        // Créer immédiatement le profil dans user_profiles
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            id: authData.user.id,
-            username: signUpForm.username,
-            full_name: signUpForm.username,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
-
-        if (profileError) {
-          console.warn('⚠️ Erreur création profil (non-bloquant):', profileError);
-        }
-        
-        if (authData.session) {
-          console.log('🔄 Session active, redirection vers onboarding...');
-          handleSuccessfulAuth(false); // false car nouvel utilisateur = pas d'onboarding complété
-        } else {
-          toast({
-            title: "Inscription réussie !",
-            description: "Vérifiez votre email pour confirmer votre inscription, puis reconnectez-vous.",
-          });
-        }
-      }
-
-    } catch (err: any) {
-      console.error('❌ Erreur inscription:', err);
-      const errorMessage = err.message || 'Erreur lors de la création du compte';
-      setError(errorMessage);
+    } catch (error) {
       toast({
-        title: "Erreur d'inscription",
-        description: errorMessage,
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de l\'inscription',
+        variant: 'destructive'
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    setIsLoading(true);
-
+    setLoading(true);
+    
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: signInForm.username,
-        password: signInForm.password
-      });
-
-      if (authError) {
-        throw new Error('Email ou mot de passe incorrect');
+      const result = await authClient.signIn(signInForm.email, signInForm.password);
+      
+      if (result.error) {
+        toast({
+          title: 'Erreur de connexion',
+          description: result.error,
+          variant: 'destructive'
+        });
+      } else if (result.user) {
+        toast({
+          title: 'Connexion réussie',
+          description: 'Bon retour sur MyFitHero !',
+          variant: 'success'
+        });
+        onAuthSuccess(result.user);
       }
-
-      if (signInForm.rememberMe) {
-        localStorage.setItem('myfitheroe_remember_me', 'true');
-        localStorage.setItem('myfitheroe_username', signInForm.username);
-      } else {
-        localStorage.removeItem('myfitheroe_remember_me');
-        localStorage.removeItem('myfitheroe_username');
-      }
-
-      // Vérifier si l'onboarding est complété
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('primary_goals')
-        .eq('id', authData.user.id)
-        .single();
-
-      const hasCompletedOnboarding = profileData?.primary_goals && 
-                                    Array.isArray(profileData.primary_goals) && 
-                                    profileData.primary_goals.length > 0;
-
-      handleSuccessfulAuth(hasCompletedOnboarding);
-
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erreur lors de la connexion';
-      setError(errorMessage);
+    } catch (error) {
       toast({
-        title: "Erreur de connexion",
-        description: errorMessage,
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la connexion',
+        variant: 'destructive'
       });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  React.useEffect(() => {
-    const rememberMe = localStorage.getItem('myfitheroe_remember_me');
-    const savedUsername = localStorage.getItem('myfitheroe_username');
-    
-    if (rememberMe === 'true' && savedUsername) {
-      setSignInForm(prev => ({
-        ...prev,
-        username: savedUsername,
-        rememberMe: true
-      }));
-    }
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield size={32} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold mb-2">MyFitHero</h1>
-          <p className="text-blue-100">Votre compagnon fitness intelligent</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">MyFitHero</h1>
+          <p className="text-gray-600">Votre compagnon fitness personnel</p>
         </div>
 
-        <div className="p-8">
-          <div className="flex bg-gray-100 rounded-xl p-1 mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          {/* Toggle buttons */}
+          <div className="flex border-b border-gray-200 mb-6">
             <button
-              onClick={() => setCurrentView('signin')}
-              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 ${
-                currentView === 'signin'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
+              onClick={() => setIsSignUp(false)}
+              className={`flex-1 py-2 px-4 text-sm font-medium border-b-2 ${
+                !isSignUp
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               Connexion
             </button>
             <button
-              onClick={() => setCurrentView('signup')}
-              className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 ${
-                currentView === 'signup'
-                  ? 'bg-white text-purple-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
+              onClick={() => setIsSignUp(true)}
+              className={`flex-1 py-2 px-4 text-sm font-medium border-b-2 ${
+                isSignUp
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >
               Inscription
             </button>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3">
-              <AlertCircle className="text-red-500 flex-shrink-0" size={20} />
-              <span className="text-red-700 text-sm">{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center space-x-3">
-              <CheckCircle className="text-green-500 flex-shrink-0" size={20} />
-              <span className="text-green-700 text-sm">{success}</span>
-            </div>
-          )}
-
-          {currentView === 'signin' && (
-            <form onSubmit={handleSignIn} className="space-y-6">
+          {isSignUp ? (
+            <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="email"
-                    value={signInForm.username}
-                    onChange={(e) => setSignInForm(prev => ({ ...prev, username: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="votre@email.com"
                     required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={signInForm.password}
-                    onChange={(e) => setSignInForm(prev => ({ ...prev, password: e.target.value }))}
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Votre mot de passe"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={signInForm.rememberMe}
-                    onChange={(e) => setSignInForm(prev => ({ ...prev, rememberMe: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">Se souvenir de moi</span>
-                </label>
-                <button type="button" className="text-sm text-blue-600 hover:text-blue-800">
-                  Mot de passe oublié ?
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <>
-                    <LogIn size={20} />
-                    <span>Se connecter</span>
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {currentView === 'signup' && (
-            <form onSubmit={handleSignUp} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Adresse email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="email"
                     value={signUpForm.email}
-                    onChange={(e) => setSignUpForm(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                    onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="votre@email.com"
-                    required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pseudo
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom d'utilisateur
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type="text"
-                    value={signUpForm.username}
-                    onChange={(e) => setSignUpForm(prev => ({ ...prev, username: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="Choisissez un pseudo"
                     required
+                    value={signUpForm.username}
+                    onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="nom_utilisateur"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Minimum 3 caractères, lettres et chiffres uniquement
-                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Mot de passe
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    value={signUpForm.password}
-                    onChange={(e) => setSignUpForm(prev => ({ ...prev, password: e.target.value }))}
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="Choisissez un mot de passe"
                     required
+                    value={signUpForm.password}
+                    onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })}
+                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Minimum 6 caractères
-                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirmer le mot de passe
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    value={signUpForm.confirmPassword}
-                    onChange={(e) => setSignUpForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                    placeholder="Confirmez votre mot de passe"
                     required
+                    value={signUpForm.confirmPassword}
+                    onChange={(e) => setSignUpForm({ ...signUpForm, confirmPassword: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="••••••••"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <>
-                    <UserPlus size={20} />
-                    <span>Créer mon compte</span>
-                  </>
-                )}
+                {loading ? 'Inscription...' : 'Créer un compte'}
               </button>
-
-              <div className="mt-4">
-                <div className="text-center text-sm text-gray-500 mb-3">ou</div>
-                <button
-                  type="button"
-                  onClick={handleMagicLink}
-                  disabled={isLoading || !signUpForm.email}
-                  className="w-full bg-blue-50 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-100 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
-                >
-                  <Mail size={20} />
-                  <span>Magic Link (sans mot de passe)</span>
-                </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignIn} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type="email"
+                    required
+                    value={signInForm.email}
+                    onChange={(e) => setSignInForm({ ...signInForm, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="votre@email.com"
+                  />
+                </div>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={signInForm.password}
+                    onChange={(e) => setSignInForm({ ...signInForm, password: e.target.value })}
+                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="remember"
+                  checked={signInForm.rememberMe}
+                  onChange={(e) => setSignInForm({ ...signInForm, rememberMe: e.target.checked })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
+                  Se souvenir de moi
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </button>
             </form>
           )}
+        </div>
 
-          <div className="mt-8 text-center text-sm text-gray-500">
-            <p>
-              En vous inscrivant, vous acceptez nos{' '}
-              <button className="text-blue-600 hover:text-blue-800">
-                conditions d'utilisation
-              </button>
-            </p>
-          </div>
+        <div className="text-center text-sm text-gray-600">
+          <p>En vous connectant, vous acceptez nos</p>
+          <p>
+            <a href="#" className="text-blue-600 hover:text-blue-500">Conditions d'utilisation</a>
+            {' et '}
+            <a href="#" className="text-blue-600 hover:text-blue-500">Politique de confidentialité</a>
+          </p>
         </div>
       </div>
     </div>
