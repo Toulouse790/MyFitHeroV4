@@ -55,11 +55,11 @@ const Index = () => {
           {/* Boutons d'accès rapide */}
           <div className="flex space-x-3">
             <button 
-              onClick={() => setLocation('/dashboard')}
+              onClick={() => setLocation('/workout')}
               className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-600 transition-colors shadow-lg hover:scale-105"
             >
-              <BarChart3 size={18} />
-              <span>Stats</span>
+              <Dumbbell size={18} />
+              <span>Workout</span>
             </button>
             <button 
               onClick={() => setLocation('/profile')}
@@ -93,10 +93,10 @@ const Index = () => {
               <ArrowRight className="inline-block ml-2" size={20} />
             </button>
             <button 
-              onClick={() => setLocation('/dashboard')}
+              onClick={() => setLocation('/profile')}
               className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 hover:scale-105"
             >
-              Voir mes statistiques
+              Voir mon profil
             </button>
           </div>
         </section>
@@ -186,11 +186,11 @@ const Index = () => {
               <h3 className="text-xl font-bold text-gray-800 mb-4">📊 Accès rapide</h3>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
-                  onClick={() => setLocation('/dashboard')}
+                  onClick={() => setLocation('/workout')}
                   className="flex items-center justify-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-sm"
                 >
-                  <BarChart3 size={20} />
-                  <span>Dashboard complet</span>
+                  <Dumbbell size={20} />
+                  <span>Workout complet</span>
                 </button>
                 <button 
                   onClick={() => setLocation('/profile')}

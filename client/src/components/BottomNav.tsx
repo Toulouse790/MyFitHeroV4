@@ -15,7 +15,7 @@ const navItems: NavItem[] = [
     id: 'home',
     label: 'Accueil',
     icon: Home,
-    path: '/dashboard',
+    path: '/',
     color: 'text-blue-600'
   },
   {

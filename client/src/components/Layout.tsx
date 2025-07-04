@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'wouter';
-import { ArrowLeft, User, BarChart3 } from 'lucide-react';
+import { ArrowLeft, User, Dumbbell } from 'lucide-react';
 import BottomNav from './BottomNav';
 
 interface LayoutProps {
@@ -10,7 +10,6 @@ interface LayoutProps {
 function getPageTitle(pathname: string): string {
   const titles: { [key: string]: string } = {
     '/': 'Accueil',
-    '/dashboard': 'Tableau de bord',
     '/hydration': 'Hydratation',
     '/nutrition': 'Nutrition',
     '/sleep': 'Sommeil',
@@ -24,11 +23,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [location] = useLocation();
   
   const isHomePage = location === '/';
-  const isDashboard = location === '/dashboard';
-  const showBackButton = !isHomePage && !isDashboard;
+  const showBackButton = !isHomePage;
   
   const quickActions = [
-    { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
+    { path: '/workout', icon: Dumbbell, label: 'Workout' },
     { path: '/profile', icon: User, label: 'Profil' },
   ];
 

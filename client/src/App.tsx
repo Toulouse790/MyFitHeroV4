@@ -8,7 +8,6 @@ import Layout from '@/components/Layout';
 
 // Import pages
 import AuthPages from '@/components/AuthPages';
-import Dashboard from '@/pages/Dashboard';
 import Hydration from '@/pages/Hydration';
 import Nutrition from '@/pages/Nutrition';
 import Sleep from '@/pages/Sleep';
@@ -77,9 +76,6 @@ const App: React.FC = () => {
         <Layout>
           <Switch>
             <Route path="/" component={Index} />
-            <Route path="/dashboard">
-              <Dashboard user={user} onSignOut={handleSignOut} />
-            </Route>
             <Route path="/hydration" component={Hydration} />
             <Route path="/nutrition" component={Nutrition} />
             <Route path="/sleep" component={Sleep} />
