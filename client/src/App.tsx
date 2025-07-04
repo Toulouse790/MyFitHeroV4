@@ -8,6 +8,7 @@ import Layout from '@/components/Layout';
 
 // Import pages
 import AuthPages from '@/components/AuthPages';
+import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
 import Hydration from '@/pages/Hydration';
 import Nutrition from '@/pages/Nutrition';
 import Sleep from '@/pages/Sleep';
@@ -19,13 +20,18 @@ import NotFound from '@/pages/NotFound';
 const App: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     const initAuth = async () => {
       try {
         const currentUser = await authClient.getUser();
-        setUser(currentUser);
+        if (currentUser) {
+          setUser(currentUser);
+          await checkUserProfile(currentUser);
+        }
       } catch (error) {
         console.error('Auth init error:', error);
       } finally {
@@ -36,11 +42,58 @@ const App: React.FC = () => {
     initAuth();
   }, []);
 
-  const handleAuthSuccess = (authenticatedUser: AuthUser) => {
+  const checkUserProfile = async (user: AuthUser) => {
+    try {
+      const response = await fetch('/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${authClient.getToken()}`
+        }
+      });
+      
+      if (response.ok) {
+        const profile = await response.json();
+        setHasProfile(!!profile);
+        setShowOnboarding(false);
+      } else if (response.status === 404) {
+        // User doesn't have a profile yet
+        setHasProfile(false);
+        setShowOnboarding(false); // Will be set to true after registration
+      }
+    } catch (error) {
+      console.error('Profile check error:', error);
+      setHasProfile(false);
+    }
+  };
+
+  const handleAuthSuccess = (authenticatedUser: AuthUser, isNewUser = false) => {
     setUser(authenticatedUser);
+    
+    if (isNewUser) {
+      // New user registration - show onboarding
+      setHasProfile(false);
+      setShowOnboarding(true);
+      toast({
+        title: 'Inscription réussie',
+        description: 'Configurons maintenant votre profil !',
+        variant: 'success'
+      });
+    } else {
+      // Existing user login - check profile
+      checkUserProfile(authenticatedUser);
+      toast({
+        title: 'Connexion réussie',
+        description: 'Bienvenue sur MyFitHero !',
+        variant: 'success'
+      });
+    }
+  };
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    setHasProfile(true);
     toast({
-      title: 'Connexion réussie',
-      description: 'Bienvenue sur MyFitHero !',
+      title: 'Profil configuré',
+      description: 'Votre profil a été créé avec succès !',
       variant: 'success'
     });
   };
@@ -68,6 +121,11 @@ const App: React.FC = () => {
 
   if (!user) {
     return <AuthPages onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  // Show onboarding for new users without profile
+  if (showOnboarding || (user && !hasProfile && !loading)) {
+    return <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} />;
   }
 
   return (

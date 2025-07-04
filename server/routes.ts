@@ -292,6 +292,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Profile management
+  app.post("/api/profile", authenticateToken, async (req, res) => {
+    try {
+      const profileData = req.body;
+      const profile = await storage.createUserProfile({
+        user_id: req.user.id,
+        age: profileData.age,
+        gender: profileData.gender,
+        sport: profileData.sport,
+        sport_position: profileData.sport_position,
+        sport_level: profileData.sport_level,
+        lifestyle: profileData.lifestyle,
+        fitness_experience: profileData.fitness_experience,
+        primary_goals: profileData.primary_goals,
+        training_frequency: profileData.training_frequency,
+        available_time_per_day: profileData.available_time_per_day,
+        active_modules: profileData.active_modules,
+        modules: profileData.modules,
+        profile_type: profileData.profile_type,
+        motivation: profileData.motivation
+      });
+      res.json(profile);
+    } catch (error) {
+      console.error("Create profile error:", error);
+      res.status(500).json({ message: "Failed to create profile" });
+    }
+  });
+
+  app.get("/api/profile", authenticateToken, async (req, res) => {
+    try {
+      const profile = await storage.getUserProfile(req.user.id);
+      res.json(profile);
+    } catch (error) {
+      console.error("Get profile error:", error);
+      res.status(500).json({ message: "Failed to get profile" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

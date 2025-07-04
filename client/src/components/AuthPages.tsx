@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, User, Lock } from 'lucide-react';
 
 interface AuthPagesProps {
-  onAuthSuccess: (user: any) => void;
+  onAuthSuccess: (user: any, isNewUser?: boolean) => void;
 }
 
 interface SignUpForm {
@@ -72,12 +72,8 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
           variant: 'destructive'
         });
       } else if (result.user) {
-        toast({
-          title: 'Inscription réussie',
-          description: 'Bienvenue sur MyFitHero !',
-          variant: 'success'
-        });
-        onAuthSuccess(result.user);
+        // Remove the toast here since App.tsx will show the onboarding toast
+        onAuthSuccess(result.user, true);
       }
     } catch (error) {
       toast({
