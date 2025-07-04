@@ -102,7 +102,7 @@ const Hydration: React.FC = () => {
   // --- LOGIQUE DE PERSONNALISATION DYNAMIQUE ---
   
   // Mapping du sport de l'utilisateur vers une catégorie
-  const getSportCategory = (sport: string): SportCategory => {
+  const getSportCategory = (sport: string | null | undefined): SportCategory => {
     const sportMappings: Record<string, SportCategory> = {
       'basketball': 'court',
       'tennis': 'court',
@@ -120,10 +120,10 @@ const Hydration: React.FC = () => {
       'weightlifting': 'strength'
     };
     
-    return sportMappings[sport?.toLowerCase()] || 'strength'; // fallback
+    return sportMappings[sport?.toLowerCase() || ''] || 'strength'; // fallback
   };
 
-  const userSportCategory = getSportCategory(appStoreUser.sport || 'none');
+  const userSportCategory = getSportCategory(appStoreUser?.sport || null);
   const sportConfig = sportsHydrationData[userSportCategory];
 
   // --- CALCUL OBJECTIF PERSONNALISÉ ---
@@ -139,22 +139,22 @@ const Hydration: React.FC = () => {
     adjustments += sportConfig.goalModifierMl;
     
     // Ajustement selon l'âge
-    if (appStoreUser.age) {
+    if (appStoreUser?.age) {
       if (appStoreUser.age > 50) adjustments += 200; // Plus âgé = plus d'hydratation
       if (appStoreUser.age < 25) adjustments += 300; // Plus jeune = plus actif
     }
     
     // Ajustement selon le genre
-    if (appStoreUser.gender === 'male') {
+    if (appStoreUser?.gender === 'male') {
       adjustments += 500; // Hommes ont généralement besoin de plus
     }
     
     // Ajustement selon les objectifs
-    if (appStoreUser.primary_goals?.includes('weight_loss')) {
+    if (appStoreUser?.primary_goals?.includes('weight_loss')) {
       adjustments += 500; // Perte de poids = plus d'eau
     }
     
-    if (appStoreUser.primary_goals?.includes('muscle_gain')) {
+    if (appStoreUser?.primary_goals?.includes('muscle_gain')) {
       adjustments += 300; // Construction musculaire = hydratation importante
     }
     
@@ -178,7 +178,7 @@ const Hydration: React.FC = () => {
     
     toast({
       title: "Eau ajoutée !",
-      description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser.name || 'Champion'} !`,
+      description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser?.name || appStoreUser?.username || 'Champion'} !`,
     });
     
     // Ici tu ajouterais l'appel à ton API/store
@@ -206,10 +206,10 @@ const Hydration: React.FC = () => {
   // --- MESSAGES PERSONNALISÉS ---
   const getPersonalizedMessage = () => {
     const progressPercentage = (currentMl / personalizedGoalMl) * 100;
-    const userName = appStoreUser.name || 'Champion';
+    const userName = appStoreUser?.name || appStoreUser?.username || 'Champion';
     
     if (progressPercentage >= 100) {
-      return `🎉 Excellent ${userName} ! Objectif atteint pour un ${appStoreUser.sport || 'athlète'} !`;
+      return `🎉 Excellent ${userName} ! Objectif atteint pour un ${appStoreUser?.sport || 'athlète'} !`;
     } else if (progressPercentage >= 75) {
       return `💪 Bravo ${userName}, tu es sur la bonne voie !`;
     } else if (progressPercentage >= 50) {
@@ -234,7 +234,7 @@ const Hydration: React.FC = () => {
               Hydratation
             </h1>
             <p className="text-gray-600">
-              {appStoreUser.name || 'Utilisateur'} • {appStoreUser.sport || 'Sport'} • {appStoreUser.age || '?'} ans
+              {appStoreUser?.name || appStoreUser?.username || 'Utilisateur'} • {appStoreUser?.sport || 'Sport'} • {appStoreUser?.age || '?'} ans
             </p>
           </div>
           <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -315,7 +315,7 @@ const Hydration: React.FC = () => {
           <div className="flex items-center space-x-2">
             <Zap size={20} className="text-yellow-500" />
             <h2 className="text-lg font-semibold text-gray-800">
-              Conseils pour {appStoreUser.sport || 'votre sport'}
+              Conseils pour {appStoreUser?.sport || 'votre sport'}
             </h2>
           </div>
           <div className="space-y-3">
@@ -343,8 +343,8 @@ const Hydration: React.FC = () => {
             <div>
               <h3 className="font-semibold text-purple-800 mb-1">Analyse Personnalisée</h3>
               <p className="text-purple-700 text-sm">
-                En tant que {appStoreUser.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser.age || '?'} ans pratiquant le {appStoreUser.sport || 'sport'}, 
-                votre objectif de {goalHydrationL.toFixed(1)}L est optimal pour vos {appStoreUser.primary_goals?.join(', ') || 'objectifs'}.
+                En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser?.age || '?'} ans pratiquant le {appStoreUser?.sport || 'sport'}, 
+                votre objectif de {goalHydrationL.toFixed(1)}L est optimal pour vos {appStoreUser?.primary_goals?.join(', ') || 'objectifs'}.
               </p>
             </div>
           </div>
