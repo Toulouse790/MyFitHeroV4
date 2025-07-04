@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Router, Route, Switch } from 'wouter';
+import { Router, Route, Switch, useLocation } from 'wouter';
 import { authClient } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import type { AuthUser } from '@/lib/auth';
@@ -17,12 +17,13 @@ import Profile from '@/pages/Profile';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     const initAuth = async () => {
@@ -69,9 +70,10 @@ const App: React.FC = () => {
     setUser(authenticatedUser);
     
     if (isNewUser) {
-      // New user registration - show onboarding
+      // New user registration - redirect to onboarding
       setHasProfile(false);
       setShowOnboarding(true);
+      setLocation('/onboarding');
       toast({
         title: 'Inscription réussie',
         description: 'Configurons maintenant votre profil !',
@@ -123,27 +125,53 @@ const App: React.FC = () => {
     return <AuthPages onAuthSuccess={handleAuthSuccess} />;
   }
 
-  // Show onboarding for new users without profile
-  if (showOnboarding || (user && !hasProfile && !loading)) {
-    return <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} />;
-  }
-
   return (
     <ErrorBoundary>
-      <Router>
-        <Layout>
-          <Switch>
-            <Route path="/" component={Index} />
-            <Route path="/hydration" component={Hydration} />
-            <Route path="/nutrition" component={Nutrition} />
-            <Route path="/sleep" component={Sleep} />
-            <Route path="/workout" component={Workout} />
-            <Route path="/profile" component={Profile} />
-            <Route component={NotFound} />
-          </Switch>
-        </Layout>
-      </Router>
+      <Switch>
+        <Route path="/onboarding">
+          {() => user ? <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} /> : <AuthPages onAuthSuccess={handleAuthSuccess} />}
+        </Route>
+        <Route path="/" component={() => {
+          if (!user) {
+            return <AuthPages onAuthSuccess={handleAuthSuccess} />;
+          }
+          // Show onboarding for new users without profile
+          if (showOnboarding || (!hasProfile && !loading)) {
+            setLocation('/onboarding');
+            return null;
+          }
+          return (
+            <Layout>
+              <Index />
+            </Layout>
+          );
+        }} />
+        <Route path="/hydration" component={() => (
+          <Layout><Hydration /></Layout>
+        )} />
+        <Route path="/nutrition" component={() => (
+          <Layout><Nutrition /></Layout>
+        )} />
+        <Route path="/sleep" component={() => (
+          <Layout><Sleep /></Layout>
+        )} />
+        <Route path="/workout" component={() => (
+          <Layout><Workout /></Layout>
+        )} />
+        <Route path="/profile" component={() => (
+          <Layout><Profile /></Layout>
+        )} />
+        <Route component={NotFound} />
+      </Switch>
     </ErrorBoundary>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 };
 

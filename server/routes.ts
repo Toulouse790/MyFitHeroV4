@@ -1,9 +1,14 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertUserProfileSchema, insertHydrationLogSchema, insertMealSchema, insertSleepSessionSchema, insertAiRequestSchema } from "@shared/schema";
+import { insertUserSchema, insertUserProfileSchema, insertHydrationLogSchema, insertMealSchema, insertSleepSessionSchema, insertAiRequestSchema, type User } from "@shared/schema";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+
+// Extend Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user: User;
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
