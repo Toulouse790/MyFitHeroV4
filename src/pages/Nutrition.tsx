@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Plus, 
   Target, 
@@ -7,30 +7,18 @@ import {
   Sun,
   Moon as MoonIcon,
   Apple,
-  ChevronRight,
-  Camera,
-  BarChart3,
-  Droplets,
   Flame,
   Zap,
-  Loader2,
   Info,
   Dumbbell,
-  Footprints
+  Footprints,
+  Trophy
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { Meal, DailyStats, Json } from '@/lib/supabase';
-import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 
-// --- TYPES & INTERFACES DE PERSONNALISATION ---
-
-type Sport = 'strength' | 'basketball' | 'american_football' | 'tennis' | 'endurance';
-
-interface User {
-  name: string;
-  sport: Sport;
-}
+// --- TYPES & INTERFACES ---
+type Sport = 'strength' | 'basketball' | 'american_football' | 'tennis' | 'endurance' | 'football';
 
 interface MealSuggestion {
   name: string;
@@ -40,16 +28,15 @@ interface MealSuggestion {
 
 interface SportNutritionConfig {
   emoji: string;
-  calorieModifier: number; // Ajout/soustraction aux objectifs de base
-  proteinMultiplier: number; // Multiplicateur pour les protéines
-  carbMultiplier: number; // Multiplicateur pour les glucides
+  calorieModifier: number;
+  proteinMultiplier: number;
+  carbMultiplier: number;
   dailyTip: string;
   hydrationTip: string;
   mealSuggestions: { [key: string]: MealSuggestion };
 }
 
 // --- CONFIGURATION NUTRITIONNELLE PAR SPORT ---
-
 const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
   strength: {
     emoji: '💪',
@@ -114,138 +101,151 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     carbMultiplier: 1.5,
     dailyTip: "Les glucides complexes (avoine, riz complet, patates douces) sont votre meilleur carburant. Consommez-les régulièrement pour maintenir vos réserves d'énergie.",
     hydrationTip: "Commencez à vous hydrater bien avant une longue sortie. L'hydratation de la veille est tout aussi importante.",
-     mealSuggestions: {
+    mealSuggestions: {
       breakfast: { name: 'Petit-déjeuner Énergie', icon: Coffee, meal_type_db: 'breakfast' },
       lunch: { name: 'Repas Glucides Complexes', icon: Footprints, meal_type_db: 'lunch' },
       snack: { name: 'Collation', icon: Apple, meal_type_db: 'snack' },
       dinner: { name: 'Dîner de Récupération', icon: MoonIcon, meal_type_db: 'dinner' },
     }
+  },
+  football: {
+    emoji: '⚽',
+    calorieModifier: 200,
+    proteinMultiplier: 1.1,
+    carbMultiplier: 1.4,
+    dailyTip: "L'endurance nécessite des réserves de glycogène pleines. Mangez des glucides complexes 3-4h avant les matchs.",
+    hydrationTip: "Pendant les 90 minutes de jeu, votre corps perd beaucoup d'eau. Hydratez-vous avant, pendant et après.",
+    mealSuggestions: {
+      breakfast: { name: 'Petit-déjeuner', icon: Coffee, meal_type_db: 'breakfast' },
+      pre_match: { name: 'Repas pré-match', icon: Zap, meal_type_db: 'lunch' },
+      half_time: { name: 'Mi-temps', icon: Apple, meal_type_db: 'snack' },
+      dinner: { name: 'Récupération', icon: MoonIcon, meal_type_db: 'dinner' },
+    }
   }
 };
 
-
-const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
-  // --- SIMULATION UTILISATEUR & CONFIG ---
-  const currentUser: User = {
-    name: 'Alex',
-    sport: 'strength' // Changez ici pour tester: 'basketball', 'tennis', 'endurance', 'american_football'
-  };
-  
-  const sportConfig = sportsNutritionData[currentUser.sport];
-
-  // --- STATE MANAGEMENT ---
-  const [selectedMealType, setSelectedMealType] = useState<string>(Object.keys(sportConfig.mealSuggestions)[0]);
-  const [meals, setMeals] = useState<Meal[]>([]);
-  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
-  const [loadingData, setLoadingData] = useState(true);
-  const [errorFetching, setErrorFetching] = useState<string | null>(null);
-
-  const [newFoodName, setNewFoodName] = useState('');
-  const [newFoodCalories, setNewFoodCalories] = useState<number>(0);
-  // ... autres états pour les champs de formulaire ...
-  const [newFoodProtein, setNewFoodProtein] = useState<number>(0);
-  const [newFoodCarbs, setNewFoodCarbs] = useState<number>(0);
-  const [newFoodFat, setNewFoodFat] = useState<number>(0);
-
+const Nutrition: React.FC = () => {
+  // --- DONNÉES RÉELLES DU STORE ---
+  const { appStoreUser } = useAppStore();
   const { toast } = useToast();
 
-  const {
-    dailyGoals: baseDailyGoals, // On renomme les objectifs de base
-    addMeal,
-    fetchMeals,
-    fetchDailyStats,
-  } = useAppStore();
-
-  // --- LOGIQUE DE PERSONNALISATION ---
-
-  // Calcul des objectifs personnalisés avec useMemo pour la performance
-  const personalizedGoals = useMemo(() => {
-    return {
-      calories: baseDailyGoals.calories + sportConfig.calorieModifier,
-      protein: Math.round(baseDailyGoals.protein * sportConfig.proteinMultiplier),
-      carbs: Math.round(baseDailyGoals.carbs * sportConfig.carbMultiplier),
-      water: baseDailyGoals.water // L'objectif d'eau reste de base, mais le conseil change
+  // --- MAPPING SPORT UTILISATEUR ---
+  const getSportCategory = (sport: string): Sport => {
+    const mappings: Record<string, Sport> = {
+      'basketball': 'basketball',
+      'tennis': 'tennis', 
+      'american_football': 'american_football',
+      'football': 'football',
+      'running': 'endurance',
+      'cycling': 'endurance',
+      'swimming': 'endurance',
+      'musculation': 'strength',
+      'powerlifting': 'strength',
+      'crossfit': 'strength',
+      'weightlifting': 'strength'
     };
-  }, [baseDailyGoals, sportConfig]);
-  
-  const today = new Date().toISOString().split('T')[0];
-
-  const currentCalories = dailyStats?.total_calories || 0;
-  const goalCalories = personalizedGoals.calories;
-  const remainingCalories = goalCalories - currentCalories;
-  const caloriesPercentage = goalCalories > 0 ? Math.min((currentCalories / goalCalories) * 100, 100) : 0;
-
-  const currentProtein = dailyStats?.total_protein || 0;
-  const goalProtein = personalizedGoals.protein;
-  const proteinPercentage = goalProtein > 0 ? Math.min((currentProtein / goalProtein) * 100, 100) : 0;
-  
-  // ... calculs similaires pour les autres macros
-  const currentCarbs = dailyStats?.total_carbs || 0;
-  const goalCarbs = personalizedGoals.carbs;
-  const carbsPercentage = goalCarbs > 0 ? Math.min((currentCarbs / goalCarbs) * 100, 100) : 0;
-
-  const currentFat = dailyStats?.total_fat || 0;
-  const goalFat = baseDailyGoals.fat; // Lipides non modifiés dans cet exemple
-  const fatPercentage = goalFat > 0 ? Math.min((currentFat / goalFat) * 100, 100) : 0;
-
-
-  // --- DATA FETCHING & ACTIONS (inchangées, mais importantes pour le contexte) ---
-  const loadNutritionData = useCallback(async () => {
-    // ... (code de chargement des données existant)
-  }, [userProfile?.id, today, fetchMeals, fetchDailyStats]);
-
-  useEffect(() => {
-    // loadNutritionData(); // Décommenter dans un projet réel
-    setLoadingData(false); // Pour la démo, on arrête le chargement immédiatement
-  }, [loadNutritionData]);
-
-  const handleAddFoodToMeal = async () => {
-    // ... (code d'ajout d'aliment existant)
+    return mappings[sport?.toLowerCase()] || 'strength';
   };
-  
-  // --- SOUS-COMPOSANTS (avec adaptations mineures) ---
 
-  const MacroCard = ({ title, current, goal, unit, color, percentage, tip }: { title: string; current: number; goal: number; unit: string; color: string; percentage: number, tip?: string }) => (
-    <div className="bg-white p-3 rounded-xl border border-gray-100 flex flex-col justify-between">
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-medium text-gray-600">{title}</h4>
-          <span className="text-xs font-medium" style={{color: color.replace('bg-', 'text-')}}>{Math.round(percentage)}%</span>
-        </div>
-        <div className="flex items-baseline space-x-1 mb-2">
-          <span className="text-lg font-bold text-gray-800">{Math.round(current)}</span>
-          <span className="text-sm text-gray-500">/ {goal} {unit}</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className={`${color} rounded-full h-2 transition-all duration-500`}
-            style={{ width: `${Math.min(percentage, 100)}%` }}
-          />
-        </div>
+  const userSport = getSportCategory(appStoreUser.sport || 'none');
+  const sportConfig = sportsNutritionData[userSport];
+
+  // --- CALCULS PERSONNALISÉS ---
+  const personalizedGoals = useMemo(() => {
+    // Calories de base (peut venir du store ou être calculées)
+    let baseCalories = appStoreUser.daily_calories || 2000;
+    
+    // Si pas de calories calculées, utiliser une formule simple
+    if (!appStoreUser.daily_calories && appStoreUser.age && appStoreUser.gender) {
+      const weight = 70; // Poids moyen
+      const height = appStoreUser.gender === 'male' ? 175 : 165;
+      
+      // BMR
+      const bmr = appStoreUser.gender === 'male'
+        ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * appStoreUser.age)
+        : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * appStoreUser.age);
+      
+      // Facteur d'activité selon lifestyle
+      const activityFactor = {
+        'student': 1.4,
+        'office_worker': 1.3, 
+        'physical_job': 1.6,
+        'retired': 1.2
+      }[appStoreUser.lifestyle as string] || 1.4;
+      
+      baseCalories = Math.round(bmr * activityFactor);
+    }
+
+    // Ajustements selon objectifs
+    let calorieAdjustment = 0;
+    if (appStoreUser.primary_goals?.includes('weight_loss')) calorieAdjustment -= 300;
+    if (appStoreUser.primary_goals?.includes('muscle_gain')) calorieAdjustment += 400;
+    
+    const finalCalories = baseCalories + sportConfig.calorieModifier + calorieAdjustment;
+    
+    return {
+      calories: finalCalories,
+      protein: Math.round((finalCalories * 0.15 / 4) * sportConfig.proteinMultiplier), // 15% en protéines ajusté
+      carbs: Math.round((finalCalories * 0.50 / 4) * sportConfig.carbMultiplier), // 50% en glucides ajusté  
+      fat: Math.round((finalCalories * 0.30 / 9)), // 30% en lipides
+    };
+  }, [appStoreUser, sportConfig]);
+
+  // --- STATES ---
+  const [currentCalories, setCurrentCalories] = useState(850); // Simulation
+  const [currentProtein, setCurrentProtein] = useState(45);
+  const [currentCarbs, setCurrentCarbs] = useState(120);
+  const [currentFat, setCurrentFat] = useState(25);
+
+  const [selectedMealType, setSelectedMealType] = useState<string>(Object.keys(sportConfig.mealSuggestions)[0]);
+
+  // --- CALCULS POURCENTAGES ---
+  const caloriesPercentage = Math.min((currentCalories / personalizedGoals.calories) * 100, 100);
+  const proteinPercentage = Math.min((currentProtein / personalizedGoals.protein) * 100, 100);
+  const carbsPercentage = Math.min((currentCarbs / personalizedGoals.carbs) * 100, 100);
+  const fatPercentage = Math.min((currentFat / personalizedGoals.fat) * 100, 100);
+
+  // --- COMPOSANTS ---
+  const MacroCard = ({ title, current, goal, unit, color, percentage, tip }: any) => (
+    <div className="bg-white p-3 rounded-xl border border-gray-100">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-medium text-gray-600">{title}</h4>
+        <span className="text-xs font-medium text-gray-500">{Math.round(percentage)}%</span>
+      </div>
+      <div className="flex items-baseline space-x-1 mb-2">
+        <span className="text-lg font-bold text-gray-800">{Math.round(current)}</span>
+        <span className="text-sm text-gray-500">/ {goal} {unit}</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+        <div 
+          className={`${color} rounded-full h-2 transition-all duration-500`}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
+        />
       </div>
       {tip && (
-        <div className="flex items-start mt-3 text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
-          <Info size={14} className="mr-2 mt-0.5 flex-shrink-0" />
-          <span>{tip}</span>
+        <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
+          <Info size={12} className="inline mr-1" />
+          {tip}
         </div>
       )}
     </div>
   );
 
-  const MealCard = ({ mealTypeKey, isSelected, onClick }: { mealTypeKey: string; isSelected: boolean; onClick: (key: string) => void }) => {
-    const mealDef = sportConfig.mealSuggestions[mealTypeKey];
-    if (!mealDef) return null;
-
-    const MealIcon = mealDef.icon;
-    const actualMeal = meals.find(m => m.meal_type === mealDef.meal_type_db);
-    const totalCals = actualMeal?.total_calories || 0;
+  // --- MESSAGES PERSONNALISÉS ---
+  const getPersonalizedMessage = () => {
+    const progress = (currentCalories / personalizedGoals.calories) * 100;
+    const userName = appStoreUser.name || 'Champion';
     
-    // ... (logique d'affichage de MealCard existante) ...
+    if (progress >= 90) {
+      return `🎯 Parfait ${userName} ! Objectif nutritionnel atteint pour ${appStoreUser.sport}`;
+    } else if (progress >= 70) {
+      return `💪 Excellent ${userName}, tu nourris bien ton corps d'athlète !`;
+    } else if (progress >= 50) {
+      return `⚡ Bien joué ${userName}, continue à alimenter ta performance !`;
+    } else {
+      return `🍎 ${userName}, ton corps a besoin de plus de carburant !`;
+    }
   };
-  
-  // ...
-
-  // --- RENDER DU COMPOSANT PRINCIPAL ---
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -258,67 +258,123 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
               <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
               Nutrition
             </h1>
-            <p className="text-gray-600">Suivi adapté pour {currentUser.sport.replace('_', ' ')}</p>
+            <p className="text-gray-600">
+              Plan adapté pour {appStoreUser.sport || 'votre sport'} • {appStoreUser.name || 'Athlète'}
+            </p>
           </div>
           <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
             <Plus size={20} className="text-gray-600" />
           </button>
         </div>
 
-        {/* Calories avec Objectif Personnalisé */}
-        <div className="bg-gradient-growth p-5 rounded-xl text-white">
-          {/* ... (logique de chargement existante) ... */}
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">Calories aujourd'hui</h3>
-              <Target size={24} />
-            </div>
-            <div className="text-center mb-4">
-              <div className="text-4xl font-bold mb-1">{currentCalories}</div>
-              <div className="text-white/80">sur {goalCalories} kcal (Objectif {currentUser.sport})</div>
-              {/* ... */}
-            </div>
-            <div className="w-full bg-white/20 rounded-full h-3 mb-2">
-              <div className="bg-white rounded-full h-3" style={{ width: `${caloriesPercentage}%` }} />
-            </div>
-          </>
+        {/* Message Motivant */}
+        <div className="bg-gradient-to-r from-green-500 to-teal-500 p-4 rounded-xl text-white">
+          <p className="font-semibold text-center">{getPersonalizedMessage()}</p>
         </div>
 
-        {/* ... (Actions rapides inchangées) ... */}
+        {/* Calories avec Objectif Personnalisé */}
+        <div className="bg-gradient-to-r from-green-600 to-teal-600 p-5 rounded-xl text-white">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-lg">Calories aujourd'hui</h3>
+            <Target size={24} />
+          </div>
+          <div className="text-center mb-4">
+            <div className="text-4xl font-bold mb-1">{currentCalories}</div>
+            <div className="text-white/80">
+              sur {personalizedGoals.calories} kcal ({appStoreUser.sport || 'sport'})
+            </div>
+            <div className="text-sm text-white/70 mt-1">
+              {personalizedGoals.calories - currentCalories > 0 
+                ? `${personalizedGoals.calories - currentCalories} kcal restantes`
+                : 'Objectif atteint ! 🎉'
+              }
+            </div>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-3 mb-2">
+            <div className="bg-white rounded-full h-3 transition-all duration-500" style={{ width: `${caloriesPercentage}%` }} />
+          </div>
+        </div>
 
         {/* Macronutriments Personnalisés */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-800">Vos Macros Personnalisées</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Vos Macros Adaptées</h2>
           <div className="grid grid-cols-2 gap-3">
-            <MacroCard title="Protéines" current={currentProtein} goal={goalProtein} unit="g" color="bg-red-500" percentage={proteinPercentage} />
-            <MacroCard title="Glucides" current={currentCarbs} goal={goalCarbs} unit="g" color="bg-blue-500" percentage={carbsPercentage} />
-            <MacroCard title="Lipides" current={currentFat} goal={goalFat} unit="g" color="bg-yellow-500" percentage={fatPercentage} />
             <MacroCard 
-              title="Hydratation" 
-              current={dailyStats?.water_intake_ml ? (dailyStats.water_intake_ml / 1000) : 0}
-              goal={personalizedGoals.water}
-              unit="L"
-              color="bg-cyan-500"
-              percentage={dailyStats?.water_intake_ml ? Math.round((dailyStats.water_intake_ml / (personalizedGoals.water * 1000)) * 100) : 0}
-              tip={sportConfig.hydrationTip}
+              title="Protéines" 
+              current={currentProtein} 
+              goal={personalizedGoals.protein} 
+              unit="g" 
+              color="bg-red-500" 
+              percentage={proteinPercentage}
+              tip={userSport === 'strength' ? 'Crucial pour la masse musculaire' : 'Important pour la récupération'}
             />
+            <MacroCard 
+              title="Glucides" 
+              current={currentCarbs} 
+              goal={personalizedGoals.carbs} 
+              unit="g" 
+              color="bg-blue-500" 
+              percentage={carbsPercentage}
+              tip={userSport === 'endurance' ? 'Votre carburant principal' : 'Énergie pour l\'entraînement'}
+            />
+            <MacroCard 
+              title="Lipides" 
+              current={currentFat} 
+              goal={personalizedGoals.fat} 
+              unit="g" 
+              color="bg-yellow-500" 
+              percentage={fatPercentage}
+            />
+            <div className="bg-white p-3 rounded-xl border border-gray-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <Trophy size={16} className="text-purple-600" />
+                <span className="text-sm font-medium text-purple-600">Performance</span>
+              </div>
+              <p className="text-xs text-gray-600">
+                Tes macros sont optimisées pour {appStoreUser.primary_goals?.join(' et ') || 'ta performance'}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Repas du jour avec Suggestions Personnalisées */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-800">Repas du jour</h2>
+          <h2 className="text-lg font-semibold text-gray-800">Repas Recommandés</h2>
           <div className="space-y-3">
-            {Object.keys(sportConfig.mealSuggestions).map((mealTypeKey) => (
-              // Le composant MealCard utiliserait maintenant sportConfig.mealSuggestions pour s'afficher
-              // Pour la démo, on affiche juste le nom :
-               <button key={mealTypeKey} className="w-full text-left p-4 rounded-xl border bg-white flex items-center space-x-3">
-                  <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
-                    {React.createElement(sportConfig.mealSuggestions[mealTypeKey].icon, { size: 20 })}
-                  </div>
-                  <h3 className="font-semibold text-gray-800">{sportConfig.mealSuggestions[mealTypeKey].name}</h3>
-               </button>
+            {Object.entries(sportConfig.mealSuggestions).map(([key, meal]) => (
+              <button 
+                key={key} 
+                className="w-full text-left p-4 rounded-xl border bg-white flex items-center space-x-3 hover:bg-gray-50 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-green-100 text-green-600">
+                  {React.createElement(meal.icon, { size: 20 })}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800">{meal.name}</h3>
+                  <p className="text-sm text-gray-500">Optimisé pour {userSport}</p>
+                </div>
+                <span className="text-gray-400">→</span>
+              </button>
             ))}
+          </div>
+        </div>
+
+        {/* Analyse Personnalisée */}
+        <div className="bg-purple-50 p-4 rounded-xl border border-purple-100">
+          <div className="flex items-start space-x-3">
+            <Zap size={20} className="text-purple-600 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-purple-800 mb-1">Analyse de votre Profil</h3>
+              <p className="text-purple-700 text-sm mb-2">
+                En tant que {appStoreUser.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser.age || '?'} ans 
+                pratiquant {appStoreUser.sport || 'le sport'}, vos besoins sont de {personalizedGoals.calories} kcal/jour.
+              </p>
+              <div className="text-xs text-purple-600 space-y-1">
+                <p>• Protéines augmentées de {Math.round((sportConfig.proteinMultiplier - 1) * 100)}% pour {userSport}</p>
+                <p>• Glucides ajustés de {Math.round((sportConfig.carbMultiplier - 1) * 100)}% selon votre sport</p>
+                <p>• Calories bonus: +{sportConfig.calorieModifier} pour l'activité</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -329,8 +385,15 @@ const Nutrition: React.FC<NutritionProps> = ({ userProfile }) => {
               <Zap size={16} className="text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-blue-800 mb-1">Conseil du jour pour {currentUser.sport.replace('_', ' ')}</h3>
+              <h3 className="font-semibold text-blue-800 mb-1">
+                Conseil pour {appStoreUser.sport?.replace('_', ' ') || 'votre sport'}
+              </h3>
               <p className="text-blue-700 text-sm">{sportConfig.dailyTip}</p>
+              <div className="mt-2 p-2 bg-blue-100 rounded-md">
+                <p className="text-xs text-blue-800">
+                  <strong>Hydratation:</strong> {sportConfig.hydrationTip}
+                </p>
+              </div>
             </div>
           </div>
         </div>
