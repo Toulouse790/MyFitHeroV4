@@ -36,7 +36,7 @@ import { useAppStore } from '@/stores/useAppStore';
 import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';
 import { DailyStats, AiRecommendation, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { UserProfile } from '@/types/user';
+import { AppUser } from '@/stores/useAppStore';
 
 interface SmartDashboardProps {
   userProfile?: SupabaseAuthUserType;
@@ -91,7 +91,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     dailyGoals,
     fetchDailyStats,
     fetchAiRecommendations,
-    user: appStoreUser
+    appStoreUser
   } = useAppStore();
 
   const today = new Date().toISOString().split('T')[0];
@@ -167,94 +167,6 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         ],
         specificExercises: ['Ball drills', 'Sprint intervals', 'Agility cones', 'Shooting practice', 'Tactical runs']
       },
-      'rugby': {
-        emoji: '🏉',
-        positions: ['pilier', 'hooker', 'deuxième_ligne', 'troisième_ligne', 'mêlée', 'ouverture', 'centre', 'ailier', 'arrière'],
-        workoutTypes: ['Strength Training', 'Scrum Power', 'Conditioning', 'Contact Prep'],
-        motivationalPhrases: [
-          'The scrum awaits your power!',
-          'Rugby warriors are forged in training!',
-          'Every ruck is a battle won!'
-        ],
-        specificExercises: ['Heavy squats', 'Scrum machine', 'Rucking drills', 'Lineout practice', 'Contact work']
-      },
-      'volleyball': {
-        emoji: '🏐',
-        positions: ['setter', 'outside_hitter', 'middle_blocker', 'opposite', 'libero'],
-        workoutTypes: ['Jump Training', 'Spike Power', 'Court Defense', 'Serve Practice'],
-        motivationalPhrases: [
-          'Rise above the net!',
-          'Every spike is a statement!',
-          'Dig deep, spike higher!'
-        ],
-        specificExercises: ['Jump training', 'Spike practice', 'Serve drills', 'Defensive digs', 'Block training']
-      },
-      'swimming': {
-        emoji: '🏊‍♂️',
-        positions: ['freestyle', 'backstroke', 'breaststroke', 'butterfly', 'individual_medley'],
-        workoutTypes: ['Technique Work', 'Endurance Sets', 'Sprint Training', 'Stroke Drills'],
-        motivationalPhrases: [
-          'Make waves in the pool!',
-          'Every stroke is progress!',
-          'Champions are made in the water!'
-        ],
-        specificExercises: ['Freestyle drills', 'Flip turns', 'Sprint sets', 'Endurance swimming', 'Technique work']
-      },
-      'track_field': {
-        emoji: '🏃‍♂️',
-        positions: ['sprinter', 'distance', 'jumper', 'thrower', 'hurdler'],
-        workoutTypes: ['Speed Work', 'Endurance', 'Technique', 'Power Training'],
-        motivationalPhrases: [
-          'Run towards greatness!',
-          'Every second counts!',
-          'Personal records await!'
-        ],
-        specificExercises: ['Sprint intervals', 'Long runs', 'Technique drills', 'Strength training', 'Recovery runs']
-      },
-      'hockey': {
-        emoji: '🏒',
-        positions: ['center', 'winger', 'defenseman', 'goalie'],
-        workoutTypes: ['Skating Power', 'Shot Accuracy', 'Body Checking', 'Puck Handling'],
-        motivationalPhrases: [
-          'Light the lamp!',
-          'Ice warriors never quit!',
-          'Every shift matters!'
-        ],
-        specificExercises: ['Skating drills', 'Shot practice', 'Puck handling', 'Body contact', 'Power plays']
-      },
-      'cycling': {
-        emoji: '🚴‍♂️',
-        positions: ['road', 'mountain', 'track', 'bmx'],
-        workoutTypes: ['Endurance Rides', 'Interval Training', 'Hill Climbing', 'Sprint Power'],
-        motivationalPhrases: [
-          'Pedal to the metal!',
-          'Every mile is progress!',
-          'Climb every mountain!'
-        ],
-        specificExercises: ['Long rides', 'Hill repeats', 'Sprint intervals', 'Time trials', 'Recovery spins']
-      },
-      'martial_arts': {
-        emoji: '🥋',
-        positions: ['striker', 'grappler', 'mixed'],
-        workoutTypes: ['Technique Drills', 'Sparring', 'Conditioning', 'Flexibility'],
-        motivationalPhrases: [
-          'Master your discipline!',
-          'Every technique is a weapon!',
-          'Warriors are forged through practice!'
-        ],
-        specificExercises: ['Kata practice', 'Sparring rounds', 'Bag work', 'Grappling drills', 'Flexibility training']
-      },
-      'boxing': {
-        emoji: '🥊',
-        positions: ['heavyweight', 'middleweight', 'lightweight', 'welterweight'],
-        workoutTypes: ['Bag Work', 'Sparring', 'Footwork', 'Conditioning'],
-        motivationalPhrases: [
-          'Float like a butterfly, sting like a bee!',
-          'Champions are made in the gym!',
-          'Every punch counts!'
-        ],
-        specificExercises: ['Heavy bag', 'Speed bag', 'Sparring', 'Jump rope', 'Mitt work']
-      },
       // Valeur par défaut
       'general': {
         emoji: '💪',
@@ -301,7 +213,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
   }, [appStoreUser, getSportConfig]);
 
-  const getPersonalizedWorkout = useCallback((profile: UserProfile | null) => {
+  const getPersonalizedWorkout = useCallback((profile: AppUser | null) => {
     if (!profile) return 'Entraînement Général';
     
     const day = new Date().getDay(); // 0 = dimanche, 1 = lundi, etc.
@@ -344,7 +256,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return 'Entraînement Personnalisé';
   }, [getSportConfig]);
 
-  const getPersonalizedExercises = useCallback((profile: UserProfile | null) => {
+  const getPersonalizedExercises = useCallback((profile: AppUser | null) => {
     if (!profile) return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
     
     const sportConfig = getSportConfig(profile.sport);
@@ -366,7 +278,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     return ['Squats', 'Push-ups', 'Planches', 'Fentes'];
   }, [getSportConfig]);
 
-  const getSmartReminders = useCallback((profile: UserProfile | null, stats: DailyStats | null) => {
+  const getSmartReminders = useCallback((profile: AppUser | null, stats: DailyStats | null) => {
     const reminders: PersonalizedWidget[] = [];
     const firstName = profile?.username?.split(' ')[0] || 'Champion';
     const sportConfig = getSportConfig(profile?.sport);
@@ -459,7 +371,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }).slice(0, 2); // Max 2 reminders
   }, [dailyGoals, getSportConfig]);
 
-  const getPersonalizedMotivation = useCallback((profile: UserProfile | null, stats: DailyStats | null) => {
+  const getPersonalizedMotivation = useCallback((profile: AppUser | null, stats: DailyStats | null) => {
     const firstName = profile?.username?.split(' ')[0] || 'Champion';
     const sportConfig = getSportConfig(profile?.sport);
     const motivations: string[] = [];
@@ -581,16 +493,23 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
       }
 
     } catch (error) {
-      console.error('Erreur lors de l\'envoi du message:', error);
-      setMessages(prev => [...prev, {
-        id: messages.length + 2,
-        type: 'ai',
-        content: 'Désolé, je rencontre un problème technique. Réessayez dans un moment.',
-        timestamp: new Date()
-      }]);
-      setIsLoading(false);
+      console.error('Erreur chargement données dashboard:', error);
+      setMessages([
+        {
+          id: 1,
+          type: 'ai',
+          content: getPersonalizedGreeting(),
+          timestamp: new Date()
+        }
+      ]);
+    } finally {
+      setLoadingDailyStats(false);
     }
-  };
+  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, appStoreUser, dailyGoals, getPersonalizedWorkout, getPersonalizedGreeting]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, [loadInitialData]);
 
   const detectMessageType = (message: string): string => {
     const lowerMessage = message.toLowerCase();
@@ -609,6 +528,109 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
     }
     
     return 'general';
+  };
+
+  const sendMessage = async () => {
+    if (!inputMessage.trim() || !userProfile?.id) return;
+
+    const userMessage: ChatMessage = {
+      id: messages.length + 1,
+      type: 'user',
+      content: inputMessage,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsLoading(true);
+
+    try {
+      const contextData: SmartDashboardContext = {
+        user_profile: {
+          id: userProfile.id,
+          username: appStoreUser.username,
+          age: appStoreUser.age,
+          gender: appStoreUser.gender,
+          fitness_goal: appStoreUser.goal,
+          primary_goals: appStoreUser.primary_goals,
+          sport: appStoreUser.sport,
+          sport_position: appStoreUser.sport_position,
+          fitness_experience: appStoreUser.fitness_experience,
+          lifestyle: appStoreUser.lifestyle,
+          available_time_per_day: appStoreUser.available_time_per_day,
+          training_frequency: appStoreUser.training_frequency,
+          season_period: appStoreUser.season_period,
+          injuries: appStoreUser.injuries,
+        },
+        current_daily_stats: dailyStats,
+        daily_program: dailyProgram,
+        last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
+      };
+
+      const { data: requestData, error: requestError } = await supabase
+        .from('ai_requests')
+        .insert({
+          user_id: userProfile.id,
+          pillar_type: detectMessageType(inputMessage),
+          prompt: inputMessage,
+          context: contextData as Json,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (requestError) throw requestError;
+
+      const subscription = supabase
+        .channel(`ai_request:${requestData.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'ai_requests',
+            filter: `id=eq.${requestData.id}`
+          },
+          (payload: WebhookPayload) => {
+            if (payload.new.status === 'completed' && payload.new.webhook_response) {
+              const aiResponseContent = payload.new.webhook_response.recommendation || 'Je réfléchis...';
+              const aiResponse: ChatMessage = {
+                id: messages.length + 2,
+                type: 'ai',
+                content: aiResponseContent,
+                timestamp: new Date()
+              };
+              setMessages(prev => [...prev, aiResponse]);
+              setIsLoading(false);
+              subscription.unsubscribe();
+            }
+          }
+        )
+        .subscribe();
+
+      setTimeout(() => {
+        if (isLoading) {
+          setMessages(prev => [...prev, {
+            id: messages.length + 2,
+            type: 'ai',
+            content: 'Désolé, le traitement prend plus de temps que prévu. Réessayez dans un moment.',
+            timestamp: new Date()
+          }]);
+          setIsLoading(false);
+          subscription.unsubscribe();
+        }
+      }, 30000);
+
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message:', error);
+      setMessages(prev => [...prev, {
+        id: messages.length + 2,
+        type: 'ai',
+        content: 'Désolé, je rencontre un problème technique. Réessayez dans un moment.',
+        timestamp: new Date()
+      }]);
+      setIsLoading(false);
+    }
   };
 
   // Calcul des actions avec progression dynamique
@@ -1122,114 +1144,4 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   );
 };
 
-export default SmartDashboard;) {
-      console.error('Erreur chargement données dashboard:', error);
-      setMessages([
-        {
-          id: 1,
-          type: 'ai',
-          content: getPersonalizedGreeting(),
-          timestamp: new Date()
-        }
-      ]);
-    } finally {
-      setLoadingDailyStats(false);
-    }
-  }, [userProfile?.id, today, fetchDailyStats, fetchAiRecommendations, appStoreUser, dailyGoals, getPersonalizedWorkout, getPersonalizedGreeting]);
-
-  useEffect(() => {
-    loadInitialData();
-  }, [loadInitialData]);
-
-  const sendMessage = async () => {
-    if (!inputMessage.trim() || !userProfile?.id) return;
-
-    const userMessage: ChatMessage = {
-      id: messages.length + 1,
-      type: 'user',
-      content: inputMessage,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputMessage('');
-    setIsLoading(true);
-
-    try {
-      const contextData: SmartDashboardContext = {
-          user_profile: {
-            id: userProfile.id,
-            username: appStoreUser.username,
-            age: appStoreUser.age,
-            gender: appStoreUser.gender,
-            fitness_goal: appStoreUser.goal,
-            primary_goals: appStoreUser.primary_goals,
-            sport: appStoreUser.sport,
-            sport_position: appStoreUser.sport_position,
-            fitness_experience: appStoreUser.fitness_experience,
-            lifestyle: appStoreUser.lifestyle,
-            available_time_per_day: appStoreUser.available_time_per_day,
-            training_frequency: appStoreUser.training_frequency,
-            season_period: appStoreUser.season_period,
-            injuries: appStoreUser.injuries,
-          },
-          current_daily_stats: dailyStats,
-          daily_program: dailyProgram,
-          last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
-      };
-
-      const { data: requestData, error: requestError } = await supabase
-        .from('ai_requests')
-        .insert({
-          user_id: userProfile.id,
-          pillar_type: detectMessageType(inputMessage),
-          prompt: inputMessage,
-          context: contextData as Json,
-          status: 'pending'
-        })
-        .select()
-        .single();
-
-      if (requestError) throw requestError;
-
-      const subscription = supabase
-        .channel(`ai_request:${requestData.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'ai_requests',
-            filter: `id=eq.${requestData.id}`
-          },
-          (payload: WebhookPayload) => {
-            if (payload.new.status === 'completed' && payload.new.webhook_response) {
-              const aiResponseContent = payload.new.webhook_response.recommendation || 'Je réfléchis...';
-              const aiResponse: ChatMessage = {
-                id: messages.length + 2,
-                type: 'ai',
-                content: aiResponseContent,
-                timestamp: new Date()
-              };
-              setMessages(prev => [...prev, aiResponse]);
-              setIsLoading(false);
-              subscription.unsubscribe();
-            }
-          }
-        )
-        .subscribe();
-
-      setTimeout(() => {
-        if (isLoading) {
-          setMessages(prev => [...prev, {
-            id: messages.length + 2,
-            type: 'ai',
-            content: 'Désolé, le traitement prend plus de temps que prévu. Réessayez dans un moment.',
-            timestamp: new Date()
-          }]);
-          setIsLoading(false);
-          subscription.unsubscribe();
-        }
-      }, 30000);
-
-    } catch (error
+export default SmartDashboard;
