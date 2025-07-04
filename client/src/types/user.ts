@@ -1,45 +1,29 @@
-
-import { UserProfile as SupabaseUserProfile } from '@/lib/supabase';
-
-// Type unifié qui étend le type Supabase avec les champs calculés locaux
-export interface UserProfile extends SupabaseUserProfile {
-  // Champs calculés/locaux (non stockés en DB)
-  name: string;
-  email: string;
-  goal: string;
-  level: number;
-  totalPoints: number;
-  joinDate: string;
-}
-
-// Interface pour l'onboarding (sans les champs calculés)
-export interface UserProfileOnboarding {
+export interface UserProfile {
+  id: string;
+  username?: string | null;
+  full_name?: string | null;
+  email?: string;
   age?: number | null;
-  gender?: string | null;
-  lifestyle?: string | null;
+  gender?: 'male' | 'female' | null;
+  sport?: string | null;
+  sport_position?: string | null;
+  sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
+  lifestyle?: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
+  fitness_experience?: 'beginner' | 'intermediate' | 'advanced' | 'expert' | null;
+  primary_goals?: string[];
+  training_frequency?: number | null;
+  season_period?: 'off_season' | 'pre_season' | 'in_season' | 'recovery' | null;
   available_time_per_day?: number | null;
-  fitness_experience?: string | null;
-  injuries?: string[] | null;
-  primary_goals?: string[] | null;
-  motivation?: string | null;
-  fitness_goal?: string | null;
-  sport?: string | null;
-  sport_position?: string | null;
-  sport_level?: string | null;
-  training_frequency?: number | null;
-  season_period?: string | null;
-}
-
-// Interface pour les données sportives spécifiques
-export interface SportProfileData {
-  sport?: string | null;
-  sport_position?: string | null;
-  sport_level?: string | null;
-  training_frequency?: number | null;
-  season_period?: string | null;
-  fitness_experience?: string | null;
-  injuries?: string[] | null;
-  primary_goals?: string[] | null;
-  motivation?: string | null;
-  fitness_goal?: string | null;
+  active_modules?: string[];
+  modules?: string[];
+  profile_type?: 'complete' | 'wellness' | 'sport_only' | 'sleep_focus';
+  sport_specific_stats?: Record<string, number>;
+  injuries?: string[];
+  motivation?: string;
+  fitness_goal?: string;
+  level?: number;
+  totalPoints?: number;
+  joinDate?: string;
+  name?: string;
+  goal?: string;
 }

@@ -1,26 +1,13 @@
-
-import { DailyStats } from '@/lib/supabase';
-
 export interface SmartDashboardContext {
-  user_profile?: {
-    id: string;
-    username: string | null;
-    age: number | null;
-    gender: string | null;
-    fitness_goal: string | null;
-    primary_goals: string[] | null;
-    sport: string | null;
-    sport_position: string | null;
-    fitness_experience: string | null;
-    lifestyle: string | null;
-    available_time_per_day: number | null;
-    training_frequency: number | null;
-    season_period: string | null;
-    injuries: string[] | null;
-  };
-  current_daily_stats?: DailyStats | null;
-  daily_program?: DailyProgramDisplay;
-  last_ai_recommendations?: string[];
+  userProfile: any;
+  dailyStats: any;
+  currentGoals: any;
+  currentProgram: any;
+  personalizedGreeting: string;
+  personalizedWorkout: string;
+  personalizedExercises: string[];
+  smartReminders: any[];
+  personalizedMotivation: string;
 }
 
 export interface DailyProgramDisplay {
