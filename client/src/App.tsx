@@ -12,7 +12,7 @@ import Hydration from '@/pages/Hydration';
 import Sleep from '@/pages/Sleep';
 import Workout from '@/pages/Workout';
 import Profile from '@/pages/Profile';
-import NotFound from '@/pages/NotFound';  // ✅ CORRECTION: pages/ au lieu de components/
+import NotFound from '@/pages/NotFound';
 
 // Components (composants réutilisables)
 import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
@@ -26,15 +26,15 @@ const AppContent: React.FC = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
-  const { appStoreUser, updateAppStoreUserProfile, checkUserSession } = useAppStore();
+  const { appStoreUser, updateAppStoreUserProfile } = useAppStore(); // ✅ Supprimé checkUserSession
 
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const session = await authClient.getSession();
-        if (session?.user) {
-          setUser(session.user);
-          await checkUserProfile(session.user);
+        const user = await authClient.getUser(); // ✅ Changé getSession() vers getUser()
+        if (user) { // ✅ Simplifié la condition
+          setUser(user);
+          await checkUserProfile(user);
         }
       } catch (error) {
         console.error('Erreur initialisation auth:', error);
@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
     try {
       const profileResponse = await fetch('/api/profile', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // ✅ Gardé 'token' original
         }
       });
 
@@ -198,7 +198,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
-        {/* Route 404 - ✅ CORRECTION APPLIQUÉE */}
+        {/* Route 404 */}
         <Route component={NotFound} />
       </Switch>
     </ErrorBoundary>
