@@ -5,20 +5,20 @@ import { useToast } from '@/hooks/use-toast';
 import { authClient } from '@/lib/auth';
 import { useAppStore } from '@/stores/useAppStore';
 
-// Pages
+// Pages (tous les composants de page)
 import Index from '@/pages/Index';
 import Nutrition from '@/pages/Nutrition';
 import Hydration from '@/pages/Hydration';
 import Sleep from '@/pages/Sleep';
 import Workout from '@/pages/Workout';
 import Profile from '@/pages/Profile';
+import NotFound from '@/pages/NotFound';  // ✅ CORRECTION: pages/ au lieu de components/
+
+// Components (composants réutilisables)
 import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
 import AuthPages from '@/components/AuthPages';
-
-// Layout
 import Layout from '@/components/Layout';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import NotFound from '@/components/NotFound';
 
 const AppContent: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -130,11 +130,12 @@ const AppContent: React.FC = () => {
   return (
     <ErrorBoundary>
       <Switch>
-        {/* ✅ AJOUT DE LA ROUTE AUTH MANQUANTE */}
+        {/* Route d'authentification */}
         <Route path="/auth">
           <AuthPages onAuthSuccess={handleAuthSuccess} />
         </Route>
         
+        {/* Route d'onboarding */}
         <Route path="/onboarding">
           {user ? (
             <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} />
@@ -143,6 +144,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
+        {/* Route principale */}
         <Route path="/">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -155,6 +157,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
+        {/* Routes des modules */}
         <Route path="/hydration">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -195,6 +198,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
+        {/* Route 404 - ✅ CORRECTION APPLIQUÉE */}
         <Route component={NotFound} />
       </Switch>
     </ErrorBoundary>
