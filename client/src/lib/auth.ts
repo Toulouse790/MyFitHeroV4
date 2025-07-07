@@ -17,7 +17,7 @@ class AuthClient {
 
   constructor() {
     // Load token from localStorage on initialization
-    this.token = localStorage.getItem('auth_token');
+    this.token = localStorage.getItem('token'); // ✅ Changé de 'auth_token' vers 'token'
   }
 
   async register(email: string, username: string, password: string): Promise<AuthResponse> {
@@ -37,7 +37,7 @@ class AuthClient {
       }
 
       this.token = data.token;
-      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('token', data.token); // ✅ Changé de 'auth_token' vers 'token'
 
       return { user: data.user, token: data.token };
     } catch (error) {
@@ -62,7 +62,7 @@ class AuthClient {
       }
 
       this.token = data.token;
-      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('token', data.token); // ✅ Changé de 'auth_token' vers 'token'
 
       return { user: data.user, token: data.token };
     } catch (error) {
@@ -72,7 +72,7 @@ class AuthClient {
 
   async signOut(): Promise<void> {
     this.token = null;
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('token'); // ✅ Changé de 'auth_token' vers 'token'
   }
 
   async getUser(): Promise<AuthUser | null> {
@@ -87,7 +87,7 @@ class AuthClient {
 
       if (!response.ok) {
         this.token = null;
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem('token'); // ✅ Changé de 'auth_token' vers 'token'
         return null;
       }
 
