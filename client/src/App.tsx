@@ -26,13 +26,13 @@ const AppContent: React.FC = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
-  const { appStoreUser, updateAppStoreUserProfile } = useAppStore(); // ✅ Supprimé checkUserSession
+  const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
 
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const user = await authClient.getUser(); // ✅ Changé getSession() vers getUser()
-        if (user) { // ✅ Simplifié la condition
+        const user = await authClient.getUser(); // ✅ CORRIGÉ : getUser() au lieu de getSession()
+        if (user) {
           setUser(user);
           await checkUserProfile(user);
         }
@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
     try {
       const profileResponse = await fetch('/api/profile', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // ✅ Gardé 'token' original
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // ✅ Maintenant cohérent avec auth.ts
         }
       });
 
