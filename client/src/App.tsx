@@ -1,86 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { Router, Route, Switch, useLocation } from 'wouter';
-import { authClient } from '@/lib/auth';
+// client/src/App.tsx
+import React, { useEffect, useState } from 'react';
+import { Router, Route, Switch } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
-import type { AuthUser } from '@/lib/auth';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import Layout from '@/components/Layout';
+import { authClient } from '@/lib/auth';
+import { useAppStore } from '@/stores/useAppStore';
 
-// Import pages
-import AuthPages from '@/components/AuthPages';
-import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
-import Hydration from '@/pages/Hydration';
+// Pages
+import Index from '@/pages/Index';
 import Nutrition from '@/pages/Nutrition';
+import Hydration from '@/pages/Hydration';
 import Sleep from '@/pages/Sleep';
 import Workout from '@/pages/Workout';
 import Profile from '@/pages/Profile';
-import Index from '@/pages/Index';
-import NotFound from '@/pages/NotFound';
+import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
+import AuthPages from '@/components/AuthPages';
+
+// Layout
+import Layout from '@/components/Layout';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import NotFound from '@/components/NotFound';
 
 const AppContent: React.FC = () => {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const { appStoreUser, updateAppStoreUserProfile, checkUserSession } = useAppStore();
 
   useEffect(() => {
-    const initAuth = async () => {
+    const initializeAuth = async () => {
       try {
-        const currentUser = await authClient.getUser();
-        if (currentUser) {
-          setUser(currentUser);
-          await checkUserProfile(currentUser);
+        const session = await authClient.getSession();
+        if (session?.user) {
+          setUser(session.user);
+          await checkUserProfile(session.user);
         }
       } catch (error) {
-        console.error('Auth init error:', error);
+        console.error('Erreur initialisation auth:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    initAuth();
+    initializeAuth();
   }, []);
 
-  const checkUserProfile = async (user: AuthUser) => {
+  const checkUserProfile = async (authenticatedUser: any) => {
     try {
-      const response = await fetch('/api/profile', {
+      const profileResponse = await fetch('/api/profile', {
         headers: {
-          'Authorization': `Bearer ${authClient.getToken()}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
-      if (response.ok) {
-        const profile = await response.json();
-        setHasProfile(!!profile);
-        setShowOnboarding(false);
-      } else if (response.status === 404) {
-        // User doesn't have a profile yet
-        setHasProfile(false);
-        setShowOnboarding(false); // Will be set to true after registration
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        if (profileData && profileData.age && profileData.gender) {
+          setHasProfile(true);
+          updateAppStoreUserProfile({
+            id: authenticatedUser.id,
+            email: authenticatedUser.email,
+            username: authenticatedUser.username,
+            ...profileData
+          });
+        } else {
+          setShowOnboarding(true);
+        }
+      } else {
+        setShowOnboarding(true);
       }
     } catch (error) {
-      console.error('Profile check error:', error);
-      setHasProfile(false);
+      console.error('Erreur vérification profil:', error);
+      setShowOnboarding(true);
     }
   };
 
-  const handleAuthSuccess = (authenticatedUser: AuthUser, isNewUser = false) => {
+  const handleAuthSuccess = async (authenticatedUser: any, isNewUser: boolean = false) => {
     setUser(authenticatedUser);
     
     if (isNewUser) {
-      // New user registration - redirect to onboarding
-      setHasProfile(false);
       setShowOnboarding(true);
-      setLocation('/onboarding');
       toast({
-        title: 'Inscription réussie',
-        description: 'Configurons maintenant votre profil !',
+        title: 'Inscription réussie !',
+        description: 'Configurons votre profil pour une expérience personnalisée',
         variant: 'success'
       });
     } else {
-      // Existing user login - check profile
       checkUserProfile(authenticatedUser);
       toast({
         title: 'Connexion réussie',
@@ -121,46 +127,74 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return <AuthPages onAuthSuccess={handleAuthSuccess} />;
-  }
-
   return (
     <ErrorBoundary>
       <Switch>
-        <Route path="/onboarding">
-          {() => user ? <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} /> : <AuthPages onAuthSuccess={handleAuthSuccess} />}
+        {/* ✅ AJOUT DE LA ROUTE AUTH MANQUANTE */}
+        <Route path="/auth">
+          <AuthPages onAuthSuccess={handleAuthSuccess} />
         </Route>
-        <Route path="/" component={() => {
-          if (!user) {
-            return <AuthPages onAuthSuccess={handleAuthSuccess} />;
-          }
-          // Show onboarding for new users without profile
-          if (showOnboarding || (!hasProfile && !loading)) {
-            setLocation('/onboarding');
-            return null;
-          }
-          return (
+        
+        <Route path="/onboarding">
+          {user ? (
+            <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} />
+          ) : (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          )}
+        </Route>
+        
+        <Route path="/">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (showOnboarding || (!hasProfile && !loading)) ? (
+            <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} />
+          ) : (
             <Layout>
               <Index />
             </Layout>
-          );
-        }} />
-        <Route path="/hydration" component={() => (
-          <Layout><Hydration /></Layout>
-        )} />
-        <Route path="/nutrition" component={() => (
-          <Layout><Nutrition /></Layout>
-        )} />
-        <Route path="/sleep" component={() => (
-          <Layout><Sleep /></Layout>
-        )} />
-        <Route path="/workout" component={() => (
-          <Layout><Workout /></Layout>
-        )} />
-        <Route path="/profile" component={() => (
-          <Layout><Profile /></Layout>
-        )} />
+          )}
+        </Route>
+        
+        <Route path="/hydration">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout><Hydration /></Layout>
+          )}
+        </Route>
+        
+        <Route path="/nutrition">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout><Nutrition /></Layout>
+          )}
+        </Route>
+        
+        <Route path="/sleep">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout><Sleep /></Layout>
+          )}
+        </Route>
+        
+        <Route path="/workout">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout><Workout /></Layout>
+          )}
+        </Route>
+        
+        <Route path="/profile">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout><Profile /></Layout>
+          )}
+        </Route>
+        
         <Route component={NotFound} />
       </Switch>
     </ErrorBoundary>
