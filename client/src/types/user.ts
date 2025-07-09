@@ -27,3 +27,16 @@ export interface UserProfile {
   name?: string;
   goal?: string;
 }
+
+// Type pour les données spécifiques au sport
+export interface SportProfileData {
+  sport?: string | null;
+  sport_position?: string | null;
+  sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
+  season_period?: 'off_season' | 'pre_season' | 'in_season' | 'recovery' | null;
+  training_frequency?: number | null;
+  available_time_per_day?: number | null;
+  sport_specific_stats?: Record<string, number>;
+  injuries?: string[];
+  primary_goals?: string[];
+}

@@ -175,14 +175,16 @@ const Sleep: React.FC = () => {
   // --- COMPOSANTS ---
   const TipCard = ({ tip }: { tip: any }) => {
     const TipIcon = tip.icon;
-    const statusColors = {
+    const statusColors: Record<string, string> = {
       done: 'border-l-green-500 bg-green-50',
       warning: 'border-l-yellow-500 bg-yellow-50', 
       todo: 'border-l-red-500 bg-red-50'
     };
     
+    const statusColor = statusColors[tip.status] || statusColors.todo;
+    
     return (
-      <div className={`p-4 rounded-xl border-l-4 ${statusColors[tip.status]}`}>
+      <div className={`p-4 rounded-xl border-l-4 ${statusColor}`}>
         <div className="flex items-start space-x-3">
           <TipIcon size={20} className="text-gray-600 mt-0.5" />
           <div>

@@ -13,7 +13,7 @@ const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
   const { appStoreUser, activateModule } = useAppStore();
   const [isActivating, setIsActivating] = React.useState(false);
 
-  const moduleConfig = {
+  const moduleConfigs = {
     sport: { 
       title: 'Sport', 
       icon: '🏋️', 
@@ -42,7 +42,9 @@ const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
       desc: 'Suivi et conseils d\'hydratation',
       bgGradient: 'from-blue-500 to-cyan-500'
     }
-  }[moduleId as keyof typeof moduleConfig];
+  } as const;
+
+  const moduleConfig = moduleConfigs[moduleId as keyof typeof moduleConfigs];
 
   const handleActivate = async () => {
     setIsActivating(true);

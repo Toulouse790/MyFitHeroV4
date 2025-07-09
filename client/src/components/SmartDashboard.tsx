@@ -370,8 +370,8 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         setMessages(recentAiRecs.map((rec, index) => ({
           id: index + 1,
           type: 'ai',
-          content: rec.recommendation,
-          timestamp: new Date(rec.created_at)
+          content: rec.content,
+          timestamp: new Date(rec.created_at || new Date())
         })));
       } else {
         // Message d'accueil ultra-personnalisé
@@ -420,7 +420,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
     try {
       const contextData: SmartDashboardContext = {
-          user_profile: {
+          userProfile: {
             id: userProfile.id,
             username: appStoreUser.username,
             age: appStoreUser.age,
@@ -447,7 +447,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           user_id: userProfile.id,
           pillar_type: detectMessageType(inputMessage),
           prompt: inputMessage,
-          context: contextData as Json,
+          context: contextData as unknown as Json,
           status: 'pending'
         })
         .select()

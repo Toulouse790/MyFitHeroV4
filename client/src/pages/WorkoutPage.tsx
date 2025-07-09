@@ -34,7 +34,7 @@ interface Workout {
 }
 
 const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
-  const { user: appStoreUser } = useAppStore();
+  const { appStoreUser } = useAppStore();
   const [todayWorkout, setTodayWorkout] = useState<Workout>({
     name: 'Entraînement du jour',
     type: 'Force',

@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertUserProfileSchema, insertHydrationLogSchema, insertMealSchema, insertSleepSessionSchema, insertAiRequestSchema, type User } from "@shared/schema";
@@ -10,10 +10,22 @@ interface AuthenticatedRequest extends Request {
   user: User;
 }
 
+// Type guard pour vérifier si req est AuthenticatedRequest
+function isAuthenticatedRequest(req: Request): req is AuthenticatedRequest {
+  return 'user' in req && req.user !== undefined;
+}
+
+// Helper function pour convertir les valeurs numériques de Drizzle
+function parseNumericValue(value: string | number | null | undefined): number {
+  if (typeof value === 'number') return value;
+  if (typeof value === 'string') return parseFloat(value) || 0;
+  return 0;
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Middleware to verify JWT token
-const authenticateToken = async (req: any, res: any, next: any) => {
+const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -27,7 +39,7 @@ const authenticateToken = async (req: any, res: any, next: any) => {
     if (!user) {
       return res.status(401).json({ message: 'Invalid token' });
     }
-    req.user = user;
+    (req as AuthenticatedRequest).user = user;
     next();
   } catch (error) {
     return res.status(403).json({ message: 'Invalid token' });
@@ -85,8 +97,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/auth/me", authenticateToken, async (req, res) => {
+  app.get("/api/auth/me", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const userProfile = await storage.getUserProfile(req.user.id);
       res.json({
         user: req.user,
@@ -99,8 +115,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User profile routes
-  app.post("/api/profile", authenticateToken, async (req, res) => {
+  app.post("/api/profile", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const profileData = insertUserProfileSchema.parse({
         ...req.body,
         user_id: req.user.id
@@ -114,8 +134,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/profile", authenticateToken, async (req, res) => {
+  app.put("/api/profile", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const updates = req.body;
       const profile = await storage.updateUserProfile(req.user.id, updates);
       res.json(profile);
@@ -125,8 +149,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/profile", authenticateToken, async (req, res) => {
+  app.get("/api/profile", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const profile = await storage.getUserProfile(req.user.id);
       res.json(profile);
     } catch (error) {
@@ -136,8 +164,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Daily stats routes
-  app.get("/api/daily-stats/:date", authenticateToken, async (req, res) => {
+  app.get("/api/daily-stats/:date", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const { date } = req.params;
       const stats = await storage.getDailyStats(req.user.id, date);
       res.json(stats);
@@ -148,8 +180,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Hydration routes
-  app.post("/api/hydration", authenticateToken, async (req, res) => {
+  app.post("/api/hydration", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const logData = insertHydrationLogSchema.parse({
         ...req.body,
         user_id: req.user.id
@@ -176,8 +212,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/hydration/:date", authenticateToken, async (req, res) => {
+  app.get("/api/hydration/:date", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const { date } = req.params;
       const logs = await storage.getHydrationLogs(req.user.id, date);
       res.json(logs);
@@ -188,8 +228,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Meals routes
-  app.post("/api/meals", authenticateToken, async (req, res) => {
+  app.post("/api/meals", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const mealData = insertMealSchema.parse({
         ...req.body,
         user_id: req.user.id
@@ -205,9 +249,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user_id: req.user.id,
         stat_date: today,
         total_calories: (existingStats?.total_calories || 0) + (mealData.total_calories || 0),
-        total_protein: ((existingStats?.total_protein || 0) as number) + ((mealData.total_protein || 0) as number),
-        total_carbs: ((existingStats?.total_carbs || 0) as number) + ((mealData.total_carbs || 0) as number),
-        total_fat: ((existingStats?.total_fat || 0) as number) + ((mealData.total_fat || 0) as number)
+        total_protein: String((parseNumericValue(existingStats?.total_protein) + parseNumericValue(mealData.total_protein))),
+        total_carbs: String((parseNumericValue(existingStats?.total_carbs) + parseNumericValue(mealData.total_carbs))),
+        total_fat: String((parseNumericValue(existingStats?.total_fat) + parseNumericValue(mealData.total_fat)))
       });
       
       res.json(meal);
@@ -217,8 +261,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/meals/:date", authenticateToken, async (req, res) => {
+  app.get("/api/meals/:date", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const { date } = req.params;
       const meals = await storage.getMeals(req.user.id, date);
       res.json(meals);
@@ -229,8 +277,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sleep routes
-  app.post("/api/sleep", authenticateToken, async (req, res) => {
+  app.post("/api/sleep", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const sleepData = insertSleepSessionSchema.parse({
         ...req.body,
         user_id: req.user.id
@@ -254,8 +306,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/sleep/:date", authenticateToken, async (req, res) => {
+  app.get("/api/sleep/:date", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const { date } = req.params;
       const sessions = await storage.getSleepSessions(req.user.id, date);
       res.json(sessions);
@@ -266,8 +322,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI recommendations routes
-  app.post("/api/ai/request", authenticateToken, async (req, res) => {
+  app.post("/api/ai/request", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const requestData = insertAiRequestSchema.parse({
         ...req.body,
         user_id: req.user.id,
@@ -282,8 +342,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/ai/recommendations", authenticateToken, async (req, res) => {
+  app.get("/api/ai/recommendations", authenticateToken, async (req: Request, res: Response) => {
     try {
+      if (!isAuthenticatedRequest(req)) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+      
       const { pillar_type, limit } = req.query;
       const recommendations = await storage.getAiRecommendations(
         req.user.id, 
@@ -294,44 +358,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Get AI recommendations error:", error);
       res.status(500).json({ message: "Failed to get AI recommendations" });
-    }
-  });
-
-  // Profile management
-  app.post("/api/profile", authenticateToken, async (req, res) => {
-    try {
-      const profileData = req.body;
-      const profile = await storage.createUserProfile({
-        user_id: req.user.id,
-        age: profileData.age,
-        gender: profileData.gender,
-        sport: profileData.sport,
-        sport_position: profileData.sport_position,
-        sport_level: profileData.sport_level,
-        lifestyle: profileData.lifestyle,
-        fitness_experience: profileData.fitness_experience,
-        primary_goals: profileData.primary_goals,
-        training_frequency: profileData.training_frequency,
-        available_time_per_day: profileData.available_time_per_day,
-        active_modules: profileData.active_modules,
-        modules: profileData.modules,
-        profile_type: profileData.profile_type,
-        motivation: profileData.motivation
-      });
-      res.json(profile);
-    } catch (error) {
-      console.error("Create profile error:", error);
-      res.status(500).json({ message: "Failed to create profile" });
-    }
-  });
-
-  app.get("/api/profile", authenticateToken, async (req, res) => {
-    try {
-      const profile = await storage.getUserProfile(req.user.id);
-      res.json(profile);
-    } catch (error) {
-      console.error("Get profile error:", error);
-      res.status(500).json({ message: "Failed to get profile" });
     }
   });
 

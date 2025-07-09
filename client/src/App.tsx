@@ -81,13 +81,14 @@ const AppContent: React.FC = () => {
     
     if (isNewUser) {
       setShowOnboarding(true);
+      setHasProfile(false);
       toast({
         title: 'Inscription réussie !',
         description: 'Configurons votre profil pour une expérience personnalisée',
         variant: 'success'
       });
     } else {
-      checkUserProfile(authenticatedUser);
+      await checkUserProfile(authenticatedUser);
       toast({
         title: 'Connexion réussie',
         description: 'Bienvenue sur MyFitHero !',
