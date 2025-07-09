@@ -38,7 +38,6 @@ Configurer les variables d'ENV dans Vercel :
 - VITE_SUPABASE_ANON_KEY
 - SUPABASE_SERVICE_ROLE_KEY
 - ORENAI_API_KEY
-- JWT_SECRET
 - REPLICATE_API_TOKEN (optionnel)
 
 ## 🇷 Attention
