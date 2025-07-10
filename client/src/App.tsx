@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Router, Route, Switch } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { authClient } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
 
 // Pages (tous les composants de page)
@@ -19,6 +20,7 @@ import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
 import AuthPages from '@/components/AuthPages';
 import Layout from '@/components/Layout';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { Toaster } from '@/components/ui/toaster';
 
 const AppContent: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -26,7 +28,7 @@ const AppContent: React.FC = () => {
   const [hasProfile, setHasProfile] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
-  const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
+  const { updateAppStoreUserProfile } = useAppStore();
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -48,25 +50,21 @@ const AppContent: React.FC = () => {
 
   const checkUserProfile = async (authenticatedUser: any) => {
     try {
-      const profileResponse = await fetch('/api/profile', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // ✅ Maintenant cohérent avec auth.ts
-        }
-      });
+      // Utiliser Supabase pour récupérer le profil
+      const { data: profileData, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', authenticatedUser.id)
+        .single();
 
-      if (profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        if (profileData && profileData.age && profileData.gender) {
-          setHasProfile(true);
-          updateAppStoreUserProfile({
-            id: authenticatedUser.id,
-            email: authenticatedUser.email,
-            username: authenticatedUser.username,
-            ...profileData
-          });
-        } else {
-          setShowOnboarding(true);
-        }
+      if (!error && profileData && profileData.age && profileData.gender) {
+        setHasProfile(true);
+        updateAppStoreUserProfile({
+          id: authenticatedUser.id,
+          email: authenticatedUser.email,
+          username: profileData.username,
+          ...profileData
+        });
       } else {
         setShowOnboarding(true);
       }
@@ -104,16 +102,6 @@ const AppContent: React.FC = () => {
       title: 'Profil configuré',
       description: 'Votre profil a été créé avec succès !',
       variant: 'success'
-    });
-  };
-
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    setUser(null);
-    toast({
-      title: 'Déconnexion',
-      description: 'À bientôt !',
-      variant: 'default'
     });
   };
 
@@ -210,6 +198,7 @@ const App: React.FC = () => {
   return (
     <Router>
       <AppContent />
+      <Toaster />
     </Router>
   );
 };

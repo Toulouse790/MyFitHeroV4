@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
 
 interface OnboardingQuestionnaireProps {
   user: any;
@@ -37,23 +38,21 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
     setLoading(true);
     
     try {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .insert({
+          user_id: user.id,
           ...profileData,
-          username: user.username,
-          full_name: user.username,
+          username: user.user_metadata?.username || user.email.split('@')[0],
+          full_name: user.user_metadata?.full_name || user.user_metadata?.username,
           modules: ['nutrition', 'workout', 'sleep', 'hydration'],
           active_modules: ['nutrition', 'workout'],
           profile_type: 'complete'
         })
-      });
+        .select()
+        .single();
 
-      if (response.ok) {
+      if (!error) {
         toast({
           title: 'Profil créé !',
           description: 'Bienvenue dans MyFitHero !',
@@ -61,7 +60,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
         });
         onComplete();
       } else {
-        throw new Error('Failed to create profile');
+        throw new Error(error.message);
       }
     } catch (error) {
       console.error('Profile creation error:', error);
