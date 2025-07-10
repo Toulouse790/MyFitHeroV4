@@ -2,7 +2,6 @@
 import React from 'react';
 import {
   Toast,
-  ToastAction,
   ToastClose,
   ToastDescription,
   ToastProvider,
