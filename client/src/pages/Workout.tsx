@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Play, 
   Clock, 
   Flame, 
   Target,
@@ -8,7 +7,6 @@ import {
   Filter,
   Search,
   Timer,
-  Users,
   Star,
   Trophy,
   Award

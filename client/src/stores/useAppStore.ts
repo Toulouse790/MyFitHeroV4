@@ -11,6 +11,7 @@ export interface AppUser {
   username?: string | null;
   full_name?: string | null;
   email?: string;
+  avatar_url?: string | null;
   age?: number | null;
   gender?: 'male' | 'female' | null;
   sport?: string | null;

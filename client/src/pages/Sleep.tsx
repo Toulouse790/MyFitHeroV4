@@ -5,7 +5,6 @@ import {
   Clock, 
   Bed,
   Phone,
-  BarChart3,
   Calendar,
   Target,
   Lightbulb,

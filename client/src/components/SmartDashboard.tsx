@@ -436,7 +436,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             season_period: appStoreUser.season_period,
             injuries: appStoreUser.injuries,
           },
-          current_daily_stats: dailyStats,
+          dailyStats: dailyStats,
           daily_program: dailyProgram,
           last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
       };

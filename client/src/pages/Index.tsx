@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "../lib/supabase";
+import DailyCheckIn from "../components/DailyCheckIn";
+import BadgeSystem from "../components/BadgeSystem";
+import SmartDashboard from "../components/SmartDashboard";
+import { useAppStore } from "../stores/useAppStore";
 
 type AuthFormData = {
   email: string;
@@ -12,12 +16,11 @@ type AuthFormData = {
 const IndexPage = () => {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
+  const { appStoreUser } = useAppStore();
 
   const {
     register,
     handleSubmit,
-    watch,
-    formState: { errors },
   } = useForm<AuthFormData>();
 
   const onSubmit = async (data: AuthFormData) => {
@@ -51,6 +54,24 @@ const IndexPage = () => {
       if (signInError) setError(signInError.message);
     }
   };
+
+  // Si l'utilisateur est connecté, afficher le dashboard
+  if (appStoreUser?.id) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-6 space-y-6">
+          {/* Dashboard principal */}
+          <SmartDashboard />
+          
+          {/* Check-in quotidien */}
+          <DailyCheckIn />
+          
+          {/* Badges compacts */}
+          <BadgeSystem showProgress={false} compact={true} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-50">

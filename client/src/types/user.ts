@@ -3,6 +3,7 @@ export interface UserProfile {
   username?: string | null;
   full_name?: string | null;
   email?: string;
+  avatar_url?: string | null;
   age?: number | null;
   gender?: 'male' | 'female' | null;
   sport?: string | null;
@@ -26,6 +27,7 @@ export interface UserProfile {
   joinDate?: string;
   name?: string;
   goal?: string;
+  daily_calories?: number | null;
 }
 
 // Type pour les données spécifiques au sport

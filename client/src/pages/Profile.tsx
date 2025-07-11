@@ -1,11 +1,15 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  User as UserIcon, Calendar, Target, PenTool, BarChart3, Clock, Zap, 
-  Ruler, Scale, Mail, PlusCircle, Dumbbell, Star, Shield, Wind, 
-  Maximize, Brain, Heart, Trophy, Award, TrendingUp, Flame 
+  User as UserIcon, Calendar, Target, PenTool, Clock, Zap, 
+  Dumbbell, Star, Wind, 
+  Maximize, Heart, Trophy, Award, TrendingUp, Flame 
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import BadgeSystem from '@/components/BadgeSystem';
+import AvatarUpload from '@/components/AvatarUpload';
+import PrivacyManager from '@/components/PrivacyManager';
 
 // --- TYPES ---
 type Sport = 'basketball' | 'american_football' | 'strength_sports' | 'endurance_sports' | 'tennis' | 'football';
@@ -196,8 +200,42 @@ const Profile: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      // Ici tu appellerais ton API Supabase
-      // const { error } = await supabase.from('user_profiles').update(formValues).eq('id', userId);
+      // Validation des champs
+      if (!formValues.sport) {
+        toast({
+          title: "Erreur de validation",
+          description: "Veuillez sélectionner un sport.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!formValues.sport_level) {
+        toast({
+          title: "Erreur de validation", 
+          description: "Veuillez sélectionner un niveau.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Sauvegarde dans Supabase
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          sport: formValues.sport,
+          sport_position: formValues.sport_position,
+          sport_level: formValues.sport_level,
+          training_frequency: formValues.training_frequency,
+          primary_goals: formValues.primary_goals,
+          sport_specific_stats: formValues.sport_specific_stats,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', appStoreUser.id);
+
+      if (error) {
+        throw error;
+      }
       
       // Mise à jour du store
       updateAppStoreUserProfile({
@@ -211,9 +249,10 @@ const Profile: React.FC = () => {
         description: "Vos informations ont été sauvegardées avec succès.",
       });
     } catch (error) {
+      console.error('Erreur sauvegarde profil:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder le profil.",
+        description: "Impossible de sauvegarder le profil. Veuillez réessayer.",
         variant: "destructive"
       });
     }
@@ -271,14 +310,21 @@ const Profile: React.FC = () => {
     
         {/* Header Personnalisé */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-              <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
-              Mon Profil
-            </h1>
-            <p className="text-gray-600">
-              {appStoreUser.name || 'Utilisateur'} • {appStoreUser.sport || 'Sport'} • Membre depuis {appStoreUser.joinDate || 'récemment'}
-            </p>
+          <div className="flex items-center gap-4">
+            <AvatarUpload 
+              size="lg" 
+              editable={true}
+              currentAvatar={appStoreUser.avatar_url || undefined}
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+                <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
+                Mon Profil
+              </h1>
+              <p className="text-gray-600">
+                {appStoreUser.name || 'Utilisateur'} • {appStoreUser.sport || 'Sport'} • Membre depuis {appStoreUser.joinDate || 'récemment'}
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setIsEditing(!isEditing)}
@@ -490,6 +536,12 @@ const Profile: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Système de Badges */}
+        <BadgeSystem showProgress={true} compact={false} />
+
+        {/* Gestion de la Confidentialité */}
+        <PrivacyManager />
       </div>
     </div>
   );

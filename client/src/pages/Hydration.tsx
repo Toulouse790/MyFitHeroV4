@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Droplets,
   Plus,
   Target,
-  TrendingUp,
   Clock,
   Zap,
   Sun,
   Dumbbell,
   Thermometer,
-  Award,
   Coffee,
   Minus,
   RotateCcw,
