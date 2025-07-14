@@ -194,8 +194,9 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
         age: data.age,
         gender: data.gender,
         lifestyle: data.lifestyle,
-        main_objective: data.mainObjective,
-        selected_modules: data.selectedModules,
+        fitness_goal: data.mainObjective, // Corrigé: main_objective → fitness_goal
+        modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: selected_modules → modules
+        active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: selected_modules → active_modules
         sport: data.sport,
         sport_position: data.sportPosition,
         sport_level: data.sportLevel,
@@ -205,12 +206,12 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
         strength_objective: data.strengthObjective,
         strength_experience: data.strengthExperience,
         dietary_preference: data.dietaryPreference,
-        food_allergies: data.foodAllergies,
+        food_allergies: data.foodAllergies || [], // S'assurer que c'est un array
         nutrition_objective: data.nutritionObjective,
-        dietary_restrictions: data.dietaryRestrictions,
-        average_sleep_hours: data.averageSleepHours,
+        dietary_restrictions: data.dietaryRestrictions || [], // S'assurer que c'est un array
+        sleep_hours_average: data.averageSleepHours, // Corrigé: average_sleep_hours → sleep_hours_average
         sleep_difficulties: data.sleepDifficulties,
-        hydration_goal: data.hydrationGoal,
+        water_intake_goal: data.hydrationGoal, // Corrigé: hydration_goal → water_intake_goal
         hydration_reminders: data.hydrationReminders,
         motivation: data.motivation,
         available_time_per_day: data.availableTimePerDay,

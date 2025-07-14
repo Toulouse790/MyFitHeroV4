@@ -23,7 +23,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
           onboarding_completed: true,
           onboarding_completed_at: new Date().toISOString(),
           profile_type: 'complete',
-          active_modules: data.selectedModules || [],
+          modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: active_modules → modules
+          active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Ajouté pour cohérence
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
