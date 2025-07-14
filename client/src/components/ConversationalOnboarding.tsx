@@ -157,8 +157,10 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       setCurrentStepId(nextStepId);
       setCurrentResponse(null);
       
-      // Sauvegarde automatique
-      await saveProgress(updatedData);
+      // Sauvegarde automatique seulement à certaines étapes importantes
+      if (['module_selection', 'sport_selection', 'personal_info'].includes(currentStep.id)) {
+        await saveProgress(updatedData);
+      }
       
     } catch (error) {
       console.error('Erreur lors de la navigation:', error);
@@ -170,7 +172,7 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
     } finally {
       setIsLoading(false);
     }
-  }, [currentStep, currentResponse, onboardingData, validateResponse]);
+  }, [currentStep, currentResponse, validateResponse]); // Retirer onboardingData des dépendances
 
   // Sauvegarde des données
   const saveProgress = async (data: OnboardingData) => {
@@ -522,7 +524,7 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
           return (
             <PersonalInfoForm
               onComplete={(data) => {
-                setCurrentResponse(data);
+                // Ne pas utiliser setCurrentResponse avec un objet car cela cause React error #31
                 // Mettre à jour directement les données d'onboarding
                 setOnboardingData(prev => ({
                   ...prev,
@@ -531,6 +533,24 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
                   lifestyle: data.lifestyle,
                   availableTimePerDay: data.availableTimePerDay
                 }));
+                
+                // Aller directement à l'étape suivante
+                let nextStepId: string;
+                if (typeof currentStep.nextStep === 'function') {
+                  nextStepId = currentStep.nextStep(data, {
+                    ...onboardingData,
+                    age: data.age,
+                    gender: data.gender,
+                    lifestyle: data.lifestyle,
+                    availableTimePerDay: data.availableTimePerDay
+                  });
+                } else {
+                  nextStepId = currentStep.nextStep || 'completion';
+                }
+                
+                if (nextStepId) {
+                  setCurrentStepId(nextStepId);
+                }
               }}
               initialData={{
                 age: onboardingData.age,
