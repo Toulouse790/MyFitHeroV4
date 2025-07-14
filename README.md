@@ -254,6 +254,24 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 L'application offre maintenant une expérience fitness complète, intelligente et sociale, prête à rivaliser avec les meilleures applications du marché.
 
+## 🚀 Déploiement Production
+
+### Vercel (Recommandé)
+```bash
+# Installation Vercel CLI
+npm i -g vercel
+
+# Déploiement
+vercel --prod
+```
+
+Configurer les variables d'environnement dans Vercel :
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ORENAI_API_KEY`
+- `REPLICATE_API_TOKEN` (optionnel)
+
 **🚀 Ready for Production Deployment!**
 
 ---
