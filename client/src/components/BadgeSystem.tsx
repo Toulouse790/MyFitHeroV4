@@ -3,14 +3,11 @@ import {
   Trophy, 
   Star, 
   Target, 
-  Flame, 
   Award,
-  Medal,
   Crown,
   Zap,
   Shield,
   Heart,
-  TrendingUp,
   Calendar,
   Lock,
   Unlock,
@@ -42,7 +39,6 @@ interface BadgeSystemProps {
 const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact = false }) => {
   const { appStoreUser } = useAppStore();
   const [badges, setBadges] = useState<Badge[]>([]);
-  const [userProgress, setUserProgress] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
 
   const predefinedBadges: Badge[] = [
@@ -183,7 +179,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       setBadges(updatedBadges);
       
       // Vérifier si des badges peuvent être débloqués
-      await checkForNewBadges(updatedBadges, stats || []);
+      await checkForNewBadges(updatedBadges);
       
     } catch (error) {
       console.error('Erreur lors du chargement des badges:', error);
@@ -225,7 +221,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
     return stats.filter(s => s.completion_rate >= 75).length;
   };
 
-  const checkForNewBadges = async (badges: Badge[], stats: any[]) => {
+  const checkForNewBadges = async (badges: Badge[]) => {
     const newlyEarned = badges.filter(badge => 
       !badge.earned && 
       badge.progress !== undefined && 

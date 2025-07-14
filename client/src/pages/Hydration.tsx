@@ -11,13 +11,16 @@ import {
   Coffee,
   Minus,
   RotateCcw,
-  Bell,
   Footprints,
   Shield,
   Trophy,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import PillarHeader from '@/components/PillarHeader';
+import AIIntelligence from '@/components/AIIntelligence';
+import { supabase } from '@/lib/supabase';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 
 // --- TYPES & INTERFACES DE PERSONNALISATION ---
 
@@ -160,11 +163,20 @@ const Hydration: React.FC = () => {
   }, [appStoreUser, sportConfig.goalModifierMl]);
 
   // --- STATES & DONNÉES ---
-  const [selectedAmount, setSelectedAmount] = useState(250);
+  const [selectedAmount] = useState(250);
   const [currentMl, setCurrentMl] = useState(800); // Simulation - à remplacer par vraies données
-  const [hydrationEntries, setHydrationEntries] = useState<any[]>([]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const todayDate = new Date().toISOString().split('T')[0];
+
+  // Synchronisation temps réel
+  const { } = useRealtimeSync({
+    pillar: 'hydration',
+    onUpdate: (payload) => {
+      console.log('🔄 Hydratation mise à jour:', payload);
+      // Ici on pourrait recharger les données depuis Supabase
+    }
+  });
+
   const currentHydrationL = currentMl / 1000;
   const goalHydrationL = personalizedGoalMl / 1000;
   const remaining = personalizedGoalMl - currentMl;
@@ -172,15 +184,48 @@ const Hydration: React.FC = () => {
 
   // --- FONCTIONS ---
   const handleAddWater = async (amount: number, type: string = 'water') => {
-    setCurrentMl(prev => prev + amount);
-    
-    toast({
-      title: "Eau ajoutée !",
-      description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser?.name || appStoreUser?.username || 'Champion'} !`,
-    });
-    
-    // Ici tu ajouterais l'appel à ton API/store
-    // await addHydrationEntry(amount, type);
+    try {
+      const newTotal = currentMl + amount;
+      setCurrentMl(newTotal);
+      
+      // Sauvegarde dans Supabase
+      const { error } = await supabase
+        .from('hydration_logs')
+        .insert({
+          user_id: appStoreUser?.id,
+          amount_ml: amount,
+          drink_type: type,
+          logged_at: new Date().toISOString(),
+          date: todayDate
+        });
+
+      if (error) throw error;
+
+      // Mise à jour des stats quotidiennes
+      const { error: statsError } = await supabase
+        .from('daily_stats')
+        .upsert({
+          user_id: appStoreUser?.id,
+          date: todayDate,
+          water_intake_ml: newTotal,
+          hydration_goal_ml: personalizedGoalMl,
+          updated_at: new Date().toISOString()
+        });
+
+      if (statsError) throw statsError;
+      
+      toast({
+        title: "Eau ajoutée !",
+        description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser?.name || appStoreUser?.username || 'Champion'} !`,
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      setCurrentMl(prev => prev - amount); // Rollback
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder. Réessayez.",
+      });
+    }
   };
 
   const handleRemoveLast = async () => {
@@ -224,26 +269,20 @@ const Hydration: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6">
 
-        {/* Header Personnalisé avec Vraies Données */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-              <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
-              Hydratation
-            </h1>
-            <p className="text-gray-600">
-              {appStoreUser?.name || appStoreUser?.username || 'Utilisateur'} • {appStoreUser?.sport || 'Sport'} • {appStoreUser?.age || '?'} ans
-            </p>
-          </div>
-          <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-            <Bell size={20} className="text-gray-600" />
-          </button>
-        </div>
-
-        {/* Message de Motivation Personnalisé */}
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-4 rounded-xl text-white">
-          <p className="font-semibold text-center">{getPersonalizedMessage()}</p>
-        </div>
+        {/* Header Uniforme */}
+        <PillarHeader
+          pillar="hydration"
+          title="Hydratation"
+          icon={Droplets}
+          color="blue"
+          bgGradient="from-blue-500 to-cyan-500"
+          emoji={sportConfig.emoji}
+          motivationalMessage={getPersonalizedMessage()}
+          currentValue={parseFloat(currentHydrationL.toFixed(2))}
+          targetValue={parseFloat(goalHydrationL.toFixed(2))}
+          unit="L"
+          showAIRecommendation={true}
+        />
 
         {/* Objectif principal avec Données Personnalisées */}
         <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-5 rounded-xl text-white relative overflow-hidden">
@@ -347,6 +386,14 @@ const Hydration: React.FC = () => {
             </div>
           </div>
         </div>
+        
+        {/* Intelligence AI - Analyse Hydratation */}
+        <AIIntelligence
+          pillar="hydration"
+          showPredictions={true}
+          showCoaching={true}
+          showRecommendations={true}
+        />
         
         {/* Rappel hydratation Personnalisé */}
         <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">

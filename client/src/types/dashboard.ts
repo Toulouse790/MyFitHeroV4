@@ -1,13 +1,14 @@
 export interface SmartDashboardContext {
-  userProfile: any;
+  user: any;
   dailyStats: any;
-  currentGoals: any;
-  currentProgram: any;
-  personalizedGreeting: string;
-  personalizedWorkout: string;
-  personalizedExercises: string[];
-  smartReminders: any[];
-  personalizedMotivation: string;
+  currentDate: string;
+  currentTime: string;
+  isWeekend: boolean;
+  weatherContext: string;
+  motivationLevel: string;
+  recentActivity: string;
+  upcomingEvents: any[];
+  personalizedTips: any[];
 }
 
 export interface DailyProgramDisplay {

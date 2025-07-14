@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  MessageCircle, 
   Mic, 
   MicOff, 
   Send, 
   Play, 
   Calendar,
-  Target,
-  TrendingUp,
   Zap,
   User,
   Settings,
@@ -18,25 +15,23 @@ import {
   Brain,
   Clock,
   Loader2,
-  Award,
   Flame,
   Heart,
-  Shield,
-  Sun,
-  Coffee,
   Star,
   CheckCircle,
   AlertCircle,
-  ArrowRight,
-  BarChart3
+  ArrowRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLocation } from 'wouter';
 import { useAppStore } from '@/stores/useAppStore';
 import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';
-import { DailyStats, AiRecommendation, Json } from '@/lib/supabase';
+import { DailyStats, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { UserProfile } from '@/types/user';
+import { useAnimateOnMount, useHaptic } from '@/hooks/useAnimations';
+import { useAdaptiveColors } from '@/components/ThemeProvider';
+import AIIntelligence from '@/components/AIIntelligence';
 
 interface SmartDashboardProps {
   userProfile?: SupabaseAuthUserType;
@@ -78,6 +73,11 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
   const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
   const [loadingDailyStats, setLoadingDailyStats] = useState(true);
+
+  // Animations et thème
+  const isVisible = useAnimateOnMount(300);
+  const colors = useAdaptiveColors();
+  const { clickVibration } = useHaptic();
 
   const {
     dailyGoals,
@@ -420,7 +420,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
 
     try {
       const contextData: SmartDashboardContext = {
-          userProfile: {
+          user: {
             id: userProfile.id,
             username: appStoreUser.username,
             age: appStoreUser.age,
@@ -437,8 +437,14 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             injuries: appStoreUser.injuries,
           },
           dailyStats: dailyStats,
-          daily_program: dailyProgram,
-          last_ai_recommendations: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
+          currentDate: new Date().toISOString().split('T')[0],
+          currentTime: new Date().toLocaleTimeString(),
+          isWeekend: [0, 6].includes(new Date().getDay()),
+          weatherContext: 'normal',
+          motivationLevel: 'normal',
+          recentActivity: 'none',
+          upcomingEvents: [],
+          personalizedTips: messages.filter(m => m.type === 'ai').map(m => m.content).slice(-3),
       };
 
       const { data: requestData, error: requestError } = await supabase
@@ -606,22 +612,34 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Personnalisé */}
-      <div className="bg-white shadow-sm border-b px-4 py-3">
+    <div className={`min-h-screen ${colors.background} transition-colors duration-300`}>
+      {/* Header Personnalisé avec animations */}
+      <div 
+        className={`
+          ${colors.surface} shadow-sm border-b ${colors.border} px-4 py-3
+          transform transition-all duration-500 
+          ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}
+        `}
+      >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+          <div 
+            className={`
+              flex items-center space-x-3
+              transform transition-all duration-700 delay-200
+              ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0'}
+            `}
+          >
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center animate-pulse">
               <Brain size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="font-bold text-gray-800">
+              <h1 className={`font-bold ${colors.text}`}>
                 {appStoreUser?.username?.split(' ')[0] || 'MyFitHero'}
                 {appStoreUser?.sport === 'rugby' && ' 🏉'}
                 {appStoreUser?.primary_goals?.includes('muscle_gain') && ' 💪'}
                 {appStoreUser?.primary_goals?.includes('weight_loss') && ' 🔥'}
               </h1>
-              <p className="text-xs text-gray-500">
+              <p className={`text-xs ${colors.textSecondary}`}>
                 {appStoreUser?.sport && appStoreUser?.sport_position ? 
                   `${appStoreUser.sport} - ${appStoreUser.sport_position}` : 
                   'Assistant IA Personnel'
@@ -629,20 +647,32 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div 
+            className={`
+              flex items-center space-x-2
+              transform transition-all duration-700 delay-300
+              ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}
+            `}
+          >
             <div className="text-right">
-              <p className="text-sm font-semibold text-gray-800">Niveau {appStoreUser?.level}</p>
-              <p className="text-xs text-gray-500">{appStoreUser?.totalPoints} XP</p>
+              <p className={`text-sm font-semibold ${colors.text}`}>Niveau {appStoreUser?.level}</p>
+              <p className={`text-xs ${colors.textSecondary}`}>{appStoreUser?.totalPoints} XP</p>
             </div>
             <button 
-              onClick={() => navigate('/profile')}
-              className="p-2 text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                clickVibration();
+                navigate('/profile');
+              }}
+              className={`p-2 ${colors.textSecondary} hover:${colors.text} transition-all duration-200 hover:scale-110`}
             >
               <User size={20} />
             </button>
             <button 
-              onClick={handleSignOut}
-              className="p-2 text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                clickVibration();
+                handleSignOut();
+              }}
+              className={`p-2 ${colors.textSecondary} hover:${colors.text} transition-all duration-200 hover:scale-110`}
             >
               <Settings size={20} />
             </button>
@@ -985,6 +1015,15 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             <p className="text-xs text-gray-500">{appStoreUser?.totalPoints} XP</p>
           </div>
         </div>
+
+        {/* Intelligence AI Avancée */}
+        <AIIntelligence
+          pillar="general"
+          showPredictions={true}
+          showCoaching={true}
+          showRecommendations={true}
+          className="mt-6"
+        />
 
         {/* Citation motivante selon profil */}
         <div className="mt-6 bg-gradient-to-r from-gray-800 to-gray-900 text-white p-6 rounded-2xl">

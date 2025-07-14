@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import BadgeSystem from '@/components/BadgeSystem';
 import AvatarUpload from '@/components/AvatarUpload';
 import PrivacyManager from '@/components/PrivacyManager';
+import PWAControls from '@/components/PWAControls';
 
 // --- TYPES ---
 type Sport = 'basketball' | 'american_football' | 'strength_sports' | 'endurance_sports' | 'tennis' | 'football';
@@ -539,6 +540,15 @@ const Profile: React.FC = () => {
 
         {/* Système de Badges */}
         <BadgeSystem showProgress={true} compact={false} />
+
+        {/* Contrôles PWA et Mode Hors Ligne */}
+        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border border-blue-100">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <Trophy className="mr-2 text-blue-600" />
+            Application
+          </h2>
+          <PWAControls />
+        </div>
 
         {/* Gestion de la Confidentialité */}
         <PrivacyManager />

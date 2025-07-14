@@ -18,6 +18,9 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import PillarHeader from '@/components/PillarHeader';
+import AIIntelligence from '@/components/AIIntelligence';
+import { supabase } from '@/lib/supabase';
 
 // --- TYPES ---
 type SportCategory = 'contact' | 'endurance' | 'precision' | 'team';
@@ -162,14 +165,60 @@ const Sleep: React.FC = () => {
   }, [appStoreUser, sportConfig.sleepGoalHours]);
 
   // --- ÉTATS ---
-  const [currentSleepHours, setCurrentSleepHours] = useState(7.5); // Simulation
-  const [sleepQuality, setSleepQuality] = useState(75); // %
-  const [bedTime, setBedTime] = useState('23:30');
-  const [wakeTime, setWakeTime] = useState('07:00');
+  const [currentSleepHours] = useState(7.5); // Simulation
+  const [sleepQuality] = useState(75); // %
+  const [bedTime] = useState('23:30');
+  const [wakeTime] = useState('07:00');
 
   // --- CALCULS ---
   const sleepPercentage = (currentSleepHours / personalizedSleepGoal) * 100;
   const sleepDeficit = Math.max(0, personalizedSleepGoal - currentSleepHours);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // --- FONCTIONS DE SAUVEGARDE ---
+  const handleLogSleep = async (hours: number, quality: number, bedTime: string, wakeTime: string) => {
+    try {
+      // Sauvegarde dans Supabase
+      const { error } = await supabase
+        .from('sleep_sessions')
+        .insert({
+          user_id: appStoreUser?.id,
+          sleep_duration_hours: hours,
+          sleep_quality: quality,
+          bed_time: bedTime,
+          wake_time: wakeTime,
+          date: today,
+          logged_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
+      // Mise à jour des stats quotidiennes
+      const { error: statsError } = await supabase
+        .from('daily_stats')
+        .upsert({
+          user_id: appStoreUser?.id,
+          date: today,
+          sleep_duration_minutes: hours * 60,
+          sleep_quality: quality,
+          updated_at: new Date().toISOString()
+        });
+
+      if (statsError) throw statsError;
+
+      toast({
+        title: "Sommeil enregistré !",
+        description: `${hours}h de sommeil (qualité: ${quality}%) sauvegardées.`,
+      });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les données de sommeil.",
+      });
+    }
+  };
 
   // --- COMPOSANTS ---
   const TipCard = ({ tip }: { tip: any }) => {
@@ -223,26 +272,20 @@ const Sleep: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6">
         
-        {/* Header Personnalisé */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-               <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
-               Sommeil
-            </h1>
-            <p className="text-gray-600">
-              {appStoreUser.name} • {appStoreUser.sport} • Objectif: {personalizedSleepGoal}h
-            </p>
-          </div>
-          <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-            <Calendar size={20} className="text-gray-600" />
-          </button>
-        </div>
-
-        {/* Message Personnalisé */}
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4 rounded-xl text-white">
-          <p className="font-semibold text-center">{getPersonalizedMessage()}</p>
-        </div>
+        {/* Header Uniforme */}
+        <PillarHeader
+          pillar="sleep"
+          title="Sommeil"
+          icon={Moon}
+          color="purple"
+          bgGradient="from-purple-500 to-pink-500"
+          emoji={sportConfig.emoji}
+          motivationalMessage={getPersonalizedMessage()}
+          currentValue={currentSleepHours}
+          targetValue={personalizedSleepGoal}
+          unit="h"
+          showAIRecommendation={true}
+        />
 
         {/* Résumé de la nuit avec Données Personnalisées */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-xl text-white">
@@ -354,6 +397,14 @@ const Sleep: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Intelligence AI - Analyse Sommeil */}
+        <AIIntelligence
+          pillar="sleep"
+          showPredictions={true}
+          showCoaching={true}
+          showRecommendations={true}
+        />
 
         {/* Message de Motivation */}
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4 rounded-xl text-white text-center">

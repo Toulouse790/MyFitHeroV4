@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { supabase } from '@/lib/supabase';
+import { useAnimateOnMount, useProgressAnimation, useHaptic } from '@/hooks/useAnimations';
 
 interface PillarHeaderProps {
   pillar: 'hydration' | 'nutrition' | 'sleep' | 'workout';
@@ -54,7 +55,11 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   const [dailyGoal, setDailyGoal] = useState<string>('');
   const [progressPercentage, setProgressPercentage] = useState<number>(0);
   const [streak, setStreak] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Animations et interactions
+  const isVisible = useAnimateOnMount(200);
+  const animatedProgress = useProgressAnimation(currentValue, 1500);
+  const { successVibration, clickVibration } = useHaptic();
 
   useEffect(() => {
     if (appStoreUser?.id) {
@@ -143,8 +148,13 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
 
   const calculateProgress = () => {
     if (targetValue > 0) {
-      const percentage = Math.min((currentValue / targetValue) * 100, 100);
-      setProgressPercentage(percentage);
+      const newPercentage = Math.min((animatedProgress / targetValue) * 100, 100);
+      setProgressPercentage(newPercentage);
+      
+      // Vibration de succès quand l'objectif est atteint
+      if (newPercentage >= 100 && currentValue >= targetValue) {
+        successVibration();
+      }
     }
   };
 
@@ -198,28 +208,43 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   const BadgeIcon = badge.icon;
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl ${bgGradient} text-white shadow-2xl`}>
-      {/* Fond évolutif avec motifs */}
+    <div 
+      className={`
+        relative overflow-hidden rounded-2xl ${bgGradient} text-white shadow-2xl
+        transform transition-all duration-500 
+        ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}
+      `}
+    >
+      {/* Fond évolutif avec motifs animés */}
       <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 right-0 w-64 h-64 transform rotate-45 translate-x-32 -translate-y-32">
+        <div className="absolute top-0 right-0 w-64 h-64 transform rotate-45 translate-x-32 -translate-y-32 animate-pulse">
           <div className="w-full h-full bg-white rounded-full"></div>
         </div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 transform -rotate-45 -translate-x-24 translate-y-24">
+        <div className="absolute bottom-0 left-0 w-48 h-48 transform -rotate-45 -translate-x-24 translate-y-24 animate-pulse" style={{ animationDelay: '0.5s' }}>
           <div className="w-full h-full bg-white rounded-full"></div>
         </div>
       </div>
 
       <div className="relative z-10 p-6">
-        {/* Header supérieur */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Header supérieur avec animation */}
+        <div 
+          className={`
+            flex items-center justify-between mb-6 
+            transform transition-all duration-700 delay-200
+            ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}
+          `}
+        >
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm">
+            <div 
+              className="p-3 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm transition-transform duration-300 hover:scale-110"
+              onClick={clickVibration}
+            >
               <Icon size={32} className="text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 {title}
-                <span className="text-3xl">{emoji}</span>
+                <span className="text-3xl animate-bounce" style={{ animationDelay: '1s' }}>{emoji}</span>
               </h1>
               <p className="text-white text-opacity-90 text-sm">
                 {motivationalMessage || `Optimisez votre ${title.toLowerCase()}`}
@@ -227,7 +252,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
             </div>
           </div>
 
-          {/* Badge de progression */}
+          {/* Badge de progression animé */}
           <div className="flex items-center gap-2 bg-white bg-opacity-20 px-4 py-2 rounded-full backdrop-blur-sm">
             <BadgeIcon size={20} className={badge.color} />
             <span className="text-sm font-medium">{badge.label}</span>

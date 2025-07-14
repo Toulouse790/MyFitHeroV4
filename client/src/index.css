@@ -2,6 +2,151 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Animations personnalisées pour MyFitHero */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+/* Classes utilitaires pour les animations */
+.animate-slideInRight {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-progress {
+  animation: progress 3s linear forwards;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-bounceIn {
+  animation: bounceIn 0.6s ease-out;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 468px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Transitions fluides pour le thème sombre */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Styles pour le mode sombre */
+.dark {
+  color-scheme: dark;
+}
+
+/* Améliorations de l'interface */
+.pillar-card {
+  @apply transform transition-all duration-300 hover:scale-105 hover:shadow-lg;
+}
+
+.pillar-card:hover {
+  @apply animate-glow;
+}
+
+.progress-bar {
+  @apply relative overflow-hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Scrollbar personnalisée pour le mode sombre */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
 /**
  * Styles globaux MyFitHero v4
  * Base CSS propre et optimisée
@@ -73,7 +218,7 @@
 
   /* Amélioration de la sélection de texte */
   ::selection {
-    @apply bg-primary/20;
+    @apply bg-blue-100;
   }
 
   /* Scroll bars personnalisées */

@@ -1,18 +1,23 @@
 // client/src/App.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Router, Route, Switch } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { authClient } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
 
-// Pages (tous les composants de page)
-import Index from '@/pages/Index';
-import Nutrition from '@/pages/Nutrition';
-import Hydration from '@/pages/Hydration';
-import Sleep from '@/pages/Sleep';
-import Workout from '@/pages/Workout';
-import Profile from '@/pages/Profile';
+// Pages avec lazy loading optimisé
+import {
+  LazyIndex,
+  LazyNutrition,
+  LazyHydration,
+  LazySleep,
+  LazyWorkout,
+  LazyProfile,
+  LazySocial,
+  OptimizedSuspenseFallback
+} from '@/components/LazyComponents';
+import Analytics from '@/pages/Analytics';
 import NotFound from '@/pages/NotFound';
 
 // Components (composants réutilisables)
@@ -21,6 +26,8 @@ import AuthPages from '@/components/AuthPages';
 import Layout from '@/components/Layout';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { AnimatedToastContainer } from '@/components/AnimatedToast';
 
 const AppContent: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -141,7 +148,9 @@ const AppContent: React.FC = () => {
             <OnboardingQuestionnaire user={user} onComplete={handleOnboardingComplete} />
           ) : (
             <Layout>
-              <Index />
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement du tableau de bord..." />}>
+                <LazyIndex />
+              </Suspense>
             </Layout>
           )}
         </Route>
@@ -151,7 +160,11 @@ const AppContent: React.FC = () => {
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
-            <Layout><Hydration /></Layout>
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement de l'hydratation..." />}>
+                <LazyHydration />
+              </Suspense>
+            </Layout>
           )}
         </Route>
         
@@ -159,7 +172,11 @@ const AppContent: React.FC = () => {
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
-            <Layout><Nutrition /></Layout>
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement de la nutrition..." />}>
+                <LazyNutrition />
+              </Suspense>
+            </Layout>
           )}
         </Route>
         
@@ -167,7 +184,11 @@ const AppContent: React.FC = () => {
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
-            <Layout><Sleep /></Layout>
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement du sommeil..." />}>
+                <LazySleep />
+              </Suspense>
+            </Layout>
           )}
         </Route>
         
@@ -175,7 +196,11 @@ const AppContent: React.FC = () => {
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
-            <Layout><Workout /></Layout>
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement des entraînements..." />}>
+                <LazyWorkout />
+              </Suspense>
+            </Layout>
           )}
         </Route>
         
@@ -183,7 +208,31 @@ const AppContent: React.FC = () => {
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
-            <Layout><Profile /></Layout>
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement du profil..." />}>
+                <LazyProfile />
+              </Suspense>
+            </Layout>
+          )}
+        </Route>
+
+        <Route path="/analytics">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout><Analytics /></Layout>
+          )}
+        </Route>
+
+        <Route path="/social">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement du social..." />}>
+                <LazySocial />
+              </Suspense>
+            </Layout>
           )}
         </Route>
         
@@ -196,10 +245,13 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <AppContent />
-      <Toaster />
-    </Router>
+    <ThemeProvider defaultTheme="auto">
+      <Router>
+        <AppContent />
+        <Toaster />
+        <AnimatedToastContainer />
+      </Router>
+    </ThemeProvider>
   );
 };
 

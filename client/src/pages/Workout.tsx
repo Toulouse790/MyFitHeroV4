@@ -4,14 +4,16 @@ import {
   Flame, 
   Target,
   ChevronRight,
-  Filter,
   Search,
   Timer,
   Star,
   Trophy,
-  Award
+  Award,
+  Dumbbell
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
+import PillarHeader from '@/components/PillarHeader';
+import AIIntelligence from '@/components/AIIntelligence';
 
 // --- TYPES ---
 type Sport = 'basketball' | 'football' | 'american_football' | 'tennis' | 'rugby' | 'volleyball' | 'swimming' | 'running' | 'cycling' | 'musculation';
@@ -245,14 +247,6 @@ const Workout: React.FC = () => {
   const toTitleCase = (str: string) => str.replace(/\b\w/g, char => char.toUpperCase());
 
   // --- MESSAGES PERSONNALISÉS ---
-  const getPersonalizedWelcome = () => {
-    const userName = appStoreUser.name || 'Champion';
-    const experience = appStoreUser.fitness_experience || 'débutant';
-    const sport = appStoreUser.sport || 'sport';
-    
-    return `Salut ${userName} ! Programmes ${experience} adaptés pour ${sport}`;
-  };
-
   const getMotivationalMessage = () => {
     const goals = appStoreUser.primary_goals || [];
     if (goals.includes('performance')) {
@@ -363,26 +357,20 @@ const Workout: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
         
-        {/* Header Personnalisé */}
-        <header>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-                <span className="mr-3 text-4xl">{personalizedData.emoji}</span> 
-                {toTitleCase(appStoreUser.sport?.replace('_', ' ') || 'Fitness')}
-              </h1>
-              <p className="text-gray-600 mt-1">{getPersonalizedWelcome()}</p>
-            </div>
-            <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-              <Filter size={20} className="text-gray-600" />
-            </button>
-          </div>
-        </header>
-
-        {/* Message Motivant Personnalisé */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4 rounded-xl text-white">
-          <p className="font-semibold text-center">{getMotivationalMessage()}</p>
-        </div>
+        {/* Header Uniforme */}
+        <PillarHeader
+          pillar="workout"
+          title={toTitleCase(appStoreUser.sport?.replace('_', ' ') || 'Fitness')}
+          icon={Dumbbell}
+          color="blue"
+          bgGradient="from-blue-500 to-purple-500"
+          emoji={personalizedData.emoji}
+          motivationalMessage={getMotivationalMessage()}
+          currentValue={2}
+          targetValue={stats.workouts}
+          unit="séances"
+          showAIRecommendation={true}
+        />
 
         {/* Stats Personnalisées */}
         <div className="bg-gradient-to-r from-red-600 to-orange-600 p-4 rounded-xl text-white shadow-lg">
@@ -479,6 +467,14 @@ const Workout: React.FC = () => {
             </div>
           )}
         </main>
+
+        {/* Intelligence AI - Analyse Workout */}
+        <AIIntelligence
+          pillar="workout"
+          showPredictions={true}
+          showCoaching={true}
+          showRecommendations={true}
+        />
 
         {/* Recommandation Personnalisée */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-xl border border-green-100">

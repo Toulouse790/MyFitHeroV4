@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, Link } from 'wouter';
 import { ArrowLeft, User, Dumbbell } from 'lucide-react';
 import BottomNav from './BottomNav';
+import { useIntelligentPreloading, useNetworkAdaptation } from '@/hooks/useIntelligentPreloading';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -14,13 +15,18 @@ function getPageTitle(pathname: string): string {
     '/nutrition': 'Nutrition',
     '/sleep': 'Sommeil',
     '/workout': 'Entraînement',
-    '/profile': 'Profil'
+    '/profile': 'Profil',
+    '/social': 'Social'
   };
   return titles[pathname] || 'MyFitHero';
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [location] = useLocation();
+  
+  // Hooks d'optimisation
+  useIntelligentPreloading();
+  useNetworkAdaptation();
   
   const isHomePage = location === '/';
   const showBackButton = !isHomePage;

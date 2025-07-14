@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, User, Upload, X, Check, Loader2 } from 'lucide-react';
+import { Camera, User, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
@@ -114,6 +114,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
       // Mettre à jour le store local
       updateAppStoreUserProfile({
+        ...appStoreUser,
         avatar_url: avatarUrl
       });
 
@@ -159,6 +160,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
       // Mettre à jour le store local
       updateAppStoreUserProfile({
+        ...appStoreUser,
         avatar_url: null
       });
 
@@ -186,7 +188,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     fileInputRef.current?.click();
   };
 
-  const displayAvatar = previewUrl || currentAvatar || appStoreUser?.avatar_url;
+  const displayAvatar = previewUrl || currentAvatar || appStoreUser?.avatar_url || undefined;
 
   return (
     <div className="relative group">

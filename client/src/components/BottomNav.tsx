@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'wouter';
-import { Dumbbell, Apple, Moon, Droplets, Home } from 'lucide-react';
+import { Dumbbell, Apple, Droplets, Home, BarChart3, Users } from 'lucide-react';
 
 interface NavItem {
   id: string;
@@ -33,11 +33,18 @@ const navItems: NavItem[] = [
     color: 'text-fitness-growth'
   },
   {
-    id: 'sleep',
-    label: 'Sommeil',
-    icon: Moon,
-    path: '/sleep',
-    color: 'text-fitness-recovery'
+    id: 'social',
+    label: 'Social',
+    icon: Users,
+    path: '/social',
+    color: 'text-purple-600'
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: BarChart3,
+    path: '/analytics',
+    color: 'text-indigo-600'
   },
   {
     id: 'hydration',
@@ -49,7 +56,7 @@ const navItems: NavItem[] = [
 ];
 
 const BottomNav = () => {
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
 
   const isActive = (path: string) => location === path;
 

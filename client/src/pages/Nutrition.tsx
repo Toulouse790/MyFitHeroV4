@@ -1,13 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Plus, 
   Target, 
   Utensils,
   Coffee,
   Sun,
   Moon as MoonIcon,
   Apple,
-  Flame,
   Zap,
   Info,
   Dumbbell,
@@ -16,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import PillarHeader from '@/components/PillarHeader';
+import AIIntelligence from '@/components/AIIntelligence';
 
 // --- TYPES & INTERFACES ---
 type Sport = 'strength' | 'basketball' | 'american_football' | 'tennis' | 'endurance' | 'football';
@@ -197,8 +197,6 @@ const Nutrition: React.FC = () => {
   const [currentCarbs, setCurrentCarbs] = useState(120);
   const [currentFat, setCurrentFat] = useState(25);
 
-  const [selectedMealType, setSelectedMealType] = useState<string>(Object.keys(sportConfig.mealSuggestions)[0]);
-
   // --- CALCULS POURCENTAGES ---
   const caloriesPercentage = Math.min((currentCalories / personalizedGoals.calories) * 100, 100);
   const proteinPercentage = Math.min((currentProtein / personalizedGoals.protein) * 100, 100);
@@ -251,26 +249,20 @@ const Nutrition: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6">
         
-        {/* Header Personnalisé */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-              <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
-              Nutrition
-            </h1>
-            <p className="text-gray-600">
-              Plan adapté pour {appStoreUser.sport || 'votre sport'} • {appStoreUser.name || 'Athlète'}
-            </p>
-          </div>
-          <button className="p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-            <Plus size={20} className="text-gray-600" />
-          </button>
-        </div>
-
-        {/* Message Motivant */}
-        <div className="bg-gradient-to-r from-green-500 to-teal-500 p-4 rounded-xl text-white">
-          <p className="font-semibold text-center">{getPersonalizedMessage()}</p>
-        </div>
+        {/* Header Uniforme */}
+        <PillarHeader
+          pillar="nutrition"
+          title="Nutrition"
+          icon={Utensils}
+          color="green"
+          bgGradient="from-green-500 to-teal-500"
+          emoji={sportConfig.emoji}
+          motivationalMessage={getPersonalizedMessage()}
+          currentValue={currentCalories}
+          targetValue={personalizedGoals.calories}
+          unit="kcal"
+          showAIRecommendation={true}
+        />
 
         {/* Calories avec Objectif Personnalisé */}
         <div className="bg-gradient-to-r from-green-600 to-teal-600 p-5 rounded-xl text-white">
@@ -397,6 +389,14 @@ const Nutrition: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Intelligence Artificielle */}
+        <AIIntelligence 
+          pillar="nutrition"
+          showPredictions={true}
+          showCoaching={true}
+          showRecommendations={true}
+        />
       </div>
     </div>
   );
