@@ -15,6 +15,8 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
   // Gérer la finalisation du nouvel onboarding
   const handleConversationalComplete = async (data: OnboardingData) => {
     try {
+      console.log('Début de la finalisation de l\'onboarding', { userId: user?.id, data });
+      
       const { error } = await supabase
         .from('user_profiles')
         .update({
@@ -27,8 +29,11 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
         .eq('id', user.id);
 
       if (error) {
+        console.error('Erreur Supabase lors de la mise à jour:', error);
         throw error;
       }
+
+      console.log('Mise à jour Supabase réussie');
 
       toast({
         title: 'Bienvenue dans MyFitHero !',
@@ -40,9 +45,10 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
       console.error('Erreur lors de la finalisation:', error);
       toast({
         title: 'Erreur',
-        description: 'Une erreur est survenue lors de la finalisation.',
+        description: 'Une erreur est survenue lors de la finalisation. Veuillez réessayer.',
         variant: 'destructive'
       });
+      // Ne pas appeler onComplete() en cas d'erreur pour permettre à l'utilisateur de réessayer
     }
   };
 

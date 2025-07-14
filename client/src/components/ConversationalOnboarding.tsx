@@ -234,17 +234,8 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       
       await saveProgress(finalData);
       
-      // Marquer l'onboarding comme terminé
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('user_profiles')
-          .update({
-            onboarding_completed: true,
-            onboarding_completed_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-      }
+      // Ne pas mettre à jour Supabase ici - laissons OnboardingQuestionnaire s'en charger
+      // pour éviter les conflits de concurrence
       
       onComplete(finalData);
       
