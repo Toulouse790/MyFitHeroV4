@@ -23,7 +23,8 @@
     "tailwind-merge": "^2.2.0",
     "clsx": "^2.1.0",
     "recharts": "^2.8.0",
-    "date-fns": "^3.2.0"
+    "date-fns": "^3.2.0",
+    "@radix-ui/react-switch": "^1.0.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
