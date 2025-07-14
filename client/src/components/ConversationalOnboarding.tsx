@@ -175,47 +175,64 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
   // Sauvegarde des données
   const saveProgress = async (data: OnboardingData) => {
     try {
+      console.log('🟡 Début de saveProgress avec data:', data);
+      
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      console.log('🟡 User récupéré:', user?.id);
+      
+      if (!user) {
+        console.error('🔴 Aucun utilisateur connecté');
+        return;
+      }
+      
+      console.log('🟡 Préparation des données pour upsert');
+      const upsertData = {
+        id: user.id,
+        first_name: data.firstName,
+        age: data.age,
+        gender: data.gender,
+        lifestyle: data.lifestyle,
+        main_objective: data.mainObjective,
+        selected_modules: data.selectedModules,
+        sport: data.sport,
+        sport_position: data.sportPosition,
+        sport_level: data.sportLevel,
+        season_period: data.seasonPeriod,
+        training_frequency: data.trainingFrequency,
+        equipment_level: data.equipmentLevel,
+        strength_objective: data.strengthObjective,
+        strength_experience: data.strengthExperience,
+        dietary_preference: data.dietaryPreference,
+        food_allergies: data.foodAllergies,
+        nutrition_objective: data.nutritionObjective,
+        dietary_restrictions: data.dietaryRestrictions,
+        average_sleep_hours: data.averageSleepHours,
+        sleep_difficulties: data.sleepDifficulties,
+        hydration_goal: data.hydrationGoal,
+        hydration_reminders: data.hydrationReminders,
+        motivation: data.motivation,
+        available_time_per_day: data.availableTimePerDay,
+        privacy_consent: data.privacyConsent,
+        marketing_consent: data.marketingConsent,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('🟡 Données préparées pour upsert:', upsertData);
       
       const { error } = await supabase
         .from('user_profiles')
-        .upsert({
-          id: user.id,
-          first_name: data.firstName,
-          age: data.age,
-          gender: data.gender,
-          lifestyle: data.lifestyle,
-          main_objective: data.mainObjective,
-          selected_modules: data.selectedModules,
-          sport: data.sport,
-          sport_position: data.sportPosition,
-          sport_level: data.sportLevel,
-          season_period: data.seasonPeriod,
-          training_frequency: data.trainingFrequency,
-          equipment_level: data.equipmentLevel,
-          strength_objective: data.strengthObjective,
-          strength_experience: data.strengthExperience,
-          dietary_preference: data.dietaryPreference,
-          food_allergies: data.foodAllergies,
-          nutrition_objective: data.nutritionObjective,
-          dietary_restrictions: data.dietaryRestrictions,
-          average_sleep_hours: data.averageSleepHours,
-          sleep_difficulties: data.sleepDifficulties,
-          hydration_goal: data.hydrationGoal,
-          hydration_reminders: data.hydrationReminders,
-          motivation: data.motivation,
-          available_time_per_day: data.availableTimePerDay,
-          privacy_consent: data.privacyConsent,
-          marketing_consent: data.marketingConsent,
-          updated_at: new Date().toISOString()
-        });
+        .upsert(upsertData);
       
       if (error) {
-        console.error('Erreur sauvegarde:', error);
+        console.error('🔴 Erreur sauvegarde Supabase:', error);
+      } else {
+        console.log('🟢 Sauvegarde Supabase réussie');
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('🔴 Erreur lors de la sauvegarde:', error);
+      if (error instanceof Error) {
+        console.error('🔴 Stack trace:', error.stack);
+      }
     }
   };
 
@@ -223,6 +240,7 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
   const completeOnboarding = async () => {
     try {
       setIsLoading(true);
+      console.log('🟡 Début de completeOnboarding dans ConversationalOnboarding');
       
       const finalData = {
         ...onboardingData,
@@ -232,15 +250,23 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
         }
       };
       
+      console.log('🟡 finalData préparée:', finalData);
+      
       await saveProgress(finalData);
+      console.log('🟡 saveProgress terminé avec succès');
       
       // Ne pas mettre à jour Supabase ici - laissons OnboardingQuestionnaire s'en charger
       // pour éviter les conflits de concurrence
       
+      console.log('🟡 Appel de onComplete avec finalData');
       onComplete(finalData);
+      console.log('🟡 onComplete appelé avec succès');
       
     } catch (error) {
-      console.error('Erreur lors de la finalisation:', error);
+      console.error('🔴 Erreur lors de la finalisation dans ConversationalOnboarding:', error);
+      if (error instanceof Error) {
+        console.error('🔴 Stack trace:', error.stack);
+      }
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de la finalisation.",
