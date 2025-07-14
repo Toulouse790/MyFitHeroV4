@@ -18,7 +18,8 @@
     "zustand": "^4.4.1",
     "react-hook-form": "^7.48.2",
     "@radix-ui/react-toast": "^1.1.5",
-    "class-variance-authority": "^0.7.0"
+    "class-variance-authority": "^0.7.0",
+    "@radix-ui/react-slider": "^1.1.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
