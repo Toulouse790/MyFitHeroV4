@@ -221,14 +221,18 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       
       console.log('🟡 Données préparées pour upsert:', upsertData);
       
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('user_profiles')
         .upsert(upsertData);
       
       if (error) {
         console.error('🔴 Erreur sauvegarde Supabase:', error);
+        console.error('🔴 Détails de l\'erreur:', error.message);
+        console.error('🔴 Code d\'erreur:', error.code);
+        console.error('🔴 Données qui ont causé l\'erreur:', upsertData);
       } else {
         console.log('🟢 Sauvegarde Supabase réussie');
+        console.log('🟢 Données sauvegardées:', insertedData);
       }
     } catch (error) {
       console.error('🔴 Erreur lors de la sauvegarde:', error);

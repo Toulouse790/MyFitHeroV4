@@ -30,6 +30,9 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
 
       if (error) {
         console.error('Erreur Supabase lors de la mise à jour:', error);
+        console.error('🔴 Détails de l\'erreur:', error.message);
+        console.error('🔴 Code d\'erreur:', error.code);
+        console.error('🔴 User ID utilisé:', user.id);
         throw error;
       }
 
