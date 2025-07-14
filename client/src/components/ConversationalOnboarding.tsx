@@ -174,6 +174,39 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
     }
   }, [currentStep, currentResponse, validateResponse]); // Retirer onboardingData des dépendances
 
+  // Fonction pour mapper les valeurs vers les contraintes de la base de données
+  const mapFitnessGoal = (mainObjective: string): string => {
+    const mapping: Record<string, string> = {
+      'performance': 'performance',
+      'health_wellness': 'general_health',
+      'body_composition': 'muscle_gain', // ou 'weight_loss' selon le contexte
+      'energy_sleep': 'energy',
+      'strength_building': 'strength',
+      'endurance_cardio': 'endurance',
+      'recovery_focus': 'recovery',
+      'weight_management': 'maintenance',
+      'weight_loss': 'weight_loss',
+      'muscle_gain': 'muscle_gain'
+    };
+    
+    return mapping[mainObjective] || 'general'; // Valeur par défaut si pas trouvé
+  };
+
+  const mapSportLevel = (sportLevel: string): string => {
+    const mapping: Record<string, string> = {
+      'recreational': 'recreational',
+      'amateur_competitive': 'amateur_competitive',
+      'semi_professional': 'semi_professional',
+      'professional': 'professional',
+      'beginner': 'recreational',
+      'intermediate': 'amateur_competitive',
+      'advanced': 'semi_professional',
+      'expert': 'professional'
+    };
+    
+    return mapping[sportLevel] || 'recreational'; // Valeur par défaut
+  };
+
   // Sauvegarde des données
   const saveProgress = async (data: OnboardingData) => {
     try {
@@ -194,12 +227,12 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
         age: data.age,
         gender: data.gender,
         lifestyle: data.lifestyle,
-        fitness_goal: data.mainObjective, // Corrigé: main_objective → fitness_goal
+        fitness_goal: mapFitnessGoal(data.mainObjective || ''), // Corrigé: utiliser le mapping
         modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: selected_modules → modules
         active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: selected_modules → active_modules
         sport: data.sport,
         sport_position: data.sportPosition,
-        sport_level: data.sportLevel,
+        sport_level: mapSportLevel(data.sportLevel || ''),
         season_period: data.seasonPeriod,
         training_frequency: data.trainingFrequency,
         equipment_level: data.equipmentLevel,
