@@ -3,7 +3,6 @@ import React from 'react';
 import { ArrowLeft, Settings, Bell, User, Trophy, TrendingUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { useNavigate } from 'react-router-dom';
 
 interface UniformHeaderProps {
   title: string;
@@ -46,13 +45,11 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
   rightContent,
   gradient = false
 }) => {
-  const navigate = useNavigate();
-
   const handleBack = () => {
     if (onBack) {
       onBack();
     } else {
-      navigate(-1);
+      window.history.back();
     }
   };
 

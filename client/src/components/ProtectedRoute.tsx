@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Redirect } from 'wouter';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
 
@@ -111,7 +111,6 @@ const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, moduleRequired }) => {
   const { appStoreUser } = useAppStore();
-  const location = useLocation();
   const [loading, setLoading] = React.useState(true);
   const [session, setSession] = React.useState<any>(null);
 
@@ -143,12 +142,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, moduleRequire
 
   if (!session) {
     // Redirection vers la page d'auth avec sauvegarde de la route
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Redirect to="/auth" />;
   }
 
   if (!appStoreUser.id || !appStoreUser.age || !appStoreUser.gender) {
     // Onboarding non terminé
-    return <Navigate to="/" replace />;
+    return <Redirect to="/" />;
   }
 
   // Vérification des modules actifs

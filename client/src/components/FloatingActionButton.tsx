@@ -1,7 +1,7 @@
 // client/src/components/FloatingActionButton.tsx
 import React, { useState } from 'react';
 import { Plus, X, Dumbbell, Droplets, Moon, Utensils, Timer, Calendar } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { WorkoutTimer } from './WorkoutTimer';
 
 interface FloatingActionButtonProps {
@@ -19,7 +19,7 @@ interface QuickAction {
 export const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ className = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
-  const navigate = useNavigate();
+  const [, navigate] = useLocation();
 
   const quickActions: QuickAction[] = [
     {
