@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Clock, Briefcase, Check } from 'lucide-react';
+import { User, Calendar, Clock, Briefcase, Check, Weight, Ruler, Star, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LIFESTYLE_OPTIONS } from '@/data/onboardingData';
 
 interface PersonalInfo {
   age: number;
   gender: 'male' | 'female';
+  weight: number;
+  height: number;
   lifestyle: 'student' | 'office_worker' | 'physical_job' | 'retired';
   availableTimePerDay: number;
 }
@@ -25,15 +27,27 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
   const [formData, setFormData] = useState<PersonalInfo>({
     age: initialData?.age || 25,
     gender: initialData?.gender || 'male',
+    weight: initialData?.weight || 0,
+    height: initialData?.height || 0,
     lifestyle: initialData?.lifestyle || 'office_worker',
     availableTimePerDay: initialData?.availableTimePerDay || 60
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [showTip, setShowTip] = useState(false);
+
+  const tips = [
+    "Métabolisme change avec l'âge",
+    "Différences hormonales importantes",
+    "Mesures précises = calculs justes",
+    "Influence besoins énergétiques quotidiens",
+    "Optimise programme selon disponibilité"
+  ];
 
   const steps = [
     { id: 'age', title: 'Âge', icon: Calendar },
     { id: 'gender', title: 'Genre', icon: User },
+    { id: 'morphology', title: 'Morphologie', icon: Weight },
     { id: 'lifestyle', title: 'Style de vie', icon: Briefcase },
     { id: 'time', title: 'Temps disponible', icon: Clock }
   ];
@@ -44,9 +58,13 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
         return formData.age >= 13 && formData.age <= 100;
       case 1: // Gender
         return ['male', 'female'].includes(formData.gender);
-      case 2: // Lifestyle
+      case 2: // Morphology
+        return formData.weight >= 45 && formData.weight <= 200 && 
+               formData.height >= 120 && formData.height <= 230 &&
+               formData.weight > 0 && formData.height > 0;
+      case 3: // Lifestyle
         return LIFESTYLE_OPTIONS.some(option => option.id === formData.lifestyle);
-      case 3: // Time
+      case 4: // Time
         return formData.availableTimePerDay >= 15 && formData.availableTimePerDay <= 300;
       default:
         return false;
@@ -55,6 +73,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
 
   const handleNext = () => {
     if (validateCurrentStep()) {
+      setShowTip(false); // Fermer le conseil quand on passe à l'étape suivante
       if (currentStep === steps.length - 1) {
         onComplete(formData);
       } else {
@@ -65,6 +84,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
 
   const handleBack = () => {
     if (currentStep > 0) {
+      setShowTip(false); // Fermer le conseil quand on revient en arrière
       setCurrentStep(currentStep - 1);
     }
   };
@@ -76,8 +96,31 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
           <div className="space-y-6">
             <div className="text-center">
               <Calendar className="h-12 w-12 mx-auto mb-4 text-blue-600" />
-              <h3 className="text-xl font-semibold mb-2">Quel âge avez-vous ?</h3>
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <h3 className="text-xl font-semibold">Quel âge avez-vous ?</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTip(!showTip)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Star className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="text-gray-600">Cela nous aide à personnaliser vos programmes</p>
+              {showTip && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTip(false)}
+                    className="absolute top-1 right-1 h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  {tips[0]}
+                </div>
+              )}
             </div>
             
             <div className="space-y-4">
@@ -119,8 +162,31 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
           <div className="space-y-6">
             <div className="text-center">
               <User className="h-12 w-12 mx-auto mb-4 text-blue-600" />
-              <h3 className="text-xl font-semibold mb-2">Quel est votre genre ?</h3>
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <h3 className="text-xl font-semibold">Quel est votre genre ?</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTip(!showTip)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Star className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="text-gray-600">Pour des recommandations plus précises</p>
+              {showTip && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTip(false)}
+                    className="absolute top-1 right-1 h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  {tips[1]}
+                </div>
+              )}
             </div>
             
             <div className="space-y-3">
@@ -153,13 +219,138 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
           </div>
         );
 
-      case 2: // Lifestyle
+      case 2: // Morphology
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <Weight className="h-12 w-12 mx-auto mb-4 text-blue-600" />
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <h3 className="text-xl font-semibold">Votre morphologie</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTip(!showTip)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Star className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-gray-600">Nous avons besoin de ces informations pour des calculs précis</p>
+              {showTip && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTip(false)}
+                    className="absolute top-1 right-1 h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  {tips[2]}
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-6">
+              {/* Poids */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Poids (kg) : {formData.weight || 70}
+                </label>
+                <div className="px-3">
+                  <input
+                    type="range"
+                    min="45"
+                    max="200"
+                    value={formData.weight || 70}
+                    onChange={(e) => setFormData({...formData, weight: parseInt(e.target.value)})}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>45 kg</span>
+                    <span>200 kg</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="number"
+                    min="45"
+                    max="200"
+                    value={formData.weight || ''}
+                    placeholder="70"
+                    onChange={(e) => setFormData({...formData, weight: parseInt(e.target.value) || 0})}
+                    className="w-20 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-500">kg</span>
+                </div>
+              </div>
+
+              {/* Taille */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Taille (cm) : {formData.height || 175}
+                </label>
+                <div className="px-3">
+                  <input
+                    type="range"
+                    min="120"
+                    max="230"
+                    value={formData.height || 175}
+                    onChange={(e) => setFormData({...formData, height: parseInt(e.target.value)})}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>120 cm</span>
+                    <span>230 cm</span>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="number"
+                    min="120"
+                    max="230"
+                    value={formData.height || ''}
+                    placeholder="175"
+                    onChange={(e) => setFormData({...formData, height: parseInt(e.target.value) || 0})}
+                    className="w-20 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-500">cm</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 3: // Lifestyle
         return (
           <div className="space-y-6">
             <div className="text-center">
               <Briefcase className="h-12 w-12 mx-auto mb-4 text-blue-600" />
-              <h3 className="text-xl font-semibold mb-2">Quel est votre style de vie ?</h3>
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <h3 className="text-xl font-semibold">Quel est votre style de vie ?</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTip(!showTip)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Star className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="text-gray-600">Cela influence vos besoins nutritionnels et d'entraînement</p>
+              {showTip && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTip(false)}
+                    className="absolute top-1 right-1 h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  {tips[3]}
+                </div>
+              )}
             </div>
             
             <div className="space-y-3">
@@ -189,13 +380,36 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
           </div>
         );
 
-      case 3: // Time
+      case 4: // Time
         return (
           <div className="space-y-6">
             <div className="text-center">
               <Clock className="h-12 w-12 mx-auto mb-4 text-blue-600" />
-              <h3 className="text-xl font-semibold mb-2">Temps disponible par jour</h3>
+              <div className="flex items-center justify-center space-x-2 mb-2">
+                <h3 className="text-xl font-semibold">Temps disponible par jour</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTip(!showTip)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Star className="h-4 w-4" />
+                </Button>
+              </div>
               <p className="text-gray-600">Combien de temps pouvez-vous consacrer à votre santé ?</p>
+              {showTip && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTip(false)}
+                    className="absolute top-1 right-1 h-6 w-6 p-0"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                  {tips[4]}
+                </div>
+              )}
             </div>
             
             <div className="space-y-4">
