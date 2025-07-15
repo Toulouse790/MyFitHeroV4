@@ -122,6 +122,9 @@ const AppContent: React.FC = () => {
         return;
       }
       
+      // Recharger le profil utilisateur pour mettre à jour l'état global
+      await checkUserProfile(currentUser);
+      
       setShowOnboarding(false);
       setHasProfile(true);
       
