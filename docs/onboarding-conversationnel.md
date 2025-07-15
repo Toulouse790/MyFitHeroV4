@@ -89,7 +89,7 @@ interface OnboardingData {
   // Informations de base
   firstName?: string;
   age?: number;
-  gender?: 'male' | 'female' | 'other';
+  gender?: 'male' | 'female';
   mainObjective?: string;
   selectedModules?: string[];
   

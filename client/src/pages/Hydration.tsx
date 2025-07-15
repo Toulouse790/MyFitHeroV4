@@ -17,10 +17,10 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
-import PillarHeader from '@/components/PillarHeader';
 import AIIntelligence from '@/components/AIIntelligence';
 import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
+import { UniformHeader } from '@/components/UniformHeader';
 
 // --- TYPES & INTERFACES DE PERSONNALISATION ---
 
@@ -270,18 +270,14 @@ const Hydration: React.FC = () => {
       <div className="px-4 py-6 space-y-6">
 
         {/* Header Uniforme */}
-        <PillarHeader
-          pillar="hydration"
+        <UniformHeader
           title="Hydratation"
-          icon={Droplets}
-          color="blue"
-          bgGradient="from-blue-500 to-cyan-500"
-          emoji={sportConfig.emoji}
-          motivationalMessage={getPersonalizedMessage()}
-          currentValue={parseFloat(currentHydrationL.toFixed(2))}
-          targetValue={parseFloat(goalHydrationL.toFixed(2))}
-          unit="L"
-          showAIRecommendation={true}
+          subtitle={`${sportConfig.emoji} ${getPersonalizedMessage()}`}
+          showBackButton={true}
+          showSettings={true}
+          showNotifications={true}
+          showProfile={true}
+          gradient={true}
         />
 
         {/* Objectif principal avec Données Personnalisées */}

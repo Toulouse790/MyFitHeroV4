@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Target, 
-  Utensils,
   Coffee,
   Sun,
   Moon as MoonIcon,
@@ -13,9 +12,8 @@ import {
   Trophy
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { useToast } from '@/hooks/use-toast';
-import PillarHeader from '@/components/PillarHeader';
 import AIIntelligence from '@/components/AIIntelligence';
+import { UniformHeader } from '@/components/UniformHeader';
 
 // --- TYPES & INTERFACES ---
 type Sport = 'strength' | 'basketball' | 'american_football' | 'tennis' | 'endurance' | 'football';
@@ -127,7 +125,6 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
 const Nutrition: React.FC = () => {
   // --- DONNÉES RÉELLES DU STORE ---
   const { appStoreUser } = useAppStore();
-  const { toast } = useToast();
 
   // --- MAPPING SPORT UTILISATEUR ---
   const getSportCategory = (sport: string): Sport => {
@@ -192,10 +189,10 @@ const Nutrition: React.FC = () => {
   }, [appStoreUser, sportConfig]);
 
   // --- STATES ---
-  const [currentCalories, setCurrentCalories] = useState(850); // Simulation
-  const [currentProtein, setCurrentProtein] = useState(45);
-  const [currentCarbs, setCurrentCarbs] = useState(120);
-  const [currentFat, setCurrentFat] = useState(25);
+  const [currentCalories] = useState(850); // Simulation
+  const [currentProtein] = useState(45);
+  const [currentCarbs] = useState(120);
+  const [currentFat] = useState(25);
 
   // --- CALCULS POURCENTAGES ---
   const caloriesPercentage = Math.min((currentCalories / personalizedGoals.calories) * 100, 100);
@@ -250,18 +247,14 @@ const Nutrition: React.FC = () => {
       <div className="px-4 py-6 space-y-6">
         
         {/* Header Uniforme */}
-        <PillarHeader
-          pillar="nutrition"
+        <UniformHeader
           title="Nutrition"
-          icon={Utensils}
-          color="green"
-          bgGradient="from-green-500 to-teal-500"
-          emoji={sportConfig.emoji}
-          motivationalMessage={getPersonalizedMessage()}
-          currentValue={currentCalories}
-          targetValue={personalizedGoals.calories}
-          unit="kcal"
-          showAIRecommendation={true}
+          subtitle={`${sportConfig.emoji} ${getPersonalizedMessage()}`}
+          showBackButton={true}
+          showSettings={true}
+          showNotifications={true}
+          showProfile={true}
+          gradient={true}
         />
 
         {/* Calories avec Objectif Personnalisé */}

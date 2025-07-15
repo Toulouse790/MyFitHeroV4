@@ -2,6 +2,8 @@ import React from 'react';
 import { useLocation, Link } from 'wouter';
 import { ArrowLeft, User, Dumbbell } from 'lucide-react';
 import BottomNav from './BottomNav';
+import { FloatingActionButton } from './FloatingActionButton';
+import { ActiveSessionIndicator } from './ActiveSessionIndicator';
 import { useIntelligentPreloading, useNetworkAdaptation } from '@/hooks/useIntelligentPreloading';
 
 interface LayoutProps {
@@ -97,8 +99,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {children}
       </main>
 
+      {/* Indicateur de session active */}
+      <ActiveSessionIndicator />
+
       {/* Navigation mobile */}
       <BottomNav />
+      
+      {/* Bouton d'action flottant */}
+      <FloatingActionButton />
     </div>
   );
 };

@@ -1,560 +1,391 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  User as UserIcon, Calendar, Target, PenTool, Clock, Zap, 
-  Dumbbell, Star, Wind, 
-  Maximize, Heart, Trophy, Award, TrendingUp, Flame 
+  User as UserIcon, Calendar, Target, 
+  Dumbbell, Star, 
+  Trophy, TrendingUp, Flame, Edit,
+  X
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import BadgeSystem from '@/components/BadgeSystem';
-import AvatarUpload from '@/components/AvatarUpload';
-import PrivacyManager from '@/components/PrivacyManager';
-import PWAControls from '@/components/PWAControls';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { UniformHeader } from '@/components/UniformHeader';
+import { BadgeDisplay } from '@/components/BadgeDisplay';
+import { UserDataService } from '@/services/userDataService';
+import { UserProfile } from '@/types/user';
 
-// --- TYPES ---
-type Sport = 'basketball' | 'american_football' | 'strength_sports' | 'endurance_sports' | 'tennis' | 'football';
+interface ProfilePageProps {}
 
-interface SportProfileConfig {
-  name: string;
-  emoji: string;
-  positions: string[];
-  specificStats: {
-    key: string;
-    label: string;
-    unit: string;
-    icon: React.ElementType;
-  }[];
-  profileTip: string;
-}
-
-// --- CONFIGURATION PROFILS SPORTIFS ---
-const sportsDetailData: Record<Sport, SportProfileConfig> = {
-  basketball: {
-    name: 'Basketball', emoji: '🏀',
-    positions: ['Meneur (PG)', 'Arrière (SG)', 'Ailier (SF)', 'Ailier Fort (PF)', 'Pivot (C)'],
-    specificStats: [
-      { key: 'vertical_jump', label: 'Détente Verticale', unit: 'cm', icon: Maximize },
-      { key: 'agility_time', label: 'Test d\'agilité', unit: 's', icon: Wind },
-      { key: 'free_throw_pct', label: 'Lancers Francs', unit: '%', icon: Target },
-    ],
-    profileTip: 'Une bonne détente verticale commence par un renforcement des jambes et du tronc. Intégrez des squats et des box jumps dans votre routine.'
-  },
-  american_football: {
-    name: 'Football Américain', emoji: '🏈',
-    positions: ['Quarterback (QB)', 'Running Back (RB)', 'Wide Receiver (WR)', 'Linebacker (LB)', 'Cornerback (CB)'],
-    specificStats: [
-      { key: 'bench_press_max', label: 'Développé Couché Max', unit: 'kg', icon: Dumbbell },
-      { key: 'sprint_40y', label: 'Sprint 40 Yards', unit: 's', icon: Wind },
-      { key: 'squat_max', label: 'Squat Max', unit: 'kg', icon: Dumbbell },
-    ],
-    profileTip: 'La puissance explosive est reine. Travaillez vos sprints et vos exercices de force comme le Power Clean pour dominer sur le terrain.'
-  },
-  strength_sports: {
-    name: 'Force Athlétique', emoji: '🏋️‍♂️',
-    positions: ['Powerlifting', 'Haltérophilie', 'Strongman'],
-    specificStats: [
-      { key: 'squat_max', label: 'Squat Max', unit: 'kg', icon: Dumbbell },
-      { key: 'bench_press_max', label: 'Développé Couché Max', unit: 'kg', icon: Dumbbell },
-      { key: 'deadlift_max', label: 'Soulevé de Terre Max', unit: 'kg', icon: Dumbbell },
-    ],
-    profileTip: 'La technique est aussi importante que la force. Filmez vos levers lourds pour analyser votre forme et éviter les blessures.'
-  },
-  endurance_sports: {
-    name: 'Sports d\'Endurance', emoji: '🏃‍♀️',
-    positions: ['Marathon', 'Cyclisme sur route', 'Triathlon'],
-    specificStats: [
-      { key: 'vo2_max', label: 'VO2 Max', unit: 'ml/kg/min', icon: Heart },
-      { key: 'ftp', label: 'Puissance (FTP)', unit: 'watts', icon: Zap },
-      { key: 'marathon_time', label: 'Temps Marathon', unit: 'h:min', icon: Clock },
-    ],
-    profileTip: 'La récupération est une partie intégrante de l\'entraînement. Intégrez des jours de repos actif pour progresser sur le long terme.'
-  },
-  tennis: {
-    name: 'Tennis', emoji: '🎾',
-    positions: ['Baseliner', 'Serve-and-Volleyer', 'All-Court'],
-    specificStats: [
-      { key: 'serve_speed', label: 'Vitesse Service', unit: 'km/h', icon: Zap },
-      { key: 'agility_time', label: 'Test Agilité', unit: 's', icon: Wind },
-      { key: 'match_endurance', label: 'Endurance Match', unit: 'min', icon: Clock },
-    ],
-    profileTip: 'L\'agilité et la vitesse de déplacement sont cruciales. Travaillez vos changements de direction et votre explosivité latérale.'
-  },
-  football: {
-    name: 'Football', emoji: '⚽',
-    positions: ['Gardien', 'Défenseur', 'Milieu', 'Attaquant'],
-    specificStats: [
-      { key: 'sprint_speed', label: 'Vitesse Sprint', unit: 'km/h', icon: Wind },
-      { key: 'vo2_max', label: 'VO2 Max', unit: 'ml/kg/min', icon: Heart },
-      { key: 'shooting_accuracy', label: 'Précision Tir', unit: '%', icon: Target },
-    ],
-    profileTip: 'L\'endurance est la base, mais ne négligez pas la vitesse et l\'agilité. Alternez travail aérobie et anaérobie pour un développement complet.'
-  }
-};
-
-const Profile: React.FC = () => {
-  // --- DONNÉES DU STORE ---
-  const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
+const ProfilePage: React.FC<ProfilePageProps> = () => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [editData, setEditData] = useState<Partial<UserProfile>>({});
 
-  // --- MAPPING SPORT ---
-  const getSportCategory = (sport: string): Sport => {
-    const mappings: Record<string, Sport> = {
-      'basketball': 'basketball',
-      'american_football': 'american_football',
-      'musculation': 'strength_sports',
-      'powerlifting': 'strength_sports', 
-      'weightlifting': 'strength_sports',
-      'running': 'endurance_sports',
-      'cycling': 'endurance_sports',
-      'swimming': 'endurance_sports',
-      'tennis': 'tennis',
-      'football': 'football'
-    };
-    return mappings[sport?.toLowerCase()] || 'strength_sports';
-  };
+  useEffect(() => {
+    loadProfileData();
+  }, []);
 
-  const userSportCategory = getSportCategory(appStoreUser.sport || 'none');
-  const sportConfig = sportsDetailData[userSportCategory];
+  const loadProfileData = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-  // --- CALCULS PERSONNALISÉS ---
-  const personalizedInsights = useMemo(() => {
-    const insights = [];
-    
-    // Analyse des objectifs
-    if (appStoreUser.primary_goals?.includes('weight_loss')) {
-      insights.push({
-        icon: TrendingUp,
-        title: 'Perte de Poids',
-        value: `${appStoreUser.daily_calories || '?'} kcal/jour`,
-        color: 'text-red-500',
-        tip: 'Déficit calorique optimal calculé pour votre profil'
-      });
-    }
-    
-    if (appStoreUser.primary_goals?.includes('muscle_gain')) {
-      insights.push({
-        icon: Dumbbell,
-        title: 'Prise de Masse',
-        value: `${Math.round((appStoreUser.daily_calories || 2000) * 0.2 / 4)}g protéines`,
-        color: 'text-blue-500',
-        tip: 'Apport protéique optimisé pour la croissance musculaire'
-      });
-    }
-    
-    // Analyse du sport
-    if (appStoreUser.sport) {
-      insights.push({
-        icon: Trophy,
-        title: 'Performance Sport',
-        value: `Niveau ${appStoreUser.sport_level || 'Amateur'}`,
-        color: 'text-purple-500',
-        tip: `Programmes adaptés pour ${sportConfig.name}`
-      });
-    }
-    
-    // Analyse de la fréquence d'entraînement
-    if (appStoreUser.training_frequency) {
-      const frequency = appStoreUser.training_frequency;
-      let assessment = 'Optimal';
-      if (frequency < 2) assessment = 'Augmentez';
-      if (frequency > 6) assessment = 'Attention surmenage';
-      
-      insights.push({
-        icon: Calendar,
-        title: 'Fréquence',
-        value: `${frequency}x/semaine`,
-        color: frequency >= 3 && frequency <= 5 ? 'text-green-500' : 'text-orange-500',
-        tip: `${assessment} pour vos objectifs`
-      });
-    }
-    
-    return insights;
-  }, [appStoreUser, sportConfig]);
+      // Charger le profil utilisateur
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-  // --- FORM STATE ---
-  const [formValues, setFormValues] = useState({
-    sport: appStoreUser.sport || 'basketball',
-    sport_position: appStoreUser.sport_position || '',
-    sport_level: appStoreUser.sport_level || 'recreational',
-    training_frequency: appStoreUser.training_frequency || 3,
-    primary_goals: appStoreUser.primary_goals || [],
-    sport_specific_stats: appStoreUser.sport_specific_stats || {},
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormValues(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleStatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormValues(prev => ({
-      ...prev,
-      sport_specific_stats: {
-        ...prev.sport_specific_stats,
-        [name]: Number(value)
+      if (profileError) {
+        console.error('Erreur lors du chargement du profil:', profileError);
+        return;
       }
-    }));
+
+      setUserProfile(profile);
+      
+      // Initialiser les données d'édition avec les valeurs du profil
+      setEditData({
+        ...profile,
+        first_name: profile.first_name || profile.full_name?.split(' ')[0] || '',
+        last_name: profile.last_name || profile.full_name?.split(' ')[1] || '',
+        bio: profile.bio || ''
+      });
+
+      // Charger les statistiques
+      const stats = await UserDataService.getUserStats(user.id);
+      setUserStats(stats);
+
+      // Note: badgeStats supprimé car non utilisé dans l'interface
+
+    } catch (error) {
+      console.error('Erreur lors du chargement des données:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données du profil",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSave = async () => {
+    if (!userProfile) return;
+
     try {
-      // Validation des champs
-      if (!formValues.sport) {
-        toast({
-          title: "Erreur de validation",
-          description: "Veuillez sélectionner un sport.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (!formValues.sport_level) {
-        toast({
-          title: "Erreur de validation", 
-          description: "Veuillez sélectionner un niveau.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Sauvegarde dans Supabase
+      setSaving(true);
       const { error } = await supabase
         .from('user_profiles')
         .update({
-          sport: formValues.sport,
-          sport_position: formValues.sport_position,
-          sport_level: formValues.sport_level,
-          training_frequency: formValues.training_frequency,
-          primary_goals: formValues.primary_goals,
-          sport_specific_stats: formValues.sport_specific_stats,
+          full_name: `${editData.first_name} ${editData.last_name}`.trim(),
+          bio: editData.bio,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', appStoreUser.id);
+        .eq('id', userProfile.id);
 
       if (error) {
         throw error;
       }
-      
-      // Mise à jour du store
-      updateAppStoreUserProfile({
-        ...formValues,
-        sport_specific_stats: formValues.sport_specific_stats
-      });
-      
+
+      setUserProfile({ ...userProfile, ...editData });
       setIsEditing(false);
+      
       toast({
-        title: "Profil mis à jour !",
-        description: "Vos informations ont été sauvegardées avec succès.",
+        title: "Succès",
+        description: "Profil mis à jour avec succès",
+        variant: "default"
       });
+
     } catch (error) {
-      console.error('Erreur sauvegarde profil:', error);
+      console.error('Erreur lors de la sauvegarde:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de sauvegarder le profil. Veuillez réessayer.",
+        description: "Impossible de sauvegarder le profil",
         variant: "destructive"
       });
+    } finally {
+      setSaving(false);
     }
   };
 
-  // --- COMPOSANTS ---
-  const SportBadge = () => (
-    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-xl text-center shadow-lg">
-      <div className="text-5xl mb-3">{sportConfig.emoji}</div>
-      <h3 className="text-xl font-bold mb-1">{sportConfig.name}</h3>
-      <p className="text-blue-200 text-sm">{appStoreUser.sport_level || 'Niveau non défini'}</p>
-      <p className="font-semibold mt-2 text-blue-100">{appStoreUser.sport_position || 'Position non définie'}</p>
-      <div className="mt-3 text-xs text-blue-200">
-        {appStoreUser.training_frequency || 0}x/semaine • {appStoreUser.season_period || 'Saison'}
-      </div>
-    </div>
-  );
+  const handleCancel = () => {
+    setEditData(userProfile || {});
+    setIsEditing(false);
+  };
 
-  const StatCard = ({ stat }: { stat: any }) => {
-    const StatIcon = stat.icon;
-    const value = appStoreUser.sport_specific_stats?.[stat.key] || 0;
+  const getLevel = (experience: number): number => {
+    return Math.floor(experience / 1000) + 1;
+  };
+
+  const getExperienceForNextLevel = (experience: number): number => {
+    const currentLevel = getLevel(experience);
+    return currentLevel * 1000 - experience;
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  if (loading) {
     return (
-      <div className="bg-gray-50 p-4 rounded-lg flex items-center space-x-4 hover:bg-gray-100 transition-colors">
-        <div className="p-2 bg-blue-100 rounded-lg">
-          <StatIcon className="text-blue-600" size={24} />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm text-gray-600">{stat.label}</p>
-          <p className="font-bold text-gray-800 text-lg">
-            {value > 0 ? `${value} ${stat.unit}` : 'Non défini'}
-          </p>
+      <div className="min-h-screen bg-gray-50">
+        <UniformHeader 
+          title="Profil"
+          showBackButton={true}
+          gradient={true}
+        />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       </div>
     );
-  };
+  }
 
-  const InsightCard = ({ insight }: { insight: any }) => {
-    const InsightIcon = insight.icon;
+  if (!userProfile) {
     return (
-      <div className="bg-white p-4 rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
-        <div className="flex items-center space-x-3 mb-2">
-          <InsightIcon className={`${insight.color}`} size={20} />
-          <span className="font-semibold text-gray-800">{insight.title}</span>
+      <div className="min-h-screen bg-gray-50">
+        <UniformHeader 
+          title="Profil"
+          showBackButton={true}
+          gradient={true}
+        />
+        <div className="p-4">
+          <Card>
+            <CardContent className="py-8">
+              <p className="text-center text-gray-600">
+                Profil non trouvé
+              </p>
+            </CardContent>
+          </Card>
         </div>
-        <p className={`font-bold text-lg ${insight.color} mb-1`}>{insight.value}</p>
-        <p className="text-xs text-gray-500">{insight.tip}</p>
       </div>
     );
-  };
+  }
 
-  // --- RENDER ---
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="px-4 py-6 space-y-6">
-    
-        {/* Header Personnalisé */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <AvatarUpload 
-              size="lg" 
-              editable={true}
-              currentAvatar={appStoreUser.avatar_url || undefined}
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-                <span className="mr-3 text-3xl">{sportConfig.emoji}</span>
-                Mon Profil
-              </h1>
-              <p className="text-gray-600">
-                {appStoreUser.name || 'Utilisateur'} • {appStoreUser.sport || 'Sport'} • Membre depuis {appStoreUser.joinDate || 'récemment'}
-              </p>
-            </div>
-          </div>
-          <button
+      <UniformHeader 
+        title="Profil"
+        showBackButton={true}
+        gradient={true}
+        rightContent={
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setIsEditing(!isEditing)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+            className="text-white hover:bg-white/20"
           >
-            <PenTool size={16} />
-            <span>{isEditing ? 'Annuler' : 'Modifier'}</span>
-          </button>
-        </div>
+            {isEditing ? <X className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
+          </Button>
+        }
+      />
 
-        {/* Insights Personnalisés */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-800">Vos Insights Personnalisés</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {personalizedInsights.map((insight, index) => (
-              <InsightCard key={index} insight={insight} />
-            ))}
-          </div>
-        </div>
+      <div className="p-4 space-y-6">
+        {/* Carte profil principal */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Informations personnelles</span>
+              {isEditing && (
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={saving}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={saving}
+                  >
+                    {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+                  </Button>
+                </div>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <UserIcon className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1">
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label htmlFor="first_name">Prénom</Label>
+                        <Input
+                          id="first_name"
+                          value={editData.first_name || ''}
+                          onChange={(e) => setEditData({...editData, first_name: e.target.value})}
+                          placeholder="Prénom"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="last_name">Nom</Label>
+                        <Input
+                          id="last_name"
+                          value={editData.last_name || ''}
+                          onChange={(e) => setEditData({...editData, last_name: e.target.value})}
+                          placeholder="Nom"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <h2 className="text-xl font-semibold">
+                      {userProfile.first_name || userProfile.full_name?.split(' ')[0] || ''} {userProfile.last_name || userProfile.full_name?.split(' ')[1] || ''}
+                    </h2>
+                    <p className="text-gray-600">{userProfile.email}</p>
+                  </div>
+                )}
+              </div>
+            </div>
 
-        {/* Section Profil Sportif */}
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center">
-              <span className="mr-3 text-2xl">{sportConfig.emoji}</span> Profil Sportif
-            </h2>
-          </div>
-
-          {isEditing ? (
-            // --- MODE ÉDITION ---
-            <div className="space-y-4">
+            {isEditing ? (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sport Principal</label>
-                <select 
-                  name="sport" 
-                  value={formValues.sport} 
-                  onChange={handleChange} 
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-                >
-                  {Object.entries(sportsDetailData).map(([key, config]) => (
-                    <option key={key} value={key}>{config.name}</option>
-                  ))}
-                </select>
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  value={editData.bio || ''}
+                  onChange={(e) => setEditData({...editData, bio: e.target.value})}
+                  placeholder="Parlez-nous de vous..."
+                  rows={3}
+                />
+              </div>
+            ) : (
+              userProfile.bio && (
+                <p className="text-gray-700">{userProfile.bio}</p>
+              )
+            )}
+
+            <div className="grid grid-cols-2 gap-4 pt-4">
+              <div className="text-center">
+                <Calendar className="w-5 h-5 mx-auto text-gray-600 mb-1" />
+                <p className="text-sm text-gray-600">Inscrit le</p>
+                <p className="font-semibold">{userProfile.created_at ? formatDate(userProfile.created_at) : 'Date inconnue'}</p>
+              </div>
+              <div className="text-center">
+                <Target className="w-5 h-5 mx-auto text-gray-600 mb-1" />
+                <p className="text-sm text-gray-600">Objectif</p>
+                <p className="font-semibold">{userProfile.fitness_goal || 'Non spécifié'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Statistiques */}
+        {userStats && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="w-5 h-5" />
+                <span>Statistiques</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <Flame className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                  <p className="text-sm text-gray-600">Streak actuelle</p>
+                  <p className="text-2xl font-bold text-blue-600">{userStats.current_streak}</p>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <Star className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                  <p className="text-sm text-gray-600">Niveau</p>
+                  <p className="text-2xl font-bold text-purple-600">{userStats.level}</p>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <Dumbbell className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                  <p className="text-sm text-gray-600">Workouts</p>
+                  <p className="text-2xl font-bold text-green-600">{userStats.total_workouts}</p>
+                </div>
+                <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                  <Trophy className="w-8 h-8 mx-auto text-yellow-600 mb-2" />
+                  <p className="text-sm text-gray-600">Badges</p>
+                  <p className="text-2xl font-bold text-yellow-600">{userStats.badges_earned}</p>
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Position/Spécialité</label>
-                <select 
-                  name="sport_position" 
-                  value={formValues.sport_position} 
-                  onChange={handleChange} 
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Sélectionner une position</option>
-                  {sportConfig.positions.map(pos => (
-                    <option key={pos} value={pos}>{pos}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Niveau</label>
-                <select 
-                  name="sport_level" 
-                  value={formValues.sport_level} 
-                  onChange={handleChange} 
-                  className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="recreational">Loisir</option>
-                  <option value="amateur_competitive">Amateur compétitif</option>
-                  <option value="semi_professional">Semi-professionnel</option>
-                  <option value="professional">Professionnel</option>
-                </select>
-              </div>
-
-              <div>
-                <h3 className="text-md font-semibold text-gray-800 mt-4 mb-2">Statistiques de Performance</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {sportConfig.specificStats.map(stat => (
-                    <div key={stat.key}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {stat.label} ({stat.unit})
-                      </label>
-                      <input
-                        type="number"
-                        name={stat.key}
-                        value={formValues.sport_specific_stats?.[stat.key] || ''}
-                        onChange={handleStatChange}
-                        className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
-                        placeholder="0"
-                      />
-                    </div>
-                  ))}
+              {/* Barre de progression d'expérience */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Expérience</span>
+                  <span className="text-sm text-gray-600">
+                    {userStats.experience_points} XP
+                  </span>
                 </div>
-              </div>
-
-              <button
-                onClick={handleSave}
-                className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors"
-              >
-                Sauvegarder les modifications
-              </button>
-            </div>
-          ) : (
-            // --- MODE AFFICHAGE ---
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1">
-                <SportBadge />
-              </div>
-              <div className="lg:col-span-2 space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-3">Statistiques de Performance</h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {sportConfig.specificStats.map(stat => (
-                      <StatCard key={stat.key} stat={stat} />
-                    ))}
-                  </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
+                    style={{ 
+                      width: `${((userStats.experience_points % 1000) / 1000) * 100}%` 
+                    }}
+                  />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-2">Conseil du Coach</h3>
-                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                    <p className="text-sm text-blue-800">{sportConfig.profileTip}</p>
-                  </div>
-                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {getExperienceForNextLevel(userStats.experience_points)} XP pour le niveau {getLevel(userStats.experience_points) + 1}
+                </p>
               </div>
-            </div>
-          )}
-        </div>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Informations Générales */}
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Informations Générales</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Badges */}
+        <BadgeDisplay className="w-full" maxDisplay={5} />
+
+        {/* Informations du profil sportif */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Dumbbell className="w-5 h-5" />
+              <span>Profil sportif</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Calendar className="text-gray-500" size={20} />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Sport principal</p>
+                  <p className="font-semibold">{userProfile.sport_name || userProfile.sport || 'Non spécifié'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Niveau</p>
+                  <p className="font-semibold">{userProfile.sport_level || 'Non spécifié'}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Position</p>
+                  <p className="font-semibold">{userProfile.sport_position || 'Non spécifié'}</p>
+                </div>
                 <div>
                   <p className="text-sm text-gray-600">Âge</p>
-                  <p className="font-semibold text-gray-800">{appStoreUser.age || 'Non défini'} ans</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <UserIcon className="text-gray-500" size={20} />
-                <div>
-                  <p className="text-sm text-gray-600">Genre</p>
-                  <p className="font-semibold text-gray-800">
-                    {appStoreUser.gender === 'male' ? 'Homme' : appStoreUser.gender === 'female' ? 'Femme' : 'Non défini'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Clock className="text-gray-500" size={20} />
-                <div>
-                  <p className="text-sm text-gray-600">Temps disponible</p>
-                  <p className="font-semibold text-gray-800">{appStoreUser.available_time_per_day || 'Non défini'} min/jour</p>
+                  <p className="font-semibold">{userProfile.age ? `${userProfile.age} ans` : 'Non spécifié'}</p>
                 </div>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Target className="text-gray-500" size={20} />
-                <div>
-                  <p className="text-sm text-gray-600">Objectifs principaux</p>
-                  <p className="font-semibold text-gray-800">
-                    {appStoreUser.primary_goals?.join(', ') || 'Non définis'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Flame className="text-gray-500" size={20} />
-                <div>
-                  <p className="text-sm text-gray-600">Calories quotidiennes</p>
-                  <p className="font-semibold text-gray-800">{appStoreUser.daily_calories || 'Non calculées'} kcal</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Star className="text-gray-500" size={20} />
-                <div>
-                  <p className="text-sm text-gray-600">Expérience fitness</p>
-                  <p className="font-semibold text-gray-800">
-                    {appStoreUser.fitness_experience || 'Non définie'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Progression et Réalisations */}
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <Award className="mr-2 text-purple-600" />
-            Votre Progression
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-white rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">{appStoreUser.level || 1}</div>
-              <div className="text-sm text-gray-600">Niveau</div>
-            </div>
-            <div className="text-center p-4 bg-white rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">{appStoreUser.totalPoints || 0}</div>
-              <div className="text-sm text-gray-600">Points XP</div>
-            </div>
-            <div className="text-center p-4 bg-white rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {appStoreUser.active_modules?.length || 0}/4
-              </div>
-              <div className="text-sm text-gray-600">Modules Actifs</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Système de Badges */}
-        <BadgeSystem showProgress={true} compact={false} />
-
-        {/* Contrôles PWA et Mode Hors Ligne */}
-        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border border-blue-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <Trophy className="mr-2 text-blue-600" />
-            Application
-          </h2>
-          <PWAControls />
-        </div>
-
-        {/* Gestion de la Confidentialité */}
-        <PrivacyManager />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 };
 
-export default Profile;
+export default ProfilePage;

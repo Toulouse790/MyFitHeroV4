@@ -11,7 +11,7 @@ import { LIFESTYLE_OPTIONS } from '@/data/onboardingData';
 
 interface PersonalInfo {
   age: number;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   lifestyle: 'student' | 'office_worker' | 'physical_job' | 'retired';
   availableTimePerDay: number;
 }
@@ -43,7 +43,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
       case 0: // Age
         return formData.age >= 13 && formData.age <= 100;
       case 1: // Gender
-        return ['male', 'female', 'other'].includes(formData.gender);
+        return ['male', 'female'].includes(formData.gender);
       case 2: // Lifestyle
         return LIFESTYLE_OPTIONS.some(option => option.id === formData.lifestyle);
       case 3: // Time
@@ -126,12 +126,11 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
             <div className="space-y-3">
               {[
                 { id: 'male', label: 'Homme', emoji: '👨' },
-                { id: 'female', label: 'Femme', emoji: '👩' },
-                { id: 'other', label: 'Autre', emoji: '🧑' }
+                { id: 'female', label: 'Femme', emoji: '👩' }
               ].map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setFormData({...formData, gender: option.id as 'male' | 'female' | 'other'})}
+                  onClick={() => setFormData({...formData, gender: option.id as 'male' | 'female'})}
                   className={cn(
                     "w-full p-4 rounded-lg border-2 text-left transition-all duration-200 hover:shadow-md",
                     formData.gender === option.id
@@ -263,11 +262,14 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
             const Icon = step.icon;
             return (
               <div key={step.id} className="flex items-center">
+                {/* eslint-disable-next-line tailwindcss/no-contradicting-classname */}
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200",
-                  index < currentStep ? "bg-blue-500 border-blue-500 text-white" :
-                  index === currentStep ? "bg-blue-50 border-blue-500 text-blue-600" :
-                  "bg-gray-100 border-gray-300 text-gray-400"
+                  {
+                    "bg-blue-500 border-blue-500 text-white": index < currentStep,
+                    "bg-blue-50 border-blue-500 text-blue-600": index === currentStep,
+                    "bg-gray-100 border-gray-300 text-gray-400": index > currentStep
+                  }
                 )}>
                   {index < currentStep ? (
                     <Check className="h-5 w-5" />

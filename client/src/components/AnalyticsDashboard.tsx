@@ -16,7 +16,6 @@ import {
   type AnalyticsData,
   type PillarProgress,
   type PerformanceMetrics,
-  type ComparisonData,
   type DetailedInsight
 } from '@/services/analyticsService';
 
@@ -35,7 +34,6 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [multiPillarData, setMultiPillarData] = useState<AnalyticsData | null>(null);
   const [pillarProgress, setPillarProgress] = useState<PillarProgress[]>([]);
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
-  const [comparisonData, setComparisonData] = useState<ComparisonData | null>(null);
   const [insights, setInsights] = useState<DetailedInsight[]>([]);
   
   // États de contrôle
@@ -56,18 +54,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       setError(null);
 
       // Chargement parallèle de toutes les données analytics
-      const [multiData, progressData, metricsData, compData, insightsData] = await Promise.all([
+      const [multiData, progressData, metricsData, insightsData] = await Promise.all([
         analyticsService.getMultiPillarData(appStoreUser.id, selectedPeriod),
         analyticsService.getPillarProgress(appStoreUser.id),
         analyticsService.getPerformanceMetrics(appStoreUser.id),
-        analyticsService.getComparisonData(appStoreUser.id, 'week'),
         analyticsService.getDetailedInsights(appStoreUser.id)
       ]);
 
       setMultiPillarData(multiData);
       setPillarProgress(progressData);
       setPerformanceMetrics(metricsData);
-      setComparisonData(compData);
       setInsights(insightsData);
 
     } catch (err) {

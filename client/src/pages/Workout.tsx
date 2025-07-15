@@ -1,36 +1,18 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Clock, 
-  Flame, 
-  Target,
   ChevronRight,
   Search,
   Timer,
-  Star,
   Trophy,
   Award,
-  Dumbbell
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import PillarHeader from '@/components/PillarHeader';
 import AIIntelligence from '@/components/AIIntelligence';
+import { UniformHeader } from '@/components/UniformHeader';
+import { WorkoutCard, WorkoutInterface } from '@/components/WorkoutCard';
 
 // --- TYPES ---
 type Sport = 'basketball' | 'football' | 'american_football' | 'tennis' | 'rugby' | 'volleyball' | 'swimming' | 'running' | 'cycling' | 'musculation';
-
-interface WorkoutInterface {
-  id: number;
-  title: string;
-  duration: number;
-  difficulty: 'Débutant' | 'Intermédiaire' | 'Avancé';
-  calories: number;
-  category: string;
-  rating: number;
-  participants: number;
-  tags: string[];
-  description: string;
-  exerciseList: string[];
-}
 
 interface CategoryInterface {
   id: string;
@@ -42,7 +24,7 @@ interface SportConfig {
   emoji: string;
   motivationalMessage: string;
   categories: CategoryInterface[];
-  workouts: Omit<WorkoutInterface, 'id' | 'rating' | 'participants'>[];
+  workouts: Omit<WorkoutInterface, 'id' | 'rating' | 'participants' | 'emoji'>[];
 }
 
 // --- CONFIGURATION PERSONNALISÉE PAR SPORT ---
@@ -213,6 +195,7 @@ const Workout: React.FC = () => {
         tags: personalizedTags,
         rating: Math.round((4.2 + Math.random() * 0.6) * 10) / 10,
         participants: Math.floor(Math.random() * 1200) + 300,
+        emoji: config.emoji,
       };
     });
     
@@ -235,15 +218,6 @@ const Workout: React.FC = () => {
     }), [activeFilter, searchQuery, personalizedData.workouts]);
 
   // --- HELPER FUNCTIONS ---
-  const getDifficultyColor = (difficulty: string): string => {
-    switch (difficulty) {
-      case 'Débutant': return 'text-green-600 bg-green-100';
-      case 'Intermédiaire': return 'text-yellow-600 bg-yellow-100';
-      case 'Avancé': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
-  
   const toTitleCase = (str: string) => str.replace(/\b\w/g, char => char.toUpperCase());
 
   // --- MESSAGES PERSONNALISÉS ---
@@ -278,79 +252,14 @@ const Workout: React.FC = () => {
 
   const stats = getPersonalizedStats();
 
+  // Gestionnaire pour démarrer un entraînement
+  const handleStartWorkout = (workout: WorkoutInterface) => {
+    console.log('Starting workout:', workout.title);
+    // Ici on pourrait rediriger vers une page d'entraînement détaillée
+    // ou ouvrir un modal avec les exercices
+  };
+
   // --- COMPOSANTS ---
-  const WorkoutCard: React.FC<{ workout: WorkoutInterface }> = ({ workout }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="text-4xl">{personalizedData.emoji}</div>
-          <div className="flex items-center space-x-1">
-            <Star size={14} className="text-yellow-500 fill-current" />
-            <span className="text-sm font-medium text-gray-700">{workout.rating}</span>
-            <span className="text-xs text-gray-500">({workout.participants})</span>
-          </div>
-        </div>
-        
-        <h3 className="font-bold text-gray-800 text-lg mb-1">{workout.title}</h3>
-        <p className="text-gray-600 text-sm mb-4">{workout.description}</p>
-        
-        <div className="mb-4">
-          <h4 className="font-semibold text-xs text-gray-500 uppercase mb-2">Exercices Clés</h4>
-          <div className="flex flex-wrap gap-2">
-            {workout.exerciseList.slice(0, 4).map((exercise, index) => (
-              <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
-                {exercise}
-              </span>
-            ))}
-            {workout.exerciseList.length > 4 && (
-              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-md">
-                +{workout.exerciseList.length - 4} autres
-              </span>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-1 mb-4">
-          {workout.tags.map((tag, index) => {
-            const isPersonalTag = tag === appStoreUser.sport_position || 
-                                 tag === 'Perte poids' || 
-                                 tag === 'Masse musculaire';
-            return (
-              <span 
-                key={index} 
-                className={`px-2 py-1 text-xs rounded-full ${
-                  isPersonalTag 
-                    ? 'bg-blue-100 text-blue-700 font-medium border border-blue-200' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                {tag}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-      
-      <div className="bg-gray-50/70 px-4 py-3 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 text-xs text-gray-600">
-            <span className="flex items-center">
-              <Clock size={14} className="mr-1 text-gray-400" /> {workout.duration}min
-            </span>
-            <span className="flex items-center">
-              <Flame size={14} className="mr-1 text-orange-400" /> {workout.calories} kcal
-            </span>
-            <span className="flex items-center">
-              <Target size={14} className="mr-1 text-blue-400" /> {workout.exerciseList.length} exos
-            </span>
-          </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(workout.difficulty)}`}>
-            {workout.difficulty}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
 
   // --- RENDER PRINCIPAL ---
   return (
@@ -358,18 +267,14 @@ const Workout: React.FC = () => {
       <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
         
         {/* Header Uniforme */}
-        <PillarHeader
-          pillar="workout"
+        <UniformHeader
           title={toTitleCase(appStoreUser.sport?.replace('_', ' ') || 'Fitness')}
-          icon={Dumbbell}
-          color="blue"
-          bgGradient="from-blue-500 to-purple-500"
-          emoji={personalizedData.emoji}
-          motivationalMessage={getMotivationalMessage()}
-          currentValue={2}
-          targetValue={stats.workouts}
-          unit="séances"
-          showAIRecommendation={true}
+          subtitle={`${personalizedData.emoji} ${getMotivationalMessage()}`}
+          showBackButton={true}
+          showSettings={true}
+          showNotifications={true}
+          showProfile={true}
+          gradient={true}
         />
 
         {/* Stats Personnalisées */}
@@ -455,7 +360,11 @@ const Workout: React.FC = () => {
           {filteredWorkouts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
               {filteredWorkouts.map((workout) => (
-                <WorkoutCard key={workout.id} workout={workout} />
+                <WorkoutCard 
+                  key={workout.id} 
+                  workout={workout} 
+                  onStartWorkout={handleStartWorkout}
+                />
               ))}
             </div>
           ) : (

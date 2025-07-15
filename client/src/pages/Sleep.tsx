@@ -17,10 +17,8 @@ import {
   Eye
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
-import { useToast } from '@/hooks/use-toast';
-import PillarHeader from '@/components/PillarHeader';
 import AIIntelligence from '@/components/AIIntelligence';
-import { supabase } from '@/lib/supabase';
+import { UniformHeader } from '@/components/UniformHeader';
 
 // --- TYPES ---
 type SportCategory = 'contact' | 'endurance' | 'precision' | 'team';
@@ -114,7 +112,6 @@ const sportsSleepData: Record<SportCategory, SportSleepConfig> = {
 const Sleep: React.FC = () => {
   // --- DONNÉES RÉELLES DU STORE ---
   const { appStoreUser } = useAppStore();
-  const { toast } = useToast();
 
   // --- MAPPING SPORT VERS CATÉGORIE ---
   const getSportCategory = (sport: string): SportCategory => {
@@ -174,51 +171,8 @@ const Sleep: React.FC = () => {
   const sleepPercentage = (currentSleepHours / personalizedSleepGoal) * 100;
   const sleepDeficit = Math.max(0, personalizedSleepGoal - currentSleepHours);
 
-  const today = new Date().toISOString().split('T')[0];
-
   // --- FONCTIONS DE SAUVEGARDE ---
-  const handleLogSleep = async (hours: number, quality: number, bedTime: string, wakeTime: string) => {
-    try {
-      // Sauvegarde dans Supabase
-      const { error } = await supabase
-        .from('sleep_sessions')
-        .insert({
-          user_id: appStoreUser?.id,
-          sleep_duration_hours: hours,
-          sleep_quality: quality,
-          bed_time: bedTime,
-          wake_time: wakeTime,
-          date: today,
-          logged_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
-      // Mise à jour des stats quotidiennes
-      const { error: statsError } = await supabase
-        .from('daily_stats')
-        .upsert({
-          user_id: appStoreUser?.id,
-          date: today,
-          sleep_duration_minutes: hours * 60,
-          sleep_quality: quality,
-          updated_at: new Date().toISOString()
-        });
-
-      if (statsError) throw statsError;
-
-      toast({
-        title: "Sommeil enregistré !",
-        description: `${hours}h de sommeil (qualité: ${quality}%) sauvegardées.`,
-      });
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les données de sommeil.",
-      });
-    }
-  };
+  // Note: handleLogSleep sera implémenté dans une future version
 
   // --- COMPOSANTS ---
   const TipCard = ({ tip }: { tip: any }) => {
@@ -273,18 +227,14 @@ const Sleep: React.FC = () => {
       <div className="px-4 py-6 space-y-6">
         
         {/* Header Uniforme */}
-        <PillarHeader
-          pillar="sleep"
+        <UniformHeader
           title="Sommeil"
-          icon={Moon}
-          color="purple"
-          bgGradient="from-purple-500 to-pink-500"
-          emoji={sportConfig.emoji}
-          motivationalMessage={getPersonalizedMessage()}
-          currentValue={currentSleepHours}
-          targetValue={personalizedSleepGoal}
-          unit="h"
-          showAIRecommendation={true}
+          subtitle={`${sportConfig.emoji} ${getPersonalizedMessage()}`}
+          showBackButton={true}
+          showSettings={true}
+          showNotifications={true}
+          showProfile={true}
+          gradient={true}
         />
 
         {/* Résumé de la nuit avec Données Personnalisées */}

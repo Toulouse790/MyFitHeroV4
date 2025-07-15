@@ -2,11 +2,15 @@ export interface UserProfile {
   id: string;
   username?: string | null;
   full_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  bio?: string | null;
   email?: string;
   avatar_url?: string | null;
   age?: number | null;
   gender?: 'male' | 'female' | null;
   sport?: string | null;
+  sport_name?: string | null;
   sport_position?: string | null;
   sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
   lifestyle?: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
@@ -28,6 +32,8 @@ export interface UserProfile {
   name?: string;
   goal?: string;
   daily_calories?: number | null;
+  created_at?: string;
+  weight?: number | null;
 }
 
 // Type pour les données spécifiques au sport

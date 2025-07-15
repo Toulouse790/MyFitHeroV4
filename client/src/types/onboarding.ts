@@ -18,7 +18,7 @@ export interface OnboardingData {
   // Informations de base
   firstName: string;
   age: number;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   
   // Sport (si module sport activé)
   sport?: string;

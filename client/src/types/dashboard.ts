@@ -11,6 +11,16 @@ export interface SmartDashboardContext {
   personalizedTips: any[];
 }
 
+export interface PersonalizedWidget {
+  id: string;
+  title: string;
+  content: string;
+  icon: any;
+  color: string;
+  action?: string;
+  path?: string;
+}
+
 export interface DailyProgramDisplay {
   workout: {
     name: string;

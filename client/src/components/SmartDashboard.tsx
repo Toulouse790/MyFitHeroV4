@@ -32,6 +32,9 @@ import { UserProfile } from '@/types/user';
 import { useAnimateOnMount, useHaptic } from '@/hooks/useAnimations';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 import AIIntelligence from '@/components/AIIntelligence';
+import { DailyCheckIn } from '@/components/DailyCheckIn';
+import { BadgeDisplay } from '@/components/BadgeDisplay';
+import { StatsOverview } from '@/components/StatsOverview';
 
 interface SmartDashboardProps {
   userProfile?: SupabaseAuthUserType;
@@ -53,7 +56,7 @@ interface WebhookPayload {
   };
 }
 
-interface PersonalizedWidget {
+interface LocalPersonalizedWidget {
   id: string;
   title: string;
   content: string;
@@ -180,7 +183,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   }, []);
 
   const getSmartReminders = useCallback((profile: UserProfile | null, stats: DailyStats | null) => {
-    const reminders: PersonalizedWidget[] = [];
+    const reminders: LocalPersonalizedWidget[] = [];
     const firstName = profile?.username?.split(' ')[0] || 'Champion';
     
     // Reminders hyper-contextuels
@@ -732,6 +735,11 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           </div>
         )}
 
+        {/* Daily Check-in */}
+        <div className="mb-6">
+          <DailyCheckIn className="w-full" />
+        </div>
+
         {/* Programme du Jour - Version Ultra Détaillée */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           {loadingDailyStats ? (
@@ -859,6 +867,16 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
             </>
           )}
         </div>
+
+        {/* Statistiques Overview */}
+        <StatsOverview className="mb-6" />
+
+        {/* Badges récents */}
+        <BadgeDisplay 
+          className="mb-6" 
+          maxDisplay={3}
+          showProgress={false}
+        />
 
         {/* Chat IA Ultra-Personnalisé */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">

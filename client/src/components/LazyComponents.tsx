@@ -21,7 +21,7 @@ export const OptimizedSuspenseFallback = ({ text = "Chargement..." }: { text?: s
   <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
     <div className="relative">
       <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-      <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin absolute top-2 left-2 animate-pulse"></div>
+      <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin absolute top-2 left-2" style={{ animationDelay: '0.2s' }}></div>
     </div>
     <p className="mt-4 text-lg font-medium text-gray-600 animate-pulse">{text}</p>
     <p className="mt-1 text-sm text-gray-400">MyFitHero V4</p>

@@ -59,7 +59,7 @@ export interface OnboardingData {
   
   // Étape 2: Informations personnelles de base
   age?: number;
-  gender?: 'male' | 'female' | 'other';
+  gender?: 'male' | 'female';
   lifestyle?: 'student' | 'office_worker' | 'physical_job' | 'retired';
   availableTimePerDay?: number;
   

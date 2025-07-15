@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dumbbell,
   Target,
@@ -8,9 +8,7 @@ import {
   TrendingUp,
   Zap
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { SportProfileData } from '@/types/user';
 
 interface WorkoutPageProps {
   userProfile?: SupabaseAuthUserType;
@@ -33,9 +31,8 @@ interface Workout {
   exercises: Exercise[];
 }
 
-const WorkoutPage: React.FC<WorkoutPageProps> = ({ userProfile }) => {
-  const { appStoreUser } = useAppStore();
-  const [todayWorkout, setTodayWorkout] = useState<Workout>({
+const WorkoutPage: React.FC<WorkoutPageProps> = () => {
+  const [todayWorkout] = useState<Workout>({
     name: 'Entraînement du jour',
     type: 'Force',
     duration: 45,

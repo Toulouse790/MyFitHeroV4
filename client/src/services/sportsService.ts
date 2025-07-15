@@ -8,7 +8,7 @@ export interface Sport {
   icon?: string;
   emoji?: string;
   positions?: string[];
-  is_active?: boolean;
+  is_popular?: boolean; // Corrigé: is_active → is_popular
   created_at?: string;
   updated_at?: string;
 }
@@ -38,7 +38,7 @@ export class SportsService {
       const { data: sportsData, error } = await supabase
         .from('sports_library')
         .select('*')
-        .eq('is_active', true)
+        .eq('is_popular', true) // Corrigé: is_active → is_popular
         .order('name');
 
       if (error) {
@@ -86,7 +86,7 @@ export class SportsService {
         .from('sports_library')
         .select('*')
         .eq('id', sportId)
-        .eq('is_active', true)
+        .eq('is_popular', true) // Corrigé: is_active → is_popular
         .single();
 
       if (error || !sport) {
@@ -147,7 +147,7 @@ export class SportsService {
         .from('sports_library')
         .select('*')
         .ilike('name', `%${query}%`)
-        .eq('is_active', true)
+        .eq('is_popular', true) // Corrigé: is_active → is_popular
         .order('name')
         .limit(10);
 
