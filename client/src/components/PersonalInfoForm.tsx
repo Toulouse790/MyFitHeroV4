@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { User, Calendar, Clock, Briefcase, Check, Weight, Ruler, Star, X } from 'lucide-react';
+import { User, Calendar, Clock, Briefcase, Check, Weight, Star, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LIFESTYLE_OPTIONS } from '@/data/onboardingData';
 
@@ -476,14 +476,13 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
             const Icon = step.icon;
             return (
               <div key={step.id} className="flex items-center">
-                {/* eslint-disable-next-line tailwindcss/no-contradicting-classname */}
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200",
-                  {
-                    "bg-blue-500 border-blue-500 text-white": index < currentStep,
-                    "bg-blue-50 border-blue-500 text-blue-600": index === currentStep,
-                    "bg-gray-100 border-gray-300 text-gray-400": index > currentStep
-                  }
+                  index < currentStep 
+                    ? "bg-blue-500 border-blue-500 text-white"
+                    : index === currentStep 
+                    ? "bg-blue-50 border-blue-500 text-blue-600"
+                    : "bg-gray-100 border-gray-300 text-gray-400"
                 )}>
                   {index < currentStep ? (
                     <Check className="h-5 w-5" />
@@ -532,7 +531,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
           disabled={!validateCurrentStep()}
           className="flex items-center"
         >
-          {currentStep === steps.length - 1 ? 'Continuer' : 'Suivant'}
+          {currentStep === steps.length - 1 ? 'Terminer' : 'Suivant'}
         </Button>
       </div>
     </div>

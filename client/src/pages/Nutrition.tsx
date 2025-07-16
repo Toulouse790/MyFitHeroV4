@@ -152,12 +152,12 @@ const Nutrition: React.FC = () => {
     // Calories de base (peut venir du store ou être calculées)
     let baseCalories = appStoreUser.daily_calories || 2000;
     
-    // Si pas de calories calculées, utiliser une formule simple
-    if (!appStoreUser.daily_calories && appStoreUser.age && appStoreUser.gender) {
-      const weight = 70; // Poids moyen
-      const height = appStoreUser.gender === 'male' ? 175 : 165;
+    // Si pas de calories calculées, utiliser une formule avec vraies données
+    if (!appStoreUser.daily_calories && appStoreUser.age && appStoreUser.gender && appStoreUser.weight_kg && appStoreUser.height_cm) {
+      const weight = appStoreUser.weight_kg;
+      const height = appStoreUser.height_cm;
       
-      // BMR
+      // BMR avec vraies données
       const bmr = appStoreUser.gender === 'male'
         ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * appStoreUser.age)
         : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * appStoreUser.age);
@@ -171,6 +171,10 @@ const Nutrition: React.FC = () => {
       }[appStoreUser.lifestyle as string] || 1.4;
       
       baseCalories = Math.round(bmr * activityFactor);
+    } else if (!appStoreUser.daily_calories && (!appStoreUser.weight_kg || !appStoreUser.height_cm)) {
+      // Si données incomplètes, utiliser valeur conservatrice et alerter
+      console.warn('⚠️ Calcul nutritionnel avec données incomplètes');
+      baseCalories = 1800; // Valeur conservatrice
     }
 
     // Ajustements selon objectifs

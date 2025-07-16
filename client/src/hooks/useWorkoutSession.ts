@@ -1,6 +1,7 @@
 // client/src/hooks/useWorkoutSession.ts
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from './use-toast';
+import { useAppStore } from '@/stores/useAppStore';
 
 export interface WorkoutSession {
   id: string;
@@ -34,14 +35,15 @@ export const useWorkoutSession = () => {
   const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const { toast } = useToast();
+  const appStoreUser = useAppStore((state) => state.appStoreUser);
 
   // Calculer les calories brûlées (estimation basique)
   const calculateCalories = useCallback((durationMinutes: number): number => {
-    // Formule basique : poids x MET x durée (valeur par défaut 70kg)
-    const weight = 70;
+    // Utiliser le poids réel de l'utilisateur ou valeur par défaut
+    const weight = appStoreUser?.weight_kg || 70;
     const metValue = 6; // MET moyen pour l'entraînement
     return Math.round(weight * metValue * (durationMinutes / 60));
-  }, []);
+  }, [appStoreUser?.weight_kg]);
 
   // Démarrer une nouvelle session
   const startSession = useCallback((workoutName: string, targetDuration: number = 30) => {

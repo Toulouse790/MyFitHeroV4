@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Droplets,
   Plus,
@@ -164,9 +164,42 @@ const Hydration: React.FC = () => {
 
   // --- STATES & DONNÉES ---
   const [selectedAmount] = useState(250);
-  const [currentMl, setCurrentMl] = useState(800); // Simulation - à remplacer par vraies données
+  const [currentMl, setCurrentMl] = useState(0); // Commencer à 0 et charger depuis la base
+  const [isLoading, setIsLoading] = useState(true);
 
   const todayDate = new Date().toISOString().split('T')[0];
+
+  // Charger les données d'hydratation au démarrage
+  useEffect(() => {
+    const loadHydrationData = async () => {
+      if (!appStoreUser?.id) return;
+
+      try {
+        setIsLoading(true);
+        
+        // Charger les données du jour
+        const { data: dailyStats, error } = await supabase
+          .from('daily_stats')
+          .select('water_intake_ml')
+          .eq('user_id', appStoreUser.id)
+          .eq('date', todayDate)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Erreur lors du chargement:', error);
+          return;
+        }
+
+        setCurrentMl(dailyStats?.water_intake_ml || 0);
+      } catch (error) {
+        console.error('Erreur lors du chargement des données d\'hydratation:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadHydrationData();
+  }, [appStoreUser?.id, todayDate]);
 
   // Synchronisation temps réel
   const { } = useRealtimeSync({
@@ -265,6 +298,17 @@ const Hydration: React.FC = () => {
   };
 
   // --- RENDER ---
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Droplets className="h-12 w-12 mx-auto mb-4 text-blue-600 animate-pulse" />
+          <p className="text-gray-600">Chargement de votre hydratation...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6">

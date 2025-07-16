@@ -34,6 +34,8 @@ export interface AppUser {
   injuries?: string[];
   motivation?: string;
   fitness_goal?: string;
+  weight_kg?: number | null;
+  height_cm?: number | null;
   
   // Champs calculés locaux
   name?: string;
@@ -56,10 +58,10 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
   // Valeurs par défaut
   let baseCalories = user.daily_calories || 2000;
   
-  // Calcul BMR si on a les données
-  if (!user.daily_calories && user.age && user.gender) {
-    const weight = 70; // Poids moyen par défaut
-    const height = user.gender === 'male' ? 175 : 165;
+  // Calcul BMR si on a les données COMPLÈTES
+  if (!user.daily_calories && user.age && user.gender && user.weight_kg && user.height_cm) {
+    const weight = user.weight_kg;
+    const height = user.height_cm;
     
     // Formule Mifflin-St Jeor
     const bmr = user.gender === 'male'
@@ -76,6 +78,10 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
     
     const activityFactor = activityFactors[user.lifestyle || ''] || 1.4;
     baseCalories = Math.round(bmr * activityFactor);
+  } else if (!user.daily_calories && (!user.weight_kg || !user.height_cm)) {
+    // Si pas de poids/taille, utiliser des valeurs conservatrices
+    console.warn('⚠️ Calcul calorique avec données incomplètes - demander à l\'utilisateur de compléter son profil');
+    baseCalories = 1800; // Valeur conservatrice
   }
 
   // Ajustements selon les objectifs
