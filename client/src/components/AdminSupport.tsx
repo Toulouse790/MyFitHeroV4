@@ -8,7 +8,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { 
   MessageCircle, Clock, CheckCircle, AlertCircle, 
-  Search, Filter, Reply, User, Calendar
+  Search, Reply, User, Calendar
 } from 'lucide-react';
 
 interface SupportTicket {

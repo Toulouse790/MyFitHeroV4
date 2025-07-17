@@ -7,7 +7,7 @@ import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { 
-  Bell, Send, Users, Calendar, Target, 
+  Bell, Send, Users, Target, 
   Mail, MessageCircle, Smartphone, Settings
 } from 'lucide-react';
 

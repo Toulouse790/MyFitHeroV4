@@ -157,7 +157,7 @@ export class AnalyticsService {
   static async uploadMealPhoto(mealId: string, file: File) {
     // Upload vers Supabase Storage
     const fileName = `meals/${mealId}/${Date.now()}_${file.name}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('meal-photos')
       .upload(fileName, file);
     

@@ -21,9 +21,6 @@ import AIIntelligence from '@/components/AIIntelligence';
 import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { UniformHeader } from '@/components/UniformHeader';
-import { useUnitPreferences } from '@/hooks/useUnitPreferences';
-import { UnitDisplay } from '@/components/UnitDisplay';
-import { convertLiquid } from '@/lib/unitConversions';
 
 // --- TYPES & INTERFACES DE PERSONNALISATION ---
 
