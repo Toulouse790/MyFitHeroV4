@@ -8,8 +8,8 @@ import { Textarea } from './ui/textarea';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { 
-  Settings, Database, Mail, Bell, Shield, 
-  Globe, Palette, Code, Server, Key
+  Settings, Mail, Shield, 
+  Palette, Server, Key
 } from 'lucide-react';
 
 interface AppSettings {
@@ -153,7 +153,7 @@ export const AdminSettings = () => {
 
   const updateSetting = (path: string, value: any) => {
     setSettings(prev => {
-      const newSettings = { ...prev };
+      const newSettings = { ...prev } as any;
       const keys = path.split('.');
       let current = newSettings;
       
