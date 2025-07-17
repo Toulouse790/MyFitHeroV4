@@ -16,6 +16,7 @@ import { UniformHeader } from '@/components/UniformHeader';
 import { BadgeDisplay } from '@/components/BadgeDisplay';
 import { UserDataService } from '@/services/userDataService';
 import { UserProfile } from '@/types/user';
+import { I18nDemo } from '@/components/I18nDemo';
 
 interface ProfilePageProps {}
 
@@ -383,6 +384,9 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Démo i18n et conversion d'unités */}
+        <I18nDemo />
       </div>
     </div>
   );

@@ -178,6 +178,88 @@ export const useWorkoutSession = () => {
     }
   }, [currentSession]);
 
+  // Mettre à jour un set spécifique d'un exercice
+  const updateExerciseSet = useCallback((exerciseId: string, setIndex: number, updates: Partial<ExerciseSet>) => {
+    if (currentSession) {
+      const updatedSession = {
+        ...currentSession,
+        exercises: currentSession.exercises.map(exercise => {
+          if (exercise.id === exerciseId) {
+            const updatedSets = exercise.sets.map((set, index) => {
+              if (index === setIndex) {
+                return { ...set, ...updates };
+              }
+              return set;
+            });
+            return { ...exercise, sets: updatedSets };
+          }
+          return exercise;
+        })
+      };
+
+      setCurrentSession(updatedSession);
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(updatedSession));
+    }
+  }, [currentSession]);
+
+  // Marquer un exercice comme terminé
+  const completeExercise = useCallback((exerciseId: string) => {
+    if (currentSession) {
+      const updatedSession = {
+        ...currentSession,
+        exercises: currentSession.exercises.map(exercise => {
+          if (exercise.id === exerciseId) {
+            return { ...exercise, completed: true };
+          }
+          return exercise;
+        })
+      };
+
+      setCurrentSession(updatedSession);
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(updatedSession));
+    }
+  }, [currentSession]);
+
+  // Récupérer les données de la dernière séance d'un workout spécifique
+  const getLastSessionData = useCallback((workoutName: string): WorkoutSession | null => {
+    const sessionHistory = JSON.parse(localStorage.getItem('workoutHistory') || '[]');
+    
+    // Trouver la dernière séance complétée avec le même nom
+    const lastSession = sessionHistory
+      .filter((session: WorkoutSession) => 
+        session.name === workoutName && 
+        session.status === 'completed'
+      )
+      .sort((a: WorkoutSession, b: WorkoutSession) => 
+        new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+      )[0];
+
+    return lastSession || null;
+  }, []);
+
+  // Préremplir les exercices avec les données de la dernière séance
+  const loadExercisesFromLastSession = useCallback((workoutName: string, defaultExercises: Omit<WorkoutExercise, 'id'>[]) => {
+    const lastSession = getLastSessionData(workoutName);
+    
+    if (lastSession && lastSession.exercises.length > 0) {
+      // Utiliser les données de la dernière séance
+      const exercisesFromLastSession = lastSession.exercises.map(exercise => ({
+        ...exercise,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9), // Nouvel ID pour cette session
+        completed: false, // Réinitialiser le statut de completion
+        sets: exercise.sets.map(set => ({ ...set, completed: false })) // Réinitialiser les sets
+      }));
+      
+      return exercisesFromLastSession;
+    }
+    
+    // Si pas de données précédentes, utiliser les exercices par défaut
+    return defaultExercises.map(exercise => ({
+      ...exercise,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+    }));
+  }, [getLastSessionData]);
+
   // Récupérer l'historique des sessions
   const getSessionHistory = useCallback((): WorkoutSession[] => {
     return JSON.parse(localStorage.getItem('workoutHistory') || '[]');
@@ -203,6 +285,10 @@ export const useWorkoutSession = () => {
     cancelSession,
     addExercise,
     updateSessionDuration,
-    getSessionHistory
+    getSessionHistory,
+    updateExerciseSet,
+    completeExercise,
+    getLastSessionData,
+    loadExercisesFromLastSession
   };
 };

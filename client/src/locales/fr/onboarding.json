@@ -1,0 +1,60 @@
+{
+  "welcome": {
+    "title": "Bienvenue sur MyFitHero",
+    "subtitle": "Votre compagnon fitness personnel",
+    "getStarted": "Commencer",
+    "tagline": "Transformez votre parcours fitness avec des conseils alimentés par l'IA"
+  },
+  "steps": {
+    "age": {
+      "title": "Quel âge avez-vous ?",
+      "subtitle": "Cela nous aide à personnaliser vos programmes",
+      "tip": "Le métabolisme change avec l'âge"
+    },
+    "gender": {
+      "title": "Quel est votre genre ?",
+      "subtitle": "Pour des recommandations plus précises",
+      "tip": "Différences hormonales importantes",
+      "options": {
+        "male": "Homme",
+        "female": "Femme"
+      }
+    },
+    "morphology": {
+      "title": "Votre morphologie",
+      "subtitle": "Nous avons besoin de ces informations pour des calculs précis",
+      "tip": "Mesures précises = calculs justes",
+      "weight": "Poids (kg)",
+      "height": "Taille (cm)",
+      "weightPlaceholder": "70",
+      "heightPlaceholder": "175"
+    },
+    "lifestyle": {
+      "title": "Quel est votre style de vie ?",
+      "subtitle": "Cela influence vos besoins nutritionnels et d'entraînement",
+      "tip": "Influence les besoins énergétiques quotidiens",
+      "options": {
+        "student": "Étudiant",
+        "office_worker": "Travailleur de bureau",
+        "physical_job": "Travail physique",
+        "retired": "Retraité"
+      }
+    },
+    "time": {
+      "title": "Temps disponible par jour",
+      "subtitle": "Combien de temps pouvez-vous consacrer à votre santé ?",
+      "tip": "Optimise le programme selon la disponibilité",
+      "labels": {
+        "quick": "Rapide",
+        "optimal": "Optimal",
+        "complete": "Complet",
+        "extended": "Étendu",
+        "intensive": "Intensif",
+        "dedicated": "Dévoué"
+      }
+    }
+  },
+  "progress": {
+    "step": "Étape {{current}} sur {{total}}"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "welcome": {
+    "title": "Welcome to MyFitHero",
+    "subtitle": "Your personal fitness companion",
+    "getStarted": "Get Started",
+    "tagline": "Transform your fitness journey with AI-powered guidance"
+  },
+  "steps": {
+    "age": {
+      "title": "How old are you?",
+      "subtitle": "This helps us personalize your programs",
+      "tip": "Metabolism changes with age"
+    },
+    "gender": {
+      "title": "What is your gender?",
+      "subtitle": "For more accurate recommendations",
+      "tip": "Important hormonal differences",
+      "options": {
+        "male": "Male",
+        "female": "Female"
+      }
+    },
+    "morphology": {
+      "title": "Your Body Stats",
+      "subtitle": "We need this information for accurate calculations",
+      "tip": "Precise measurements = accurate results",
+      "weight": "Weight (lbs)",
+      "height": "Height (ft/in)",
+      "weightPlaceholder": "155",
+      "heightPlaceholder": "5'9\""
+    },
+    "lifestyle": {
+      "title": "What's your lifestyle?",
+      "subtitle": "This influences your nutritional and training needs",
+      "tip": "Affects daily energy requirements",
+      "options": {
+        "student": "Student",
+        "office_worker": "Office Worker",
+        "physical_job": "Physical Job",
+        "retired": "Retired"
+      }
+    },
+    "time": {
+      "title": "Available Time Per Day",
+      "subtitle": "How much time can you dedicate to your health?",
+      "tip": "Optimize program based on availability",
+      "labels": {
+        "quick": "Quick",
+        "optimal": "Optimal",
+        "complete": "Complete",
+        "extended": "Extended",
+        "intensive": "Intensive",
+        "dedicated": "Dedicated"
+      }
+    }
+  },
+  "progress": {
+    "step": "Step {{current}} of {{total}}"
+  }
+}

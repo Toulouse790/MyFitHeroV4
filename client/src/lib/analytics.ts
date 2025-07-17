@@ -200,6 +200,198 @@ export class AnalyticsService {
     
     return { data, error };
   }
+
+  // 📱 Synchronisation appareils connectés
+  static async saveWearableSteps(userId: string, steps: number, date: Date = new Date()) {
+    const { error } = await supabase
+      .from('wearable_steps')
+      .upsert({
+        user_id: userId,
+        steps,
+        date: date.toISOString().split('T')[0], // Format YYYY-MM-DD
+        synced_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id, date'
+      });
+    
+    if (error) console.error('Erreur sauvegarde steps:', error);
+    return { error };
+  }
+
+  static async saveHeartRateData(userId: string, heartRateReadings: number[], recordedAt: Date = new Date()) {
+    const records = heartRateReadings.map(rate => ({
+      user_id: userId,
+      heart_rate: rate,
+      recorded_at: recordedAt.toISOString(),
+      synced_at: new Date().toISOString()
+    }));
+
+    const { error } = await supabase
+      .from('heart_rate_logs')
+      .insert(records);
+    
+    if (error) console.error('Erreur sauvegarde heart rate:', error);
+    return { error };
+  }
+
+  static async saveSleepSession(userId: string, sleepData: {
+    startTime: Date;
+    endTime: Date;
+    duration: number;
+    quality: string;
+    deepSleepDuration?: number;
+    remSleepDuration?: number;
+    awakenings?: number;
+  }) {
+    const { error } = await supabase
+      .from('sleep_sessions')
+      .insert({
+        user_id: userId,
+        start_time: sleepData.startTime.toISOString(),
+        end_time: sleepData.endTime.toISOString(),
+        duration_minutes: sleepData.duration,
+        quality_score: sleepData.quality,
+        deep_sleep_minutes: sleepData.deepSleepDuration,
+        rem_sleep_minutes: sleepData.remSleepDuration,
+        awakenings_count: sleepData.awakenings,
+        synced_at: new Date().toISOString()
+      });
+    
+    if (error) console.error('Erreur sauvegarde sleep session:', error);
+    return { error };
+  }
+
+  static async saveWearableWorkout(userId: string, workoutData: {
+    type: string;
+    startTime: Date;
+    endTime: Date;
+    calories: number;
+    distance?: number;
+    source: 'apple_health' | 'google_fit' | 'manual';
+  }) {
+    const { error } = await supabase
+      .from('wearable_workouts')
+      .insert({
+        user_id: userId,
+        workout_type: workoutData.type,
+        start_time: workoutData.startTime.toISOString(),
+        end_time: workoutData.endTime.toISOString(),
+        calories_burned: workoutData.calories,
+        distance_meters: workoutData.distance,
+        data_source: workoutData.source,
+        synced_at: new Date().toISOString()
+      });
+    
+    if (error) console.error('Erreur sauvegarde wearable workout:', error);
+    return { error };
+  }
+
+  // 📊 Récupération des données wearables
+  static async getWearableSteps(userId: string, startDate: Date, endDate: Date) {
+    const { data, error } = await supabase
+      .from('wearable_steps')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', endDate.toISOString().split('T')[0])
+      .order('date', { ascending: true });
+    
+    return { data, error };
+  }
+
+  static async getHeartRateData(userId: string, startDate: Date, endDate: Date) {
+    const { data, error } = await supabase
+      .from('heart_rate_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('recorded_at', startDate.toISOString())
+      .lte('recorded_at', endDate.toISOString())
+      .order('recorded_at', { ascending: true });
+    
+    return { data, error };
+  }
+
+  static async getSleepSessions(userId: string, startDate: Date, endDate: Date) {
+    const { data, error } = await supabase
+      .from('sleep_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('start_time', startDate.toISOString())
+      .lte('end_time', endDate.toISOString())
+      .order('start_time', { ascending: true });
+    
+    return { data, error };
+  }
+
+  static async getWearableWorkouts(userId: string, startDate: Date, endDate: Date) {
+    const { data, error } = await supabase
+      .from('wearable_workouts')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('start_time', startDate.toISOString())
+      .lte('end_time', endDate.toISOString())
+      .order('start_time', { ascending: true });
+    
+    return { data, error };
+  }
+
+  // 📈 Statistiques wearables
+  static async getWearableStats(userId: string, days: number = 7) {
+    const endDate = new Date();
+    const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
+
+    const [stepsResult, heartRateResult, sleepResult] = await Promise.allSettled([
+      this.getWearableSteps(userId, startDate, endDate),
+      this.getHeartRateData(userId, startDate, endDate),
+      this.getSleepSessions(userId, startDate, endDate)
+    ]);
+
+    const stats = {
+      totalSteps: 0,
+      avgHeartRate: 0,
+      avgSleepDuration: 0,
+      avgSleepQuality: 0,
+      totalWorkouts: 0,
+      lastSync: null as Date | null
+    };
+
+    // Calculer les statistiques des pas
+    if (stepsResult.status === 'fulfilled' && stepsResult.value.data) {
+      stats.totalSteps = stepsResult.value.data.reduce((sum, record) => sum + record.steps, 0);
+    }
+
+    // Calculer les statistiques de fréquence cardiaque
+    if (heartRateResult.status === 'fulfilled' && heartRateResult.value.data) {
+      const heartRateData = heartRateResult.value.data;
+      if (heartRateData.length > 0) {
+        stats.avgHeartRate = heartRateData.reduce((sum, record) => sum + record.heart_rate, 0) / heartRateData.length;
+      }
+    }
+
+    // Calculer les statistiques de sommeil
+    if (sleepResult.status === 'fulfilled' && sleepResult.value.data) {
+      const sleepData = sleepResult.value.data;
+      if (sleepData.length > 0) {
+        stats.avgSleepDuration = sleepData.reduce((sum, record) => sum + record.duration_minutes, 0) / sleepData.length;
+        
+        // Calculer la qualité moyenne du sommeil (conversion text -> number)
+        const qualityScores = sleepData.map(record => {
+          switch (record.quality_score) {
+            case 'excellent': return 4;
+            case 'good': return 3;
+            case 'fair': return 2;
+            case 'poor': return 1;
+            default: return 2;
+          }
+        });
+        stats.avgSleepQuality = qualityScores.reduce((sum, score) => sum + score, 0) / qualityScores.length;
+      }
+    }
+
+    return stats;
+  }
+
+  // ...existing code...
 }
 
 // 🎛️ Hooks React pour utilisation facile
