@@ -169,35 +169,36 @@ const Hydration: React.FC = () => {
 
   const todayDate = new Date().toISOString().split('T')[0];
 
+  // Fonction pour charger les données d'hydratation
+  const loadHydrationData = async () => {
+    if (!appStoreUser?.id) return;
+
+    try {
+      setIsLoading(true);
+      
+      // Charger les données du jour
+      const { data: dailyStats, error } = await supabase
+        .from('daily_stats')
+        .select('water_intake_ml')
+        .eq('user_id', appStoreUser.id)
+        .eq('date', todayDate)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erreur lors du chargement:', error);
+        return;
+      }
+
+      setCurrentMl(dailyStats?.water_intake_ml || 0);
+    } catch (error) {
+      console.error('Erreur lors du chargement des données d\'hydratation:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Charger les données d'hydratation au démarrage
   useEffect(() => {
-    const loadHydrationData = async () => {
-      if (!appStoreUser?.id) return;
-
-      try {
-        setIsLoading(true);
-        
-        // Charger les données du jour
-        const { data: dailyStats, error } = await supabase
-          .from('daily_stats')
-          .select('water_intake_ml')
-          .eq('user_id', appStoreUser.id)
-          .eq('date', todayDate)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Erreur lors du chargement:', error);
-          return;
-        }
-
-        setCurrentMl(dailyStats?.water_intake_ml || 0);
-      } catch (error) {
-        console.error('Erreur lors du chargement des données d\'hydratation:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadHydrationData();
   }, [appStoreUser?.id, todayDate]);
 
@@ -206,7 +207,10 @@ const Hydration: React.FC = () => {
     pillar: 'hydration',
     onUpdate: (payload) => {
       console.log('🔄 Hydratation mise à jour:', payload);
-      // Ici on pourrait recharger les données depuis Supabase
+      // Recharger les données uniquement si ce n'est pas une mise à jour locale
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        loadHydrationData();
+      }
     }
   });
 
@@ -219,6 +223,8 @@ const Hydration: React.FC = () => {
   const handleAddWater = async (amount: number, type: string = 'water') => {
     try {
       const newTotal = currentMl + amount;
+      
+      // Mise à jour optimiste du state local
       setCurrentMl(newTotal);
       
       // Sauvegarde dans Supabase
@@ -251,12 +257,15 @@ const Hydration: React.FC = () => {
         title: "Eau ajoutée !",
         description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser?.name || appStoreUser?.username || 'Champion'} !`,
       });
+      
+      // Ne pas recharger les données immédiatement pour éviter l'écrasement
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       setCurrentMl(prev => prev - amount); // Rollback
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder. Réessayez.",
+        variant: "destructive"
       });
     }
   };

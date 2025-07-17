@@ -187,7 +187,14 @@ export const useWorkoutSession = () => {
           if (exercise.id === exerciseId) {
             const updatedSets = exercise.sets.map((set, index) => {
               if (index === setIndex) {
-                return { ...set, ...updates };
+                const updatedSet = { ...set, ...updates };
+                
+                // Si le poids est mis à jour, sauvegarder dans l'historique
+                if (updates.weight !== undefined) {
+                  saveExerciseWeightHistory(exercise.name, updates.weight);
+                }
+                
+                return updatedSet;
               }
               return set;
             });
@@ -201,6 +208,45 @@ export const useWorkoutSession = () => {
       localStorage.setItem('currentWorkoutSession', JSON.stringify(updatedSession));
     }
   }, [currentSession]);
+
+  // Sauvegarder l'historique des poids pour un exercice
+  const saveExerciseWeightHistory = useCallback((exerciseName: string, weight: number) => {
+    const weightHistory = JSON.parse(localStorage.getItem('exerciseWeightHistory') || '{}');
+    
+    if (!weightHistory[exerciseName]) {
+      weightHistory[exerciseName] = [];
+    }
+    
+    // Ajouter le nouveau poids avec la date
+    weightHistory[exerciseName].push({
+      weight,
+      date: new Date().toISOString(),
+      userId: appStoreUser?.id
+    });
+    
+    // Garder seulement les 10 dernières entrées
+    if (weightHistory[exerciseName].length > 10) {
+      weightHistory[exerciseName] = weightHistory[exerciseName].slice(-10);
+    }
+    
+    localStorage.setItem('exerciseWeightHistory', JSON.stringify(weightHistory));
+  }, [appStoreUser?.id]);
+
+  // Récupérer le dernier poids utilisé pour un exercice
+  const getLastWeightForExercise = useCallback((exerciseName: string): number | undefined => {
+    const weightHistory = JSON.parse(localStorage.getItem('exerciseWeightHistory') || '{}');
+    const exerciseHistory = weightHistory[exerciseName];
+    
+    if (exerciseHistory && exerciseHistory.length > 0) {
+      // Retourner le poids le plus récent pour cet utilisateur
+      const userWeights = exerciseHistory.filter((entry: any) => entry.userId === appStoreUser?.id);
+      if (userWeights.length > 0) {
+        return userWeights[userWeights.length - 1].weight;
+      }
+    }
+    
+    return undefined;
+  }, [appStoreUser?.id]);
 
   // Marquer un exercice comme terminé
   const completeExercise = useCallback((exerciseId: string) => {
@@ -253,12 +299,68 @@ export const useWorkoutSession = () => {
       return exercisesFromLastSession;
     }
     
-    // Si pas de données précédentes, utiliser les exercices par défaut
-    return defaultExercises.map(exercise => ({
-      ...exercise,
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
-    }));
-  }, [getLastSessionData]);
+    // Si pas de données précédentes, utiliser les exercices par défaut avec historique des poids
+    return defaultExercises.map(exercise => {
+      const lastWeight = getLastWeightForExercise(exercise.name);
+      return {
+        ...exercise,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        sets: exercise.sets.map(set => ({
+          ...set,
+          weight: lastWeight || set.weight // Utiliser le dernier poids connu ou le poids par défaut
+        }))
+      };
+    });
+  }, [getLastSessionData, getLastWeightForExercise]);
+
+  // Ajouter une série à un exercice
+  const addSetToExercise = useCallback((exerciseId: string) => {
+    if (currentSession) {
+      const updatedSession = {
+        ...currentSession,
+        exercises: currentSession.exercises.map(exercise => {
+          if (exercise.id === exerciseId) {
+            // Récupérer les données de la dernière série pour pré-remplir
+            const lastSet = exercise.sets[exercise.sets.length - 1];
+            const newSet: ExerciseSet = {
+              reps: lastSet?.reps || 10,
+              weight: lastSet?.weight,
+              duration: lastSet?.duration,
+              completed: false
+            };
+            
+            return {
+              ...exercise,
+              sets: [...exercise.sets, newSet]
+            };
+          }
+          return exercise;
+        })
+      };
+
+      setCurrentSession(updatedSession);
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(updatedSession));
+    }
+  }, [currentSession]);
+
+  // Supprimer une série d'un exercice
+  const removeSetFromExercise = useCallback((exerciseId: string, setIndex: number) => {
+    if (currentSession) {
+      const updatedSession = {
+        ...currentSession,
+        exercises: currentSession.exercises.map(exercise => {
+          if (exercise.id === exerciseId && exercise.sets.length > 1) {
+            const updatedSets = exercise.sets.filter((_, index) => index !== setIndex);
+            return { ...exercise, sets: updatedSets };
+          }
+          return exercise;
+        })
+      };
+
+      setCurrentSession(updatedSession);
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(updatedSession));
+    }
+  }, [currentSession]);
 
   // Récupérer l'historique des sessions
   const getSessionHistory = useCallback((): WorkoutSession[] => {
@@ -289,6 +391,9 @@ export const useWorkoutSession = () => {
     updateExerciseSet,
     completeExercise,
     getLastSessionData,
-    loadExercisesFromLastSession
+    loadExercisesFromLastSession,
+    addSetToExercise,
+    removeSetFromExercise,
+    getLastWeightForExercise
   };
 };

@@ -19,6 +19,8 @@ import {
 } from '@/components/LazyComponents';
 import Analytics from '@/pages/Analytics';
 import NotFound from '@/pages/NotFound';
+import ProfileComplete from '@/pages/ProfileComplete';
+import SettingsComplete from '@/pages/SettingsComplete';
 
 // Components (composants réutilisables)
 import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
@@ -233,6 +235,26 @@ const AppContent: React.FC = () => {
         </Route>
         
         <Route path="/profile">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout>
+              <ProfileComplete />
+            </Layout>
+          )}
+        </Route>
+
+        <Route path="/settings">
+          {!user ? (
+            <AuthPages onAuthSuccess={handleAuthSuccess} />
+          ) : (
+            <Layout>
+              <SettingsComplete />
+            </Layout>
+          )}
+        </Route>
+
+        <Route path="/profile-old">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (

@@ -37,6 +37,12 @@ export interface AppUser {
   weight_kg?: number | null;
   height_cm?: number | null;
   
+  // Champs additionnels pour le profil complet
+  phone?: string | null;
+  bio?: string | null;
+  city?: string | null;
+  country?: string | null;
+  
   // Champs calculés locaux
   name?: string;
   goal?: string;

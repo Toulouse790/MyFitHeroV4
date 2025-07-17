@@ -3,6 +3,7 @@ import React from 'react';
 import { ArrowLeft, Settings, Bell, User, Trophy, TrendingUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
+import { useLocation } from 'wouter';
 
 interface UniformHeaderProps {
   title: string;
@@ -45,11 +46,53 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
   rightContent,
   gradient = false
 }) => {
+  const [, navigate] = useLocation();
+
   const handleBack = () => {
     if (onBack) {
       onBack();
     } else {
       window.history.back();
+    }
+  };
+
+  const handleSettings = () => {
+    if (onSettings) {
+      onSettings();
+    } else {
+      navigate('/settings');
+    }
+  };
+
+  const handleProfile = () => {
+    if (onProfile) {
+      onProfile();
+    } else {
+      navigate('/profile');
+    }
+  };
+
+  const handleNotifications = () => {
+    if (onNotifications) {
+      onNotifications();
+    } else {
+      navigate('/notifications');
+    }
+  };
+
+  const handleStats = () => {
+    if (onStats) {
+      onStats();
+    } else {
+      navigate('/analytics');
+    }
+  };
+
+  const handleBadges = () => {
+    if (onBadges) {
+      onBadges();
+    } else {
+      navigate('/achievements');
     }
   };
 
@@ -98,11 +141,22 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
               </div>
             )}
             
+            {showSettings && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSettings}
+                className={`${gradient ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
+              >
+                <Settings className="w-5 h-5" />
+              </Button>
+            )}
+
             {showStats && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onStats}
+                onClick={handleStats}
                 className={`${gradient ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 <TrendingUp className="w-5 h-5" />
@@ -113,7 +167,7 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onBadges}
+                onClick={handleBadges}
                 className={`${gradient ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 <Trophy className="w-5 h-5" />
@@ -124,7 +178,7 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onNotifications}
+                onClick={handleNotifications}
                 className={`relative ${gradient ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 <Bell className="w-5 h-5" />
@@ -143,21 +197,10 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onProfile}
+                onClick={handleProfile}
                 className={`${gradient ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
               >
                 <User className="w-5 h-5" />
-              </Button>
-            )}
-
-            {showSettings && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onSettings}
-                className={`${gradient ? 'text-white hover:bg-white/20' : 'text-gray-600 hover:bg-gray-100'}`}
-              >
-                <Settings className="w-5 h-5" />
               </Button>
             )}
           </div>
