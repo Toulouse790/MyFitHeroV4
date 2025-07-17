@@ -25,7 +25,7 @@ interface USMarketOnboardingProps {
 }
 
 export const USMarketOnboarding: React.FC<USMarketOnboardingProps> = ({ onComplete }) => {
-  const { preferences, updatePreferences } = useUnitPreferences();
+  const { preferences } = useUnitPreferences();
   const [currentStep, setCurrentStep] = useState(0);
   const [profile, setProfile] = useState<USUserProfile>({
     name: '',
@@ -276,7 +276,7 @@ export const USMarketOnboarding: React.FC<USMarketOnboardingProps> = ({ onComple
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
-            <steps[currentStep].icon className="h-5 w-5" />
+            {React.createElement(steps[currentStep].icon, { className: "h-5 w-5" })}
             {steps[currentStep].title}
           </CardTitle>
           <Badge variant="outline">

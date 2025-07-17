@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
 import { User, Calendar, Clock, Briefcase, Check, Weight, Star, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LIFESTYLE_OPTIONS } from '@/data/onboardingData';
@@ -245,19 +244,19 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
             <div className="space-y-3">
               {LIFESTYLE_OPTIONS.map((option) => (
                 <Button
-                  key={option.value}
-                  variant={formData.lifestyle === option.value ? 'default' : 'outline'}
-                  onClick={() => setFormData({...formData, lifestyle: option.value})}
+                  key={option.id}
+                  variant={formData.lifestyle === option.id ? 'default' : 'outline'}
+                  onClick={() => setFormData({...formData, lifestyle: option.id as "student" | "office_worker" | "physical_job" | "retired"})}
                   className="w-full h-16 flex items-center justify-between p-4"
                 >
                   <div className="flex items-center space-x-3">
-                    <option.icon className="h-5 w-5" />
+                    <User className="h-5 w-5" />
                     <div className="text-left">
-                      <div className="font-medium">{option.label}</div>
+                      <div className="font-medium">{option.name}</div>
                       <div className="text-sm text-gray-500">{option.description}</div>
                     </div>
                   </div>
-                  {formData.lifestyle === option.value && <Check className="h-5 w-5" />}
+                  {formData.lifestyle === option.id && <Check className="h-5 w-5" />}
                 </Button>
               ))}
             </div>
