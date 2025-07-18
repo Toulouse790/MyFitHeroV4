@@ -9,7 +9,7 @@ const conversationalFlow = [
        label: sport.name,
        value: sport.id,
        icon: sport.emoji
-     })),
+     }),
      validation: [
        { type: 'required', message: 'Please select your sport' }
      ],
