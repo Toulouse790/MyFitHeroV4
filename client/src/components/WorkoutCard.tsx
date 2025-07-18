@@ -1,167 +1,299 @@
 // client/src/components/WorkoutCard.tsx
 import React, { useState } from 'react';
-import { Clock, Flame, Target, Star, Play, Timer, Users, ChevronRight } from 'lucide-react';
-import { WorkoutTimer } from './WorkoutTimer';
+import { 
+  ChevronRight, 
+  Clock, 
+  Flame, 
+  Users, 
+  Star,
+  Plus,
+  Minus,
+  Edit2
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useWorkoutSession } from '@/hooks/useWorkoutSession';
+import { useToast } from '@/hooks/use-toast';
 
 export interface WorkoutInterface {
   id: number;
   title: string;
   duration: number;
-  difficulty: 'Débutant' | 'Intermédiaire' | 'Avancé';
+  difficulty: string;
   calories: number;
   category: string;
-  rating: number;
-  participants: number;
   tags: string[];
   description: string;
   exerciseList: string[];
-  emoji?: string;
+  rating: number;
+  participants: number;
+  emoji: string;
 }
 
 interface WorkoutCardProps {
   workout: WorkoutInterface;
-  onStartWorkout?: (workout: WorkoutInterface) => void;
-  showQuickStart?: boolean;
+  onStartWorkout: (workout: WorkoutInterface) => void;
 }
 
-export const WorkoutCard: React.FC<WorkoutCardProps> = ({ 
-  workout, 
-  onStartWorkout,
-  showQuickStart = true 
-}) => {
-  const [showTimer, setShowTimer] = useState(false);
+export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onStartWorkout }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { startSession } = useWorkoutSession();
+  const [exerciseSets, setExerciseSets] = useState<Record<string, { sets: number; reps: number; weight: number }>>({});
+  const { startSession, addExercise, getLastWeightForExercise } = useWorkoutSession();
+  const { toast } = useToast();
 
-  const getDifficultyColor = (difficulty: string): string => {
-    switch (difficulty) {
-      case 'Débutant': return 'text-green-600 bg-green-100';
-      case 'Intermédiaire': return 'text-yellow-600 bg-yellow-100';
-      case 'Avancé': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+  // Initialize exercise data
+  const initializeExerciseData = (exerciseName: string) => {
+    if (!exerciseSets[exerciseName]) {
+      const lastWeight = getLastWeightForExercise(exerciseName) || 0;
+      setExerciseSets(prev => ({
+        ...prev,
+        [exerciseName]: { sets: 3, reps: 10, weight: lastWeight }
+      }));
     }
   };
 
-  const handleStartWorkout = () => {
-    if (onStartWorkout) {
-      onStartWorkout(workout);
-    }
+  // Update exercise data
+  const updateExerciseData = (exerciseName: string, field: 'sets' | 'reps' | 'weight', value: number) => {
+    setExerciseSets(prev => ({
+      ...prev,
+      [exerciseName]: {
+        ...prev[exerciseName],
+        [field]: Math.max(0, value)
+      }
+    }));
+  };
+
+  // Start workout with configured exercises
+  const handleStartCustomWorkout = () => {
+    // Start session
     startSession(workout.title, workout.duration);
-    setShowTimer(true);
+    
+    // Add exercises with configured sets
+    workout.exerciseList.forEach((exerciseName) => {
+      const config = exerciseSets[exerciseName] || { sets: 3, reps: 10, weight: 0 };
+      
+      const exercise = {
+        name: exerciseName,
+        sets: Array(config.sets).fill(null).map(() => ({
+          reps: config.reps,
+          weight: config.weight,
+          completed: false
+        })),
+        completed: false,
+        restTime: 60
+      };
+      
+      addExercise(exercise);
+    });
+
+    toast({
+      title: "Entraînement démarré !",
+      description: `${workout.title} - ${workout.exerciseList.length} exercices configurés`,
+    });
+
+    // Navigate to workout page
+    onStartWorkout(workout);
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case 'débutant': return 'text-green-600 bg-green-50';
+      case 'intermédiaire': return 'text-yellow-600 bg-yellow-50';
+      case 'avancé': return 'text-red-600 bg-red-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
   };
 
   return (
-    <>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-        <div className="p-4">
-          <div className="flex items-start justify-between mb-3">
-            <div className="text-4xl">{workout.emoji || '💪'}</div>
-            <div className="flex items-center space-x-1">
-              <Star size={14} className="text-yellow-500 fill-current" />
-              <span className="text-sm font-medium text-gray-700">{workout.rating}</span>
-              <span className="text-xs text-gray-500">({workout.participants})</span>
-            </div>
-          </div>
-          
-          <h3 className="font-bold text-gray-800 text-lg mb-1">{workout.title}</h3>
-          <p className="text-gray-600 text-sm mb-4">{workout.description}</p>
-          
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-xs text-gray-500 uppercase">Exercices Clés</h4>
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center text-xs text-blue-600 hover:text-blue-800"
-              >
-                {isExpanded ? 'Réduire' : 'Voir plus'}
-                <ChevronRight size={12} className={`ml-1 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-              </button>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200">
+      {/* Header */}
+      <div 
+        className="p-4 cursor-pointer"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center space-x-2 mb-2">
+              <span className="text-2xl">{workout.emoji}</span>
+              <h3 className="font-semibold text-gray-900">{workout.title}</h3>
             </div>
             
-            <div className="flex flex-wrap gap-2">
-              {workout.exerciseList.slice(0, isExpanded ? undefined : 4).map((exercise, index) => (
-                <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
-                  {exercise}
-                </span>
-              ))}
-              {!isExpanded && workout.exerciseList.length > 4 && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-md">
-                  +{workout.exerciseList.length - 4} autres
-                </span>
-              )}
+            <p className="text-sm text-gray-600 mb-3">{workout.description}</p>
+            
+            {/* Stats */}
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              <div className="flex items-center text-gray-500">
+                <Clock size={16} className="mr-1" />
+                <span>{workout.duration} min</span>
+              </div>
+              <div className="flex items-center text-gray-500">
+                <Flame size={16} className="mr-1" />
+                <span>{workout.calories} cal</span>
+              </div>
+              <div className="flex items-center text-gray-500">
+                <Users size={16} className="mr-1" />
+                <span>{workout.participants}</span>
+              </div>
+              <div className="flex items-center text-yellow-500">
+                <Star size={16} className="mr-1 fill-current" />
+                <span>{workout.rating}</span>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-1 mb-4">
-            {workout.tags.map((tag, index) => {
-              const isSpecialTag = tag.includes('perte') || tag.includes('masse') || tag.includes('performance');
-              return (
-                <span 
-                  key={index} 
-                  className={`px-2 py-1 text-xs rounded-full ${
-                    isSpecialTag 
-                      ? 'bg-blue-100 text-blue-700 font-medium border border-blue-200' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}
-                >
+            
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              <Badge className={getDifficultyColor(workout.difficulty)}>
+                {workout.difficulty}
+              </Badge>
+              {workout.tags.slice(0, 3).map((tag, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
                   {tag}
-                </span>
-              );
-            })}
-          </div>
-        </div>
-        
-        <div className="bg-gray-50/70 px-4 py-3 border-t border-gray-100">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center space-x-4 text-xs text-gray-600">
-              <span className="flex items-center">
-                <Clock size={14} className="mr-1 text-gray-400" /> {workout.duration}min
-              </span>
-              <span className="flex items-center">
-                <Flame size={14} className="mr-1 text-orange-400" /> {workout.calories} kcal
-              </span>
-              <span className="flex items-center">
-                <Target size={14} className="mr-1 text-blue-400" /> {workout.exerciseList.length} exos
-              </span>
-              <span className="flex items-center">
-                <Users size={14} className="mr-1 text-purple-400" /> {workout.participants}
-              </span>
+                </Badge>
+              ))}
             </div>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(workout.difficulty)}`}>
-              {workout.difficulty}
-            </span>
           </div>
           
-          {showQuickStart && (
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleStartWorkout}
-                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center space-x-2"
-              >
-                <Play size={16} />
-                <span>Commencer</span>
-              </button>
-              
-              <button
-                onClick={() => setShowTimer(true)}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center"
-                title="Chronomètre"
-              >
-                <Timer size={16} />
-              </button>
-            </div>
-          )}
+          <ChevronRight 
+            size={20} 
+            className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+          />
         </div>
       </div>
 
-      {/* Timer Modal */}
-      <WorkoutTimer
-        isVisible={showTimer}
-        onClose={() => setShowTimer(false)}
-        workoutName={workout.title}
-        targetDuration={workout.duration}
-      />
-    </>
+      {/* Expanded Content */}
+      {isExpanded && (
+        <div className="border-t border-gray-100 p-4 space-y-4">
+          <h4 className="font-semibold text-gray-900 mb-3">Exercices ({workout.exerciseList.length})</h4>
+          
+          {/* Exercise List with Controls */}
+          <div className="space-y-3">
+            {workout.exerciseList.map((exercise, index) => {
+              // Initialize data for this exercise
+              if (!exerciseSets[exercise]) {
+                initializeExerciseData(exercise);
+              }
+              
+              const exerciseData = exerciseSets[exercise] || { sets: 3, reps: 10, weight: 0 };
+              
+              return (
+                <div key={index} className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-gray-800">{exercise}</span>
+                    <Edit2 size={16} className="text-gray-400" />
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-3">
+                    {/* Sets */}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Séries</label>
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => updateExerciseData(exercise, 'sets', exerciseData.sets - 1)}
+                        >
+                          <Minus size={14} />
+                        </Button>
+                        <Input
+                          type="number"
+                          value={exerciseData.sets}
+                          onChange={(e) => updateExerciseData(exercise, 'sets', parseInt(e.target.value) || 0)}
+                          className="h-8 w-12 text-center p-1"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => updateExerciseData(exercise, 'sets', exerciseData.sets + 1)}
+                        >
+                          <Plus size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Reps */}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Reps</label>
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => updateExerciseData(exercise, 'reps', exerciseData.reps - 1)}
+                        >
+                          <Minus size={14} />
+                        </Button>
+                        <Input
+                          type="number"
+                          value={exerciseData.reps}
+                          onChange={(e) => updateExerciseData(exercise, 'reps', parseInt(e.target.value) || 0)}
+                          className="h-8 w-12 text-center p-1"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => updateExerciseData(exercise, 'reps', exerciseData.reps + 1)}
+                        >
+                          <Plus size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Weight */}
+                    <div>
+                      <label className="text-xs text-gray-500 mb-1 block">Poids (kg)</label>
+                      <div className="flex items-center space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => updateExerciseData(exercise, 'weight', exerciseData.weight - 2.5)}
+                        >
+                          <Minus size={14} />
+                        </Button>
+                        <Input
+                          type="number"
+                          step="2.5"
+                          value={exerciseData.weight}
+                          onChange={(e) => updateExerciseData(exercise, 'weight', parseFloat(e.target.value) || 0)}
+                          className="h-8 w-16 text-center p-1"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 w-8 p-0"
+                          onClick={() => updateExerciseData(exercise, 'weight', exerciseData.weight + 2.5)}
+                        >
+                          <Plus size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3 pt-2">
+            <Button 
+              onClick={handleStartCustomWorkout}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            >
+              Démarrer l'entraînement
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => onStartWorkout(workout)}
+            >
+              Aperçu rapide
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
