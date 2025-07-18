@@ -1,3 +1,13 @@
+import {
+  AVAILABLE_SPORTS,
+  SPORT_LEVELS,
+  EQUIPMENT_LEVELS,
+  STRENGTH_OBJECTIVES,
+  FITNESS_EXPERIENCE_LEVELS,
+  DIETARY_PREFERENCES,
+  NUTRITION_OBJECTIVES
+} from './onboardingData';
+
 const conversationalFlow = [
   {
     description: 'This helps me create sport-specific programs',
@@ -9,7 +19,7 @@ const conversationalFlow = [
        label: sport.name,
        value: sport.id,
        icon: sport.emoji
-     }),
+     })),
      validation: [
        { type: 'required', message: 'Please select your sport' }
      ],
@@ -318,7 +328,8 @@ const conversationalFlow = [
      estimatedTime: 1
    }
  ]
-};
+
+export const CONVERSATIONAL_ONBOARDING_FLOW = conversationalFlow;
 
 // Utility function for module colors
 function getModuleColor(moduleId: string): string {
