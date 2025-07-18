@@ -1,8 +1,6 @@
 steps:
   - name: 'node:18'
     entrypoint: 'bash'
-    args:
-      - -c
-      - |
-        npm install
-        npm run build
+    args: ['-c', 'npm install && npm run build']
+options:
+  logging: CLOUD_LOGGING_ONLY
