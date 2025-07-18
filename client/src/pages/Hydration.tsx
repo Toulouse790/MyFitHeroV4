@@ -207,9 +207,11 @@ const Hydration: React.FC = () => {
     pillar: 'hydration',
     onUpdate: (payload) => {
       console.log('🔄 Hydratation mise à jour:', payload);
-      // Recharger les données uniquement si ce n'est pas une mise à jour locale
+      // Ne recharger que si c'est une mise à jour externe
       if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-        loadHydrationData();
+        if (payload.userId !== appStoreUser?.id) {
+          loadHydrationData();
+        }
       }
     }
   });
@@ -255,10 +257,10 @@ const Hydration: React.FC = () => {
       
       toast({
         title: "Eau ajoutée !",
-        description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser?.name || appStoreUser?.username || 'Champion'} !`,
+        description: `+${amount}ml d'hydratation. Continue comme ça ${appStoreUser?.first_name || appStoreUser?.username || 'Champion'} !`,
       });
       
-      // Ne pas recharger les données immédiatement pour éviter l'écrasement
+      // Les données sont déjà mises à jour de manière optimiste via setCurrentMl
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       setCurrentMl(prev => prev - amount); // Rollback
@@ -272,26 +274,64 @@ const Hydration: React.FC = () => {
 
   const handleRemoveLast = async () => {
     if (currentMl >= 250) {
-      setCurrentMl(prev => prev - 250);
-      toast({
-        title: "Dernière entrée annulée",
-        description: "-250ml",
-      });
+      const newTotal = currentMl - 250;
+      setCurrentMl(newTotal);
+      
+      // Mise à jour dans la base
+      try {
+        const { error } = await supabase
+          .from('daily_stats')
+          .upsert({
+            user_id: appStoreUser?.id,
+            date: todayDate,
+            water_intake_ml: newTotal,
+            hydration_goal_ml: personalizedGoalMl,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+        
+        toast({
+          title: "Dernière entrée annulée",
+          description: "-250ml",
+        });
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour:', error);
+        setCurrentMl(prev => prev + 250); // Rollback
+      }
     }
   };
 
   const handleReset = async () => {
     setCurrentMl(0);
-    toast({
-      title: "Compteur remis à zéro",
-      description: "Nouveau départ pour aujourd'hui !",
-    });
+    
+    try {
+      const { error } = await supabase
+        .from('daily_stats')
+        .upsert({
+          user_id: appStoreUser?.id,
+          date: todayDate,
+          water_intake_ml: 0,
+          hydration_goal_ml: personalizedGoalMl,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+      
+      toast({
+        title: "Compteur remis à zéro",
+        description: "Nouveau départ pour aujourd'hui !",
+      });
+    } catch (error) {
+      console.error('Erreur lors du reset:', error);
+      loadHydrationData(); // Recharger les vraies données
+    }
   };
 
   // --- MESSAGES PERSONNALISÉS ---
   const getPersonalizedMessage = () => {
     const progressPercentage = (currentMl / personalizedGoalMl) * 100;
-    const userName = appStoreUser?.name || appStoreUser?.username || 'Champion';
+    const userName = appStoreUser?.first_name || appStoreUser?.username || 'Champion';
     
     if (progressPercentage >= 100) {
       return `🎉 Excellent ${userName} ! Objectif atteint pour un ${appStoreUser?.sport || 'athlète'} !`;
