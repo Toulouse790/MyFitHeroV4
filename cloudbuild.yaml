@@ -1,0 +1,11 @@
+steps:
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        npm install
+        npm run build
+artifacts:
+  files:
+    - 'dist/**'
