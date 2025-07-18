@@ -3,13 +3,19 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.6.3"
+  },
   "scripts": {
     "dev": "cd client && vite",
     "dev:full": "vite",
     "build": "cd client && vite build",
+    "vercel-build": "cd client && vite build",
     "preview": "cd client && vite preview",
     "start": "cd client && vite preview",
-    "check": "tsc"
+    "check": "tsc",
+    "prepare": "echo 'Ready'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -106,6 +112,4 @@
     "vitest": "^3.2.4"
   },
   "optionalDependencies": {
-    "bufferutil": "^4.0.8"
-  }
-}
+    "bufferutil": "^
