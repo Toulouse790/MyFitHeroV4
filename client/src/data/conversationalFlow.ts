@@ -1,6 +1,8 @@
-description: 'This helps me create sport-specific programs',
-     illustration: '🏃‍♂️',
-     inputType: 'single-select',
+const conversationalFlow = [
+  {
+    description: 'This helps me create sport-specific programs',
+    illustration: '🏃‍♂️',
+    inputType: 'single-select',,
      condition: (data) => data.selectedModules?.includes('sport') || false,
      options: AVAILABLE_SPORTS.map(sport => ({
        id: sport.id,
