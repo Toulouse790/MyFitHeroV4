@@ -6,6 +6,3 @@ steps:
       - |
         npm install
         npm run build
-artifacts:
-  files:
-    - 'dist/**'
