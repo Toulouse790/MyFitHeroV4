@@ -6,66 +6,66 @@ export const AVAILABLE_MODULES: OnboardingModule[] = [
     id: 'sport',
     name: 'Sport & Performance',
     icon: '🏃‍♂️',
-    description: 'Programmes d\'entraînement personnalisés selon votre sport',
+    description: 'Personalized training programs for your sport',
     benefits: [
-      'Programmes spécifiques à votre sport et position',
-      'Suivi de performance et progression',
-      'Planification selon la saison sportive'
+      'Sport and position-specific programs',
+      'Performance tracking and progression',
+      'Season-based planning'
     ]
   },
   {
     id: 'strength',
-    name: 'Musculation',
+    name: 'Strength Training',
     icon: '💪',
-    description: 'Renforcement musculaire et développement physique',
+    description: 'Muscle building and physical development',
     benefits: [
-      'Programmes de force et hypertrophie',
-      'Prévention des blessures',
-      'Amélioration des performances sportives'
+      'Strength and hypertrophy programs',
+      'Injury prevention',
+      'Athletic performance improvement'
     ]
   },
   {
     id: 'nutrition',
     name: 'Nutrition',
     icon: '🥗',
-    description: 'Alimentation optimisée pour vos objectifs',
+    description: 'Optimized nutrition for your goals',
     benefits: [
-      'Plans nutritionnels personnalisés',
-      'Suivi des macronutriments',
-      'Recettes adaptées à votre sport'
+      'Personalized meal plans',
+      'Macro tracking',
+      'Sport-specific recipes'
     ]
   },
   {
     id: 'sleep',
-    name: 'Sommeil',
+    name: 'Sleep',
     icon: '😴',
-    description: 'Optimisation de la récupération et du repos',
+    description: 'Recovery and rest optimization',
     benefits: [
-      'Analyse de la qualité du sommeil',
-      'Conseils pour améliorer la récupération',
-      'Horaires de sommeil optimisés'
+      'Sleep quality analysis',
+      'Recovery improvement tips',
+      'Optimized sleep schedules'
     ]
   },
   {
     id: 'hydration',
-    name: 'Hydratation',
+    name: 'Hydration',
     icon: '💧',
-    description: 'Suivi et optimisation de l\'hydratation',
+    description: 'Hydration tracking and optimization',
     benefits: [
-      'Rappels d\'hydratation intelligents',
-      'Objectifs personnalisés selon l\'activité',
-      'Suivi de la performance hydrique'
+      'Smart hydration reminders',
+      'Activity-based goals',
+      'Hydration performance tracking'
     ]
   },
   {
     id: 'wellness',
-    name: 'Bien-être Global',
+    name: 'Global Wellness',
     icon: '🧘‍♀️',
-    description: 'Approche holistique de la santé et du bien-être',
+    description: 'Holistic approach to health and wellness',
     benefits: [
-      'Coordination de tous les aspects',
-      'Coaching IA personnalisé',
-      'Équilibre vie sportive/personnelle'
+      'All aspects coordination',
+      'Personalized AI coaching',
+      'Work-life-sport balance'
     ]
   }
 ];
@@ -73,40 +73,42 @@ export const AVAILABLE_MODULES: OnboardingModule[] = [
 export const MAIN_OBJECTIVES = [
   {
     id: 'performance',
-    name: 'Performance Sportive',
-    description: 'Améliorer mes performances dans mon sport',
+    name: 'Athletic Performance',
+    description: 'Improve my performance in sports',
     icon: '🏆',
     modules: ['sport', 'strength', 'nutrition', 'sleep']
   },
   {
     id: 'health_wellness',
-    name: 'Santé & Bien-être',
-    description: 'Maintenir une bonne santé générale',
+    name: 'Health & Wellness',
+    description: 'Maintain overall good health',
     icon: '❤️',
     modules: ['nutrition', 'sleep', 'hydration', 'wellness']
   },
   {
     id: 'body_composition',
-    name: 'Transformation Physique',
-    description: 'Perdre du poids ou prendre du muscle',
+    name: 'Body Transformation',
+    description: 'Lose weight or build muscle',
     icon: '⚖️',
     modules: ['strength', 'nutrition', 'hydration']
   },
   {
     id: 'energy_sleep',
-    name: 'Énergie & Récupération',
-    description: 'Améliorer mon énergie et ma récupération',
+    name: 'Energy & Recovery',
+    description: 'Boost my energy and recovery',
     icon: '⚡',
     modules: ['sleep', 'nutrition', 'hydration', 'wellness']
   },
   {
     id: 'holistic',
-    name: 'Accompagnement Complet',
-    description: 'Optimiser tous les aspects de ma vie',
+    name: 'Complete Transformation',
+    description: 'Optimize every aspect of my life',
     icon: '🌟',
     modules: ['sport', 'strength', 'nutrition', 'sleep', 'hydration', 'wellness']
   }
 ];
+
+// Le reste du fichier reste identique...
 
 // Sports disponibles avec leurs positions (basé sur vos données existantes)
 export const AVAILABLE_SPORTS: SportOption[] = [
