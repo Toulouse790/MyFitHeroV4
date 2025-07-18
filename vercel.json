@@ -4,7 +4,13 @@
   "framework": "vite",
   "installCommand": "pnpm install",
   "functions": {
-    "directory": "api"
+    "api/*.js": {
+      "memory": 512,
+      "maxDuration": 10
+    },
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
   },
   "headers": [
     {
@@ -15,7 +21,7 @@
           "value": "SAMEORIGIN"
         },
         {
-          "key": "X-XSS-Protection", 
+          "key": "X-XSS-Protection",
           "value": "1; mode=block"
         },
         {
