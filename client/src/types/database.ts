@@ -15,7 +15,6 @@ export type Json =
 /* -------------------------------------------------------------------------- */
 export interface Database {
   public: {
-    /* =============================== TABLES =============================== */
     Tables: {
       /* --------------------------- AI REQUESTS -------------------------- */
       ai_requests: {
@@ -152,7 +151,10 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['user_profiles']['Row'], 'created_at' | 'updated_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['user_profiles']['Row'],
+          'created_at' | 'updated_at'
+        > & {
           created_at?: string;
           updated_at?: string;
         };
@@ -179,7 +181,10 @@ export interface Database {
           muscle_objectives: string[] | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['workouts']['Row'], 'id' | 'created_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['workouts']['Row'],
+          'id' | 'created_at'
+        > & {
           id?: string;
           created_at?: string;
         };
@@ -208,7 +213,10 @@ export interface Database {
           allergens: string[] | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['meals']['Row'], 'id' | 'created_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['meals']['Row'],
+          'id' | 'created_at'
+        > & {
           id?: string;
           created_at?: string;
         };
@@ -246,7 +254,10 @@ export interface Database {
           created_at: string;
           updated_at: string | null;
         };
-        Insert: Omit<Database['public']['Tables']['foods_library']['Row'], 'id' | 'created_at' | 'updated_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['foods_library']['Row'],
+          'id' | 'created_at' | 'updated_at'
+        > & {
           id?: string;
           created_at?: string;
           updated_at?: string;
@@ -266,7 +277,10 @@ export interface Database {
           logged_at: string;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['hydration_logs']['Row'], 'id' | 'logged_at' | 'created_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['hydration_logs']['Row'],
+          'id' | 'logged_at' | 'created_at'
+        > & {
           id?: string;
           logged_at?: string;
           created_at?: string;
@@ -294,7 +308,10 @@ export interface Database {
           notes: string | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['sleep_sessions']['Row'], 'id' | 'created_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['sleep_sessions']['Row'],
+          'id' | 'created_at'
+        > & {
           id?: string;
           created_at?: string;
         };
@@ -320,56 +337,53 @@ export interface Database {
           reminder_enabled: boolean | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['user_goals']['Row'], 'id' | 'created_at'> & {
+        Insert: Omit<
+          Database['public']['Tables']['user_goals']['Row'],
+          'id' | 'created_at'
+        > & {
           id?: string;
           created_at?: string;
         };
         Update: Partial<Omit<Database['public']['Tables']['user_goals']['Row'], 'id'>>;
       };
-/* --------------------------- DAILY STATS -------------------------- */
-daily_stats: {
-  Row: {
-    id: string;
-    user_id: string | null;
-    stat_date: string;                 // YYYY‑MM‑DD
 
-    workouts_completed: number | null;
-    total_workout_minutes: number | null;
-    calories_burned: number | null;
+      /* --------------------------- DAILY STATS ------------------------- */
+      daily_stats: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          stat_date: string;
 
-    total_calories: number | null;
-    total_protein: number | null;
-    total_carbs: number | null;
-    total_fat: number | null;
+          workouts_completed: number | null;
+          total_workout_minutes: number | null;
+          calories_burned: number | null;
 
-    sleep_duration_minutes: number | null;
-    sleep_quality: number | null;
+          total_calories: number | null;
+          total_protein: number | null;
+          total_carbs: number | null;
+          total_fat: number | null;
 
-    water_intake_ml: number | null;
-    hydration_goal_ml: number | null;
+          sleep_duration_minutes: number | null;
+          sleep_quality: number | null;
 
-    created_at: string;
-    updated_at: string;
-  };
+          water_intake_ml: number | null;
+          hydration_goal_ml: number | null;
 
-  Insert: Omit<
-    Database['public']['Tables']['daily_stats']['Row'],
-    'id' | 'created_at' | 'updated_at'
-  > & {
-    id?: string;
-    created_at?: string;
-    updated_at?: string;
-  };
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<
+          Database['public']['Tables']['daily_stats']['Row'],
+          'id' | 'created_at' | 'updated_at'
+        > & {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Omit<Database['public']['Tables']['daily_stats']['Row'], 'id'>>;
+      };
 
-  Update: Partial<
-    Omit<Database['public']['Tables']['daily_stats']['Row'], 'id'>
-  >;
-};
-
-      /* --------------------------- (autres tables) ---------------------- */
-      /* Les autres tables de ton schéma (daily_stats, risk_alerts, etc.)
-         ne sont pas encore utilisées dans le code ; ajoute‑les ici plus
-         tard si besoin.                                                   */
-    };
-  };
-}
+      /* ----- Ajoute d’autres tables plus tard si ton code les utilise --- */
+    }; // 👈 fin de Tables
+  };   // 👈 fin de namespace public
+}      // 👈 fin de Database
