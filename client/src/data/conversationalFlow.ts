@@ -1,5 +1,5 @@
 // client/src/data/conversationalFlow.ts
-import { ConversationalFlow, ConversationalStep } from '@/types/conversationalOnboarding';
+import type { ConversationalFlow, ConversationalStep } from '@/types/conversationalOnboarding';
 import {
   MAIN_OBJECTIVES,
   AVAILABLE_MODULES,
