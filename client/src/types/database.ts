@@ -326,6 +326,45 @@ export interface Database {
         };
         Update: Partial<Omit<Database['public']['Tables']['user_goals']['Row'], 'id'>>;
       };
+/* --------------------------- DAILY STATS -------------------------- */
+daily_stats: {
+  Row: {
+    id: string;
+    user_id: string | null;
+    stat_date: string;                 // YYYY‑MM‑DD
+
+    workouts_completed: number | null;
+    total_workout_minutes: number | null;
+    calories_burned: number | null;
+
+    total_calories: number | null;
+    total_protein: number | null;
+    total_carbs: number | null;
+    total_fat: number | null;
+
+    sleep_duration_minutes: number | null;
+    sleep_quality: number | null;
+
+    water_intake_ml: number | null;
+    hydration_goal_ml: number | null;
+
+    created_at: string;
+    updated_at: string;
+  };
+
+  Insert: Omit<
+    Database['public']['Tables']['daily_stats']['Row'],
+    'id' | 'created_at' | 'updated_at'
+  > & {
+    id?: string;
+    created_at?: string;
+    updated_at?: string;
+  };
+
+  Update: Partial<
+    Omit<Database['public']['Tables']['daily_stats']['Row'], 'id'>
+  >;
+};
 
       /* --------------------------- (autres tables) ---------------------- */
       /* Les autres tables de ton schéma (daily_stats, risk_alerts, etc.)
