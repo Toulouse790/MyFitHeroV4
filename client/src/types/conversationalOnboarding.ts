@@ -13,6 +13,20 @@ export interface StepOption<T = any> {
   color?: string;     // couleur optionnelle pour l’UI
   triggers?: string[]; // modules recommandés (ex: depuis MAIN_OBJECTIVES)
 }
+/**
+ * Interface for sport options used in the onboarding flow.
+ * Represents a sport with its available positions for user selection.
+ */
+export interface SportOption {
+  /** Unique identifier for the sport */
+  id: string;
+  /** Display name of the sport */
+  name: string;
+  /** Emoji representation of the sport */
+  emoji: string;
+  /** List of available positions for this sport */
+  positions: string[];
+}
 
 /* --------------------------- Règles de validation ------------------ */
 export type ValidationRule =

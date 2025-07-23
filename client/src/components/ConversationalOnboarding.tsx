@@ -15,22 +15,70 @@ import {
   CONVERSATIONAL_ONBOARDING_FLOW
   // calculateEstimatedTime  ← SUPPRIMÉ car n'existe pas
 } from '@/data/conversationalFlow';
+import type { OnboardingData, ConversationalStep, SportOption } from '@/types/conversationalOnboarding';
+
 const calculateEstimatedTime = (modules: string[]): number => {
   return Math.max(10, modules.length * 5); // 5 min par module, minimum 10 min
-}; from '@/data/conversationalFlow';
+};
 import { AVAILABLE_SPORTS, MAIN_OBJECTIVES, AVAILABLE_MODULES } from '@/data/onboardingData';
 import SportSelector from './SportSelector';
 import PositionSelector from './PositionSelector';
 import PersonalInfoForm from './PersonalInfoForm';
 import { useSports } from '@/services/sportsService';
-import { SportOption } from '@/types/onboarding';
 
+/**
+ * Props for the ConversationalOnboarding component.
+ * 
+ * This interface defines the contract for the interactive onboarding experience
+ * that guides users through the MyFitHero setup process using a conversational flow.
+ * 
+ * @interface ConversationalOnboardingProps
+ */
 interface ConversationalOnboardingProps {
-  onComplete: (data: OnboardingData) => void;
-  onSkip?: () => void;
+  /**
+   * Callback function called when the onboarding process is completed successfully.
+   * 
+   * @param data - The complete onboarding data collected from the user during the flow.
+   *               Contains user preferences, selected modules, personal information,
+   *               and all configuration choices made during the onboarding process.
+   * 
+   * @example
+   * ```tsx
+   * const handleComplete = (data: OnboardingData) => {
+   *   console.log('User onboarding completed:', data);
+   *   // Save data to database, redirect to dashboard, etc.
+   * };
+   * 
+   * <ConversationalOnboarding onComplete={handleComplete} />
+   * ```
+   */
+  readonly onComplete: (data: OnboardingData) => void;
+
+  /**
+   * Optional callback function called when the user chooses to skip the onboarding process.
+   * 
+   * If not provided, the skip functionality will be disabled and users must complete
+   * the entire onboarding flow.
+   * 
+   * @optional
+   * 
+   * @example
+   * ```tsx
+   * const handleSkip = () => {
+   *   console.log('User skipped onboarding');
+   *   // Redirect to dashboard with default settings
+   * };
+   * 
+   * <ConversationalOnboarding 
+   *   onComplete={handleComplete} 
+   *   onSkip={handleSkip} 
+   * />
+   * ```
+   */
+  readonly onSkip?: () => void;
 }
 
-export default function ConversationalOnboarding({ onComplete, onSkip }: ConversationalOnboardingProps {
+export default function ConversationalOnboarding({ onComplete, onSkip }: ConversationalOnboardingProps) {
 
   const { toast } = useToast();
   const [currentStepId, setCurrentStepId] = useState(CONVERSATIONAL_ONBOARDING_FLOW.initialStep);
