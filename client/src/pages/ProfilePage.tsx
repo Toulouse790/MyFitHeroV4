@@ -22,7 +22,11 @@ import {
   Heart,
   Activity,
   Shield,
-  Settings
+  Settings,
+  CheckCircle2,
+  Clock,
+  Layers,
+  BarChart3
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -39,6 +43,8 @@ import { BadgeDisplay } from '@/components/BadgeDisplay';
 import { UserDataService } from '@/services/userDataService';
 import { UserProfile } from '@/types/user';
 import { useAppStore } from '@/stores/useAppStore';
+import { AVAILABLE_SPORTS } from '@/data/sports';
+import { AVAILABLE_MODULES } from '@/data/modules';
 
 interface UserStats {
   current_streak: number;
@@ -53,9 +59,7 @@ interface UserStats {
   weekly_goal_completion: number;
 }
 
-interface ProfilePageProps {}
-
-const ProfilePage: React.FC<ProfilePageProps> = () => {
+const ProfilePage: React.FC = () => {
   const router = useRouter();
   const { toast } = useToast();
   const { appStoreUser, setAppStoreUser } = useAppStore();
@@ -66,9 +70,9 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [editData, setEditData] = useState<Partial<UserProfile>>({});
-  const [activeTab, setActiveTab] = useState<'profile' | 'stats' | 'sport' | 'settings'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'stats' | 'sport' | 'modules' | 'settings'>('profile');
 
-  // Chargement des données optimisé
+  // Chargement des données optimisé avec nouveaux champs
   const loadProfileData = useCallback(async () => {
     try {
       setLoading(true);
@@ -78,45 +82,69 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
         return;
       }
 
-      // Chargement parallèle des données
-      const [profileResult, statsResult] = await Promise.allSettled([
-        supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single(),
-        UserDataService.getUserStats(user.id)
-      ]);
+      // Chargement avec tous les nouveaux champs de l'onboarding conversationnel
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select(`
+          *,
+          active_modules,
+          training_frequency,
+          fitness_experience,
+          sport_position,
+          sport_level,
+          onboarding_completed,
+          primary_goals,
+          country,
+          timezone
+        `)
+        .eq('id', user.id)
+        .single();
 
-      // Gestion du profil
-      if (profileResult.status === 'fulfilled' && !profileResult.value.error) {
-        const profile = profileResult.value.data;
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Erreur chargement profil:', profileError);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger le profil",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (profile) {
         setUserProfile(profile);
-        
-        // Synchroniser avec le store global
         setAppStoreUser(profile);
         
-        // Initialiser les données d'édition
+        // Initialiser données d'édition avec tous les champs
         setEditData({
           ...profile,
           first_name: profile.first_name || profile.full_name?.split(' ')[0] || '',
           last_name: profile.last_name || profile.full_name?.split(' ')[1] || '',
           bio: profile.bio || '',
           phone: profile.phone || '',
-          city: profile.city || ''
-        });
-      } else {
-        console.error('Erreur chargement profil:', profileResult);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger le profil",
-          variant: "destructive"
+          city: profile.city || '',
+          country: profile.country || ''
         });
       }
 
-      // Gestion des statistiques
-      if (statsResult.status === 'fulfilled') {
-        setUserStats(statsResult.value);
+      // Charger les statistiques
+      try {
+        const stats = await UserDataService.getUserStats(user.id);
+        setUserStats(stats);
+      } catch (statsError) {
+        console.error('Erreur stats:', statsError);
+        // Stats par défaut si erreur
+        setUserStats({
+          current_streak: 0,
+          level: 1,
+          total_workouts: 0,
+          badges_earned: 0,
+          experience_points: 0,
+          total_calories_burned: 0,
+          total_workout_minutes: 0,
+          favorite_exercise: '',
+          last_workout_date: '',
+          weekly_goal_completion: 0
+        });
       }
 
     } catch (error) {
@@ -131,7 +159,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     }
   }, [router, toast, setAppStoreUser]);
 
-  // Sauvegarde optimisée
+  // Sauvegarde optimisée avec nouveaux champs
   const handleSave = useCallback(async () => {
     if (!userProfile) return;
 
@@ -145,6 +173,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
         bio: editData.bio?.trim(),
         phone: editData.phone?.trim(),
         city: editData.city?.trim(),
+        country: editData.country?.trim(),
         updated_at: new Date().toISOString()
       };
 
@@ -195,7 +224,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     setIsEditing(false);
   }, [userProfile]);
 
-  // Calculs dérivés mémorisés
+  // Calculs dérivés améliorés
   const derivedData = useMemo(() => {
     if (!userStats || !userProfile) return null;
 
@@ -205,17 +234,35 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
       return currentLevel * 1000 - experience;
     };
 
-    // Calcul BMI si données disponibles
+    // Calcul BMI
     const bmi = userProfile.height_cm && userProfile.weight_kg 
       ? (userProfile.weight_kg / Math.pow(userProfile.height_cm / 100, 2))
       : null;
 
     const getBMICategory = (bmi: number) => {
-      if (bmi < 18.5) return { category: 'Sous-poids', color: 'text-blue-600' };
-      if (bmi < 25) return { category: 'Normal', color: 'text-green-600' };
-      if (bmi < 30) return { category: 'Surpoids', color: 'text-yellow-600' };
-      return { category: 'Obésité', color: 'text-red-600' };
+      if (bmi < 18.5) return { category: 'Sous-poids', color: 'text-blue-600', bgColor: 'bg-blue-50' };
+      if (bmi < 25) return { category: 'Normal', color: 'text-green-600', bgColor: 'bg-green-50' };
+      if (bmi < 30) return { category: 'Surpoids', color: 'text-yellow-600', bgColor: 'bg-yellow-50' };
+      return { category: 'Obésité', color: 'text-red-600', bgColor: 'bg-red-50' };
     };
+
+    // Calcul de complétude amélioré avec nouveaux champs
+    const requiredFields = [
+      userProfile.sport,
+      userProfile.age,
+      userProfile.height_cm,
+      userProfile.weight_kg,
+      userProfile.fitness_experience,
+      userProfile.primary_goals?.length,
+      userProfile.active_modules?.length,
+      userProfile.training_frequency
+    ];
+    
+    const completedFields = requiredFields.filter(field => 
+      field !== null && field !== undefined && field !== 0
+    ).length;
+    
+    const completionRate = Math.round((completedFields / requiredFields.length) * 100);
 
     return {
       level: getLevel(userStats.experience_points),
@@ -225,7 +272,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
         value: bmi.toFixed(1),
         ...getBMICategory(bmi)
       } : null,
-      completionRate: userProfile.sport && userProfile.age && userProfile.height_cm && userProfile.weight_kg ? 100 : 75
+      completionRate
     };
   }, [userStats, userProfile]);
 
@@ -243,12 +290,26 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     
     if (derivedData?.completionRate === 100) {
       return `🎯 Parfait ${userName} ! Profil optimisé pour ${sport}`;
-    } else if (derivedData?.completionRate > 80) {
+    } else if (derivedData?.completionRate && derivedData.completionRate > 80) {
       return `💪 Excellent ${userName}, quelques détails à finaliser`;
     } else {
       return `🚀 ${userName}, complétez votre profil pour une expérience optimale`;
     }
   }, [userProfile, derivedData]);
+
+  // Obtenir les informations du sport sélectionné
+  const sportInfo = useMemo(() => {
+    if (!userProfile?.sport) return null;
+    return AVAILABLE_SPORTS.find(s => s.id === userProfile.sport) || null;
+  }, [userProfile?.sport]);
+
+  // Obtenir les modules actifs avec leurs informations complètes
+  const activeModulesInfo = useMemo(() => {
+    if (!userProfile?.active_modules) return [];
+    return userProfile.active_modules
+      .map(moduleId => AVAILABLE_MODULES.find(m => m.id === moduleId))
+      .filter(Boolean);
+  }, [userProfile?.active_modules]);
 
   useEffect(() => {
     loadProfileData();
@@ -289,8 +350,8 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
               <p className="text-gray-600 mb-4">
                 Impossible de charger vos informations de profil.
               </p>
-              <Button onClick={() => router.push('/profile-complete')}>
-                Créer un profil
+              <Button onClick={() => router.push('/onboarding')}>
+                Compléter l'onboarding
               </Button>
             </CardContent>
           </Card>
@@ -303,6 +364,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     { id: 'profile', label: 'Profil', icon: UserIcon },
     { id: 'stats', label: 'Stats', icon: TrendingUp },
     { id: 'sport', label: 'Sport', icon: Dumbbell },
+    { id: 'modules', label: 'Modules', icon: Layers },
     { id: 'settings', label: 'Paramètres', icon: Settings }
   ];
 
@@ -316,7 +378,10 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
         rightContent={
           <div className="flex items-center space-x-2">
             <Badge variant="secondary" className="bg-white/20 text-white">
-              Niveau {derivedData?.level}
+              Niveau {derivedData?.level || 1}
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white">
+              {derivedData?.completionRate || 0}% complet
             </Badge>
             <Button
               variant="ghost"
@@ -335,14 +400,14 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
         {/* Navigation par onglets */}
         <Card>
           <CardContent className="p-2">
-            <div className="flex space-x-1">
+            <div className="flex space-x-1 overflow-x-auto">
               {tabs.map((tab) => {
                 const TabIcon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex-shrink-0 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === tab.id 
                         ? 'bg-blue-600 text-white' 
                         : 'text-gray-600 hover:bg-gray-100'
@@ -357,10 +422,34 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
           </CardContent>
         </Card>
 
+        {/* Alerte complétude si nécessaire */}
+        {derivedData && derivedData.completionRate < 100 && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <Clock className="h-5 w-5 text-amber-600" />
+                <div className="flex-1">
+                  <h3 className="font-medium text-amber-900">Profil incomplet</h3>
+                  <p className="text-sm text-amber-700">
+                    Complétez votre profil pour débloquer toutes les fonctionnalités IA personnalisées
+                  </p>
+                </div>
+                <Button 
+                  size="sm" 
+                  onClick={() => router.push('/onboarding')}
+                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                >
+                  Compléter
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Contenu selon l'onglet actif */}
         {activeTab === 'profile' && (
           <div className="space-y-6">
-            {/* Carte profil principal */}
+            {/* Carte profil principal avec informations enrichies */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -390,11 +479,15 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 
-                {/* Avatar et nom */}
+                {/* Avatar et nom avec sport */}
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <UserIcon className="w-8 h-8 text-white" />
+                      {sportInfo?.emoji ? (
+                        <span className="text-2xl">{sportInfo.emoji}</span>
+                      ) : (
+                        <UserIcon className="w-8 h-8 text-white" />
+                      )}
                     </div>
                     {isEditing && (
                       <button className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700">
@@ -445,6 +538,13 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                             <p className="text-gray-600">{userProfile.phone}</p>
                           </div>
                         )}
+                        {sportInfo && (
+                          <div className="mt-2">
+                            <Badge className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                              {sportInfo.emoji} {sportInfo.name}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -473,7 +573,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                   )}
                 </div>
 
-                {/* Informations complémentaires */}
+                {/* Informations complémentaires enrichies */}
                 {isEditing && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -496,11 +596,21 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                         className="mt-1"
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="country" className="text-sm">Pays</Label>
+                      <Input
+                        id="country"
+                        value={editData.country || ''}
+                        onChange={(e) => setEditData({...editData, country: e.target.value})}
+                        placeholder="Votre pays"
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
                 )}
 
-                {/* Informations de base */}
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                {/* Informations de base étendues */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                   <div className="text-center">
                     <Calendar className="w-5 h-5 mx-auto text-gray-500 mb-2" />
                     <p className="text-xs text-gray-500">Inscrit le</p>
@@ -515,20 +625,98 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                       {userProfile.primary_goals?.[0] || 'Non défini'}
                     </p>
                   </div>
-                  {userProfile.city && (
-                    <div className="text-center">
-                      <MapPin className="w-5 h-5 mx-auto text-gray-500 mb-2" />
-                      <p className="text-xs text-gray-500">Ville</p>
-                      <p className="text-sm font-semibold">{userProfile.city}</p>
-                    </div>
-                  )}
+                  <div className="text-center">
+                    <MapPin className="w-5 h-5 mx-auto text-gray-500 mb-2" />
+                    <p className="text-xs text-gray-500">Localisation</p>
+                    <p className="text-sm font-semibold">
+                      {userProfile.city || userProfile.country || 'Non spécifié'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <CheckCircle2 className="w-5 h-5 mx-auto text-gray-500 mb-2" />
+                    <p className="text-xs text-gray-500">Onboarding</p>
+                    <p className="text-sm font-semibold">
+                      {userProfile.onboarding_completed ? '✅ Complété' : '⏳ En cours'}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Onglet Statistiques */}
+        {/* Onglet Modules Actifs */}
+        {activeTab === 'modules' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Layers className="w-5 h-5" />
+                  <span>Modules MyFitHero Activés</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {activeModulesInfo.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {activeModulesInfo.map((module: any) => (
+                      <div key={module.id} className="p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50">
+                        <div className="flex items-center space-x-3">
+                          <div className="text-2xl">{module.icon}</div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{module.name}</h3>
+                            <p className="text-sm text-gray-600">{module.description}</p>
+                            <Badge variant="outline" className="mt-1">
+                              {module.category}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Layers className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun module activé</h3>
+                    <p className="text-gray-600 mb-4">
+                      Activez des modules pendant l'onboarding pour personnaliser votre expérience
+                    </p>
+                    <Button onClick={() => router.push('/onboarding')}>
+                      Configurer les modules
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Informations de training */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="w-5 h-5" />
+                  <span>Configuration Entraînement</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Fréquence d'entraînement</p>
+                    <p className="font-semibold">
+                      {userProfile.training_frequency ? `${userProfile.training_frequency} fois/semaine` : 'Non définie'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Niveau d'expérience</p>
+                    <Badge variant="outline" className="capitalize">
+                      {userProfile.fitness_experience || 'Non défini'}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Onglet Statistiques (conservé tel quel) */}
         {activeTab === 'stats' && userStats && derivedData && (
           <div className="space-y-6">
             
@@ -640,7 +828,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
           </div>
         )}
 
-        {/* Onglet Sport */}
+        {/* Onglet Sport avec informations enrichies */}
         {activeTab === 'sport' && (
           <div className="space-y-6">
             <Card>
@@ -655,9 +843,19 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                   <div className="space-y-4">
                     <div>
                       <p className="text-sm text-gray-600 mb-1">Sport principal</p>
-                      <p className="font-semibold text-lg">
-                        {userProfile.sport || 'Non spécifié'}
-                      </p>
+                      {sportInfo ? (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg">{sportInfo.emoji}</span>
+                          <p className="font-semibold text-lg">{sportInfo.name}</p>
+                        </div>
+                      ) : (
+                        <p className="font-semibold text-lg">Non spécifié</p>
+                      )}
+                      {sportInfo && (
+                        <Badge variant="outline" className="mt-1">
+                          {sportInfo.category}
+                        </Badge>
+                      )}
                     </div>
                     
                     <div>
@@ -671,6 +869,15 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                       <div>
                         <p className="text-sm text-gray-600 mb-1">Position</p>
                         <p className="font-semibold">{userProfile.sport_position}</p>
+                      </div>
+                    )}
+
+                    {userProfile.sport_level && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Niveau sport</p>
+                        <Badge variant="outline">
+                          {userProfile.sport_level}
+                        </Badge>
                       </div>
                     )}
                   </div>
@@ -713,7 +920,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                         <p className="text-sm text-gray-600 mb-1">IMC</p>
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold">{derivedData.bmi.value}</span>
-                          <Badge variant="outline" className={derivedData.bmi.color}>
+                          <Badge variant="outline" className={`${derivedData.bmi.color} ${derivedData.bmi.bgColor}`}>
                             {derivedData.bmi.category}
                           </Badge>
                         </div>
@@ -759,7 +966,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                 
                 {(derivedData?.completionRate || 0) < 100 && (
                   <Button 
-                    onClick={() => router.push('/profile-complete')}
+                    onClick={() => router.push('/onboarding')}
                     variant="outline"
                     className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
                   >
@@ -771,7 +978,7 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
           </div>
         )}
 
-        {/* Onglet Paramètres */}
+        {/* Onglet Paramètres (conservé tel quel) */}
         {activeTab === 'settings' && (
           <div className="space-y-6">
             <Card>
@@ -785,10 +992,10 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
                 <Button 
                   variant="outline" 
                   className="w-full justify-start"
-                  onClick={() => router.push('/profile-complete')}
+                  onClick={() => router.push('/onboarding')}
                 >
                   <Target className="w-4 h-4 mr-2" />
-                  Compléter le profil
+                  Refaire l'onboarding
                 </Button>
                 
                 <Button 
