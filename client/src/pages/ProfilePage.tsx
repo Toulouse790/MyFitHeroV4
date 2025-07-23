@@ -1,9 +1,28 @@
-import React, { useState, useEffect } from 'react';
+// pages/profile.tsx
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/router';
 import { 
-  User as UserIcon, Calendar, Target, 
-  Dumbbell, Star, 
-  Trophy, TrendingUp, Flame, Edit,
-  X
+  User as UserIcon, 
+  Calendar, 
+  Target, 
+  Dumbbell, 
+  Star, 
+  Trophy, 
+  TrendingUp, 
+  Flame, 
+  Edit,
+  X,
+  Save,
+  Camera,
+  Mail,
+  Phone,
+  MapPin,
+  Award,
+  Zap,
+  Heart,
+  Activity,
+  Shield,
+  Settings
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -12,60 +31,93 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { UniformHeader } from '@/components/UniformHeader';
 import { BadgeDisplay } from '@/components/BadgeDisplay';
 import { UserDataService } from '@/services/userDataService';
 import { UserProfile } from '@/types/user';
-import { I18nDemo } from '@/components/I18nDemo';
+import { useAppStore } from '@/stores/useAppStore';
+
+interface UserStats {
+  current_streak: number;
+  level: number;
+  total_workouts: number;
+  badges_earned: number;
+  experience_points: number;
+  total_calories_burned: number;
+  total_workout_minutes: number;
+  favorite_exercise: string;
+  last_workout_date: string;
+  weekly_goal_completion: number;
+}
 
 interface ProfilePageProps {}
 
 const ProfilePage: React.FC<ProfilePageProps> = () => {
+  const router = useRouter();
   const { toast } = useToast();
+  const { appStoreUser, setAppStoreUser } = useAppStore();
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userStats, setUserStats] = useState<any>(null);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [editData, setEditData] = useState<Partial<UserProfile>>({});
+  const [activeTab, setActiveTab] = useState<'profile' | 'stats' | 'sport' | 'settings'>('profile');
 
-  useEffect(() => {
-    loadProfileData();
-  }, []);
-
-  const loadProfileData = async () => {
+  // Chargement des données optimisé
+  const loadProfileData = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Charger le profil utilisateur
-      const { data: profile, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Erreur lors du chargement du profil:', profileError);
+      if (!user) {
+        router.push('/auth');
         return;
       }
 
-      setUserProfile(profile);
-      
-      // Initialiser les données d'édition avec les valeurs du profil
-      setEditData({
-        ...profile,
-        first_name: profile.first_name || profile.full_name?.split(' ')[0] || '',
-        last_name: profile.last_name || profile.full_name?.split(' ')[1] || '',
-        bio: profile.bio || ''
-      });
+      // Chargement parallèle des données
+      const [profileResult, statsResult] = await Promise.allSettled([
+        supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single(),
+        UserDataService.getUserStats(user.id)
+      ]);
 
-      // Charger les statistiques
-      const stats = await UserDataService.getUserStats(user.id);
-      setUserStats(stats);
+      // Gestion du profil
+      if (profileResult.status === 'fulfilled' && !profileResult.value.error) {
+        const profile = profileResult.value.data;
+        setUserProfile(profile);
+        
+        // Synchroniser avec le store global
+        setAppStoreUser(profile);
+        
+        // Initialiser les données d'édition
+        setEditData({
+          ...profile,
+          first_name: profile.first_name || profile.full_name?.split(' ')[0] || '',
+          last_name: profile.last_name || profile.full_name?.split(' ')[1] || '',
+          bio: profile.bio || '',
+          phone: profile.phone || '',
+          city: profile.city || ''
+        });
+      } else {
+        console.error('Erreur chargement profil:', profileResult);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger le profil",
+          variant: "destructive"
+        });
+      }
 
-      // Note: badgeStats supprimé car non utilisé dans l'interface
+      // Gestion des statistiques
+      if (statsResult.status === 'fulfilled') {
+        setUserStats(statsResult.value);
+      }
 
     } catch (error) {
       console.error('Erreur lors du chargement des données:', error);
@@ -77,37 +129,57 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router, toast, setAppStoreUser]);
 
-  const handleSave = async () => {
+  // Sauvegarde optimisée
+  const handleSave = useCallback(async () => {
     if (!userProfile) return;
 
     try {
       setSaving(true);
+      
+      const updateData = {
+        first_name: editData.first_name?.trim(),
+        last_name: editData.last_name?.trim(),
+        full_name: `${editData.first_name} ${editData.last_name}`.trim(),
+        bio: editData.bio?.trim(),
+        phone: editData.phone?.trim(),
+        city: editData.city?.trim(),
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('user_profiles')
-        .update({
-          full_name: `${editData.first_name} ${editData.last_name}`.trim(),
-          bio: editData.bio,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', userProfile.id);
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
-      setUserProfile({ ...userProfile, ...editData });
+      // Mise à jour locale et store
+      const updatedProfile = { ...userProfile, ...updateData };
+      setUserProfile(updatedProfile);
+      setAppStoreUser(updatedProfile);
       setIsEditing(false);
       
       toast({
         title: "Succès",
         description: "Profil mis à jour avec succès",
-        variant: "default"
+        action: {
+          label: "Voir les changements",
+          onClick: () => setActiveTab('profile')
+        }
       });
 
+      // Analytics
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'profile_updated', {
+          user_id: userProfile.id,
+          fields_updated: Object.keys(updateData).filter(key => updateData[key as keyof typeof updateData])
+        });
+      }
+
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      console.error('Erreur sauvegarde:', error);
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder le profil",
@@ -116,40 +188,86 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [userProfile, editData, setAppStoreUser, toast]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditData(userProfile || {});
     setIsEditing(false);
-  };
+  }, [userProfile]);
 
-  const getLevel = (experience: number): number => {
-    return Math.floor(experience / 1000) + 1;
-  };
+  // Calculs dérivés mémorisés
+  const derivedData = useMemo(() => {
+    if (!userStats || !userProfile) return null;
 
-  const getExperienceForNextLevel = (experience: number): number => {
-    const currentLevel = getLevel(experience);
-    return currentLevel * 1000 - experience;
-  };
+    const getLevel = (experience: number): number => Math.floor(experience / 1000) + 1;
+    const getExperienceForNextLevel = (experience: number): number => {
+      const currentLevel = getLevel(experience);
+      return currentLevel * 1000 - experience;
+    };
 
-  const formatDate = (dateString: string): string => {
+    // Calcul BMI si données disponibles
+    const bmi = userProfile.height_cm && userProfile.weight_kg 
+      ? (userProfile.weight_kg / Math.pow(userProfile.height_cm / 100, 2))
+      : null;
+
+    const getBMICategory = (bmi: number) => {
+      if (bmi < 18.5) return { category: 'Sous-poids', color: 'text-blue-600' };
+      if (bmi < 25) return { category: 'Normal', color: 'text-green-600' };
+      if (bmi < 30) return { category: 'Surpoids', color: 'text-yellow-600' };
+      return { category: 'Obésité', color: 'text-red-600' };
+    };
+
+    return {
+      level: getLevel(userStats.experience_points),
+      nextLevelXP: getExperienceForNextLevel(userStats.experience_points),
+      levelProgress: ((userStats.experience_points % 1000) / 1000) * 100,
+      bmi: bmi ? {
+        value: bmi.toFixed(1),
+        ...getBMICategory(bmi)
+      } : null,
+      completionRate: userProfile.sport && userProfile.age && userProfile.height_cm && userProfile.weight_kg ? 100 : 75
+    };
+  }, [userStats, userProfile]);
+
+  const formatDate = useCallback((dateString: string): string => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-  };
+  }, []);
 
+  const getPersonalizedMessage = useCallback(() => {
+    const userName = userProfile?.first_name || userProfile?.username || 'Champion';
+    const sport = userProfile?.sport || 'sport';
+    
+    if (derivedData?.completionRate === 100) {
+      return `🎯 Parfait ${userName} ! Profil optimisé pour ${sport}`;
+    } else if (derivedData?.completionRate > 80) {
+      return `💪 Excellent ${userName}, quelques détails à finaliser`;
+    } else {
+      return `🚀 ${userName}, complétez votre profil pour une expérience optimale`;
+    }
+  }, [userProfile, derivedData]);
+
+  useEffect(() => {
+    loadProfileData();
+  }, [loadProfileData]);
+
+  // Render des états de chargement
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <UniformHeader 
           title="Profil"
+          subtitle="Chargement..."
           showBackButton={true}
           gradient={true}
         />
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="p-4 space-y-6 max-w-2xl mx-auto">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
         </div>
       </div>
     );
@@ -163,12 +281,17 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
           showBackButton={true}
           gradient={true}
         />
-        <div className="p-4">
+        <div className="p-4 max-w-2xl mx-auto">
           <Card>
-            <CardContent className="py-8">
-              <p className="text-center text-gray-600">
-                Profil non trouvé
+            <CardContent className="py-12 text-center">
+              <UserIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Profil non trouvé</h3>
+              <p className="text-gray-600 mb-4">
+                Impossible de charger vos informations de profil.
               </p>
+              <Button onClick={() => router.push('/profile-complete')}>
+                Créer un profil
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -176,217 +299,525 @@ const ProfilePage: React.FC<ProfilePageProps> = () => {
     );
   }
 
+  const tabs = [
+    { id: 'profile', label: 'Profil', icon: UserIcon },
+    { id: 'stats', label: 'Stats', icon: TrendingUp },
+    { id: 'sport', label: 'Sport', icon: Dumbbell },
+    { id: 'settings', label: 'Paramètres', icon: Settings }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <UniformHeader 
-        title="Profil"
+        title="Mon Profil"
+        subtitle={getPersonalizedMessage()}
         showBackButton={true}
         gradient={true}
         rightContent={
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-white hover:bg-white/20"
-          >
-            {isEditing ? <X className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Badge variant="secondary" className="bg-white/20 text-white">
+              Niveau {derivedData?.level}
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(!isEditing)}
+              className="text-white hover:bg-white/20"
+            >
+              {isEditing ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+            </Button>
+          </div>
         }
       />
 
-      <div className="p-4 space-y-6">
-        {/* Carte profil principal */}
+      <div className="p-4 space-y-6 max-w-2xl mx-auto">
+        
+        {/* Navigation par onglets */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Informations personnelles</span>
-              {isEditing && (
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancel}
-                    disabled={saving}
+          <CardContent className="p-2">
+            <div className="flex space-x-1">
+              {tabs.map((tab) => {
+                const TabIcon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      activeTab === tab.id 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
                   >
-                    Annuler
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    {saving ? 'Sauvegarde...' : 'Sauvegarder'}
-                  </Button>
+                    <TabIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contenu selon l'onglet actif */}
+        {activeTab === 'profile' && (
+          <div className="space-y-6">
+            {/* Carte profil principal */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Informations personnelles</span>
+                  {isEditing && (
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancel}
+                        disabled={saving}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+                      </Button>
+                    </div>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* Avatar et nom */}
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <UserIcon className="w-8 h-8 text-white" />
+                    </div>
+                    {isEditing && (
+                      <button className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700">
+                        <Camera className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1">
+                    {isEditing ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="first_name" className="text-sm">Prénom</Label>
+                            <Input
+                              id="first_name"
+                              value={editData.first_name || ''}
+                              onChange={(e) => setEditData({...editData, first_name: e.target.value})}
+                              placeholder="Prénom"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="last_name" className="text-sm">Nom</Label>
+                            <Input
+                              id="last_name"
+                              value={editData.last_name || ''}
+                              onChange={(e) => setEditData({...editData, last_name: e.target.value})}
+                              placeholder="Nom"
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <h2 className="text-xl font-semibold text-gray-900">
+                          {userProfile.first_name || userProfile.full_name?.split(' ')[0] || ''} {' '}
+                          {userProfile.last_name || userProfile.full_name?.split(' ')[1] || ''}
+                        </h2>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Mail className="w-4 h-4 text-gray-500" />
+                          <p className="text-gray-600">{userProfile.email}</p>
+                        </div>
+                        {userProfile.phone && (
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Phone className="w-4 h-4 text-gray-500" />
+                            <p className="text-gray-600">{userProfile.phone}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <UserIcon className="w-8 h-8 text-white" />
-              </div>
-              <div className="flex-1">
-                {isEditing ? (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label htmlFor="first_name">Prénom</Label>
-                        <Input
-                          id="first_name"
-                          value={editData.first_name || ''}
-                          onChange={(e) => setEditData({...editData, first_name: e.target.value})}
-                          placeholder="Prénom"
-                        />
+
+                {/* Bio */}
+                <div>
+                  {isEditing ? (
+                    <div>
+                      <Label htmlFor="bio" className="text-sm">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        value={editData.bio || ''}
+                        onChange={(e) => setEditData({...editData, bio: e.target.value})}
+                        placeholder="Parlez-nous de vous, vos objectifs, votre motivation..."
+                        rows={4}
+                        className="mt-1"
+                      />
+                    </div>
+                  ) : (
+                    userProfile.bio && (
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-gray-700 text-sm leading-relaxed">{userProfile.bio}</p>
                       </div>
-                      <div>
-                        <Label htmlFor="last_name">Nom</Label>
-                        <Input
-                          id="last_name"
-                          value={editData.last_name || ''}
-                          onChange={(e) => setEditData({...editData, last_name: e.target.value})}
-                          placeholder="Nom"
-                        />
-                      </div>
+                    )
+                  )}
+                </div>
+
+                {/* Informations complémentaires */}
+                {isEditing && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone" className="text-sm">Téléphone</Label>
+                      <Input
+                        id="phone"
+                        value={editData.phone || ''}
+                        onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                        placeholder="Numéro de téléphone"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city" className="text-sm">Ville</Label>
+                      <Input
+                        id="city"
+                        value={editData.city || ''}
+                        onChange={(e) => setEditData({...editData, city: e.target.value})}
+                        placeholder="Votre ville"
+                        className="mt-1"
+                      />
                     </div>
                   </div>
-                ) : (
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      {userProfile.first_name || userProfile.full_name?.split(' ')[0] || ''} {userProfile.last_name || userProfile.full_name?.split(' ')[1] || ''}
-                    </h2>
-                    <p className="text-gray-600">{userProfile.email}</p>
-                  </div>
                 )}
-              </div>
-            </div>
 
-            {isEditing ? (
-              <div>
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={editData.bio || ''}
-                  onChange={(e) => setEditData({...editData, bio: e.target.value})}
-                  placeholder="Parlez-nous de vous..."
-                  rows={3}
-                />
-              </div>
-            ) : (
-              userProfile.bio && (
-                <p className="text-gray-700">{userProfile.bio}</p>
-              )
-            )}
-
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="text-center">
-                <Calendar className="w-5 h-5 mx-auto text-gray-600 mb-1" />
-                <p className="text-sm text-gray-600">Inscrit le</p>
-                <p className="font-semibold">{userProfile.created_at ? formatDate(userProfile.created_at) : 'Date inconnue'}</p>
-              </div>
-              <div className="text-center">
-                <Target className="w-5 h-5 mx-auto text-gray-600 mb-1" />
-                <p className="text-sm text-gray-600">Objectif</p>
-                <p className="font-semibold">{userProfile.fitness_goal || 'Non spécifié'}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Statistiques */}
-        {userStats && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5" />
-                <span>Statistiques</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <Flame className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-                  <p className="text-sm text-gray-600">Streak actuelle</p>
-                  <p className="text-2xl font-bold text-blue-600">{userStats.current_streak}</p>
+                {/* Informations de base */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                  <div className="text-center">
+                    <Calendar className="w-5 h-5 mx-auto text-gray-500 mb-2" />
+                    <p className="text-xs text-gray-500">Inscrit le</p>
+                    <p className="text-sm font-semibold">
+                      {userProfile.created_at ? formatDate(userProfile.created_at) : 'Inconnu'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <Target className="w-5 h-5 mx-auto text-gray-500 mb-2" />
+                    <p className="text-xs text-gray-500">Objectif</p>
+                    <p className="text-sm font-semibold">
+                      {userProfile.primary_goals?.[0] || 'Non défini'}
+                    </p>
+                  </div>
+                  {userProfile.city && (
+                    <div className="text-center">
+                      <MapPin className="w-5 h-5 mx-auto text-gray-500 mb-2" />
+                      <p className="text-xs text-gray-500">Ville</p>
+                      <p className="text-sm font-semibold">{userProfile.city}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <Star className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-                  <p className="text-sm text-gray-600">Niveau</p>
-                  <p className="text-2xl font-bold text-purple-600">{userStats.level}</p>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <Dumbbell className="w-8 h-8 mx-auto text-green-600 mb-2" />
-                  <p className="text-sm text-gray-600">Workouts</p>
-                  <p className="text-2xl font-bold text-green-600">{userStats.total_workouts}</p>
-                </div>
-                <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                  <Trophy className="w-8 h-8 mx-auto text-yellow-600 mb-2" />
-                  <p className="text-sm text-gray-600">Badges</p>
-                  <p className="text-2xl font-bold text-yellow-600">{userStats.badges_earned}</p>
-                </div>
-              </div>
-              
-              {/* Barre de progression d'expérience */}
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Expérience</span>
-                  <span className="text-sm text-gray-600">
-                    {userStats.experience_points} XP
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
-                    style={{ 
-                      width: `${((userStats.experience_points % 1000) / 1000) * 100}%` 
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {getExperienceForNextLevel(userStats.experience_points)} XP pour le niveau {getLevel(userStats.experience_points) + 1}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
-        {/* Badges */}
-        <BadgeDisplay className="w-full" maxDisplay={5} />
+        {/* Onglet Statistiques */}
+        {activeTab === 'stats' && userStats && derivedData && (
+          <div className="space-y-6">
+            
+            {/* Niveau et XP */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Star className="w-5 h-5 text-purple-600" />
+                  <span>Niveau et Expérience</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center mb-6">
+                  <div className="text-4xl font-bold text-purple-600 mb-2">
+                    Niveau {derivedData.level}
+                  </div>
+                  <p className="text-gray-600">{userStats.experience_points} XP total</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Progression</span>
+                    <span className="text-sm text-gray-600">
+                      {derivedData.nextLevelXP} XP pour le niveau {derivedData.level + 1}
+                    </span>
+                  </div>
+                  <Progress value={derivedData.levelProgress} className="h-3" />
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Informations du profil sportif */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Dumbbell className="w-5 h-5" />
-              <span>Profil sportif</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-gray-600">Sport principal</p>
-                  <p className="font-semibold">{userProfile.sport_name || userProfile.sport || 'Non spécifié'}</p>
+            {/* Statistiques principales */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5" />
+                  <span>Vos performances</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+                    <Flame className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                    <p className="text-xs text-gray-600 mb-1">Série actuelle</p>
+                    <p className="text-2xl font-bold text-blue-600">{userStats.current_streak}</p>
+                    <p className="text-xs text-blue-600">jours</p>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+                    <Dumbbell className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                    <p className="text-xs text-gray-600 mb-1">Entraînements</p>
+                    <p className="text-2xl font-bold text-green-600">{userStats.total_workouts}</p>
+                    <p className="text-xs text-green-600">sessions</p>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg">
+                    <Zap className="w-8 h-8 mx-auto text-orange-600 mb-2" />
+                    <p className="text-xs text-gray-600 mb-1">Calories</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {userStats.total_calories_burned?.toLocaleString() || 0}
+                    </p>
+                    <p className="text-xs text-orange-600">brûlées</p>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+                    <Trophy className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                    <p className="text-xs text-gray-600 mb-1">Badges</p>
+                    <p className="text-2xl font-bold text-purple-600">{userStats.badges_earned}</p>
+                    <p className="text-xs text-purple-600">obtenus</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Niveau</p>
-                  <p className="font-semibold">{userProfile.sport_level || 'Non spécifié'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Position</p>
-                  <p className="font-semibold">{userProfile.sport_position || 'Non spécifié'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Âge</p>
-                  <p className="font-semibold">{userProfile.age ? `${userProfile.age} ans` : 'Non spécifié'}</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Démo i18n et conversion d'unités */}
-        <I18nDemo />
+                {/* Statistiques supplémentaires */}
+                <div className="mt-6 pt-6 border-t">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Temps total:</span>
+                      <span className="font-semibold">
+                        {Math.floor((userStats.total_workout_minutes || 0) / 60)}h{(userStats.total_workout_minutes || 0) % 60}min
+                      </span>
+                    </div>
+                    {userStats.favorite_exercise && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Exercice favori:</span>
+                        <span className="font-semibold">{userStats.favorite_exercise}</span>
+                      </div>
+                    )}
+                    {userStats.weekly_goal_completion && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Objectif semaine:</span>
+                        <span className="font-semibold">{userStats.weekly_goal_completion}%</span>
+                      </div>
+                    )}
+                    {userStats.last_workout_date && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Dernier workout:</span>
+                        <span className="font-semibold">
+                          {formatDate(userStats.last_workout_date)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Badges */}
+            <BadgeDisplay className="w-full" maxDisplay={8} showProgress={true} />
+          </div>
+        )}
+
+        {/* Onglet Sport */}
+        {activeTab === 'sport' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Dumbbell className="w-5 h-5" />
+                  <span>Profil sportif</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Sport principal</p>
+                      <p className="font-semibold text-lg">
+                        {userProfile.sport || 'Non spécifié'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">Niveau d'expérience</p>
+                      <Badge variant="outline" className="capitalize">
+                        {userProfile.fitness_experience || 'Non défini'}
+                      </Badge>
+                    </div>
+                    
+                    {userProfile.sport_position && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Position</p>
+                        <p className="font-semibold">{userProfile.sport_position}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Âge</p>
+                        <p className="font-semibold">
+                          {userProfile.age ? `${userProfile.age} ans` : 'Non spécifié'}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Genre</p>
+                        <p className="font-semibold capitalize">
+                          {userProfile.gender === 'male' ? 'Homme' : userProfile.gender === 'female' ? 'Femme' : 'Non spécifié'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Taille</p>
+                        <p className="font-semibold">
+                          {userProfile.height_cm ? `${userProfile.height_cm} cm` : 'Non spécifié'}
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Poids</p>
+                        <p className="font-semibold">
+                          {userProfile.weight_kg ? `${userProfile.weight_kg} kg` : 'Non spécifié'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {derivedData?.bmi && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">IMC</p>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold">{derivedData.bmi.value}</span>
+                          <Badge variant="outline" className={derivedData.bmi.color}>
+                            {derivedData.bmi.category}
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Objectifs */}
+                {userProfile.primary_goals && userProfile.primary_goals.length > 0 && (
+                  <div className="mt-6 pt-6 border-t">
+                    <p className="text-sm text-gray-600 mb-3">Objectifs principaux</p>
+                    <div className="flex flex-wrap gap-2">
+                      {userProfile.primary_goals.map((goal, index) => (
+                        <Badge key={index} variant="secondary">
+                          {goal}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Complétion du profil */}
+            <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-100">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-purple-900 mb-1">
+                      Complétude du profil
+                    </h3>
+                    <p className="text-sm text-purple-700">
+                      Profil {derivedData?.completionRate || 0}% complet
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="text-purple-700 border-purple-200">
+                    {derivedData?.completionRate || 0}%
+                  </Badge>
+                </div>
+                
+                <Progress value={derivedData?.completionRate || 0} className="mb-4" />
+                
+                {(derivedData?.completionRate || 0) < 100 && (
+                  <Button 
+                    onClick={() => router.push('/profile-complete')}
+                    variant="outline"
+                    className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+                  >
+                    Compléter le profil
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Onglet Paramètres */}
+        {activeTab === 'settings' && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Settings className="w-5 h-5" />
+                  <span>Paramètres du profil</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push('/profile-complete')}
+                >
+                  <Target className="w-4 h-4 mr-2" />
+                  Compléter le profil
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push('/settings')}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Paramètres généraux
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push('/privacy')}
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Confidentialité
+                </Button>
+
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-gray-500 text-center">
+                    Dernière mise à jour: {userProfile.updated_at ? formatDate(userProfile.updated_at) : 'Inconnue'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
