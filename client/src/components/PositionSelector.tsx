@@ -94,7 +94,7 @@ export default function PositionSelector({
   variant = 'default',
   disabled = false,
   className = '',
-  placeholder = 'Rechercher una position...',
+  placeholder = 'Rechercher une position...',
   maxSuggestions = 8,
   enableAIRecommendations = true
 }: PositionSelectorProps) {
