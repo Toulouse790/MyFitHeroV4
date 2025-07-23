@@ -30,7 +30,8 @@ interface ConversationalOnboardingProps {
   onSkip?: () => void;
 }
 
-export default function ConversationalOnboarding({ onComplete, onSkip }: ConversationalOnboardingProps) {
+export default function ConversationalOnboarding({ onComplete, onSkip }: ConversationalOnboardingProps {
+
   const { toast } = useToast();
   const [currentStepId, setCurrentStepId] = useState(CONVERSATIONAL_ONBOARDING_FLOW.initialStep);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
