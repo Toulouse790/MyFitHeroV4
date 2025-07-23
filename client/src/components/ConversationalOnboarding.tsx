@@ -12,12 +12,12 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { 
+  ConversationalStep, 
+  OnboardingData
+} from '@/types/conversationalOnboarding';
+import { 
   CONVERSATIONAL_ONBOARDING_FLOW
-  // calculateEstimatedTime  ← SUPPRIMÉ car n'existe pas
 } from '@/data/conversationalFlow';
-const calculateEstimatedTime = (modules: string[]): number => {
-  return Math.max(10, modules.length * 5); // 5 min par module, minimum 10 min
-}; from '@/data/conversationalFlow';
 import { AVAILABLE_SPORTS, MAIN_OBJECTIVES, AVAILABLE_MODULES } from '@/data/onboardingData';
 import SportSelector from './SportSelector';
 import PositionSelector from './PositionSelector';
@@ -30,8 +30,7 @@ interface ConversationalOnboardingProps {
   onSkip?: () => void;
 }
 
-export default function ConversationalOnboarding({ onComplete, onSkip }: ConversationalOnboardingProps {
-
+export default function ConversationalOnboarding({ onComplete, onSkip }: ConversationalOnboardingProps) {
   const { toast } = useToast();
   const [currentStepId, setCurrentStepId] = useState(CONVERSATIONAL_ONBOARDING_FLOW.initialStep);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
@@ -39,7 +38,7 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       currentStep: CONVERSATIONAL_ONBOARDING_FLOW.initialStep,
       completedSteps: [],
       totalSteps: CONVERSATIONAL_ONBOARDING_FLOW.steps.length,
-      estimatedTimeLeft: CONVERSATIONAL_ONBOARDING_FLOW.estimatedDuration,
+      estimatedTimeLeft: 15, // Temps fixe
       skipCount: 0,
       moduleSpecificSteps: {}
     },
@@ -130,7 +129,8 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       // Logique spéciale pour les modules
       if (currentStep.id === 'module_selection') {
         updatedData.selectedModules = currentResponse;
-        updatedData.progress.estimatedTimeLeft = calculateEstimatedTime(currentResponse);
+        // Temps estimé fixe basé sur le nombre de modules
+        updatedData.progress.estimatedTimeLeft = Math.max(10, currentResponse.length * 3);
       }
       
       // Gestion des positions sportives dynamiques
@@ -172,14 +172,14 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
     } finally {
       setIsLoading(false);
     }
-  }, [currentStep, currentResponse, validateResponse]); // Retirer onboardingData des dépendances
+  }, [currentStep, currentResponse, validateResponse]);
 
   // Fonction pour mapper les valeurs vers les contraintes de la base de données
   const mapFitnessGoal = (mainObjective: string): string => {
     const mapping: Record<string, string> = {
       'performance': 'performance',
       'health_wellness': 'general_health',
-      'body_composition': 'muscle_gain', // ou 'weight_loss' selon le contexte
+      'body_composition': 'muscle_gain',
       'energy_sleep': 'energy',
       'strength_building': 'strength',
       'endurance_cardio': 'endurance',
@@ -189,7 +189,7 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       'muscle_gain': 'muscle_gain'
     };
     
-    return mapping[mainObjective] || 'general'; // Valeur par défaut si pas trouvé
+    return mapping[mainObjective] || 'general';
   };
 
   const mapSportLevel = (sportLevel: string): string => {
@@ -204,7 +204,7 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       'expert': 'professional'
     };
     
-    return mapping[sportLevel] || 'recreational'; // Valeur par défaut
+    return mapping[sportLevel] || 'recreational';
   };
 
   // Sauvegarde des données
@@ -227,9 +227,9 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
         age: data.age,
         gender: data.gender,
         lifestyle: data.lifestyle,
-        fitness_goal: mapFitnessGoal(data.mainObjective || ''), // Corrigé: utiliser le mapping
-        modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: selected_modules → modules
-        active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'], // Corrigé: selected_modules → active_modules
+        fitness_goal: mapFitnessGoal(data.mainObjective || ''),
+        modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'],
+        active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'],
         sport: data.sport,
         sport_position: data.sportPosition,
         sport_level: mapSportLevel(data.sportLevel || ''),
@@ -239,12 +239,12 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
         strength_objective: data.strengthObjective,
         strength_experience: data.strengthExperience,
         dietary_preference: data.dietaryPreference,
-        food_allergies: data.foodAllergies || [], // S'assurer que c'est un array
+        food_allergies: data.foodAllergies || [],
         nutrition_objective: data.nutritionObjective,
-        dietary_restrictions: data.dietaryRestrictions || [], // S'assurer que c'est un array
-        sleep_hours_average: data.averageSleepHours, // Corrigé: average_sleep_hours → sleep_hours_average
+        dietary_restrictions: data.dietaryRestrictions || [],
+        sleep_hours_average: data.averageSleepHours,
         sleep_difficulties: data.sleepDifficulties,
-        water_intake_goal: data.hydrationGoal, // Corrigé: hydration_goal → water_intake_goal
+        water_intake_goal: data.hydrationGoal,
         hydration_reminders: data.hydrationReminders,
         motivation: data.motivation,
         available_time_per_day: data.availableTimePerDay,
@@ -294,9 +294,6 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
       
       await saveProgress(finalData);
       console.log('🟡 saveProgress terminé avec succès');
-      
-      // Ne pas mettre à jour Supabase ici - laissons OnboardingQuestionnaire s'en charger
-      // pour éviter les conflits de concurrence
       
       console.log('🟡 Appel de onComplete avec finalData');
       onComplete(finalData);
@@ -562,8 +559,6 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
           return (
             <PersonalInfoForm
               onComplete={(data) => {
-                // Ne pas utiliser setCurrentResponse avec un objet car cela cause React error #31
-                // Mettre à jour directement les données d'onboarding
                 setOnboardingData(prev => ({
                   ...prev,
                   age: data.age,
@@ -572,7 +567,6 @@ export default function ConversationalOnboarding({ onComplete, onSkip }: Convers
                   availableTimePerDay: data.availableTimePerDay
                 }));
                 
-                // Aller directement à l'étape suivante
                 let nextStepId: string;
                 if (typeof currentStep.nextStep === 'function') {
                   nextStepId = currentStep.nextStep(data, {
