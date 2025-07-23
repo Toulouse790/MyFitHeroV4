@@ -2,7 +2,7 @@ import React from 'react';
 import { useLocation, Link } from 'wouter';
 import { ArrowLeft, User, Dumbbell } from 'lucide-react';
 import BottomNav from './BottomNav';
-import { FloatingActionButton } from './FloatingActionButton';
+import FloatingActionButton from './FloatingActionButton'; // ← Changé: import default au lieu de named
 import { ActiveSessionIndicator } from './ActiveSessionIndicator';
 import { useIntelligentPreloading, useNetworkAdaptation } from '@/hooks/useIntelligentPreloading';
 
