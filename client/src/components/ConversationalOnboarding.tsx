@@ -12,13 +12,12 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  ConversationalStep, 
-  OnboardingData
-} from '@/types/conversationalOnboarding';
-import { 
-  CONVERSATIONAL_ONBOARDING_FLOW, 
-  calculateEstimatedTime
+  CONVERSATIONAL_ONBOARDING_FLOW
+  // calculateEstimatedTime  ← SUPPRIMÉ car n'existe pas
 } from '@/data/conversationalFlow';
+const calculateEstimatedTime = (modules: string[]): number => {
+  return Math.max(10, modules.length * 5); // 5 min par module, minimum 10 min
+}; from '@/data/conversationalFlow';
 import { AVAILABLE_SPORTS, MAIN_OBJECTIVES, AVAILABLE_MODULES } from '@/data/onboardingData';
 import SportSelector from './SportSelector';
 import PositionSelector from './PositionSelector';
