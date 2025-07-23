@@ -49,7 +49,7 @@ jobs:
         cname: myfithero.com # Remplacer par votre domaine
         
     - name: Upload artifacts 📋
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4.6.2
       with:
         name: build-files
         path: client/dist/
