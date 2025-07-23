@@ -1,278 +1,270 @@
 // client/src/services/sportsService.ts
-import { supabase } from '@/lib/supabase';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SportOption } from '@/types/onboarding';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery, useQueryClient } from '@tanstack/react-query'; // facultatif
+import React from 'react';
 
-export interface Sport {
+/* ------------------------------------------------------------------ */
+/*                          CONFIG SUPABASE                           */
+/* ------------------------------------------------------------------ */
+
+const supabase: SupabaseClient = createClient(
+  import.meta.env.VITE_SUPABASE_URL as string,
+  import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+);
+
+/* ------------------------------------------------------------------ */
+/*                            TYPES                                   */
+/* ------------------------------------------------------------------ */
+
+export interface SportRow {
   id: string;
   name: string;
-  icon?: string;
-  emoji?: string;
-  positions?: string[];
-  is_popular?: boolean; // Corrigé: is_active → is_popular
-  created_at?: string;
-  updated_at?: string;
+  emoji: string | null;
+  icon: string | null;
+  category: string | null;
+  positions: string[] | null;
+  is_popular: boolean | null;
+  user_count: number | null;
+  updated_at: string;
 }
 
-export interface SportsData {
-  sports: SportOption[];
-  positions: Record<string, string[]>;
+export interface SportSuggestionPayload {
+  sport_name: string;
+  suggested_position?: string;
+  locale?: string;
+  user_id?: string;
 }
 
-// Cache pour éviter les requêtes répétées
-let sportsCache: SportsData | null = null;
-let cacheExpiry = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+/* ------------------------------------------------------------------ */
+/*                       CONSTANTES / CACHE                           */
+/* ------------------------------------------------------------------ */
 
-export class SportsService {
-  
-  /**
-   * Récupère tous les sports depuis Supabase avec leurs positions
-   */
-  static async getSports(): Promise<SportsData> {
-    // Vérifier le cache
-    if (sportsCache && Date.now() < cacheExpiry) {
-      return sportsCache;
-    }
+const CACHE_TTL = 5 * 60_000; // 5 min
+const MEMO_KEY = 'sports-cache-v1';
 
-    try {
-      const { data: sportsData, error } = await supabase
-        .from('sports_library')
-        .select('*')
-        .eq('is_popular', true) // Corrigé: is_active → is_popular
-        .order('name');
+/* mémoire : { data, expiry } */
+let memoryCache: { data: SportRow[]; expiry: number } | null = null;
 
-      if (error) {
-        console.error('Erreur lors de la récupération des sports:', error);
-        return this.getFallbackSports();
-      }
+/* ------------------------------------------------------------------ */
+/*                       FONCTIONS BAS NIVEAU                         */
+/* ------------------------------------------------------------------ */
 
-      if (!sportsData || sportsData.length === 0) {
-        return this.getFallbackSports();
-      }
+/** Lecture (et mise en cache) de la table `sports_library` */
+async function fetchAllSports(): Promise<SportRow[]> {
+  // 1. Cache mémoire
+  if (memoryCache && memoryCache.expiry > Date.now()) {
+    return memoryCache.data;
+  }
 
-      const sports: SportOption[] = sportsData.map(sport => ({
-        id: sport.id,
-        name: sport.name,
-        emoji: sport.emoji || '🏃‍♂️',
-        positions: sport.positions || []
-      }));
-
-      const positions: Record<string, string[]> = {};
-      sportsData.forEach(sport => {
-        if (sport.positions && sport.positions.length > 0) {
-          positions[sport.id] = sport.positions;
-        }
-      });
-
-      const result: SportsData = { sports, positions };
-      
-      // Mettre en cache
-      sportsCache = result;
-      cacheExpiry = Date.now() + CACHE_DURATION;
-      
-      return result;
-    } catch (error) {
-      console.error('Erreur lors de la récupération des sports:', error);
-      return this.getFallbackSports();
+  // 2. Cache sessionStorage (pour F5)
+  const cached = sessionStorage.getItem(MEMO_KEY);
+  if (cached) {
+    const { data, expiry } = JSON.parse(cached) as typeof memoryCache;
+    if (expiry > Date.now()) {
+      memoryCache = { data, expiry };
+      return data;
     }
   }
 
-  /**
-   * Récupère un sport spécifique avec ses positions
-   */
-  static async getSport(sportId: string): Promise<SportOption | null> {
-    try {
-      const { data: sport, error } = await supabase
-        .from('sports_library')
-        .select('*')
-        .eq('id', sportId)
-        .eq('is_popular', true) // Corrigé: is_active → is_popular
-        .single();
+  // 3. Requête Supabase
+  const { data, error } = await supabase
+    .from('sports_library')
+    .select(
+      'id, name, emoji, icon, category, positions, is_popular, user_count, updated_at',
+    )
+    .order('name', { ascending: true });
 
-      if (error || !sport) {
-        console.error('Sport non trouvé:', sportId);
-        return null;
-      }
-
-      return {
-        id: sport.id,
-        name: sport.name,
-        emoji: sport.emoji || '🏃‍♂️',
-        positions: sport.positions || []
-      };
-    } catch (error) {
-      console.error('Erreur lors de la récupération du sport:', error);
-      return null;
-    }
+  if (error) {
+    console.error('[sportService] fetchAllSports:', error);
+    throw error;
   }
 
-  /**
-   * Ajoute un nouveau sport suggéré par l'utilisateur
-   */
-  static async suggestNewSport(sportName: string, userPosition?: string): Promise<boolean> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('Utilisateur non connecté');
-        return false;
-      }
+  // 4. Cache
+  const payload = { data, expiry: Date.now() + CACHE_TTL };
+  memoryCache = payload;
+  sessionStorage.setItem(MEMO_KEY, JSON.stringify(payload));
 
-      const { error } = await supabase
-        .from('sport_suggestions')
-        .insert({
-          sport_name: sportName,
-          suggested_position: userPosition,
-          user_id: user.id,
-          status: 'pending'
-        });
+  return data as SportRow[];
+}
 
-      if (error) {
-        console.error('Erreur lors de la suggestion de sport:', error);
-        return false;
-      }
+/** Conversion SQL → SportOption (côté UI) */
+function mapRow(row: SportRow): SportOption {
+  return {
+    id: row.id,
+    name: row.name,
+    emoji: row.emoji ?? '🏃‍♂️',
+    positions: row.positions ?? [],
+  };
+}
 
-      return true;
-    } catch (error) {
-      console.error('Erreur lors de la suggestion de sport:', error);
-      return false;
-    }
-  }
+/* ------------------------------------------------------------------ */
+/*                MÉTHODES PUBLIQUES – ACCÈS/SEARCH                    */
+/* ------------------------------------------------------------------ */
 
-  /**
-   * Recherche de sports avec autocomplétion
-   */
-  static async searchSports(query: string): Promise<SportOption[]> {
-    try {
-      const { data: sports, error } = await supabase
-        .from('sports_library')
-        .select('*')
-        .ilike('name', `%${query}%`)
-        .eq('is_popular', true) // Corrigé: is_active → is_popular
-        .order('name')
-        .limit(10);
+export const SportsService = {
+  /** Tous les sports (avec cache)  */
+  async getSports(): Promise<SportOption[]> {
+    const rows = await fetchAllSports();
+    return rows.map(mapRow);
+  },
 
-      if (error) {
-        console.error('Erreur lors de la recherche de sports:', error);
-        return [];
-      }
+  /** Sports populaires */
+  async getPopularSports(limit = 12): Promise<SportOption[]> {
+    const rows = await fetchAllSports();
+    return rows
+      .filter((r) => r.is_popular)
+      .slice(0, limit)
+      .map(mapRow);
+  },
 
-      return sports.map(sport => ({
-        id: sport.id,
-        name: sport.name,
-        emoji: sport.emoji || '🏃‍♂️',
-        positions: sport.positions || []
-      }));
-    } catch (error) {
-      console.error('Erreur lors de la recherche de sports:', error);
+  /** Recherche full-text ; retourne max 15 résultats */
+  async searchSports(query: string): Promise<SportOption[]> {
+    if (!query || query.length < 2) return [];
+
+    // Recherche locale d’abord (perfs)
+    const localRows = (await fetchAllSports()).filter((r) =>
+      r.name.toLowerCase().includes(query.toLowerCase()),
+    );
+
+    if (localRows.length > 0) return localRows.map(mapRow);
+
+    // Recherche SQL ILIKE
+    const { data, error } = await supabase
+      .from('sports_library')
+      .select(
+        'id, name, emoji, icon, category, positions',
+      )
+      .ilike('name', `%${query}%`)
+      .order('name')
+      .limit(15);
+
+    if (error) {
+      console.error('[sportService] searchSports:', error);
       return [];
     }
-  }
+    return (data ?? []).map(mapRow);
+  },
 
-  /**
-   * Vide le cache des sports
-   */
-  static clearCache(): void {
-    sportsCache = null;
-    cacheExpiry = 0;
-  }
+  /** Détails d’un sport */
+  async getSportById(id: string): Promise<SportOption | null> {
+    const { data, error } = await supabase
+      .from('sports_library')
+      .select(
+        'id, name, emoji, icon, category, positions',
+      )
+      .eq('id', id)
+      .single();
 
-  /**
-   * Sports de fallback en cas d'erreur
-   */
-  private static getFallbackSports(): SportsData {
-    const fallbackSports: SportOption[] = [
-      {
-        id: 'football',
-        name: 'Football',
-        emoji: '⚽',
-        positions: ['Gardien', 'Défenseur central', 'Latéral droit', 'Latéral gauche', 'Milieu défensif', 'Milieu central', 'Milieu offensif', 'Ailier droit', 'Ailier gauche', 'Attaquant', 'Avant-centre']
-      },
-      {
-        id: 'basketball',
-        name: 'Basketball',
-        emoji: '🏀',
-        positions: ['Meneur (PG)', 'Arrière (SG)', 'Ailier (SF)', 'Ailier Fort (PF)', 'Pivot (C)']
-      },
-      {
-        id: 'tennis',
-        name: 'Tennis',
-        emoji: '🎾',
-        positions: ['Joueur de fond de court', 'Joueur offensif', 'Joueur polyvalent']
-      },
-      {
-        id: 'running',
-        name: 'Course à Pied',
-        emoji: '🏃‍♂️',
-        positions: ['Sprint', 'Demi-fond', 'Fond', 'Marathon', 'Trail']
-      },
-      {
-        id: 'cycling',
-        name: 'Cyclisme',
-        emoji: '🚴‍♂️',
-        positions: ['Route', 'VTT', 'Piste', 'BMX']
-      },
-      {
-        id: 'musculation',
-        name: 'Musculation',
-        emoji: '💪',
-        positions: ['Bodybuilding', 'Powerlifting', 'Haltérophilie', 'CrossFit', 'Fitness général']
-      },
-      {
-        id: 'other',
-        name: 'Autre sport',
-        emoji: '🎯',
-        positions: []
-      }
-    ];
+    if (error || !data) {
+      console.error('[sportService] getSportById:', error);
+      return null;
+    }
+    return mapRow(data as SportRow);
+  },
 
-    const positions: Record<string, string[]> = {};
-    fallbackSports.forEach(sport => {
-      if (sport.positions && sport.positions.length > 0) {
-        positions[sport.id] = sport.positions;
-      }
-    });
-
-    return { sports: fallbackSports, positions };
-  }
-}
-
-// Hook React pour utiliser les sports
-export const useSports = () => {
-  const [sports, setSports] = React.useState<SportOption[]>([]);
-  const [positions, setPositions] = React.useState<Record<string, string[]>>({});
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-
-  React.useEffect(() => {
-    const loadSports = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await SportsService.getSports();
-        setSports(data.sports);
-        setPositions(data.positions);
-      } catch (err) {
-        console.error('Erreur lors du chargement des sports:', err);
-        setError('Erreur lors du chargement des sports');
-      } finally {
-        setLoading(false);
-      }
+  /** Suggestion utilisateur → table `sport_suggestions` */
+  async suggestSport(
+    sportName: string,
+    opts: { suggested_position?: string; locale?: string } = {},
+  ): Promise<boolean> {
+    const { data: userData } = await supabase.auth.getUser();
+    const payload: SportSuggestionPayload = {
+      sport_name: sportName,
+      suggested_position: opts.suggested_position,
+      locale: opts.locale ?? 'fr',
+      user_id: userData?.user?.id ?? undefined,
     };
 
-    loadSports();
-  }, []);
+    const { error } = await supabase
+      .from('sport_suggestions')
+      .insert(payload);
 
-  return {
-    sports,
-    positions,
-    loading,
-    error,
-    refreshSports: () => {
-      SportsService.clearCache();
-      return SportsService.getSports();
+    if (error) {
+      console.error('[sportService] suggestSport:', error);
+      return false;
     }
-  };
+    return true;
+  },
+
+  /** Invalidation totale du cache */
+  clearCache() {
+    memoryCache = null;
+    sessionStorage.removeItem(MEMO_KEY);
+  },
 };
 
-// Import React pour le hook
-import React from 'react';
+/* ------------------------------------------------------------------ */
+/*                       HOOKS REACT (React Query)                     */
+/* ------------------------------------------------------------------ */
+
+export function useSports(options?: { enabled?: boolean }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const query = useQuery(
+    ['sports', 'all'],
+    () => SportsService.getSports(),
+    {
+      staleTime: CACHE_TTL,
+      cacheTime: CACHE_TTL * 2,
+      enabled: options?.enabled ?? true,
+      onError: (err) => {
+        console.error(err);
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger la liste des sports',
+          variant: 'destructive',
+        });
+      },
+    },
+  );
+
+  return {
+    sports: query.data ?? [],
+    loading: query.isLoading,
+    error: query.isError ? 'Erreur de chargement' : null,
+    refreshSports: () => {
+      SportsService.clearCache();
+      queryClient.invalidateQueries(['sports', 'all']);
+    },
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*          HOOK LÉGER Fallback (si React Query n’est pas utilisé)     */
+/* ------------------------------------------------------------------ */
+
+export function useSportsFallback() {
+  const { toast } = useToast();
+  const [state, setState] = React.useState<{
+    sports: SportOption[];
+    loading: boolean;
+    error: string | null;
+  }>({
+    sports: [],
+    loading: true,
+    error: null,
+  });
+
+  React.useEffect(() => {
+    SportsService.getSports()
+      .then((s) => setState({ sports: s, loading: false, error: null }))
+      .catch((e) => {
+        console.error(e);
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger les sports',
+          variant: 'destructive',
+        });
+        setState({
+          sports: [],
+          loading: false,
+          error: 'Erreur de chargement',
+        });
+      });
+  }, [toast]);
+
+  return { ...state, refreshSports: SportsService.clearCache };
+}
