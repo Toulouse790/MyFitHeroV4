@@ -1,7 +1,7 @@
 // pages/index.tsx
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/router';
+import { useLocation } from 'wouter';
 import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
