@@ -1,277 +1,297 @@
 // client/src/hooks/useWorkoutSession.ts
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useToast } from './use-toast';
 import { useAppStore } from '@/stores/useAppStore';
+import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
+
+/* =================================================================== */
+/*                             TYPES                                   */
+/* =================================================================== */
 
 export interface ExerciseSet {
   reps: number;
   weight?: number;
-  duration?: number;           // secondes (pour exos chronométrés)
+  duration?: number;           // ex : planche (sec)
+  distance?: number;           // ex : run (m)
   completed: boolean;
+  rpe?: number;                // Rate of Perceived Exertion (1-10)
+  notes?: string;
+  timestamp?: string;          // ISO pour historique
 }
 
 export interface WorkoutExercise {
   id: string;
   name: string;
+  category: string;
+  muscle_groups: string[];
   sets: ExerciseSet[];
   completed: boolean;
-  restTime: number;            // secondes
+  restTime: number;            // prévu (sec)
+  actualRestTime?: number;     // mesuré (sec)
+  equipment?: string;
+  video_url?: string;
 }
 
 export interface WorkoutSession {
   id: string;
   user_id: string;
   name: string;
-  start_time: string;          // ISO
-  end_time?: string;           // ISO
-  duration_seconds: number;
-  target_duration_min: number;
-  exercises: WorkoutExercise[];
+  startTime: string;           // ISO
+  endTime?: string;            // ISO
+  duration: number;            // sec
+  targetDuration: number;      // min
   status: 'active' | 'paused' | 'completed' | 'cancelled';
-  calories_burned: number;
+  caloriesBurned: number;
+  workout_type: 'strength' | 'cardio' | 'flexibility' | 'sports' | 'other';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  exercises: WorkoutExercise[];
   notes?: string;
 }
 
-/* ------------------------------------------------------------------ */
-/*                         CONSTANTES / KEYS                          */
-/* ------------------------------------------------------------------ */
-
-const LS_CURRENT = 'mfh_currentWorkoutSession';
-const LS_HISTORY = 'mfh_workoutHistory';
-const LS_WEIGHT  = 'mfh_exerciseWeightHistory';
-
-/* ------------------------------------------------------------------ */
-/*                       HOOK PRINCIPAL                               */
-/* ------------------------------------------------------------------ */
+/* =================================================================== */
+/*                       HOOK PRINCIPAL                                */
+/* =================================================================== */
 
 export const useWorkoutSession = () => {
   const { toast } = useToast();
-  const { appStoreUser, setAppStoreUser } = useAppStore.getState();
-  const userId = appStoreUser?.id;
+  const queryClient = useQueryClient();
+  const { appStoreUser } = useAppStore.getState();
 
-  const [session, setSession] = useState<WorkoutSession | null>(null);
-  const [isActive, setIsActive]   = useState(false);
+  const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(
+    () => loadLocalSession()
+  );
+  const [isSessionActive, setIsSessionActive] = useState<boolean>(
+    () => loadLocalSession()?.status === 'active' || false
+  );
 
-  /* ========================= UTILITAIRES ========================= */
+  const timerRef = useRef<NodeJS.Timer>();
 
-  const calcCalories = useCallback((minutes: number) => {
-    const weight = appStoreUser?.weight_kg ?? 70;
-    const MET = 6;                                 // valeur moyenne
-    return Math.round(weight * MET * (minutes / 60));
-  }, [appStoreUser?.weight_kg]);
+  /* ------------------------- UTILS --------------------------------- */
 
-  const persistLocal = (data: WorkoutSession | null) => {
-    if (data) localStorage.setItem(LS_CURRENT, JSON.stringify(data));
-    else      localStorage.removeItem(LS_CURRENT);
+  const saveLocalSession = (session: WorkoutSession | null) => {
+    if (session) {
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(session));
+    } else {
+      localStorage.removeItem('currentWorkoutSession');
+    }
   };
 
-  const upsertSupabase = async (data: WorkoutSession) => {
-    await supabase.from('workouts').upsert(data, { onConflict: 'id' });
+  function loadLocalSession(): WorkoutSession | null {
+    const raw = localStorage.getItem('currentWorkoutSession');
+    return raw ? (JSON.parse(raw) as WorkoutSession) : null;
+  }
+
+  const calculateCalories = useCallback(
+    (minutes: number) => {
+      const w = appStoreUser?.weight_kg || 70;
+      const MET = 6; // valeur moyenne, à raffiner
+      return Math.round((w * MET * minutes) / 60);
+    },
+    [appStoreUser?.weight_kg]
+  );
+
+  const persistToSupabase = async (session: WorkoutSession) => {
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .upsert({ ...session, updated_at: new Date().toISOString() });
+
+      if (error) throw error;
+
+      // invalider les requêtes « workouts » si vous en avez
+      queryClient.invalidateQueries(['workouts', session.user_id]);
+    } catch (e) {
+      // en cas d’échec, on garde le localStorage ; un service worker pourra resync
+      console.error('Supabase persistence error:', e);
+    }
   };
 
-  /* ========================== ACTIONS =========================== */
+  /* ------------------------- START --------------------------------- */
 
   const startSession = useCallback(
-    async (name: string, target = 30) => {
-      if (!userId) return toast({ title: 'Non connecté', variant: 'destructive' });
+    async (
+      workoutName: string,
+      {
+        targetDuration = 30,
+        workout_type = 'strength',
+        difficulty = 'intermediate',
+        exercises = [] as WorkoutExercise[]
+      } = {}
+    ) => {
+      if (!appStoreUser?.id) return;
 
       const newSession: WorkoutSession = {
         id: crypto.randomUUID(),
-        user_id: userId,
-        name,
-        start_time: new Date().toISOString(),
-        duration_seconds: 0,
-        target_duration_min: target,
-        exercises: [],
+        user_id: appStoreUser.id,
+        name: workoutName,
+        startTime: new Date().toISOString(),
+        duration: 0,
+        targetDuration,
         status: 'active',
-        calories_burned: 0,
+        caloriesBurned: 0,
+        workout_type,
+        difficulty,
+        exercises
       };
 
-      setSession(newSession);
-      setIsActive(true);
-      persistLocal(newSession);
-      await upsertSupabase(newSession);
+      setCurrentSession(newSession);
+      setIsSessionActive(true);
+      saveLocalSession(newSession);
+      persistToSupabase(newSession);
 
-      toast({ title: 'Entraînement démarré', description: name });
+      toast({
+        title: 'Session démarrée',
+        description: `« ${workoutName} » en cours`,
+      });
     },
-    [toast, userId],
+    [appStoreUser?.id, toast]
   );
 
-  const pauseSession = useCallback(async () => {
-    if (!session) return;
-    const update = { ...session, status: 'paused' as const };
-    setSession(update);
-    setIsActive(false);
-    persistLocal(update);
-    await upsertSupabase(update);
-  }, [session]);
+  /* ------------------------- PAUSE / RESUME ------------------------ */
 
-  const resumeSession = useCallback(async () => {
-    if (!session) return;
-    const update = { ...session, status: 'active' as const };
-    setSession(update);
-    setIsActive(true);
-    persistLocal(update);
-    await upsertSupabase(update);
-  }, [session]);
+  const pauseSession = useCallback(() => {
+    if (!currentSession) return;
+    const updated = { ...currentSession, status: 'paused' as const };
+    setCurrentSession(updated);
+    setIsSessionActive(false);
+    saveLocalSession(updated);
+    persistToSupabase(updated);
+  }, [currentSession]);
 
-  const completeSession = useCallback(async () => {
-    if (!session) return;
+  const resumeSession = useCallback(() => {
+    if (!currentSession) return;
+    const updated = { ...currentSession, status: 'active' as const };
+    setCurrentSession(updated);
+    setIsSessionActive(true);
+    saveLocalSession(updated);
+    persistToSupabase(updated);
+  }, [currentSession]);
+
+  /* ------------------------- COMPLETE / CANCEL --------------------- */
+
+  const completeSession = useCallback(() => {
+    if (!currentSession) return;
+
     const end = new Date();
-    const duration = Math.floor(
-      (end.getTime() - new Date(session.start_time).getTime()) / 1000,
-    );
-    const calories = calcCalories(duration / 60);
+    const durationSec =
+      Math.floor(
+        (end.getTime() - new Date(currentSession.startTime).getTime()) / 1000
+      ) + currentSession.duration; // + durée déjà comptée
 
     const completed: WorkoutSession = {
-      ...session,
-      end_time: end.toISOString(),
-      duration_seconds: duration,
-      calories_burned: calories,
+      ...currentSession,
+      endTime: end.toISOString(),
+      duration: durationSec,
+      caloriesBurned: calculateCalories(durationSec / 60),
       status: 'completed',
     };
 
-    setSession(completed);
-    setIsActive(false);
-    persistLocal(null);
-
-    // Historique local
-    const history: WorkoutSession[] = JSON.parse(localStorage.getItem(LS_HISTORY) || '[]');
-    localStorage.setItem(LS_HISTORY, JSON.stringify([...history, completed]));
-
-    // Supabase
-    await upsertSupabase(completed);
-    await supabase.rpc('update_daily_stats_after_workout', {
-      p_user_id: userId,
-      p_calories: calories,
-      p_duration: duration,
-    }); // fonction SQL stockée
+    setCurrentSession(completed);
+    setIsSessionActive(false);
+    saveLocalSession(null); // session terminée → on nettoie
+    persistToSupabase(completed);
 
     toast({
       title: 'Session terminée',
-      description: `${Math.round(duration / 60)} min • ${calories} kcal`,
+      description: `${Math.round(durationSec / 60)} min • ${completed.caloriesBurned} kcal`,
     });
+  }, [currentSession, calculateCalories, toast]);
 
-    // Rafraîchir le store profil (ex : total workouts)
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('total_workouts')
-      .eq('id', userId)
-      .single();
-    setAppStoreUser({ ...appStoreUser, total_workouts: data?.total_workouts });
-  }, [session, calcCalories, toast, userId, setAppStoreUser, appStoreUser]);
+  const cancelSession = useCallback(() => {
+    if (!currentSession) return;
+    const cancelled = { ...currentSession, status: 'cancelled' as const };
+    setCurrentSession(cancelled);
+    setIsSessionActive(false);
+    saveLocalSession(null);
+    persistToSupabase(cancelled);
 
-  const cancelSession = useCallback(async () => {
-    if (!session) return;
-    const cancelled = { ...session, status: 'cancelled' as const };
-    setSession(cancelled);
-    setIsActive(false);
-    persistLocal(null);
-    await upsertSupabase(cancelled);
-    toast({ title: 'Session annulée', variant: 'destructive' });
-  }, [session, toast]);
-
-  /* ------------------ EXERCICES & SETS ------------------ */
-
-  const addExercise = (exercise: Omit<WorkoutExercise, 'id'>) => {
-    if (!session) return;
-    const newEx: WorkoutExercise = { ...exercise, id: crypto.randomUUID() };
-    const upd = { ...session, exercises: [...session.exercises, newEx] };
-    setSession(upd);
-    persistLocal(upd);
-  };
-
-  const updateExerciseSet = (
-    exId: string,
-    setIdx: number,
-    changes: Partial<ExerciseSet>,
-  ) => {
-    if (!session) return;
-    const upd = {
-      ...session,
-      exercises: session.exercises.map((ex) =>
-        ex.id === exId
-          ? {
-              ...ex,
-              sets: ex.sets.map((s, i) => (i === setIdx ? { ...s, ...changes } : s)),
-            }
-          : ex,
-      ),
-    };
-    setSession(upd);
-    persistLocal(upd);
-
-    // Historiser poids
-    if (changes.weight !== undefined) {
-      saveWeightHistory(exId, changes.weight);
-    }
-  };
-
-  const completeExercise = (exId: string) => {
-    if (!session) return;
-    const upd = {
-      ...session,
-      exercises: session.exercises.map((ex) =>
-        ex.id === exId ? { ...ex, completed: true } : ex,
-      ),
-    };
-    setSession(upd);
-    persistLocal(upd);
-  };
-
-  /* ---------------- HISTORIQUE POIDS ---------------- */
-
-  const saveWeightHistory = (exerciseName: string, weight: number) => {
-    const hist = JSON.parse(localStorage.getItem(LS_WEIGHT) || '{}');
-    if (!hist[exerciseName]) hist[exerciseName] = [];
-    hist[exerciseName].push({
-      weight,
-      date: new Date().toISOString(),
-      uid: userId,
+    toast({
+      title: 'Session annulée',
+      variant: 'destructive',
     });
-    if (hist[exerciseName].length > 20) hist[exerciseName] = hist[exerciseName].slice(-20);
-    localStorage.setItem(LS_WEIGHT, JSON.stringify(hist));
-  };
+  }, [currentSession, toast]);
 
-  const getLastWeight = (exerciseName: string): number | undefined => {
-    const hist = JSON.parse(localStorage.getItem(LS_WEIGHT) || '{}')[exerciseName] || [];
-    const userEntries = hist.filter((h: any) => h.uid === userId);
-    return userEntries.length ? userEntries[userEntries.length - 1].weight : undefined;
-  };
-
-  /* ================ REPRISE À L’OUVERTURE ================ */
+  /* ------------------------- DURÉE EN TEMPS RÉEL ------------------- */
 
   useEffect(() => {
-    const saved = localStorage.getItem(LS_CURRENT);
-    if (saved) {
-      const s: WorkoutSession = JSON.parse(saved);
-      setSession(s);
-      setIsActive(s.status === 'active');
+    if (isSessionActive) {
+      timerRef.current = setInterval(() => {
+        setCurrentSession((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev, duration: prev.duration + 1 };
+          saveLocalSession(updated);
+          return updated;
+        });
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current as NodeJS.Timer);
     }
+    return () => clearInterval(timerRef.current as NodeJS.Timer);
+  }, [isSessionActive]);
+
+  /* ------------------------- EXERCICES ----------------------------- */
+
+  const updateExerciseSet = useCallback(
+    (
+      exerciseId: string,
+      setIndex: number,
+      updates: Partial<ExerciseSet>
+    ) => {
+      if (!currentSession) return;
+
+      const session = structuredClone(currentSession) as WorkoutSession;
+      const ex = session.exercises.find((e) => e.id === exerciseId);
+      if (!ex) return;
+
+      ex.sets[setIndex] = { ...ex.sets[setIndex], ...updates };
+
+      // marquer l’exercice terminé si toutes les séries le sont
+      ex.completed = ex.sets.every((s) => s.completed);
+
+      setCurrentSession(session);
+      saveLocalSession(session);
+      persistToSupabase(session);
+    },
+    [currentSession]
+  );
+
+  const addExercise = useCallback(
+    (exercise: Omit<WorkoutExercise, 'id'>) => {
+      if (!currentSession) return;
+      const newEx: WorkoutExercise = { ...exercise, id: crypto.randomUUID() };
+      const updated = {
+        ...currentSession,
+        exercises: [...currentSession.exercises, newEx],
+      };
+      setCurrentSession(updated);
+      saveLocalSession(updated);
+      persistToSupabase(updated);
+    },
+    [currentSession]
+  );
+
+  /* ------------------------- SYNC AU MONTAGE ----------------------- */
+
+  useEffect(() => {
+    if (currentSession) persistToSupabase(currentSession);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ================ EXPORTS ================ */
+  /* ------------------------- EXPORT ------------------------------- */
 
   return {
-    /* état */
-    currentSession: session,
-    isSessionActive: isActive,
+    /* state */
+    currentSession,
+    isSessionActive,
 
-    /* contrôles */
+    /* actions */
     startSession,
     pauseSession,
     resumeSession,
     completeSession,
     cancelSession,
-
-    /* exercices */
     addExercise,
     updateExerciseSet,
-    completeExercise,
-    getLastWeight,
-
-    /* utilitaires */
-    saveWeightHistory,
   };
 };
