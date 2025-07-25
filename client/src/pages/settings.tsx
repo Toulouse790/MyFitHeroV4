@@ -1,6 +1,6 @@
 // pages/settings.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { useLocation } from 'wouter';
 import { 
   Settings as SettingsIcon, 
   User, 
