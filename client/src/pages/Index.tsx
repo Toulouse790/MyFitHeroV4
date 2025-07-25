@@ -44,7 +44,7 @@ type AuthFormData = {
 };
 
 const IndexPage = () => {
-  const router = useRouter();
+  const [location, setLocation] = useLocation();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
