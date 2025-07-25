@@ -20,7 +20,7 @@ import {
 import Analytics from '@/pages/Analytics';
 import NotFound from '@/pages/NotFound';
 import ProfileComplete from '@/pages/ProfileComplete';
-import SettingsComplete from '@/pages/SettingsComplete';
+import Settings from '@/pages/settings';
 
 // Components (composants réutilisables)
 import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
