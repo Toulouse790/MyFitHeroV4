@@ -15,12 +15,14 @@ import {
   LazyWorkout,
   LazyProfile,
   LazySocial,
+  LazyAnalytics,      // ✅ Ajouté
+  LazySettings,       // ✅ Ajouté 
+  LazyNotFound,       // ✅ Ajouté
   OptimizedSuspenseFallback
 } from '@/components/LazyComponents';
-import Analytics from '@/pages/Analytics';
-import NotFound from '@/pages/NotFound';
+
+// Import direct pour les pages critiques (éviter lazy loading)
 import ProfileComplete from '@/pages/ProfileComplete';
-import Settings from '@/pages/settings';
 
 // Components (composants réutilisables)
 import OnboardingQuestionnaire from '@/components/OnboardingQuestionnaire';
@@ -42,7 +44,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const user = await authClient.getUser(); // ✅ CORRIGÉ : getUser() au lieu de getSession()
+        const user = await authClient.getUser();
         if (user) {
           setUser(user);
           await checkUserProfile(user);
@@ -61,11 +63,10 @@ const AppContent: React.FC = () => {
     try {
       console.log('🟡 Vérification du profil pour:', authenticatedUser.id);
       
-      // Utiliser Supabase pour récupérer le profil
       const { data: profileData, error } = await supabase
         .from('user_profiles')
         .select('*')
-        .eq('id', authenticatedUser.id)  // Changé de user_id à id
+        .eq('id', authenticatedUser.id)
         .single();
 
       console.log('🟡 Données profil récupérées:', profileData);
@@ -115,7 +116,6 @@ const AppContent: React.FC = () => {
     console.log('🟡 handleOnboardingComplete démarré');
     
     try {
-      // Vérifier que l'utilisateur est toujours connecté
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       console.log('🟡 Utilisateur après onboarding:', currentUser?.id);
       
@@ -124,7 +124,6 @@ const AppContent: React.FC = () => {
         return;
       }
       
-      // Recharger le profil utilisateur pour mettre à jour l'état global
       await checkUserProfile(currentUser);
       
       setShowOnboarding(false);
@@ -185,7 +184,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
-        {/* Routes des modules */}
+        {/* Routes des modules avec lazy loading */}
         <Route path="/hydration">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -234,6 +233,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
+        {/* Route profil - import direct (pas de lazy) */}
         <Route path="/profile">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -244,16 +244,20 @@ const AppContent: React.FC = () => {
           )}
         </Route>
 
+        {/* Route paramètres - lazy loading ✅ CORRIGÉ */}
         <Route path="/settings">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
             <Layout>
-              <SettingsComplete />
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement des paramètres..." />}>
+                <LazySettings />
+              </Suspense>
             </Layout>
           )}
         </Route>
 
+        {/* Route profil ancien - lazy loading */}
         <Route path="/profile-old">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -266,14 +270,20 @@ const AppContent: React.FC = () => {
           )}
         </Route>
 
+        {/* Route analytics - lazy loading ✅ CORRIGÉ */}
         <Route path="/analytics">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
           ) : (
-            <Layout><Analytics /></Layout>
+            <Layout>
+              <Suspense fallback={<OptimizedSuspenseFallback text="Chargement des analytics..." />}>
+                <LazyAnalytics />
+              </Suspense>
+            </Layout>
           )}
         </Route>
 
+        {/* Route social - lazy loading */}
         <Route path="/social">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -286,8 +296,12 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
-        {/* Route 404 */}
-        <Route component={NotFound} />
+        {/* Route 404 - lazy loading ✅ CORRIGÉ */}
+        <Route>
+          <Suspense fallback={<OptimizedSuspenseFallback text="Chargement..." />}>
+            <LazyNotFound />
+          </Suspense>
+        </Route>
       </Switch>
     </ErrorBoundary>
   );
