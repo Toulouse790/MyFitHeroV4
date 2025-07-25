@@ -3,10 +3,10 @@ dist
 .DS_Store
 serveur/public
 vite .config .ts .*
-*.tar.gz
 * .tar .gz
 .env
 .env .*
 !/ .env .exemple
 /client/ .env
 ! /client/.env.exemple
+
