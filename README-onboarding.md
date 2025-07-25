@@ -20,8 +20,9 @@ npm install class-variance-authority lucide-react clsx tailwind-merge
 ### 2. Configuration
 
 ```bash
-# Copier le fichier d'environnement
+# Copier les fichiers d'environnement
 cp .env.example .env
+cp client/.env.example client/.env
 
 # Configurer vos variables Supabase dans .env
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -560,7 +561,9 @@ cd MyFitHeroV4
 
 # 2. Installation et setup
 npm install
+# Copier les fichiers d'environnement
 cp .env.example .env
+cp client/.env.example client/.env
 # Configurer les variables d'environnement
 
 # 3. Créer une branche feature

@@ -75,8 +75,9 @@ cd MyFitHeroV4
 # Installation des dépendances
 npm install
 
-# Configuration des variables d'environnement
-cp .env.example .env.local
+# Configuration des variables d'environnement (server + client)
+cp .env.example .env
+cp client/.env.example client/.env
 # Remplir avec vos clés Supabase
 
 # Démarrage du serveur de développement
