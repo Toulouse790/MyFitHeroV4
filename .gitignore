@@ -101,3 +101,30 @@ temp/
 # Server public assets (si générés automatiquement)
 server/public/
 
+# Assets lourds
+*.mp4
+*.mov
+*.avi
+*.zip
+*.tar.gz
+*.dmg
+*.iso
+
+# Fichiers de développement
+*.map
+*.bundle.js
+*.chunk.js
+
+# Images non optimisées (si vous utilisez un processus d'optimisation)
+client/public/images/original/
+client/src/assets/raw/
+
+# Caches supplémentaires
+.cache/
+.parcel-cache/
+.webpack-cache/
+.vite-cache/
+
+# Fichiers générés
+client/public/js/bundle*.js
+client/public/css/main*.css
