@@ -1,6 +1,12 @@
-node_modules
+modules_nœuds
 dist
 .DS_Store
-server/public
-vite.config.ts.*
+serveur/public
+vite .config .ts .*
 *.tar.gz
+* .tar .gz
+.env
+.env .*
+!/ .env .exemple
+/client/ .env
+! /client/.env.exemple
