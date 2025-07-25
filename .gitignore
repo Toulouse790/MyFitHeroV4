@@ -1,4 +1,4 @@
-modules_nœuds
+node_modules
 dist
 .DS_Store
 serveur/public
