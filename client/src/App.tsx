@@ -1,6 +1,6 @@
 // client/src/App.tsx
 import React, { useEffect, useState, Suspense } from 'react';
-import { Router, Route, Switch } from 'wouter';
+import { Router, Route, Switch, useLocation } from 'wouter'; // ✅ Ajout useLocation
 import { useToast } from '@/hooks/use-toast';
 import { authClient } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -34,6 +34,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AnimatedToastContainer } from '@/components/AnimatedToast';
 
 const AppContent: React.FC = () => {
+  const [, setLocation] = useLocation(); // ✅ Hook de navigation ajouté
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
@@ -97,6 +98,10 @@ const AppContent: React.FC = () => {
     if (isNewUser) {
       setShowOnboarding(true);
       setHasProfile(false);
+      
+      // ✅ REDIRECTION AJOUTÉE - Solution du problème !
+      setLocation('/onboarding');
+      
       toast({
         title: 'Inscription réussie !',
         description: 'Configurons votre profil pour une expérience personnalisée',
@@ -104,6 +109,12 @@ const AppContent: React.FC = () => {
       });
     } else {
       await checkUserProfile(authenticatedUser);
+      
+      // ✅ REDIRECTION pour profils incomplets existants
+      if (!hasProfile) {
+        setLocation('/onboarding');
+      }
+      
       toast({
         title: 'Connexion réussie',
         description: 'Bienvenue sur MyFitHero !',
@@ -129,11 +140,14 @@ const AppContent: React.FC = () => {
       setShowOnboarding(false);
       setHasProfile(true);
       
+      // ✅ REDIRECTION vers le dashboard après onboarding
+      setLocation('/');
+      
       console.log('🟢 Onboarding terminé avec succès');
       
       toast({
-        title: 'Profil configuré',
-        description: 'Votre profil a été créé avec succès !',
+        title: 'Profil configuré ! 🎉',
+        description: 'Bienvenue dans MyFitHero',
         variant: 'success'
       });
     } catch (error) {
