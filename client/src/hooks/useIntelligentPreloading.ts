@@ -47,7 +47,7 @@ export const useIntelligentPreloading = () => {
               await import('@/pages/ProfileComplete'); // ✅ Corrigé: ProfileComplete au lieu de Profile
               break;
             case '/':
-              await import('@/pages/index'); // ✅ Corrigé: index (minuscule) au lieu de Index
+              await import('@/pages/Index'); // ✅ Corrigé: Index avec majuscule
               break;
           }
         } catch (error) {
