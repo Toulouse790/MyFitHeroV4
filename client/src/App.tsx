@@ -1,6 +1,6 @@
 // client/src/App.tsx
 import React, { useEffect, useState, Suspense } from 'react';
-import { Router, Route, Switch, useLocation } from 'wouter'; // ✅ Ajout useLocation
+import { Router, Route, Switch, useLocation } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import { authClient } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -15,9 +15,9 @@ import {
   LazyWorkout,
   LazyProfile,
   LazySocial,
-  LazyAnalytics,      // ✅ Ajouté
-  LazySettings,       // ✅ Ajouté 
-  LazyNotFound,       // ✅ Ajouté
+  LazyAnalytics,
+  LazySettings,
+  LazyNotFound,
   OptimizedSuspenseFallback
 } from '@/components/LazyComponents';
 
@@ -34,13 +34,31 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AnimatedToastContainer } from '@/components/AnimatedToast';
 
 const AppContent: React.FC = () => {
-  const [, setLocation] = useLocation(); // ✅ Hook de navigation ajouté
+  const [, navigate] = useLocation();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
   const { updateAppStoreUserProfile } = useAppStore();
+
+  // ✅ FONCTION DE REDIRECTION ROBUSTE
+  const forceNavigate = (path: string) => {
+    console.log(`🔄 Tentative de navigation vers: ${path}`);
+    try {
+      navigate(path);
+      // Fallback si wouter échoue
+      setTimeout(() => {
+        if (window.location.pathname !== path) {
+          console.log(`🔄 Fallback redirection vers: ${path}`);
+          window.location.href = path;
+        }
+      }, 200);
+    } catch (error) {
+      console.error('Erreur navigation wouter:', error);
+      window.location.href = path;
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -73,9 +91,10 @@ const AppContent: React.FC = () => {
       console.log('🟡 Données profil récupérées:', profileData);
       console.log('🟡 Erreur profil:', error);
 
-      if (!error && profileData && profileData.age && profileData.gender) {
+      if (!error && profileData && profileData.age && profileData.gender && profileData.onboarding_completed) {
         console.log('🟢 Profil complet trouvé');
         setHasProfile(true);
+        setShowOnboarding(false);
         updateAppStoreUserProfile({
           id: authenticatedUser.id,
           email: authenticatedUser.email,
@@ -85,35 +104,44 @@ const AppContent: React.FC = () => {
       } else {
         console.log('🟡 Profil incomplet, affichage de l\'onboarding');
         setShowOnboarding(true);
+        setHasProfile(false);
       }
     } catch (error) {
       console.error('🔴 Erreur vérification profil:', error);
       setShowOnboarding(true);
+      setHasProfile(false);
     }
   };
 
   const handleAuthSuccess = async (authenticatedUser: any, isNewUser: boolean = false) => {
+    console.log('🚀 handleAuthSuccess appelé', { isNewUser, userId: authenticatedUser.id });
+    
     setUser(authenticatedUser);
     
     if (isNewUser) {
+      console.log('🟡 Nouvel utilisateur détecté - redirection onboarding');
       setShowOnboarding(true);
       setHasProfile(false);
       
-      // ✅ REDIRECTION AJOUTÉE - Solution du problème !
-      setLocation('/onboarding');
+      // ✅ REDIRECTION IMMÉDIATE ET ROBUSTE
+      forceNavigate('/onboarding');
       
       toast({
         title: 'Inscription réussie !',
-        description: 'Configurons votre profil pour une expérience personnalisée',
+        description: 'Redirection vers le questionnaire...',
         variant: 'success'
       });
     } else {
+      console.log('🟡 Utilisateur existant - vérification profil');
       await checkUserProfile(authenticatedUser);
       
-      // ✅ REDIRECTION pour profils incomplets existants
-      if (!hasProfile) {
-        setLocation('/onboarding');
-      }
+      // ✅ VÉRIFICATION ET REDIRECTION SI PROFIL INCOMPLET
+      setTimeout(() => {
+        if (showOnboarding && !hasProfile) {
+          console.log('🔄 Profil incomplet détecté - redirection onboarding');
+          forceNavigate('/onboarding');
+        }
+      }, 100);
       
       toast({
         title: 'Connexion réussie',
@@ -135,13 +163,20 @@ const AppContent: React.FC = () => {
         return;
       }
       
+      // ✅ MARQUER L'ONBOARDING COMME TERMINÉ DANS LA BASE
+      await supabase
+        .from('user_profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', currentUser.id);
+      
       await checkUserProfile(currentUser);
       
       setShowOnboarding(false);
       setHasProfile(true);
       
-      // ✅ REDIRECTION vers le dashboard après onboarding
-      setLocation('/');
+      // ✅ REDIRECTION VERS LE DASHBOARD
+      console.log('🔄 Redirection vers dashboard principal');
+      forceNavigate('/');
       
       console.log('🟢 Onboarding terminé avec succès');
       
@@ -154,6 +189,17 @@ const AppContent: React.FC = () => {
       console.error('🔴 Erreur dans handleOnboardingComplete:', error);
     }
   };
+
+  // ✅ EFFECT DE SURVEILLANCE POUR FORCER LA REDIRECTION
+  useEffect(() => {
+    if (user && showOnboarding && !hasProfile && !loading) {
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/onboarding') {
+        console.log('🔄 Effect de surveillance - Force redirection onboarding');
+        setTimeout(() => forceNavigate('/onboarding'), 300);
+      }
+    }
+  }, [user, showOnboarding, hasProfile, loading]);
 
   if (loading) {
     return (
@@ -258,7 +304,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
 
-        {/* Route paramètres - lazy loading ✅ CORRIGÉ */}
+        {/* Route paramètres - lazy loading */}
         <Route path="/settings">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -284,7 +330,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
 
-        {/* Route analytics - lazy loading ✅ CORRIGÉ */}
+        {/* Route analytics - lazy loading */}
         <Route path="/analytics">
           {!user ? (
             <AuthPages onAuthSuccess={handleAuthSuccess} />
@@ -310,7 +356,7 @@ const AppContent: React.FC = () => {
           )}
         </Route>
         
-        {/* Route 404 - lazy loading ✅ CORRIGÉ */}
+        {/* Route 404 - lazy loading */}
         <Route>
           <Suspense fallback={<OptimizedSuspenseFallback text="Chargement..." />}>
             <LazyNotFound />
