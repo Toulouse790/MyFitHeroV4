@@ -1,6 +1,6 @@
 // pages/analytics.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/router';
+import { useLocation } from 'wouter';
 import { 
   BarChart3, 
   TrendingUp, 
