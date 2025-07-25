@@ -80,7 +80,7 @@ const WorkoutDashboard = () => (
     </CardContent>
   </Card>
 );
-
+importer WorkoutDashboard depuis '@/components/WorkoutDashboard' ;
 const DailyCheckIn = () => (
   <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
     <CardContent className="p-4">
