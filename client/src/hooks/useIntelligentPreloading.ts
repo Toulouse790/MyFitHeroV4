@@ -5,7 +5,7 @@ export const useIntelligentPreloading = () => {
   useEffect(() => {
     const currentPath = window.location.pathname;
     const preloadTargets: string[] = [];
-
+    
     // Logique de preloading basée sur la route actuelle
     switch (currentPath) {
       case '/':
@@ -25,29 +25,29 @@ export const useIntelligentPreloading = () => {
         preloadTargets.push('/');
         break;
     }
-
+    
     // Preload des imports avec requestIdleCallback si disponible
     const preload = () => {
       preloadTargets.forEach(async (route) => {
         try {
           switch (route) {
             case '/workout':
-              await import('@/pages/Workout');
+              await import('@/pages/WorkoutPage'); // ✅ Corrigé: WorkoutPage au lieu de Workout
               break;
             case '/nutrition':
-              await import('@/pages/Nutrition');
+              await import('@/pages/Nutrition'); // ✅ Correct
               break;
             case '/hydration':
-              await import('@/pages/Hydration');
+              await import('@/pages/Hydration'); // ✅ Correct
               break;
             case '/sleep':
-              await import('@/pages/Sleep');
+              await import('@/pages/Sleep'); // ✅ Correct
               break;
             case '/profile':
-              await import('@/pages/Profile');
+              await import('@/pages/ProfileComplete'); // ✅ Corrigé: ProfileComplete au lieu de Profile
               break;
             case '/':
-              await import('@/pages/Index');
+              await import('@/pages/index'); // ✅ Corrigé: index (minuscule) au lieu de Index
               break;
           }
         } catch (error) {
@@ -55,7 +55,7 @@ export const useIntelligentPreloading = () => {
         }
       });
     };
-
+    
     if ('requestIdleCallback' in window) {
       requestIdleCallback(preload, { timeout: 2000 });
     } else {
@@ -73,13 +73,13 @@ export const useNetworkAdaptation = () => {
       const updatePerformanceMode = () => {
         const isSlowConnection = connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g';
         const isLowData = connection.saveData;
-
+        
         // Configuration du mode performance
         document.documentElement.style.setProperty(
           '--performance-mode',
           isSlowConnection || isLowData ? 'low' : 'high'
         );
-
+        
         // Désactiver les animations coûteuses en mode dégradé
         if (isSlowConnection || isLowData) {
           document.documentElement.classList.add('reduce-motion');
@@ -87,10 +87,10 @@ export const useNetworkAdaptation = () => {
           document.documentElement.classList.remove('reduce-motion');
         }
       };
-
+      
       updatePerformanceMode();
       connection.addEventListener('change', updatePerformanceMode);
-
+      
       return () => connection.removeEventListener('change', updatePerformanceMode);
     }
   }, []);
