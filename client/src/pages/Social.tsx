@@ -1,6 +1,6 @@
 // pages/social.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/router';
+import { useLocation } from 'wouter';
 import { 
   Users, 
   Target, 
