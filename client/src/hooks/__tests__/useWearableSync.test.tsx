@@ -20,22 +20,21 @@ describe('useWearableSync caching', () => {
       sleepSessions: [
         { id: '1', startTime: new Date(0), endTime: new Date(60000), duration: 1, quality: 'good' as const }
       ],
-      lastSync: new Date(),
-      caloriesBurned: 50,
-      distance: 1200,
-      activeMinutes: 30,
-    };
+      lastSync : nouvelle  date ( '2024-01-01T10:00:00.000Z' ) ,
+      calories brûlées : 50 ,
+      distance : 1200 ,
+      Minutes actives : 30 ,
+    } ;
 
-    act(() => {
-      result.current.cacheData(sample);
-    });
+    agir ( ( )  =>  {
+      résultat . current . cacheData ( échantillon ) ;
+    } ) ;
 
-    const restored = result.current.getCachedData();
-    expect(restored).not.toBeNull();
-    expect(restored!.steps).toBe(1000);
-    expect(restored!.heartRate.length).toBe(2);
-    expect(restored!.lastSync instanceof Date).toBe(true);
-    expect(restored!.sleepSessions[0].startTime instanceof Date).toBe(true);
-    expect(restored!.sleepSessions[0].startTime.getTime()).toBe(sample.sleepSessions[0].startTime.getTime());
+    const  restauré  =  résultat . courant . getCachedData ( ) ;
+    attendre ( restauré ) . pas . toBeNull ( ) ;
+    attendre ( restauré ! . étapes ) . être ( 1000 ) ;
+    attendre ( restauré ! . heartRate . length ) . toBe ( 2 ) ;
+    attendre ( restauré ! . lastSync . getTime ( ) ) . toBe ( échantillon . lastSync . getTime ( ) ) ;
+    attendre ( restauré ! . sleepSessions [ 0 ] . startTime . getTime ( ) ) . toBe ( échantillon . sleepSessions [ 0 ] . startTime . getTime ( ) ) ;
   });
 });
