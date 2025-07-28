@@ -1,91 +1,321 @@
 // hooks/workout/useWorkoutSessionCore.ts
-import { useState, useCallback } from 'react';
-import { WorkoutSession, Exercise, WorkoutStatus } from '@/types/workout';
+import { useState, useEffect, useCallback } from 'react';
+import { useToast } from '../use-toast';
+import { useAppStore } from '@/stores/useAppStore';
+import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
+
+export interface WorkoutSession {
+  id: string;
+  user_id: string;
+  name: string;
+  startTime: string;
+  endTime?: string;
+  duration: number;
+  targetDuration: number;
+  status: 'active' | 'paused' | 'completed' | 'cancelled';
+  caloriesBurned: number;
+  workout_type: 'strength' | 'cardio' | 'flexibility' | 'sports' | 'other';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  exercises: WorkoutExercise[];
+  notes?: string;
+}
+
+export interface WorkoutExercise {
+  id: string;
+  name: string;
+  category: string;
+  muscle_groups: string[];
+  sets: ExerciseSet[];
+  completed: boolean;
+  restTime: number;
+  actualRestTime?: number;
+  equipment?: string;
+  video_url?: string;
+}
+
+export interface ExerciseSet {
+  reps: number;
+  weight?: number;
+  duration?: number;
+  distance?: number;
+  completed: boolean;
+  rpe?: number;
+  notes?: string;
+  timestamp?: string;
+}
 
 export interface UseWorkoutSessionCoreReturn {
-  session: WorkoutSession | null;
-  status: WorkoutStatus;
-  currentExerciseIndex: number;
-  isActive: boolean;
-  startSession: (templateId: string) => Promise<void>;
-  endSession: () => Promise<void>;
-  pauseSession: () => void;
-  resumeSession: () => void;
-  nextExercise: () => void;
-  previousExercise: () => void;
-  setCurrentExercise: (index: number) => void;
+  currentSession: WorkoutSession | null;
+  isSessionActive: boolean;
+  startSession: (
+    workoutName: string,
+    options?: {
+      targetDuration?: number;
+      workout_type?: WorkoutSession['workout_type'];
+      difficulty?: WorkoutSession['difficulty'];
+      exercises?: WorkoutExercise[];
+    }
+  ) => Promise<void>;
+  pauseSession: () => Promise<void>;
+  resumeSession: () => Promise<void>;
+  completeSession: () => Promise<void>;
+  cancelSession: () => Promise<void>;
+  calculateCalories: (minutes: number) => number;
+  updateSession: (updates: Partial<WorkoutSession>) => void;
 }
 
 export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
-  const [session, setSession] = useState<WorkoutSession | null>(null);
-  const [status, setStatus] = useState<WorkoutStatus>('idle');
-  const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { appStoreUser } = useAppStore.getState();
 
-  const isActive = status === 'active' || status === 'paused';
+  const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(
+    () => loadLocalSession()
+  );
+  const [isSessionActive, setIsSessionActive] = useState<boolean>(
+    () => loadLocalSession()?.status === 'active' || false
+  );
 
-  const startSession = useCallback(async (templateId: string) => {
-    try {
-      setStatus('loading');
-      // Logique de démarrage de session
-      const newSession = await createWorkoutSession(templateId);
-      setSession(newSession);
-      setStatus('active');
-      setCurrentExerciseIndex(0);
-    } catch (error) {
-      setStatus('error');
-      throw error;
+  // Utilitaires localStorage
+  const saveLocalSession = (session: WorkoutSession | null) => {
+    if (session) {
+      localStorage.setItem('currentWorkoutSession', JSON.stringify(session));
+    } else {
+      localStorage.removeItem('currentWorkoutSession');
     }
-  }, []);
+  };
 
-  const endSession = useCallback(async () => {
-    if (!session) return;
-    
+  function loadLocalSession(): WorkoutSession | null {
     try {
-      setStatus('completing');
-      await completeWorkoutSession(session.id);
-      setSession(null);
-      setStatus('idle');
-      setCurrentExerciseIndex(0);
+      const raw = localStorage.getItem('currentWorkoutSession');
+      return raw ? (JSON.parse(raw) as WorkoutSession) : null;
     } catch (error) {
-      setStatus('error');
-      throw error;
+      console.error('Erreur parsing session localStorage:', error);
+      localStorage.removeItem('currentWorkoutSession');
+      return null;
     }
-  }, [session]);
+  }
 
-  const pauseSession = useCallback(() => {
-    setStatus('paused');
-  }, []);
+  const calculateCalories = useCallback(
+    (minutes: number) => {
+      const w = appStoreUser?.weight_kg || 70;
+      const MET = 6;
+      return Math.round((w * MET * minutes) / 60);
+    },
+    [appStoreUser?.weight_kg]
+  );
 
-  const resumeSession = useCallback(() => {
-    setStatus('active');
-  }, []);
+  const persistToSupabase = async (session: WorkoutSession) => {
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .upsert({ ...session, updated_at: new Date().toISOString() });
 
-  const nextExercise = useCallback(() => {
-    if (!session || currentExerciseIndex >= session.exercises.length - 1) return;
-    setCurrentExerciseIndex(prev => prev + 1);
-  }, [session, currentExerciseIndex]);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['workouts', session.user_id] });
+    } catch (e) {
+      console.error('Supabase persistence error:', e);
+    }
+  };
 
-  const previousExercise = useCallback(() => {
-    if (currentExerciseIndex <= 0) return;
-    setCurrentExerciseIndex(prev => prev - 1);
-  }, [currentExerciseIndex]);
+  const updateSession = useCallback((updates: Partial<WorkoutSession>) => {
+    if (!currentSession) return;
+    const updatedSession = { ...currentSession, ...updates };
+    setCurrentSession(updatedSession);
+    saveLocalSession(updatedSession);
+    persistToSupabase(updatedSession);
+  }, [currentSession]);
 
-  const setCurrentExercise = useCallback((index: number) => {
-    if (!session || index < 0 || index >= session.exercises.length) return;
-    setCurrentExerciseIndex(index);
-  }, [session]);
+  const startSession = useCallback(
+    async (
+      workoutName: string,
+      {
+        targetDuration = 30,
+        workout_type = 'strength',
+        difficulty = 'intermediate',
+        exercises = [] as WorkoutExercise[]
+      } = {}
+    ) => {
+      if (!appStoreUser?.id) {
+        toast({
+          title: 'Erreur',
+          description: 'Utilisateur non connecté',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      const newSession: WorkoutSession = {
+        id: crypto.randomUUID(),
+        user_id: appStoreUser.id,
+        name: workoutName,
+        startTime: new Date().toISOString(),
+        duration: 0,
+        targetDuration,
+        status: 'active',
+        caloriesBurned: 0,
+        workout_type,
+        difficulty,
+        exercises
+      };
+
+      setCurrentSession(newSession);
+      setIsSessionActive(true);
+      saveLocalSession(newSession);
+      await persistToSupabase(newSession);
+
+      toast({
+        title: 'Session démarrée',
+        description: `« ${workoutName} » en cours`,
+      });
+
+      // Analytics
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'workout_started', {
+          workout_name: workoutName,
+          workout_type,
+          user_id: appStoreUser.id
+        });
+      }
+    },
+    [appStoreUser?.id, toast, persistToSupabase]
+  );
+
+  const pauseSession = useCallback(async () => {
+    if (!currentSession) return;
+    const updated = { ...currentSession, status: 'paused' as const };
+    setCurrentSession(updated);
+    setIsSessionActive(false);
+    saveLocalSession(updated);
+    await persistToSupabase(updated);
+
+    toast({
+      title: 'Session en pause',
+      description: 'Reprenez quand vous êtes prêt',
+    });
+  }, [currentSession, persistToSupabase, toast]);
+
+  const resumeSession = useCallback(async () => {
+    if (!currentSession) return;
+    const updated = { ...currentSession, status: 'active' as const };
+    setCurrentSession(updated);
+    setIsSessionActive(true);
+    saveLocalSession(updated);
+    await persistToSupabase(updated);
+
+    toast({
+      title: 'Session reprise',
+      description: 'Bon entraînement !',
+    });
+  }, [currentSession, persistToSupabase, toast]);
+
+  const completeSession = useCallback(async () => {
+    if (!currentSession || !appStoreUser?.id) return;
+
+    const end = new Date();
+    const durationSec = Math.floor(
+      (end.getTime() - new Date(currentSession.startTime).getTime()) / 1000
+    );
+
+    const completed: WorkoutSession = {
+      ...currentSession,
+      endTime: end.toISOString(),
+      duration: durationSec,
+      caloriesBurned: calculateCalories(durationSec / 60),
+      status: 'completed',
+    };
+
+    setCurrentSession(completed);
+    setIsSessionActive(false);
+    saveLocalSession(null);
+    await persistToSupabase(completed);
+
+    // Mettre à jour les stats quotidiennes
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      await supabase
+        .from('daily_stats')
+        .upsert({
+          user_id: appStoreUser.id,
+          stat_date: today,
+          workouts_completed: 1,
+          total_workout_minutes: Math.floor(durationSec / 60),
+          calories_burned: completed.caloriesBurned
+        }, {
+          onConflict: 'user_id,stat_date'
+        });
+    } catch (error) {
+      console.error('Erreur mise à jour stats quotidiennes:', error);
+    }
+
+    toast({
+      title: 'Session terminée ! 🎉',
+      description: `${Math.round(durationSec / 60)} min • ${completed.caloriesBurned} kcal`,
+    });
+
+    // Analytics
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'workout_completed', {
+        duration_minutes: Math.round(durationSec / 60),
+        calories_burned: completed.caloriesBurned,
+        workout_type: completed.workout_type,
+        user_id: appStoreUser.id
+      });
+    }
+  }, [currentSession, calculateCalories, toast, appStoreUser?.id, persistToSupabase]);
+
+  const cancelSession = useCallback(async () => {
+    if (!currentSession) return;
+    const cancelled = { ...currentSession, status: 'cancelled' as const };
+    setCurrentSession(cancelled);
+    setIsSessionActive(false);
+    saveLocalSession(null);
+    await persistToSupabase(cancelled);
+
+    toast({
+      title: 'Session annulée',
+      variant: 'destructive',
+    });
+  }, [currentSession, toast, persistToSupabase]);
+
+  // Sync au montage - récupérer session interrompue
+  useEffect(() => {
+    const loadInterruptedSession = async () => {
+      if (appStoreUser?.id && !currentSession) {
+        try {
+          const { data, error } = await supabase
+            .from('workouts')
+            .select('*')
+            .eq('user_id', appStoreUser.id)
+            .in('status', ['active', 'paused'])
+            .order('startTime', { ascending: false })
+            .limit(1);
+
+          if (!error && data && data.length > 0) {
+            const session = data[0];
+            setCurrentSession(session);
+            setIsSessionActive(session.status === 'active');
+            saveLocalSession(session);
+          }
+        } catch (error) {
+          console.error('Erreur récupération session interrompue:', error);
+        }
+      }
+    };
+
+    loadInterruptedSession();
+  }, [appStoreUser?.id, currentSession]);
 
   return {
-    session,
-    status,
-    currentExerciseIndex,
-    isActive,
+    currentSession,
+    isSessionActive,
     startSession,
-    endSession,
     pauseSession,
     resumeSession,
-    nextExercise,
-    previousExercise,
-    setCurrentExercise,
+    completeSession,
+    cancelSession,
+    calculateCalories,
+    updateSession,
   };
 };
