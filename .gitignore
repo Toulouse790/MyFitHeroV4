@@ -1,17 +1,20 @@
-# Dependencies
+# Dépendances
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+jspm_packages/
 
-# Build outputs
+# Builds
 dist/
 build/
 .vite/
 .turbo/
+.next
+.nuxt
+.out
+.storybook-out
+.storybook/
+storybook-static/
 
-# Environment variables (CRITIQUE pour la sécurité)
+# Env
 .env
 .env.*
 !.env.example
@@ -22,7 +25,9 @@ build/
 /server/.env.*
 !/server/.env.example
 
-# IDE and OS files
+# IDE/OS
+.vscode/
+.idea/
 .DS_Store
 .DS_Store?
 ._*
@@ -30,75 +35,52 @@ build/
 .Trashes
 ehthumbs.db
 Thumbs.db
-.vscode/
-.idea/
 *.swp
 *.swo
 *~
 
-# Logs
+# Logs & caches
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.npm
+.eslintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+.cache/
+.parcel-cache/
+.webpack-cache/
+.vite-cache/
+.nyc_output/
+coverage/
+*.lcov
 
-# Runtime data
+# Runtime
 pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-.nyc_output/
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
+# REPL
 .node_repl_history
 
-# Output of 'npm pack'
+# npm pack
 *.tgz
 *.tar.gz
 
-# Yarn Integrity file
+# Yarn
 .yarn-integrity
 
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
+# Temp
 tmp/
 temp/
 
-# Server public assets (si générés automatiquement)
+# Public/server assets générés
 server/public/
 
 # Assets lourds
@@ -106,25 +88,26 @@ server/public/
 *.mov
 *.avi
 *.zip
-*.tar.gz
 *.dmg
 *.iso
 
-# Fichiers de développement
+# Fichiers générés
 *.map
 *.bundle.js
 *.chunk.js
+client/public/js/bundle*.js
+client/public/css/main*.css
 
-# Images non optimisées (si vous utilisez un processus d'optimisation)
+# Images non optimisées
 client/public/images/original/
 client/src/assets/raw/
 
-# Caches supplémentaires
-.cache/
-.parcel-cache/
-.webpack-cache/
-.vite-cache/
+# Vercel
+.vercel/
 
-# Fichiers générés
-client/public/js/bundle*.js
-client/public/css/main*.css
+# Playwright/Cypress
+.playwright/
+cypress/
+
+# Sentry
+.sentryclirc
