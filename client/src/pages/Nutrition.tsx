@@ -1,4 +1,5 @@
-// client/src/components/Nutrition.tsx
+# Créer le code React optimisé pour la page Nutrition
+nutrition_code = '''// client/src/components/Nutrition.tsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -15,7 +16,13 @@ import {
   AlertTriangle,
   Plus,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  EyeOff,
+  Brain,
+  ChevronRight
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +32,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { supabase } from '@/lib/supabase';
 
 // --- TYPES & INTERFACES ---
@@ -36,6 +46,7 @@ interface MealSuggestion {
   meal_type_db: string;
   calories?: number;
   description?: string;
+  priority: 'high' | 'medium' | 'low';
 }
 
 interface SportNutritionConfig {
@@ -72,7 +83,7 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     calorieModifier: 300,
     proteinMultiplier: 1.5,
     carbMultiplier: 1.0,
-    dailyTip: "Priorisez les protéines dans les 90 minutes après l'entraînement pour maximiser la réparation et la croissance musculaire. La créatine peut également être un supplément efficace.",
+    dailyTip: "Priorisez les protéines dans les 90 minutes après l'entraînement pour maximiser la réparation et la croissance musculaire.",
     hydrationTip: "Une bonne hydratation est cruciale pour la force. Visez au moins 2.5L par jour.",
     mealSuggestions: {
       breakfast: { 
@@ -80,28 +91,32 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
         icon: Coffee, 
         meal_type_db: 'breakfast',
         calories: 450,
-        description: 'Œufs, avoine, fruits'
-      },
-      lunch: { 
-        name: 'Déjeuner Force', 
-        icon: Sun, 
-        meal_type_db: 'lunch',
-        calories: 650,
-        description: 'Viande maigre, riz, légumes'
+        description: 'Œufs, avoine, fruits',
+        priority: 'high'
       },
       post_workout: { 
         name: 'Post-Entraînement', 
         icon: Dumbbell, 
         meal_type_db: 'snack',
         calories: 250,
-        description: 'Protéine + glucides rapides'
+        description: 'Protéine + glucides rapides',
+        priority: 'high'
+      },
+      lunch: { 
+        name: 'Déjeuner Force', 
+        icon: Sun, 
+        meal_type_db: 'lunch',
+        calories: 650,
+        description: 'Viande maigre, riz, légumes',
+        priority: 'medium'
       },
       dinner: { 
         name: 'Dîner Récupération', 
         icon: MoonIcon, 
         meal_type_db: 'dinner',
         calories: 600,
-        description: 'Poisson, quinoa, légumes verts'
+        description: 'Poisson, quinoa, légumes verts',
+        priority: 'medium'
       },
     }
   },
@@ -110,36 +125,40 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     calorieModifier: 250,
     proteinMultiplier: 1.2,
     carbMultiplier: 1.3,
-    dailyTip: "Les glucides à action rapide 1-2h avant un match ou un entraînement intense peuvent vous donner l'énergie explosive nécessaire sur le terrain.",
-    hydrationTip: "L'hydratation est la clé de l'endurance. Buvez régulièrement tout au long de la journée, pas seulement pendant l'effort.",
+    dailyTip: "Les glucides à action rapide 1-2h avant un match peuvent vous donner l'énergie explosive nécessaire.",
+    hydrationTip: "L'hydratation est la clé de l'endurance. Buvez régulièrement tout au long de la journée.",
     mealSuggestions: {
-      breakfast: { 
-        name: 'Petit-déjeuner Énergie', 
-        icon: Coffee, 
-        meal_type_db: 'breakfast',
-        calories: 400,
-        description: 'Banane, flocons d\'avoine, miel'
-      },
       pre_game: { 
         name: 'Repas pré-match', 
         icon: Zap, 
         meal_type_db: 'lunch',
         calories: 550,
-        description: 'Pâtes, sauce tomate, blanc de poulet'
+        description: 'Pâtes, sauce tomate, blanc de poulet',
+        priority: 'high'
       },
       snack: { 
         name: 'Collation énergétique', 
         icon: Apple, 
         meal_type_db: 'snack',
         calories: 200,
-        description: 'Fruits secs, eau de coco'
+        description: 'Fruits secs, eau de coco',
+        priority: 'high'
+      },
+      breakfast: { 
+        name: 'Petit-déjeuner Énergie', 
+        icon: Coffee, 
+        meal_type_db: 'breakfast',
+        calories: 400,
+        description: 'Banane, flocons d\'avoine, miel',
+        priority: 'medium'
       },
       dinner: { 
         name: 'Dîner de récupération', 
         icon: MoonIcon, 
         meal_type_db: 'dinner',
         calories: 650,
-        description: 'Saumon, patate douce, brocolis'
+        description: 'Saumon, patate douce, brocolis',
+        priority: 'medium'
       },
     }
   },
@@ -148,7 +167,7 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     calorieModifier: 500,
     proteinMultiplier: 1.6,
     carbMultiplier: 1.1,
-    dailyTip: "Un apport calorique élevé et riche en protéines est essentiel pour construire et maintenir la masse musculaire nécessaire à l'impact.",
+    dailyTip: "Un apport calorique élevé et riche en protéines est essentiel pour construire et maintenir la masse musculaire.",
     hydrationTip: "Ne sous-estimez pas les pertes d'eau sous l'équipement. Buvez plus que votre soif.",
     mealSuggestions: {
       breakfast: { 
@@ -156,28 +175,32 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
         icon: Coffee, 
         meal_type_db: 'breakfast',
         calories: 600,
-        description: 'Œufs brouillés, bacon, pain complet'
-      },
-      lunch: { 
-        name: 'Déjeuner Riche', 
-        icon: Sun, 
-        meal_type_db: 'lunch',
-        calories: 800,
-        description: 'Bœuf, riz, avocat'
+        description: 'Œufs brouillés, bacon, pain complet',
+        priority: 'high'
       },
       snack: { 
         name: 'Collation Masse', 
         icon: Apple, 
         meal_type_db: 'snack',
         calories: 350,
-        description: 'Shake protéiné, noix'
+        description: 'Shake protéiné, noix',
+        priority: 'high'
+      },
+      lunch: { 
+        name: 'Déjeuner Riche', 
+        icon: Sun, 
+        meal_type_db: 'lunch',
+        calories: 800,
+        description: 'Bœuf, riz, avocat',
+        priority: 'medium'
       },
       dinner: { 
         name: 'Dîner Puissance', 
         icon: MoonIcon, 
         meal_type_db: 'dinner',
         calories: 750,
-        description: 'Steak, pommes de terre, épinards'
+        description: 'Steak, pommes de terre, épinards',
+        priority: 'medium'
       },
     }
   },
@@ -186,36 +209,40 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     calorieModifier: 150,
     proteinMultiplier: 1.1,
     carbMultiplier: 1.2,
-    dailyTip: "Pendant un long match, des collations faciles à digérer comme une banane ou un gel énergétique peuvent maintenir votre niveau d'énergie.",
-    hydrationTip: "Pensez aux électrolytes ! Ajoutez une pincée de sel et un peu de jus de citron à votre eau pour compenser les pertes dues à la transpiration.",
+    dailyTip: "Pendant un long match, des collations faciles à digérer comme une banane peuvent maintenir votre énergie.",
+    hydrationTip: "Pensez aux électrolytes ! Ajoutez une pincée de sel et un peu de jus de citron à votre eau.",
     mealSuggestions: {
+      on_court_snack: { 
+        name: 'Collation Court', 
+        icon: Apple, 
+        meal_type_db: 'snack',
+        calories: 150,
+        description: 'Banane, gel énergétique',
+        priority: 'high'
+      },
       breakfast: { 
         name: 'Petit-déjeuner Léger', 
         icon: Coffee, 
         meal_type_db: 'breakfast',
         calories: 350,
-        description: 'Yaourt grec, fruits, granola'
+        description: 'Yaourt grec, fruits, granola',
+        priority: 'high'
       },
       lunch: { 
         name: 'Déjeuner Équilibré', 
         icon: Sun, 
         meal_type_db: 'lunch',
         calories: 500,
-        description: 'Salade de quinoa, légumes'
-      },
-      on_court_snack: { 
-        name: 'Collation Court', 
-        icon: Apple, 
-        meal_type_db: 'snack',
-        calories: 150,
-        description: 'Banane, gel énergétique'
+        description: 'Salade de quinoa, légumes',
+        priority: 'medium'
       },
       dinner: { 
         name: 'Dîner Récupération', 
         icon: MoonIcon, 
         meal_type_db: 'dinner',
         calories: 550,
-        description: 'Poisson blanc, légumes vapeur'
+        description: 'Poisson blanc, légumes vapeur',
+        priority: 'medium'
       },
     }
   },
@@ -224,36 +251,40 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     calorieModifier: 400,
     proteinMultiplier: 1.2,
     carbMultiplier: 1.5,
-    dailyTip: "Les glucides complexes (avoine, riz complet, patates douces) sont votre meilleur carburant. Consommez-les régulièrement pour maintenir vos réserves d'énergie.",
-    hydrationTip: "Commencez à vous hydrater bien avant une longue sortie. L'hydratation de la veille est tout aussi importante.",
+    dailyTip: "Les glucides complexes (avoine, riz complet, patates douces) sont votre meilleur carburant.",
+    hydrationTip: "Commencez à vous hydrater bien avant une longue sortie. L'hydratation de la veille est importante.",
     mealSuggestions: {
       breakfast: { 
         name: 'Petit-déjeuner Énergie', 
         icon: Coffee, 
         meal_type_db: 'breakfast',
         calories: 500,
-        description: 'Porridge, banane, miel'
-      },
-      lunch: { 
-        name: 'Repas Glucides Complexes', 
-        icon: Footprints, 
-        meal_type_db: 'lunch',
-        calories: 650,
-        description: 'Pâtes complètes, légumes'
+        description: 'Porridge, banane, miel',
+        priority: 'high'
       },
       snack: { 
         name: 'Collation Endurance', 
         icon: Apple, 
         meal_type_db: 'snack',
         calories: 250,
-        description: 'Dattes, amandes'
+        description: 'Dattes, amandes',
+        priority: 'high'
+      },
+      lunch: { 
+        name: 'Repas Glucides Complexes', 
+        icon: Footprints, 
+        meal_type_db: 'lunch',
+        calories: 650,
+        description: 'Pâtes complètes, légumes',
+        priority: 'medium'
       },
       dinner: { 
         name: 'Dîner de Récupération', 
         icon: MoonIcon, 
         meal_type_db: 'dinner',
         calories: 600,
-        description: 'Saumon, patate douce'
+        description: 'Saumon, patate douce',
+        priority: 'medium'
       },
     }
   },
@@ -265,33 +296,37 @@ const sportsNutritionData: Record<Sport, SportNutritionConfig> = {
     dailyTip: "L'endurance nécessite des réserves de glycogène pleines. Mangez des glucides complexes 3-4h avant les matchs.",
     hydrationTip: "Pendant les 90 minutes de jeu, votre corps perd beaucoup d'eau. Hydratez-vous avant, pendant et après.",
     mealSuggestions: {
-      breakfast: { 
-        name: 'Petit-déjeuner Foot', 
-        icon: Coffee, 
-        meal_type_db: 'breakfast',
-        calories: 400,
-        description: 'Céréales, lait, fruits'
-      },
       pre_match: { 
         name: 'Repas pré-match', 
         icon: Zap, 
         meal_type_db: 'lunch',
         calories: 600,
-        description: 'Riz, poulet, légumes'
+        description: 'Riz, poulet, légumes',
+        priority: 'high'
       },
       half_time: { 
         name: 'Mi-temps', 
         icon: Apple, 
         meal_type_db: 'snack',
         calories: 100,
-        description: 'Orange, eau'
+        description: 'Orange, eau',
+        priority: 'high'
+      },
+      breakfast: { 
+        name: 'Petit-déjeuner Foot', 
+        icon: Coffee, 
+        meal_type_db: 'breakfast',
+        calories: 400,
+        description: 'Céréales, lait, fruits',
+        priority: 'medium'
       },
       dinner: { 
         name: 'Récupération', 
         icon: MoonIcon, 
         meal_type_db: 'dinner',
         calories: 650,
-        description: 'Poisson, quinoa, légumes'
+        description: 'Poisson, quinoa, légumes',
+        priority: 'medium'
       },
     }
   }
@@ -314,6 +349,9 @@ const Nutrition: React.FC = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [showDetailedView, setShowDetailedView] = useState(false);
+  const [showCoachingModal, setShowCoachingModal] = useState(false);
+  const [showAllMeals, setShowAllMeals] = useState(false);
 
   // --- MAPPING SPORT UTILISATEUR ---
   const getSportCategory = useCallback((sport: string): Sport => {
@@ -457,7 +495,7 @@ const Nutrition: React.FC = () => {
   const waterPercentage = Math.min((dailyData.water / personalizedGoals.water) * 100, 100);
 
   // --- COMPOSANTS ---
-  const MacroCard = ({ title, current, goal, unit, color, percentage, tip }: {
+  const MacroCard = ({ title, current, goal, unit, color, percentage, tip, compact = false }: {
     title: string;
     current: number;
     goal: number;
@@ -465,21 +503,26 @@ const Nutrition: React.FC = () => {
     color: string;
     percentage: number;
     tip?: string;
+    compact?: boolean;
   }) => (
     <Card className="bg-white border-gray-100">
-      <CardContent className="p-3">
+      <CardContent className={compact ? "p-3" : "p-4"}>
         <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-medium text-gray-600">{title}</h4>
+          <h4 className={`font-medium text-gray-600 ${compact ? 'text-xs' : 'text-sm'}`}>{title}</h4>
           <Badge variant="outline" className="text-xs">
             {Math.round(percentage)}%
           </Badge>
         </div>
         <div className="flex items-baseline space-x-1 mb-2">
-          <span className="text-lg font-bold text-gray-800">{Math.round(current)}</span>
-          <span className="text-sm text-gray-500">/ {goal} {unit}</span>
+          <span className={`font-bold text-gray-800 ${compact ? 'text-base' : 'text-lg'}`}>
+            {Math.round(current)}
+          </span>
+          <span className={`text-gray-500 ${compact ? 'text-xs' : 'text-sm'}`}>
+            / {goal} {unit}
+          </span>
         </div>
-        <Progress value={percentage} className="h-2 mb-2" />
-        {tip && (
+        <Progress value={percentage} className={`mb-2 ${compact ? 'h-1' : 'h-2'}`} />
+        {tip && !compact && (
           <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded-md">
             <Info size={12} className="inline mr-1" />
             {tip}
@@ -495,15 +538,22 @@ const Nutrition: React.FC = () => {
     const userName = appStoreUser?.first_name || appStoreUser?.username || 'Champion';
     
     if (progress >= 90) {
-      return `🎯 Parfait ${userName} ! Objectif nutritionnel atteint pour ${appStoreUser?.sport}`;
+      return `🎯 Parfait ${userName} ! Objectif nutritionnel atteint`;
     } else if (progress >= 70) {
-      return `💪 Excellent ${userName}, tu nourris bien ton corps d'athlète !`;
+      return `💪 Excellent ${userName}, tu nourris bien ton corps !`;
     } else if (progress >= 50) {
-      return `⚡ Bien joué ${userName}, continue à alimenter ta performance !`;
+      return `⚡ Bien joué ${userName}, continue !`;
     } else {
       return `🍎 ${userName}, ton corps a besoin de plus de carburant !`;
     }
   }, [dailyData.calories, personalizedGoals.calories, appStoreUser]);
+
+  // Repas prioritaires
+  const getPriorityMeals = useCallback(() => {
+    const meals = Object.entries(sportConfig.mealSuggestions);
+    const highPriority = meals.filter(([_, meal]) => meal.priority === 'high');
+    return highPriority.slice(0, 2); // Top 2 repas prioritaires
+  }, [sportConfig.mealSuggestions]);
 
   // --- EFFECTS ---
   useEffect(() => {
@@ -524,6 +574,8 @@ const Nutrition: React.FC = () => {
       });
     }
   }, [profileIncomplete, toast, handleCompleteProfile]);
+
+  const priorityMeals = getPriorityMeals();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -566,12 +618,22 @@ const Nutrition: React.FC = () => {
           </Card>
         )}
 
-        {/* Calories avec Objectif Personnalisé */}
+        {/* Calories avec Objectif Personnalisé - FOCUS */}
         <Card className="bg-gradient-to-r from-green-600 to-teal-600 text-white">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-lg">Calories aujourd'hui</h3>
-              <Target size={24} />
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDetailedView(!showDetailedView)}
+                  className="text-white hover:bg-white/20"
+                >
+                  {showDetailedView ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Target size={24} />
+              </div>
             </div>
             <div className="text-center mb-4">
               <div className="text-4xl font-bold mb-1">{dailyData.calories}</div>
@@ -605,68 +667,132 @@ const Nutrition: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Macronutriments Personnalisés */}
+        {/* Macronutriments - MODE COMPACT/DÉTAILLÉ */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Vos Macros Adaptées</h2>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/nutrition/details')}
-            >
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Détails
-            </Button>
+            <h2 className="text-lg font-semibold text-gray-800">Vos Macros</h2>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant={showDetailedView ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowDetailedView(!showDetailedView)}
+                className="text-xs"
+              >
+                {showDetailedView ? "Vue Simple" : "Vue Détaillée"}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/nutrition/details')}
+              >
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Historique
+              </Button>
+            </div>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
-            <MacroCard 
-              title="Protéines" 
-              current={dailyData.protein} 
-              goal={personalizedGoals.protein} 
-              unit="g" 
-              color="bg-red-500" 
-              percentage={proteinPercentage}
-              tip={userSport === 'strength' ? 'Crucial pour la masse musculaire' : 'Important pour la récupération'}
-            />
-            <MacroCard 
-              title="Glucides" 
-              current={dailyData.carbs} 
-              goal={personalizedGoals.carbs} 
-              unit="g" 
-              color="bg-blue-500" 
-              percentage={carbsPercentage}
-              tip={userSport === 'endurance' ? 'Votre carburant principal' : 'Énergie pour l\'entraînement'}
-            />
-            <MacroCard 
-              title="Lipides" 
-              current={dailyData.fat} 
-              goal={personalizedGoals.fat} 
-              unit="g" 
-              color="bg-yellow-500" 
-              percentage={fatPercentage}
-            />
-            <Card className="bg-white border-gray-100">
-              <CardContent className="p-3">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Trophy size={16} className="text-purple-600" />
-                  <span className="text-sm font-medium text-purple-600">Hydratation</span>
+          {showDetailedView ? (
+            // Vue détaillée avec tabs
+            <Tabs defaultValue="macros" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="macros">Macronutriments</TabsTrigger>
+                <TabsTrigger value="hydration">Hydratation</TabsTrigger>
+              </TabsList>
+              <TabsContent value="macros" className="space-y-3">
+                <div className="grid grid-cols-1 gap-3">
+                  <MacroCard 
+                    title="Protéines" 
+                    current={dailyData.protein} 
+                    goal={personalizedGoals.protein} 
+                    unit="g" 
+                    color="bg-red-500" 
+                    percentage={proteinPercentage}
+                    tip={userSport === 'strength' ? 'Crucial pour la masse musculaire' : 'Important pour la récupération'}
+                  />
+                  <MacroCard 
+                    title="Glucides" 
+                    current={dailyData.carbs} 
+                    goal={personalizedGoals.carbs} 
+                    unit="g" 
+                    color="bg-blue-500" 
+                    percentage={carbsPercentage}
+                    tip={userSport === 'endurance' ? 'Votre carburant principal' : 'Énergie pour l\'entraînement'}
+                  />
+                  <MacroCard 
+                    title="Lipides" 
+                    current={dailyData.fat} 
+                    goal={personalizedGoals.fat} 
+                    unit="g" 
+                    color="bg-yellow-500" 
+                    percentage={fatPercentage}
+                    tip="Essentiels pour les hormones et l'absorption des vitamines"
+                  />
                 </div>
-                <div className="flex items-baseline space-x-1 mb-2">
-                  <span className="text-lg font-bold text-gray-800">
-                    {Math.round(dailyData.water / 1000 * 10) / 10}L
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    / {Math.round(personalizedGoals.water / 1000 * 10) / 10}L
-                  </span>
-                </div>
-                <Progress value={waterPercentage} className="h-2" />
-              </CardContent>
-            </Card>
-          </div>
+              </TabsContent>
+              <TabsContent value="hydration">
+                <MacroCard 
+                  title="Hydratation" 
+                  current={dailyData.water / 1000} 
+                  goal={personalizedGoals.water / 1000} 
+                  unit="L" 
+                  color="bg-blue-500" 
+                  percentage={waterPercentage}
+                  tip={sportConfig.hydrationTip}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            // Vue compacte
+            <div className="grid grid-cols-2 gap-3">
+              <MacroCard 
+                title="Protéines" 
+                current={dailyData.protein} 
+                goal={personalizedGoals.protein} 
+                unit="g" 
+                color="bg-red-500" 
+                percentage={proteinPercentage}
+                compact={true}
+              />
+              <MacroCard 
+                title="Glucides" 
+                current={dailyData.carbs} 
+                goal={personalizedGoals.carbs} 
+                unit="g" 
+                color="bg-blue-500" 
+                percentage={carbsPercentage}
+                compact={true}
+              />
+              <MacroCard 
+                title="Lipides" 
+                current={dailyData.fat} 
+                goal={personalizedGoals.fat} 
+                unit="g" 
+                color="bg-yellow-500" 
+                percentage={fatPercentage}
+                compact={true}
+              />
+              <Card className="bg-white border-gray-100">
+                <CardContent className="p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Trophy size={14} className="text-purple-600" />
+                    <span className="text-xs font-medium text-purple-600">Hydratation</span>
+                  </div>
+                  <div className="flex items-baseline space-x-1 mb-2">
+                    <span className="text-base font-bold text-gray-800">
+                      {Math.round(dailyData.water / 1000 * 10) / 10}L
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      / {Math.round(personalizedGoals.water / 1000 * 10) / 10}L
+                    </span>
+                  </div>
+                  <Progress value={waterPercentage} className="h-1" />
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
-        {/* Repas du jour avec Suggestions Personnalisées */}
+        {/* Repas Recommandés - PRIORITAIRES UNIQUEMENT */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-800">Repas Recommandés</h2>
@@ -676,7 +802,7 @@ const Nutrition: React.FC = () => {
           </div>
           
           <div className="space-y-3">
-            {Object.entries(sportConfig.mealSuggestions).map(([key, meal]) => (
+            {priorityMeals.map(([key, meal]) => (
               <Card key={key} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-0">
                   <button 
@@ -698,7 +824,7 @@ const Nutrition: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline" className="text-xs">
-                        {meal.meal_type_db}
+                        Priorité
                       </Badge>
                       <span className="text-gray-400">→</span>
                     </div>
@@ -706,29 +832,46 @@ const Nutrition: React.FC = () => {
                 </CardContent>
               </Card>
             ))}
+            
+            {/* Voir tous les repas */}
+            <Collapsible open={showAllMeals} onOpenChange={setShowAllMeals}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full text-sm">
+                  {showAllMeals ? "Voir moins" : `Voir tous les repas (${Object.keys(sportConfig.mealSuggestions).length - 2} autres)`}
+                  {showAllMeals ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-3 mt-3">
+                {Object.entries(sportConfig.mealSuggestions)
+                  .filter(([_, meal]) => meal.priority !== 'high')
+                  .map(([key, meal]) => (
+                    <Card key={key} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-0">
+                        <button 
+                          onClick={() => handleOpenMeal(meal.meal_type_db, meal.name)}
+                          className="w-full text-left p-4 flex items-center space-x-3 hover:bg-gray-50 transition-colors rounded-lg"
+                        >
+                          <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+                            {React.createElement(meal.icon, { size: 20 })}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800">{meal.name}</h3>
+                            <p className="text-sm text-gray-500">{meal.description}</p>
+                            {meal.calories && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                ~{meal.calories} kcal
+                              </p>
+                            )}
+                          </div>
+                          <span className="text-gray-400">→</span>
+                        </button>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </div>
-
-        {/* Analyse Personnalisée */}
-        <Card className="bg-purple-50 border-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <Zap size={20} className="text-purple-600 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-purple-800 mb-1">Analyse de votre Profil</h3>
-                <p className="text-purple-700 text-sm mb-2">
-                  En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser?.age || '?'} ans 
-                  pratiquant {appStoreUser?.sport || 'le sport'}, vos besoins sont de {personalizedGoals.calories} kcal/jour.
-                </p>
-                <div className="text-xs text-purple-600 space-y-1">
-                  <p>• Protéines augmentées de {Math.round((sportConfig.proteinMultiplier - 1) * 100)}% pour {userSport}</p>
-                  <p>• Glucides ajustés de {Math.round((sportConfig.carbMultiplier - 1) * 100)}% selon votre sport</p>
-                  <p>• Calories bonus: +{sportConfig.calorieModifier} pour l'activité</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Conseil du jour Personnalisé */}
         <Card className="bg-blue-50 border-blue-100">
@@ -752,13 +895,38 @@ const Nutrition: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Intelligence Artificielle */}
-        <AIIntelligence 
-          pillar="nutrition"
-          showPredictions={true}
-          showCoaching={true}
-          showRecommendations={true}
-        />
+        {/* Analyse Personnalisée - MODAL */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Brain className="h-5 w-5 text-purple-600" />
+                <div>
+                  <h3 className="font-semibold text-gray-800 text-sm">Analyse Nutritionnelle</h3>
+                  <p className="text-xs text-gray-600">IA personnalisée et conseils</p>
+                </div>
+              </div>
+              <Dialog open={showCoachingModal} onOpenChange={setShowCoachingModal}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Ouvrir <ChevronRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Analyse Nutritionnelle IA</DialogTitle>
+                  </DialogHeader>
+                  <AIIntelligence
+                    pillar="nutrition"
+                    showPredictions={true}
+                    showCoaching={true}
+                    showRecommendations={true}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Actions rapides */}
         <Card>
@@ -796,4 +964,19 @@ const Nutrition: React.FC = () => {
   );
 };
 
-export default Nutrition;
+export default Nutrition;'''
+
+# Sauvegarder le code dans un fichier
+with open('Nutrition_Optimized.tsx', 'w', encoding='utf-8') as f:
+    f.write(nutrition_code)
+
+print("Code React optimisé généré avec succès !")
+print("\nPrincipales améliorations :")
+print("✅ Mode Vue Simple vs Vue Détaillée (toggle)")
+print("✅ Repas prioritaires affichés en premier")
+print("✅ Collapsible pour voir tous les repas")
+print("✅ Tabs pour organiser macros/hydratation")
+print("✅ Analyse IA dans une modal")
+print("✅ Interface plus claire et moins chargée")
+print("✅ Actions rapides regroupées")
+print("✅ Macros compactes en mode simple")
