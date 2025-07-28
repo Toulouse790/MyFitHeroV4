@@ -1,94 +1,56 @@
-import type { Config } from "tailwindcss";
+// client/tailwind.config.js
+import plugin from 'tailwindcss/plugin';
 
 export default {
-  darkMode: ["class"],
-  content: [
-    "./Index.html", 
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./src/**/*.{html,js,ts,jsx,tsx}"
-  ],
+  content: ['./src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+      backgroundImage: {
+        'hero-gradient': 'linear-gradient(135deg, #5d2cfe 0%, #7d36fc 20%, #a53eff 60%, #ff549e 100%)',
       },
       colors: {
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        chart: {
-          "1": "hsl(var(--chart-1))",
-          "2": "hsl(var(--chart-2))",
-          "3": "hsl(var(--chart-3))",
-          "4": "hsl(var(--chart-4))",
-          "5": "hsl(var(--chart-5))",
-        },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
-      },
-      keyframes: {
-        "accordion-down": {
-          from: {
-            height: "0",
+        hero: {
+          purple: {
+            50: '#f5f3ff',
+            100: '#ede9fe',
+            500: '#5d2cfe',
+            600: '#7d36fc',
+            700: '#a53eff',
           },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
-        },
-        "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
-        },
-      },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
-    },
+          pink: {
+            500: '#ff549e',
+          }
+        }
+      }
+    }
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography"), require("@tailwindcss/forms")],
-} satisfies Config;
+  plugins: [
+    plugin(function({ addComponents, theme }) {
+      addComponents({
+        '.hero-container': {
+          background: theme('backgroundImage.hero-gradient'),
+          backgroundAttachment: 'fixed',
+          minHeight: '100vh',
+          position: 'relative',
+        },
+        '.hero-card': {
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(12px)',
+          borderRadius: theme('borderRadius.2xl'),
+          boxShadow: theme('boxShadow.2xl'),
+          padding: theme('spacing.8'),
+          '@media (max-width: 640px)': {
+            padding: theme('spacing.6'),
+          }
+        },
+        '.hero-card-glass': {
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: theme('borderRadius.2xl'),
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        }
+      })
+    })
+  ]
+}
