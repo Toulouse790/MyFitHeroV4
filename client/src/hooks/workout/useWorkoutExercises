@@ -1,0 +1,71 @@
+// hooks/workout/useWorkoutExercises.ts
+import { useState, useCallback } from 'react';
+import { Exercise, Set, ExerciseData } from '@/types/workout';
+
+export interface UseWorkoutExercisesReturn {
+  currentExercise: Exercise | null;
+  currentSet: number;
+  sets: Set[];
+  addSet: (setData: Omit<Set, 'id' | 'timestamp'>) => void;
+  updateSet: (setIndex: number, setData: Partial<Set>) => void;
+  removeSet: (setIndex: number) => void;
+  nextSet: () => void;
+  completeExercise: () => void;
+  skipExercise: () => void;
+}
+
+export const useWorkoutExercises = (
+  exercises: Exercise[],
+  currentExerciseIndex: number
+): UseWorkoutExercisesReturn => {
+  const [sets, setSets] = useState<Set[]>([]);
+  const [currentSet, setCurrentSet] = useState(0);
+
+  const currentExercise = exercises[currentExerciseIndex] || null;
+
+  const addSet = useCallback((setData: Omit<Set, 'id' | 'timestamp'>) => {
+    const newSet: Set = {
+      ...setData,
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+    };
+    setSets(prev => [...prev, newSet]);
+  }, []);
+
+  const updateSet = useCallback((setIndex: number, setData: Partial<Set>) => {
+    setSets(prev => prev.map((set, index) => 
+      index === setIndex ? { ...set, ...setData } : set
+    ));
+  }, []);
+
+  const removeSet = useCallback((setIndex: number) => {
+    setSets(prev => prev.filter((_, index) => index !== setIndex));
+  }, []);
+
+  const nextSet = useCallback(() => {
+    setCurrentSet(prev => prev + 1);
+  }, []);
+
+  const completeExercise = useCallback(() => {
+    // Logique de completion d'exercice
+    setSets([]);
+    setCurrentSet(0);
+  }, []);
+
+  const skipExercise = useCallback(() => {
+    setSets([]);
+    setCurrentSet(0);
+  }, []);
+
+  return {
+    currentExercise,
+    currentSet,
+    sets,
+    addSet,
+    updateSet,
+    removeSet,
+    nextSet,
+    completeExercise,
+    skipExercise,
+  };
+};
