@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    splitVendorChunkPlugin(), // Optimisation du bundle
+    splitVendorChunkPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
       ? [
@@ -20,26 +20,21 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
-      "@shared": path.resolve(__dirname, "shared"),
-      "@assets": path.resolve(__dirname, "attached_assets"),
+      "@": path.resolve(__dirname, "src"),           // ← Changé
+      "@shared": path.resolve(__dirname, "../shared"), // ← Changé
+      "@assets": path.resolve(__dirname, "../attached_assets"), // ← Changé
     },
   },
-  root: path.resolve(__dirname, "client"),
+  // root: Retiré car on est déjà dans client/
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: "dist", // ← Simplifié
     emptyOutDir: true,
-    // Optimisation du bundle
     rollupOptions: {
       output: {
         manualChunks: {
-          // Chunk pour les librairies React
           'react-vendor': ['react', 'react-dom'],
-          // Chunk pour Supabase et auth
           'supabase': ['@supabase/supabase-js'],
-          // Chunk pour les icônes (grosse librairie)
           'icons': ['lucide-react'],
-          // Chunk pour les utilitaires de routing
           'routing': ['wouter']
         }
       }
