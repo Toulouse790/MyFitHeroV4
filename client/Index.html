@@ -2,28 +2,38 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
-    <meta name="description" content="MyFitHero - Application de fitness intelligente avec IA pour un suivi complet de votre forme physique" />
-    <meta name="keywords" content="fitness, sport, nutrition, sommeil, hydratation, IA, entraînement" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+
+    <!-- SEO -->
+    <meta name="description"
+          content="MyFitHero - Application de fitness intelligente avec IA pour un suivi complet de votre forme physique" />
+    <meta name="keywords"
+          content="fitness, sport, nutrition, sommeil, hydratation, IA, entraînement" />
     <meta name="author" content="MyFitHero" />
-    
-    <!-- PWA Meta Tags -->
+
+    <!-- PWA -->
     <meta name="theme-color" content="#2563eb" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="MyFitHero V4" />
-    
-    <!-- Manifest -->
     <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Icons -->
+
+    <!-- Icônes -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/placeholder.svg" />
-    
-    <!-- Title -->
-    <title>MyFitHero - Votre Coach Fitness Intelligent</title>
+
+    <!-- Titre -->
+    <title>MyFitHero – Votre Coach Fitness Intelligent</title>
   </head>
-  <body>
+
+  <!-- Ajoute la classe hero-gradient-bg si tu veux le dégradé partout -->
+  <body class="hero-gradient-bg">
+    <!-- Point de montage React/Vite -->
+    <div id="root"></div>
+
+    <!-- Entrée de ton bundle Vite/React -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
