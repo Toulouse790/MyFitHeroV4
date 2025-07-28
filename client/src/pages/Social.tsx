@@ -1,4 +1,4 @@
-// pages/social.tsx
+// pages/Social.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'wouter';
 import { 
@@ -29,7 +29,13 @@ import {
   Crown,
   Medal,
   Bookmark,
-  Flag
+  Flag,
+  Trash2,
+  Edit3,
+  UserPlus,
+  MessageSquare,
+  ThumbsUp,
+  AlertTriangle
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -45,6 +51,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AIIntelligence from '@/components/AIIntelligence';
 
 // Types
@@ -58,6 +65,7 @@ interface SocialPost {
   comments_count: number;
   shares_count: number;
   is_liked: boolean;
+  is_bookmarked: boolean;
   created_at: string;
   user: {
     id: string;
@@ -69,6 +77,20 @@ interface SocialPost {
   };
   achievements?: any[];
   workout_data?: any;
+  comments?: Comment[];
+}
+
+interface Comment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  user: {
+    name: string;
+    username: string;
+    avatar_url?: string;
+  };
 }
 
 interface Challenge {
@@ -104,6 +126,18 @@ interface UserStats {
   achievements_count: number;
 }
 
+interface Friend {
+  id: string;
+  name: string;
+  username: string;
+  avatar_url?: string;
+  sport: string;
+  level: number;
+  is_online: boolean;
+  mutual_friends: number;
+  last_activity: string;
+}
+
 interface CreatePostData {
   content: string;
   post_type: 'general' | 'achievement' | 'workout' | 'progress';
@@ -125,27 +159,31 @@ interface CreateChallengeData {
 }
 
 const Social: React.FC = () => {
-  const router = useRouter();
+  const [location, setLocation] = useLocation();
   const { appStoreUser } = useAppStore();
   const { toast } = useToast();
-  
+
   // States
   const [activeTab, setActiveTab] = useState<'feed' | 'challenges' | 'leaderboard' | 'friends'>('feed');
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [postsLoading, setPostsLoading] = useState(false);
   const [challengesLoading, setChallengesLoading] = useState(false);
-  
+
   // Modals
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showCreateChallenge, setShowCreateChallenge] = useState(false);
-  
-  // Filters
+  const [showComments, setShowComments] = useState<string | null>(null);
+
+  // Filters & Search
   const [feedFilter, setFeedFilter] = useState<'all' | 'friends' | 'sport'>('all');
   const [challengeFilter, setChallengeFilter] = useState<'all' | 'active' | 'available'>('active');
-  
+  const [friendsSearch, setFriendsSearch] = useState('');
+  const [newComment, setNewComment] = useState('');
+
   // Forms
   const [newPost, setNewPost] = useState<CreatePostData>({
     content: '',
@@ -172,7 +210,6 @@ const Social: React.FC = () => {
     if (!appStoreUser?.id) return;
 
     try {
-      // Simulation avec vraies données partielles
       const mockStats: UserStats = {
         friends_count: 24,
         active_challenges: 8,
@@ -192,7 +229,6 @@ const Social: React.FC = () => {
 
     setPostsLoading(true);
     try {
-      // Simulation de posts avec structure réelle
       const mockPosts: SocialPost[] = [
         {
           id: '1',
@@ -204,6 +240,7 @@ const Social: React.FC = () => {
           comments_count: 7,
           shares_count: 3,
           is_liked: false,
+          is_bookmarked: false,
           created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
           user: {
             id: 'user1',
@@ -217,7 +254,21 @@ const Social: React.FC = () => {
             type: 'personal_record',
             value: '45min',
             description: `Record ${appStoreUser.sport}`
-          }]
+          }],
+          comments: [
+            {
+              id: 'c1',
+              post_id: '1',
+              user_id: 'user2',
+              content: 'Bravo Marie ! Quel est ton secret ?',
+              created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+              user: {
+                name: 'Thomas Martin',
+                username: 'tom_athlete',
+                avatar_url: ''
+              }
+            }
+          ]
         },
         {
           id: '2',
@@ -229,6 +280,7 @@ const Social: React.FC = () => {
           comments_count: 12,
           shares_count: 8,
           is_liked: true,
+          is_bookmarked: true,
           created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
           user: {
             id: 'user2',
@@ -236,7 +288,8 @@ const Social: React.FC = () => {
             username: 'tom_athlete',
             sport: appStoreUser.sport || 'fitness',
             level: 12
-          }
+          },
+          comments: []
         }
       ];
 
@@ -280,7 +333,7 @@ const Social: React.FC = () => {
         {
           id: '2',
           title: 'Hydratation Parfaite',
-          description: 'Boire 2.5L d\'eau par jour pendant 14 jours',
+          description: 'Boire 2.5L d'eau par jour pendant 14 jours',
           creator_id: 'creator2',
           pillar: 'hydration',
           challenge_type: 'individual',
@@ -310,6 +363,52 @@ const Social: React.FC = () => {
     }
   }, [appStoreUser?.id, appStoreUser?.sport, challengeFilter]);
 
+  const loadFriends = useCallback(async () => {
+    if (!appStoreUser?.id) return;
+
+    try {
+      const mockFriends: Friend[] = [
+        {
+          id: 'friend1',
+          name: 'Marie Dupont',
+          username: 'marie_fit',
+          avatar_url: '',
+          sport: appStoreUser.sport || 'fitness',
+          level: 8,
+          is_online: true,
+          mutual_friends: 5,
+          last_activity: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'friend2',
+          name: 'Thomas Martin',
+          username: 'tom_athlete',
+          avatar_url: '',
+          sport: 'crossfit',
+          level: 12,
+          is_online: false,
+          mutual_friends: 3,
+          last_activity: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: 'friend3',
+          name: 'Sophie Laurent',
+          username: 'sophie_coach',
+          avatar_url: '',
+          sport: appStoreUser.sport || 'fitness',
+          level: 15,
+          is_online: true,
+          mutual_friends: 8,
+          last_activity: new Date(Date.now() - 10 * 60 * 1000).toISOString()
+        }
+      ];
+
+      setFriends(mockFriends);
+    } catch (error) {
+      console.error('Erreur chargement amis:', error);
+    }
+  }, [appStoreUser?.id, appStoreUser?.sport]);
+
   // Handlers
   const handleCreatePost = useCallback(async () => {
     if (!newPost.content.trim()) {
@@ -322,7 +421,6 @@ const Social: React.FC = () => {
     }
 
     try {
-      // Simulation création post
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       const newPostData: SocialPost = {
@@ -335,6 +433,7 @@ const Social: React.FC = () => {
         comments_count: 0,
         shares_count: 0,
         is_liked: false,
+        is_bookmarked: false,
         created_at: new Date().toISOString(),
         user: {
           id: appStoreUser?.id || '',
@@ -343,11 +442,12 @@ const Social: React.FC = () => {
           sport: appStoreUser?.sport || 'fitness',
           level: 5
         },
-        achievements: newPost.achievements
+        achievements: newPost.achievements,
+        comments: []
       };
 
       setPosts(prev => [newPostData, ...prev]);
-      
+
       toast({
         title: 'Post publié !',
         description: 'Votre post a été partagé avec la communauté',
@@ -357,7 +457,6 @@ const Social: React.FC = () => {
         }
       });
 
-      // Reset form
       setNewPost({
         content: '',
         post_type: 'general',
@@ -367,7 +466,6 @@ const Social: React.FC = () => {
       });
       setShowCreatePost(false);
 
-      // Analytics
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'social_post_created', {
           post_type: newPost.post_type,
@@ -417,7 +515,7 @@ const Social: React.FC = () => {
       };
 
       setChallenges(prev => [challengeData, ...prev]);
-      
+
       toast({
         title: 'Défi créé !',
         description: 'Votre défi est maintenant disponible pour la communauté',
@@ -427,7 +525,6 @@ const Social: React.FC = () => {
         }
       });
 
-      // Reset form
       setNewChallenge({
         title: '',
         description: '',
@@ -441,7 +538,6 @@ const Social: React.FC = () => {
       });
       setShowCreateChallenge(false);
 
-      // Analytics
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'social_challenge_created', {
           pillar: newChallenge.pillar,
@@ -473,7 +569,6 @@ const Social: React.FC = () => {
         : post
     ));
 
-    // Analytics
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'social_post_liked', {
         post_id: postId,
@@ -482,7 +577,73 @@ const Social: React.FC = () => {
     }
   }, [appStoreUser?.id]);
 
+  const handleBookmarkPost = useCallback(async (postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { ...post, is_bookmarked: !post.is_bookmarked }
+        : post
+    ));
+
+    const post = posts.find(p => p.id === postId);
+    toast({
+      title: post?.is_bookmarked ? 'Retiré des favoris' : 'Ajouté aux favoris',
+      description: post?.is_bookmarked 
+        ? 'Post retiré de vos favoris' 
+        : 'Post ajouté à vos favoris',
+    });
+  }, [posts, toast]);
+
+  const handleDeletePost = useCallback(async (postId: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) {
+      return;
+    }
+
+    setPosts(prev => prev.filter(post => post.id !== postId));
+    toast({
+      title: "Post supprimé",
+      description: "Votre post a bien été supprimé.",
+    });
+  }, [toast]);
+
+  const handleAddComment = useCallback(async (postId: string) => {
+    if (!newComment.trim()) return;
+
+    const comment: Comment = {
+      id: Date.now().toString(),
+      post_id: postId,
+      user_id: appStoreUser?.id || '',
+      content: newComment,
+      created_at: new Date().toISOString(),
+      user: {
+        name: appStoreUser?.first_name || appStoreUser?.username || 'Utilisateur',
+        username: appStoreUser?.username || 'user',
+        avatar_url: ''
+      }
+    };
+
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? { 
+            ...post, 
+            comments: [...(post.comments || []), comment],
+            comments_count: post.comments_count + 1
+          }
+        : post
+    ));
+
+    setNewComment('');
+    toast({ title: "Commentaire ajouté !" });
+  }, [newComment, appStoreUser, toast]);
+
   const handleJoinChallenge = useCallback(async (challengeId: string) => {
+    const challenge = challenges.find(c => c.id === challengeId);
+
+    if (challenge?.is_participating) {
+      if (!window.confirm('Voulez-vous vraiment quitter ce défi ?')) {
+        return;
+      }
+    }
+
     setChallenges(prev => prev.map(challenge => 
       challenge.id === challengeId 
         ? { 
@@ -495,22 +656,37 @@ const Social: React.FC = () => {
         : challenge
     ));
 
-    const challenge = challenges.find(c => c.id === challengeId);
+    const updatedChallenge = challenges.find(c => c.id === challengeId);
     toast({
-      title: challenge?.is_participating ? 'Défi quitté' : 'Défi rejoint !',
-      description: challenge?.is_participating 
+      title: updatedChallenge?.is_participating ? 'Défi quitté' : 'Défi rejoint !',
+      description: updatedChallenge?.is_participating 
         ? 'Vous avez quitté ce défi' 
-        : `Vous participez maintenant au défi "${challenge?.title}"`,
+        : `Vous participez maintenant au défi "${updatedChallenge?.title}"`,
     });
   }, [challenges, toast]);
+
+  const handleAddFriend = useCallback(async (friendId: string) => {
+    toast({
+      title: "Demande d'ami envoyée",
+      description: "Votre demande d'ami a été envoyée.",
+    });
+  }, [toast]);
 
   // Messages personnalisés
   const getPersonalizedMessage = useMemo(() => {
     const userName = appStoreUser?.first_name || appStoreUser?.username || 'Champion';
     const sport = appStoreUser?.sport || 'sport';
-    
+
     return `🌟 Connectez-vous avec la communauté ${sport}, ${userName} !`;
   }, [appStoreUser]);
+
+  // Filtrage des amis
+  const filteredFriends = useMemo(() => {
+    return friends.filter(friend => 
+      friend.name.toLowerCase().includes(friendsSearch.toLowerCase()) ||
+      friend.username.toLowerCase().includes(friendsSearch.toLowerCase())
+    );
+  }, [friends, friendsSearch]);
 
   // Effects
   useEffect(() => {
@@ -519,31 +695,23 @@ const Social: React.FC = () => {
       await Promise.all([
         loadUserStats(),
         loadPosts(),
-        loadChallenges()
+        loadChallenges(),
+        loadFriends()
       ]);
       setLoading(false);
     };
 
     loadData();
-  }, [loadUserStats, loadPosts, loadChallenges]);
+  }, [loadUserStats, loadPosts, loadChallenges, loadFriends]);
 
   // Composants
   const CreatePostModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Créer un post</CardTitle>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setShowCreatePost(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Dialog open={showCreatePost} onOpenChange={setShowCreatePost}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Créer un post</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
           <div className="flex items-center space-x-3">
             <Avatar>
               <AvatarFallback>
@@ -570,7 +738,7 @@ const Social: React.FC = () => {
               <SelectItem value="progress">📈 Progrès</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Textarea
             value={newPost.content}
             onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
@@ -578,7 +746,7 @@ const Social: React.FC = () => {
             className="min-h-32 resize-none"
             maxLength={500}
           />
-          
+
           <div className="text-xs text-gray-500 text-right">
             {newPost.content.length}/500 caractères
           </div>
@@ -593,7 +761,7 @@ const Social: React.FC = () => {
               Lieu
             </Button>
           </div>
-          
+
           <div className="flex justify-end space-x-3">
             <Button 
               variant="outline" 
@@ -610,37 +778,28 @@ const Social: React.FC = () => {
               Publier
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 
   const CreateChallengeModal = () => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Créer un défi</CardTitle>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setShowCreateChallenge(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-          <CardDescription>
+    <Dialog open={showCreateChallenge} onOpenChange={setShowCreateChallenge}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Créer un défi</DialogTitle>
+          <p className="text-sm text-gray-600">
             Créez un défi motivant pour la communauté {appStoreUser?.sport}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </DialogHeader>
+        <div className="space-y-4">
           <Input
             value={newChallenge.title}
             onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
             placeholder={`ex: Défi ${appStoreUser?.sport} 30 jours`}
             maxLength={100}
           />
-          
+
           <Textarea
             value={newChallenge.description}
             onChange={(e) => setNewChallenge(prev => ({ ...prev, description: e.target.value }))}
@@ -648,7 +807,7 @@ const Social: React.FC = () => {
             className="min-h-24 resize-none"
             maxLength={300}
           />
-          
+
           <div className="grid grid-cols-2 gap-4">
             <Select 
               value={newChallenge.pillar} 
@@ -665,7 +824,7 @@ const Social: React.FC = () => {
                 <SelectItem value="general">⭐ Général</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select 
               value={newChallenge.difficulty} 
               onValueChange={(value: any) => setNewChallenge(prev => ({ ...prev, difficulty: value }))}
@@ -681,7 +840,7 @@ const Social: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <Input
               type="number"
@@ -689,14 +848,14 @@ const Social: React.FC = () => {
               onChange={(e) => setNewChallenge(prev => ({ ...prev, target_value: parseInt(e.target.value) || 0 }))}
               placeholder="Objectif"
             />
-            
+
             <Input
               value={newChallenge.target_unit}
               onChange={(e) => setNewChallenge(prev => ({ ...prev, target_unit: e.target.value }))}
               placeholder="Unité (km, reps...)"
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Durée (jours)</label>
@@ -708,7 +867,7 @@ const Social: React.FC = () => {
                 max="365"
               />
             </div>
-            
+
             <div>
               <label className="text-sm font-medium mb-2 block">Points récompense</label>
               <Input
@@ -720,7 +879,7 @@ const Social: React.FC = () => {
               />
             </div>
           </div>
-          
+
           <Select 
             value={newChallenge.challenge_type} 
             onValueChange={(value: any) => setNewChallenge(prev => ({ ...prev, challenge_type: value }))}
@@ -734,7 +893,7 @@ const Social: React.FC = () => {
               <SelectItem value="community">🌍 Communauté</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <Button 
               variant="outline" 
@@ -751,9 +910,9 @@ const Social: React.FC = () => {
               Créer le défi
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 
   const PostCard = ({ post }: { post: SocialPost }) => (
@@ -764,20 +923,35 @@ const Social: React.FC = () => {
             <AvatarImage src={post.user.avatar_url} />
             <AvatarFallback>{post.user.name[0]}</AvatarFallback>
           </Avatar>
-          
+
           <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-2">
-              <h4 className="font-semibold">{post.user.name}</h4>
-              <Badge variant="outline" className="text-xs">
-                {post.user.sport} • Niveau {post.user.level}
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                {post.post_type}
-              </Badge>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <h4 className="font-semibold">{post.user.name}</h4>
+                <Badge variant="outline" className="text-xs">
+                  {post.user.sport} • Niveau {post.user.level}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {post.post_type}
+                </Badge>
+              </div>
+
+              {post.user_id === appStoreUser?.id && (
+                <div className="flex items-center space-x-1">
+                  <Button
+                    onClick={() => handleDeletePost(post.id)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
-            
+
             <p className="text-gray-700 mb-3">{post.content}</p>
-            
+
             {post.achievements && post.achievements.length > 0 && (
               <div className="mb-3">
                 {post.achievements.map((achievement, index) => (
@@ -787,13 +961,13 @@ const Social: React.FC = () => {
                 ))}
               </div>
             )}
-            
-            <div className="flex items-center justify-between text-sm text-gray-500">
+
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
               <span>{new Date(post.created_at).toLocaleTimeString('fr-FR', { 
                 hour: '2-digit', 
                 minute: '2-digit' 
               })}</span>
-              
+
               <div className="flex items-center space-x-4">
                 <button 
                   onClick={() => handleLikePost(post.id)}
@@ -804,18 +978,82 @@ const Social: React.FC = () => {
                   <Heart className={`h-4 w-4 ${post.is_liked ? 'fill-current' : ''}`} />
                   <span>{post.likes_count}</span>
                 </button>
-                
-                <button className="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+
+                <button 
+                  onClick={() => setShowComments(showComments === post.id ? null : post.id)}
+                  className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
+                >
                   <MessageCircle className="h-4 w-4" />
                   <span>{post.comments_count}</span>
                 </button>
-                
+
                 <button className="flex items-center space-x-1 hover:text-green-500 transition-colors">
                   <Share2 className="h-4 w-4" />
                   <span>{post.shares_count}</span>
                 </button>
+
+                <button 
+                  onClick={() => handleBookmarkPost(post.id)}
+                  className={`hover:text-yellow-500 transition-colors ${
+                    post.is_bookmarked ? 'text-yellow-500' : ''
+                  }`}
+                >
+                  <Bookmark className={`h-4 w-4 ${post.is_bookmarked ? 'fill-current' : ''}`} />
+                </button>
               </div>
             </div>
+
+            {/* Section commentaires */}
+            {showComments === post.id && (
+              <div className="border-t pt-3 space-y-3">
+                {post.comments?.map((comment) => (
+                  <div key={comment.id} className="flex items-start space-x-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={comment.user.avatar_url} />
+                      <AvatarFallback className="text-xs">{comment.user.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="bg-gray-100 rounded-lg px-3 py-2">
+                        <p className="text-sm font-medium">{comment.user.name}</p>
+                        <p className="text-sm">{comment.content}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {new Date(comment.created_at).toLocaleTimeString('fr-FR', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex items-center space-x-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarFallback className="text-xs">
+                      {(appStoreUser?.first_name?.[0] || appStoreUser?.username?.[0] || 'U').toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Ajouter un commentaire..."
+                    className="flex-1"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newComment.trim()) {
+                        handleAddComment(post.id);
+                      }
+                    }}
+                  />
+                  <Button 
+                    onClick={() => handleAddComment(post.id)} 
+                    size="sm" 
+                    disabled={!newComment.trim()}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
@@ -855,14 +1093,14 @@ const Social: React.FC = () => {
               {challenge.difficulty}
             </Badge>
           </div>
-          
+
           <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
             <span>{getPillarIcon(challenge.pillar)} {challenge.pillar}</span>
             <span>🎯 {challenge.target_value} {challenge.target_unit}</span>
             <span>⏱️ {challenge.duration_days} jours</span>
             <span>🏆 {challenge.reward_points} pts</span>
           </div>
-          
+
           <div className="mb-3">
             <div className="flex justify-between text-sm mb-1">
               <span>Progression</span>
@@ -870,7 +1108,7 @@ const Social: React.FC = () => {
             </div>
             <Progress value={challenge.progress_percentage} className="h-2" />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Avatar className="h-6 w-6">
@@ -882,7 +1120,7 @@ const Social: React.FC = () => {
                 {challenge.participants_count} participants
               </Badge>
             </div>
-            
+
             <Button
               onClick={() => handleJoinChallenge(challenge.id)}
               variant={challenge.is_participating ? "outline" : "default"}
@@ -895,6 +1133,46 @@ const Social: React.FC = () => {
       </Card>
     );
   };
+
+  const FriendCard = ({ friend }: { friend: Friend }) => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="relative">
+              <Avatar>
+                <AvatarImage src={friend.avatar_url} />
+                <AvatarFallback>{friend.name[0]}</AvatarFallback>
+              </Avatar>
+              {friend.is_online && (
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+              )}
+            </div>
+            <div>
+              <h4 className="font-semibold">{friend.name}</h4>
+              <p className="text-sm text-gray-600">@{friend.username}</p>
+              <div className="flex items-center space-x-2 text-xs text-gray-500">
+                <span>{friend.sport} • Niveau {friend.level}</span>
+                <span>•</span>
+                <span>{friend.mutual_friends} amis communs</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={() => handleAddFriend(friend.id)}
+              variant="outline"
+              size="sm"
+            >
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Message
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   if (loading) {
     return (
@@ -953,7 +1231,7 @@ const Social: React.FC = () => {
       />
 
       <div className="p-4 space-y-6 max-w-6xl mx-auto">
-        
+
         {/* Stats rapides */}
         {userStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -966,7 +1244,7 @@ const Social: React.FC = () => {
                 <div className="text-sm text-gray-600">Amis</div>
               </CardContent>
             </Card>
-            
+
             <Card className="text-center">
               <CardContent className="p-4">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -976,7 +1254,7 @@ const Social: React.FC = () => {
                 <div className="text-sm text-gray-600">Défis Actifs</div>
               </CardContent>
             </Card>
-            
+
             <Card className="text-center">
               <CardContent className="p-4">
                 <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -986,7 +1264,7 @@ const Social: React.FC = () => {
                 <div className="text-sm text-gray-600">Rang Global</div>
               </CardContent>
             </Card>
-            
+
             <Card className="text-center">
               <CardContent className="p-4">
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -1140,17 +1418,37 @@ const Social: React.FC = () => {
                         <Users className="h-5 w-5" />
                         <span>Mes Amis ({userStats?.friends_count})</span>
                       </span>
-                      <Button size="sm">
-                        <Search className="h-4 w-4 mr-2" />
-                        Trouver
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          value={friendsSearch}
+                          onChange={(e) => setFriendsSearch(e.target.value)}
+                          placeholder="Rechercher un ami..."
+                          className="w-48"
+                        />
+                        <Button size="sm">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Inviter
+                        </Button>
+                      </div>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-8 text-gray-500">
-                      <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                      <p>Fonctionnalité amis en développement</p>
-                      <p className="text-sm">Bientôt disponible pour connecter avec d'autres athlètes {appStoreUser?.sport}</p>
+                    <div className="space-y-4">
+                      {filteredFriends.length > 0 ? (
+                        filteredFriends.map(friend => (
+                          <FriendCard key={friend.id} friend={friend} />
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <p>
+                            {friendsSearch ? 'Aucun ami trouvé' : 'Connectez-vous avec d'autres athlètes'}
+                          </p>
+                          <p className="text-sm">
+                            {friendsSearch ? 'Essayez un autre terme de recherche' : `Trouvez des partenaires d'entraînement ${appStoreUser?.sport}`}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1169,8 +1467,8 @@ const Social: React.FC = () => {
       </div>
 
       {/* Modals */}
-      {showCreatePost && <CreatePostModal />}
-      {showCreateChallenge && <CreateChallengeModal />}
+      <CreatePostModal />
+      <CreateChallengeModal />
     </div>
   );
 };
