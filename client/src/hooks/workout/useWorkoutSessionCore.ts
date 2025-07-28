@@ -4,46 +4,7 @@ import { useToast } from '../use-toast';
 import { useAppStore } from '@/stores/useAppStore';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
-
-export interface WorkoutSession {
-  id: string;
-  user_id: string;
-  name: string;
-  startTime: string;
-  endTime?: string;
-  duration: number;
-  targetDuration: number;
-  status: 'active' | 'paused' | 'completed' | 'cancelled';
-  caloriesBurned: number;
-  workout_type: 'strength' | 'cardio' | 'flexibility' | 'sports' | 'other';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  exercises: WorkoutExercise[];
-  notes?: string;
-}
-
-export interface WorkoutExercise {
-  id: string;
-  name: string;
-  category: string;
-  muscle_groups: string[];
-  sets: ExerciseSet[];
-  completed: boolean;
-  restTime: number;
-  actualRestTime?: number;
-  equipment?: string;
-  video_url?: string;
-}
-
-export interface ExerciseSet {
-  reps: number;
-  weight?: number;
-  duration?: number;
-  distance?: number;
-  completed: boolean;
-  rpe?: number;
-  notes?: string;
-  timestamp?: string;
-}
+import type { WorkoutSession, WorkoutExercise, ExerciseSet } from '@/types/workout';
 
 export interface UseWorkoutSessionCoreReturn {
   currentSession: WorkoutSession | null;
@@ -68,7 +29,7 @@ export interface UseWorkoutSessionCoreReturn {
 export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { appStoreUser } = useAppStore.getState();
+  const { appStoreUser } = useAppStore();
 
   const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(
     () => loadLocalSession()
@@ -108,9 +69,26 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
 
   const persistToSupabase = async (session: WorkoutSession) => {
     try {
+      // Adapter les données pour correspondre au schéma Supabase
+      const workoutData = {
+        id: session.id,
+        user_id: session.user_id,
+        name: session.name,
+        workout_type: session.workout_type,
+        difficulty: session.difficulty,
+        started_at: session.startTime,
+        completed_at: session.endTime,
+        duration_minutes: Math.floor(session.duration / 60),
+        calories_burned: session.caloriesBurned,
+        exercises: session.exercises,
+        notes: session.notes,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('workouts')
-        .upsert({ ...session, updated_at: new Date().toISOString() });
+        .upsert(workoutData);
 
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ['workouts', session.user_id] });
@@ -288,12 +266,29 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
             .from('workouts')
             .select('*')
             .eq('user_id', appStoreUser.id)
-            .in('status', ['active', 'paused'])
-            .order('startTime', { ascending: false })
+            .is('completed_at', null) // Sessions non terminées
+            .order('started_at', { ascending: false })
             .limit(1);
 
           if (!error && data && data.length > 0) {
-            const session = data[0];
+            const dbSession = data[0];
+            // Convertir les données DB vers le format WorkoutSession
+            const session: WorkoutSession = {
+              id: dbSession.id,
+              user_id: dbSession.user_id,
+              name: dbSession.name,
+              startTime: dbSession.started_at,
+              endTime: dbSession.completed_at,
+              duration: (dbSession.duration_minutes || 0) * 60,
+              targetDuration: 30, // Valeur par défaut
+              status: dbSession.completed_at ? 'completed' : 'active',
+              caloriesBurned: dbSession.calories_burned || 0,
+              workout_type: dbSession.workout_type || 'strength',
+              difficulty: dbSession.difficulty || 'intermediate',
+              exercises: dbSession.exercises || [],
+              notes: dbSession.notes
+            };
+            
             setCurrentSession(session);
             setIsSessionActive(session.status === 'active');
             saveLocalSession(session);
