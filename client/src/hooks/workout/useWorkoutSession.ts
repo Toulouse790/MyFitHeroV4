@@ -48,4 +48,4 @@ export type {
   WorkoutSession,
   WorkoutExercise,
   ExerciseSet,
-} from './useWorkoutSessionCore';
+} from '@/types/workout';
