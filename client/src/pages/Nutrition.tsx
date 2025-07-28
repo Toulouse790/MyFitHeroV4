@@ -965,18 +965,3 @@ const Nutrition: React.FC = () => {
 };
 
 export default Nutrition;'''
-
-# Sauvegarder le code dans un fichier
-with open('Nutrition_Optimized.tsx', 'w', encoding='utf-8') as f:
-    f.write(nutrition_code)
-
-print("Code React optimisé généré avec succès !")
-print("\nPrincipales améliorations :")
-print("✅ Mode Vue Simple vs Vue Détaillée (toggle)")
-print("✅ Repas prioritaires affichés en premier")
-print("✅ Collapsible pour voir tous les repas")
-print("✅ Tabs pour organiser macros/hydratation")
-print("✅ Analyse IA dans une modal")
-print("✅ Interface plus claire et moins chargée")
-print("✅ Actions rapides regroupées")
-print("✅ Macros compactes en mode simple")
