@@ -1,5 +1,4 @@
-# Création du fichier WearableHub.tsx complet
-wearable_hub_content = '''// pages/WearableHub.tsx
+// pages/WearableHub.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,7 +92,7 @@ const WearableHub: React.FC = () => {
       ];
 
       setDevices(mockDevices);
-      
+
       // Simulation d'erreurs
       const mockErrors: WearableError[] = [
         {
@@ -103,7 +102,7 @@ const WearableHub: React.FC = () => {
           resolved: false
         }
       ];
-      
+
       setErrors(mockErrors);
     } catch (error) {
       console.error('Erreur chargement appareils:', error);
@@ -120,11 +119,11 @@ const WearableHub: React.FC = () => {
   // Synchronisation manuelle
   const handleManualSync = useCallback(async () => {
     setSyncLoading(true);
-    
+
     try {
       // Simulation de la synchronisation
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Mise à jour des statuts
       setDevices(prev => prev.map(device => ({
         ...device,
@@ -252,7 +251,7 @@ const WearableHub: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <Button
                 onClick={handleManualSync}
@@ -264,7 +263,7 @@ const WearableHub: React.FC = () => {
                 <RefreshCw className={`h-4 w-4 mr-2 ${syncLoading ? 'animate-spin' : ''}`} />
                 {syncLoading ? 'Sync...' : 'Synchroniser'}
               </Button>
-              
+
               <Badge 
                 variant={connectedDevices.length > 0 ? "default" : "destructive"} 
                 className={connectedDevices.length > 0 ? "text-green-600 border-green-600" : ""}
@@ -274,7 +273,7 @@ const WearableHub: React.FC = () => {
                 }`} />
                 {connectedDevices.length > 0 ? 'En ligne' : 'Hors ligne'}
               </Badge>
-              
+
               <Badge variant="secondary">
                 <Activity size={12} className="mr-1" />
                 {connectedDevices.length}/{devices.length} appareils
@@ -340,7 +339,7 @@ const WearableHub: React.FC = () => {
               <div className="lg:col-span-2">
                 <WearableStats />
               </div>
-              
+
               {/* Résumé rapide */}
               <div className="space-y-4">
                 <Card>
@@ -463,7 +462,7 @@ const WearableHub: React.FC = () => {
                     <div className="text-xs text-gray-500">/ 5.0</div>
                   </div>
                 </div>
-                
+
                 <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
                   <h3 className="font-medium text-gray-900 mb-2">Insights personnalisés</h3>
                   <ul className="space-y-2 text-sm text-gray-600">
@@ -503,11 +502,4 @@ const WearableHub: React.FC = () => {
   );
 };
 
-export default WearableHub;'''
-
-# Sauvegarde du fichier
-with open('WearableHub.tsx', 'w', encoding='utf-8') as f:
-    f.write(wearable_hub_content)
-
-print("✅ Fichier WearableHub.tsx créé avec succès!")
-print("📁 Taille:", len(wearable_hub_content), "caractères")
+export default WearableHub;
