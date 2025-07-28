@@ -1,5 +1,3 @@
-
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -29,7 +27,7 @@ export default defineConfig({
   },
   root: path.resolve(__dirname, "client"),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "client", "dist"), // ← CORRECTION PRINCIPALE
     emptyOutDir: true,
     // Optimisation du bundle
     rollupOptions: {
