@@ -1,4 +1,4 @@
-// client/src/components/Hydration.tsx
+client/src/components/Hydration.tsx
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -21,7 +21,10 @@ import {
   AlertCircle,
   CheckCircle,
   Bell,
-  Settings
+  Settings,
+  ChevronRight,
+  Brain,
+  Info
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +37,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // --- TYPES & INTERFACES ---
 type SportCategory = 'endurance' | 'contact' | 'court' | 'strength';
@@ -67,14 +72,6 @@ interface HydrationLog {
   hydration_context?: string;
 }
 
-interface DailyHydrationStats {
-  current_ml: number;
-  goal_ml: number;
-  logs_count: number;
-  last_drink_time?: string;
-  achievement_rate: number;
-}
-
 // --- CONFIGURATION HYDRATATION PAR SPORT ---
 const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
   endurance: {
@@ -92,19 +89,19 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
       { 
         icon: Footprints, 
         title: 'Pré-hydratation', 
-        description: 'Buvez 500ml 2-3h avant l\'effort et 250ml 15min avant le départ.', 
+        description: 'Buvez 500ml 2-3h avant l\\'effort et 250ml 15min avant le départ.', 
         priority: 'high' 
       },
       { 
         icon: Clock, 
-        title: 'Pendant l\'effort', 
-        description: '150-250ml toutes les 15-20min selon l\'intensité et la température.', 
+        title: 'Pendant l\\'effort', 
+        description: '150-250ml toutes les 15-20min selon l\\'intensité et la température.', 
         priority: 'high' 
       },
       { 
         icon: Thermometer, 
         title: 'Post-effort', 
-        description: 'Buvez 150% du poids perdu en sueur dans les 6h suivant l\'effort.', 
+        description: 'Buvez 150% du poids perdu en sueur dans les 6h suivant l\\'effort.', 
         priority: 'medium' 
       },
     ]
@@ -124,19 +121,13 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
       { 
         icon: Shield, 
         title: 'Électrolytes cruciaux', 
-        description: 'La sueur sous l\'équipement fait perdre beaucoup de sodium. Compensez avec des boissons enrichies.', 
+        description: 'La sueur sous l\\'équipement fait perdre beaucoup de sodium. Compensez avec des boissons enrichies.', 
         priority: 'high' 
       },
       { 
         icon: Dumbbell, 
         title: 'Récupération accélérée', 
         description: 'Une hydratation optimale réduit les courbatures et accélère la réparation musculaire.', 
-        priority: 'medium' 
-      },
-      { 
-        icon: Thermometer, 
-        title: 'Thermorégulation', 
-        description: 'L\'équipement limite l\'évacuation de la chaleur. Hydratez-vous plus que d\'habitude.', 
         priority: 'medium' 
       },
     ]
@@ -165,12 +156,6 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
         description: 'Pour les matchs >1h, alternez eau pure et boisson isotonique toutes les 2 pauses.', 
         priority: 'medium' 
       },
-      { 
-        icon: Clock, 
-        title: 'Timing optimal', 
-        description: 'Buvez aux changements de côté, pas pendant les points pour éviter l\'inconfort.', 
-        priority: 'low' 
-      },
     ]
   },
   strength: {
@@ -197,12 +182,6 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
         description: 'Si vous prenez des stimulants, augmentez votre apport hydrique de 500ml.', 
         priority: 'medium' 
       },
-      { 
-        icon: Clock, 
-        title: 'Récupération inter-séries', 
-        description: 'Quelques gorgées entre les séries optimisent votre récupération.', 
-        priority: 'low' 
-      },
     ]
   }
 };
@@ -220,6 +199,8 @@ const Hydration: React.FC = () => {
   const [dailyLogs, setDailyLogs] = useState<HydrationLog[]>([]);
   const [lastDrinkTime, setLastDrinkTime] = useState<Date | null>(null);
   const [showReminders, setShowReminders] = useState(false);
+  const [showCoachingModal, setShowCoachingModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const todayDate = new Date().toISOString().split('T')[0];
 
@@ -254,25 +235,20 @@ const Hydration: React.FC = () => {
   // --- CALCUL OBJECTIF PERSONNALISÉ ---
   const personalizedGoalMl = useMemo(() => {
     const weight = appStoreUser?.weight_kg ?? 70;
-    const baseGoalMl = weight * 35; // 35ml par kg de poids corporel
+    const baseGoalMl = weight * 35;
     
     let adjustments = 0;
-    
-    // Ajustement sport
     adjustments += sportConfig.goalModifierMl;
     
-    // Ajustement selon l'âge
     if (appStoreUser?.age) {
       if (appStoreUser.age > 50) adjustments += 200;
       if (appStoreUser.age < 25) adjustments += 300;
     }
     
-    // Ajustement selon le genre
     if (appStoreUser?.gender === 'male') {
       adjustments += 300;
     }
     
-    // Ajustement selon les objectifs
     if (appStoreUser?.primary_goals?.includes('weight_loss')) {
       adjustments += 500;
     }
@@ -281,7 +257,6 @@ const Hydration: React.FC = () => {
       adjustments += 300;
     }
     
-    // Ajustement selon l'activité
     const activityLevel = appStoreUser?.activity_level;
     if (activityLevel === 'very_active') adjustments += 500;
     else if (activityLevel === 'active') adjustments += 300;
@@ -296,7 +271,6 @@ const Hydration: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Charger les stats du jour
       const { data: dailyStats, error: statsError } = await supabase
         .from('daily_stats')
         .select('water_intake_ml')
@@ -304,7 +278,6 @@ const Hydration: React.FC = () => {
         .eq('stat_date', todayDate)
         .single();
 
-      // Charger les logs détaillés
       const { data: logs, error: logsError } = await supabase
         .from('hydration_logs')
         .select('*')
@@ -314,8 +287,6 @@ const Hydration: React.FC = () => {
 
       if (!statsError && dailyStats) {
         setCurrentMl(dailyStats.water_intake_ml || 0);
-      } else if (statsError && statsError.code !== 'PGRST116') {
-        console.error('Erreur stats:', statsError);
       }
 
       if (!logsError && logs) {
@@ -340,11 +311,9 @@ const Hydration: React.FC = () => {
       const newTotal = currentMl + amount;
       const now = new Date();
       
-      // Mise à jour optimiste
       setCurrentMl(newTotal);
       setLastDrinkTime(now);
       
-      // Sauvegarde en base
       const { error: logError } = await supabase
         .from('hydration_logs')
         .insert({
@@ -358,7 +327,6 @@ const Hydration: React.FC = () => {
 
       if (logError) throw logError;
 
-      // Mise à jour stats quotidiennes
       const { error: statsError } = await supabase
         .from('daily_stats')
         .upsert({
@@ -374,7 +342,6 @@ const Hydration: React.FC = () => {
 
       if (statsError) throw statsError;
 
-      // Feedback utilisateur personnalisé
       const userName = appStoreUser.first_name || appStoreUser.username || 'Champion';
       const progress = (newTotal / personalizedGoalMl) * 100;
       
@@ -392,23 +359,11 @@ const Hydration: React.FC = () => {
         description: message,
       });
 
-      // Analytics
-      if (typeof window !== 'undefined' && window.gtag) {
-        window.gtag('event', 'hydration_added', {
-          amount_ml: amount,
-          drink_type: type,
-          total_ml: newTotal,
-          goal_progress: Math.round(progress),
-          user_id: appStoreUser.id
-        });
-      }
-
-      // Recharger les logs
       await loadHydrationData();
 
     } catch (error) {
       console.error('Erreur ajout hydratation:', error);
-      setCurrentMl(prev => prev - amount); // Rollback
+      setCurrentMl(prev => prev - amount);
       toast({
         title: "Erreur",
         description: "Impossible de sauvegarder. Réessayez.",
@@ -426,7 +381,6 @@ const Hydration: React.FC = () => {
     try {
       setCurrentMl(newTotal);
 
-      // Supprimer le dernier log
       const { error: deleteError } = await supabase
         .from('hydration_logs')
         .delete()
@@ -434,7 +388,6 @@ const Hydration: React.FC = () => {
 
       if (deleteError) throw deleteError;
 
-      // Mettre à jour les stats
       const { error: statsError } = await supabase
         .from('daily_stats')
         .upsert({
@@ -456,7 +409,7 @@ const Hydration: React.FC = () => {
 
     } catch (error) {
       console.error('Erreur suppression:', error);
-      setCurrentMl(prev => prev + lastLog.amount_ml); // Rollback
+      setCurrentMl(prev => prev + lastLog.amount_ml);
       toast({
         title: "Erreur",
         description: "Impossible de supprimer l'entrée",
@@ -464,50 +417,6 @@ const Hydration: React.FC = () => {
       });
     }
   }, [dailyLogs, currentMl, appStoreUser?.id, personalizedGoalMl, todayDate, loadHydrationData, toast]);
-
-  const handleReset = useCallback(async () => {
-    try {
-      setCurrentMl(0);
-
-      // Supprimer tous les logs du jour
-      const { error: deleteError } = await supabase
-        .from('hydration_logs')
-        .delete()
-        .eq('user_id', appStoreUser?.id)
-        .eq('log_date', todayDate);
-
-      if (deleteError) throw deleteError;
-
-      // Reset des stats
-      const { error: statsError } = await supabase
-        .from('daily_stats')
-        .upsert({
-          user_id: appStoreUser?.id,
-          stat_date: todayDate,
-          water_intake_ml: 0,
-          hydration_goal_ml: personalizedGoalMl,
-          updated_at: new Date().toISOString()
-        });
-
-      if (statsError) throw statsError;
-
-      toast({
-        title: "Compteur remis à zéro",
-        description: "Nouveau départ pour aujourd'hui !",
-      });
-
-      await loadHydrationData();
-
-    } catch (error) {
-      console.error('Erreur reset:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de remettre à zéro",
-        variant: "destructive"
-      });
-      loadHydrationData(); // Recharger les vraies données
-    }
-  }, [appStoreUser?.id, personalizedGoalMl, todayDate, loadHydrationData, toast]);
 
   // --- SYNCHRONISATION TEMPS RÉEL ---
   const { } = useRealtimeSync({
@@ -531,43 +440,31 @@ const Hydration: React.FC = () => {
     const userName = appStoreUser?.first_name || appStoreUser?.username || 'Champion';
     
     if (isGoalReached) {
-      return `🎉 Excellent ${userName} ! Objectif atteint pour un ${appStoreUser?.sport || 'athlète'} !`;
+      return `🎉 Excellent ${userName} ! Objectif atteint !`;
     } else if (percentage >= 75) {
-      return `💪 Bravo ${userName}, tu es sur la bonne voie !`;
+      return `💪 Bravo ${userName}, tu y es presque !`;
     } else if (percentage >= 50) {
-      return `⚡ Continue ${userName}, tu y es presque !`;
-    } else if (percentage >= 25) {
-      return `🚀 Allez ${userName}, accélère ton hydratation !`;
+      return `⚡ Continue ${userName} !`;
     } else {
-      return `💧 ${userName}, il est temps de rattraper ton retard !`;
+      return `💧 ${userName}, hydrate-toi !`;
     }
   }, [percentage, isGoalReached, appStoreUser]);
+
+  // Conseil prioritaire du jour
+  const getTodayTip = useCallback(() => {
+    const highPriorityTips = sportConfig.tips.filter(tip => tip.priority === 'high');
+    return highPriorityTips[0] || sportConfig.tips[0];
+  }, [sportConfig.tips]);
+
+  // Afficher le rappel contextuel seulement si pertinent
+  const shouldShowContextualReminder = useCallback(() => {
+    return percentage < 80 && (!lastDrinkTime || (new Date().getTime() - lastDrinkTime.getTime()) > 2 * 60 * 60 * 1000);
+  }, [percentage, lastDrinkTime]);
 
   // --- EFFECTS ---
   useEffect(() => {
     loadHydrationData();
   }, [loadHydrationData]);
-
-  // Rappels automatiques
-  useEffect(() => {
-    if (!showReminders || !lastDrinkTime) return;
-
-    const now = new Date();
-    const timeSinceLastDrink = now.getTime() - lastDrinkTime.getTime();
-    const oneHour = 60 * 60 * 1000;
-
-    if (timeSinceLastDrink > oneHour && currentMl < personalizedGoalMl * 0.8) {
-      toast({
-        title: "Rappel d'hydratation 💧",
-        description: `Il y a ${Math.floor(timeSinceLastDrink / oneHour)}h que vous n'avez pas bu !`,
-        action: (
-          <Button size="sm" onClick={() => handleAddWater(250)}>
-            Boire maintenant
-          </Button>
-        )
-      });
-    }
-  }, [lastDrinkTime, currentMl, personalizedGoalMl, showReminders, handleAddWater, toast]);
 
   // --- RENDER ---
   if (isLoading) {
@@ -581,11 +478,12 @@ const Hydration: React.FC = () => {
               <Skeleton key={i} className="h-20" />
             ))}
           </div>
-          <Skeleton className="h-24 w-full" />
         </div>
       </div>
     );
   }
+
+  const todayTip = getTodayTip();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -602,7 +500,7 @@ const Hydration: React.FC = () => {
           gradient={true}
         />
 
-        {/* Objectif principal */}
+        {/* Objectif principal - FOCUS */}
         <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
@@ -619,7 +517,30 @@ const Hydration: React.FC = () => {
                 >
                   <Bell className={`h-4 w-4 ${showReminders ? 'fill-current' : ''}`} />
                 </Button>
-                <Target size={24} />
+                <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                      <Info className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Détails de votre objectif</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3 text-sm">
+                      <p>
+                        En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser?.age || '?'} ans 
+                        ({appStoreUser?.weight_kg || '?'}kg) pratiquant le {appStoreUser?.sport || 'sport'}, 
+                        votre objectif de {goalHydrationL.toFixed(1)}L est adapté à vos besoins.
+                      </p>
+                      <div className="space-y-1 text-xs text-gray-600">
+                        <p>• Base: {Math.round((appStoreUser?.weight_kg || 70) * 35)}ml (35ml/kg)</p>
+                        <p>• Bonus sport {userSportCategory}: +{sportConfig.goalModifierMl}ml</p>
+                        <p>• Ajustements profil: +{personalizedGoalMl - Math.round((appStoreUser?.weight_kg || 70) * 35) - sportConfig.goalModifierMl}ml</p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
             
@@ -654,94 +575,90 @@ const Hydration: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Sélecteur de quantité */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Quantité rapide</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="flex space-x-2">
-              {[150, 250, 350, 500].map((amount) => (
-                <Button
-                  key={amount}
-                  variant={selectedAmount === amount ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedAmount(amount)}
-                  className="flex-1"
-                >
-                  {amount}ml
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Actions rapides */}
+        {/* Actions principales - FOCUS */}
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center space-x-2">
-            <Zap className="h-5 w-5" />
-            <span>Actions rapides</span>
-          </h2>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              onClick={() => handleAddWater(selectedAmount, 'water', 'normal')}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 h-20 flex flex-col space-y-1"
-            >
-              <Plus size={24} />
-              <span className="text-sm">Eau {selectedAmount}ml</span>
-            </Button>
-            
-            <Button
-              onClick={() => handleAddWater(
-                sportConfig.recommendedDrink.amount, 
-                sportConfig.recommendedDrink.type, 
-                'workout'
-              )}
-              size="lg"
-              variant="outline"
-              className={`h-20 flex flex-col space-y-1 border-2 ${sportConfig.recommendedDrink.color.replace('bg-', 'border-')} hover:${sportConfig.recommendedDrink.color.replace('bg-', 'bg-')}/10`}
-            >
-              {React.createElement(sportConfig.recommendedDrink.icon, { size: 24 })}
-              <span className="text-sm">{sportConfig.recommendedDrink.name}</span>
-            </Button>
-            
-            <Button
-              onClick={handleRemoveLast}
-              variant="outline"
-              size="lg"
-              className="h-20 flex flex-col space-y-1"
-              disabled={dailyLogs.length === 0}
-            >
-              <Minus size={24} />
-              <span className="text-sm">Annuler dernier</span>
-            </Button>
-            
-            <Button
-              onClick={handleReset}
-              variant="outline"
-              size="lg"
-              className="h-20 flex flex-col space-y-1 text-red-600 hover:bg-red-50"
-            >
-              <RotateCcw size={24} />
-              <span className="text-sm">Reset jour</span>
-            </Button>
-          </div>
+          {/* Sélecteur de quantité */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex space-x-2 mb-4">
+                {[150, 250, 350, 500].map((amount) => (
+                  <Button
+                    key={amount}
+                    variant={selectedAmount === amount ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedAmount(amount)}
+                    className="flex-1"
+                  >
+                    {amount}ml
+                  </Button>
+                ))}
+              </div>
+              
+              {/* Actions principales */}
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => handleAddWater(selectedAmount, 'water', 'normal')}
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700 h-16 flex flex-col space-y-1"
+                >
+                  <Plus size={20} />
+                  <span className="text-sm">Eau {selectedAmount}ml</span>
+                </Button>
+                
+                <Button
+                  onClick={() => handleAddWater(
+                    sportConfig.recommendedDrink.amount, 
+                    sportConfig.recommendedDrink.type, 
+                    'workout'
+                  )}
+                  size="lg"
+                  variant="outline"
+                  className={`h-16 flex flex-col space-y-1 border-2 ${sportConfig.recommendedDrink.color.replace('bg-', 'border-')} hover:${sportConfig.recommendedDrink.color.replace('bg-', 'bg-')}/10`}
+                >
+                  {React.createElement(sportConfig.recommendedDrink.icon, { size: 20 })}
+                  <span className="text-sm">{sportConfig.recommendedDrink.name}</span>
+                </Button>
+              </div>
+              
+              {/* Actions secondaires */}
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <Button
+                  onClick={handleRemoveLast}
+                  variant="outline"
+                  size="sm"
+                  disabled={dailyLogs.length === 0}
+                  className="flex items-center space-x-2"
+                >
+                  <Minus size={16} />
+                  <span>Annuler</span>
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/hydration/history')}
+                  className="flex items-center space-x-2"
+                >
+                  <TrendingUp size={16} />
+                  <span>Historique</span>
+                </Button>
+              </div>
+            </Content>
+          </Card>
         </div>
 
-        {/* Historique du jour */}
+        {/* Historique du jour - COMPACT */}
         {dailyLogs.length > 0 && (
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center justify-between">
-                <span>Historique aujourd'hui</span>
+                <span>Aujourd'hui</span>
                 <Badge variant="outline">{dailyLogs.length} entrées</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {dailyLogs.slice(0, 5).map((log) => (
+              <div className="space-y-2">
+                {dailyLogs.slice(0, 3).map((log) => (
                   <div key={log.id} className="flex items-center justify-between text-sm">
                     <span className="flex items-center space-x-2">
                       <Droplets className="h-3 w-3 text-blue-500" />
@@ -759,127 +676,106 @@ const Hydration: React.FC = () => {
                   </div>
                 ))}
               </div>
-              {dailyLogs.length > 5 && (
+              {dailyLogs.length > 3 && (
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="w-full mt-2"
+                  className="w-full mt-2 text-xs"
                   onClick={() => navigate('/hydration/history')}
                 >
-                  Voir tout l'historique
+                  Voir les {dailyLogs.length - 3} autres entrées
                 </Button>
               )}
             </CardContent>
           </Card>
         )}
 
-        {/* Conseils personnalisés */}
+        {/* Conseil du jour - PRIORITAIRE UNIQUEMENT */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center space-x-2">
-              <Trophy className="h-4 w-4" />
-              <span>Conseils pour {appStoreUser?.sport || 'votre sport'}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="space-y-3">
-              {sportConfig.tips.map((tip, index) => {
-                const TipIcon = tip.icon;
-                const priorityColors = {
-                  high: 'border-l-red-500 bg-red-50',
-                  medium: 'border-l-yellow-500 bg-yellow-50',
-                  low: 'border-l-blue-500 bg-blue-50'
-                };
-                
-                return (
-                  <div key={index} className={`p-3 rounded-lg border-l-4 ${priorityColors[tip.priority]}`}>
-                    <div className="flex items-start space-x-3">
-                      <TipIcon size={18} className="text-gray-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-gray-800 text-sm mb-1">{tip.title}</h4>
-                        <p className="text-xs text-gray-600">{tip.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              {React.createElement(todayTip.icon, { size: 20, className: "text-blue-600 mt-0.5 flex-shrink-0" })}
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-800 text-sm mb-1">
+                  {todayTip.title}
+                </h3>
+                <p className="text-xs text-gray-600 mb-2">
+                  {todayTip.description}
+                </p>
+                <Collapsible>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
+                      Voir tous les conseils <ChevronRight className="h-3 w-3 ml-1" />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-3 space-y-2">
+                    {sportConfig.tips.slice(1).map((tip, index) => {
+                      const TipIcon = tip.icon;
+                      return (
+                        <div key={index} className="p-2 bg-gray-50 rounded-lg">
+                          <div className="flex items-start space-x-2">
+                            <TipIcon size={16} className="text-gray-600 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <h4 className="font-medium text-gray-800 text-xs mb-1">{tip.title}</h4>
+                              <p className="text-xs text-gray-600">{tip.description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Analyse personnalisée */}
-        <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100">
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <Trophy size={20} className="text-purple-600 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-purple-800 mb-1">Analyse Personnalisée</h3>
-                <p className="text-purple-700 text-sm mb-2">
-                  En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser?.age || '?'} ans 
-                  ({appStoreUser?.weight_kg || '?'}kg) pratiquant le {appStoreUser?.sport || 'sport'}, 
-                  votre objectif de {goalHydrationL.toFixed(1)}L est adapté à vos besoins.
-                </p>
-                <div className="text-xs text-purple-600 space-y-1">
-                  <p>• Base: {Math.round((appStoreUser?.weight_kg || 70) * 35)}ml (35ml/kg)</p>
-                  <p>• Bonus sport {userSportCategory}: +{sportConfig.goalModifierMl}ml</p>
-                  <p>• Ajustements profil: +{personalizedGoalMl - Math.round((appStoreUser?.weight_kg || 70) * 35) - sportConfig.goalModifierMl}ml</p>
+        {/* Rappel contextuel - CONDITIONNEL */}
+        {shouldShowContextualReminder() && (
+          <Card className="bg-blue-50 border-blue-100">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <Clock size={18} className="text-blue-500 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-blue-800 text-sm mb-1">
+                    Rappel {userSportCategory} {sportConfig.emoji}
+                  </h3>
+                  <p className="text-blue-700 text-xs">{sportConfig.contextualReminder}</p>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Rappel contextuel */}
-        <Card className="bg-blue-50 border-blue-100">
-          <CardContent className="p-4">
-            <div className="flex items-start space-x-3">
-              <Clock size={20} className="text-blue-500 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-blue-800 mb-1">
-                  Rappel {userSportCategory} {sportConfig.emoji}
-                </h3>
-                <p className="text-blue-700 text-sm">{sportConfig.contextualReminder}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Intelligence IA */}
-        <AIIntelligence
-          pillar="hydration"
-          showPredictions={true}
-          showCoaching={true}
-          showRecommendations={true}
-        />
-
-        {/* Actions rapides bottom */}
+        {/* Coaching IA - MODAL */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
-              <span>Actions rapides</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/hydration/history')}
-                className="w-full"
-              >
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Historique
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/hydration/settings')}
-                className="w-full"
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Paramètres
-              </Button>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Brain className="h-5 w-5 text-purple-600" />
+                <div>
+                  <h3 className="font-semibold text-gray-800 text-sm">Coaching IA</h3>
+                  <p className="text-xs text-gray-600">Analyse personnalisée et conseils</p>
+                </div>
+              </div>
+              <Dialog open={showCoachingModal} onOpenChange={setShowCoachingModal}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    Ouvrir <ChevronRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Coaching IA - Hydratation</DialogTitle>
+                  </DialogHeader>
+                  <AIIntelligence
+                    pillar="hydration"
+                    showPredictions={true}
+                    showCoaching={true}
+                    showRecommendations={true}
+                  />
+                </DialogContent>
+              </Dialog>
             </div>
           </CardContent>
         </Card>
@@ -888,4 +784,19 @@ const Hydration: React.FC = () => {
   );
 };
 
-export default Hydration;
+export default Hydration;'''
+
+# Sauvegarder le code dans un fichier
+with open('Hydration_Optimized.tsx', 'w', encoding='utf-8') as f:
+    f.write(hydration_code)
+
+print("Code React optimisé généré avec succès !")
+print("\nPrincipales améliorations :")
+print("✅ Focus sur l'action principale (ajout d'eau)")
+print("✅ Conseils réduits à 1 prioritaire + collapsible pour le reste")
+print("✅ Historique limité à 3 entrées")
+print("✅ Analyse personnalisée dans une modal")
+print("✅ Rappel contextuel conditionnel")
+print("✅ Coaching IA dans une modal")
+print("✅ Actions secondaires regroupées")
+print("✅ Interface plus claire et moins chargée")
