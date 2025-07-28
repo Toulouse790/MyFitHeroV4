@@ -14,7 +14,8 @@ import {
   Zap,
   FileText,
   Share2,
-  Filter
+  Filter,
+  Trophy
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -47,11 +48,11 @@ interface ExportData {
 }
 
 const Analytics: React.FC = () => {
-  const router = useRouter();
+  const [location, setLocation] = useLocation();
   const { appStoreUser } = useAppStore();
   const { toast } = useToast();
-  
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'reports' | 'export' | 'social'>('dashboard');
+
+  const [activeTab, setActiveTab] = useState<'tableau-bord' | 'rapports' | 'export' | 'social'>('tableau-bord');
   const [periodFilter, setPeriodFilter] = useState<'week' | 'month' | 'quarter'>('month');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,7 +85,7 @@ const Analytics: React.FC = () => {
         goals_achieved: 92,
         ranking_percentile: 15,
         total_workouts: workoutStats?.length || 24,
-        total_calories: workoutStats?.reduce((sum, w) => sum + (w.calories_burned || 0), 0) || 3840,
+        total_calories: workoutStats?.reduce((sum: number, w: any) => sum + (w.calories_burned || 0), 0) || 3840,
         average_sleep: 7.5,
         hydration_rate: 88
       };
@@ -106,9 +107,9 @@ const Analytics: React.FC = () => {
   const getPersonalizedMessage = useMemo(() => {
     const userName = appStoreUser?.first_name || appStoreUser?.username || 'Champion';
     const sport = appStoreUser?.sport || 'sport';
-    
+
     if (!analyticsData) return `📊 Analysons vos performances, ${userName}`;
-    
+
     if (analyticsData.consistency_rate >= 90) {
       return `🎯 Excellent ${userName} ! Vos performances en ${sport} sont remarquables`;
     } else if (analyticsData.consistency_rate >= 70) {
@@ -118,7 +119,7 @@ const Analytics: React.FC = () => {
     }
   }, [appStoreUser, analyticsData]);
 
-  // Export des données avec GitHub Copilot integration
+  // Export des données avec optimisation
   const handleExport = useCallback(async (format: ExportData['format']) => {
     if (!analyticsData || !appStoreUser?.id) return;
 
@@ -133,7 +134,7 @@ const Analytics: React.FC = () => {
         format
       };
 
-      // Simulation d'export avec GitHub Copilot optimization
+      // Simulation d'export avec délai réaliste
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       if (format === 'json') {
@@ -142,6 +143,31 @@ const Analytics: React.FC = () => {
         const a = document.createElement('a');
         a.href = url;
         a.download = `analytics-${appStoreUser.sport}-${periodFilter}.json`;
+        a.setAttribute('aria-label', `Télécharger les données analytics au format JSON`);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else if (format === 'csv') {
+        // Génération CSV basique
+        const csvContent = [
+          'Métrique,Valeur',
+          `Taux de consistance,${analyticsData.consistency_rate}%`,
+          `Série de jours,${analyticsData.streak_days}`,
+          `Amélioration mensuelle,${analyticsData.monthly_improvement}%`,
+          `Objectifs atteints,${analyticsData.goals_achieved}%`,
+          `Total entraînements,${analyticsData.total_workouts}`,
+          `Total calories,${analyticsData.total_calories}`,
+          `Sommeil moyen,${analyticsData.average_sleep}h`,
+          `Taux hydratation,${analyticsData.hydration_rate}%`
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `analytics-${appStoreUser.sport}-${periodFilter}.csv`;
+        a.setAttribute('aria-label', `Télécharger les données analytics au format CSV`);
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -153,9 +179,9 @@ const Analytics: React.FC = () => {
         description: `Données ${format.toUpperCase()} téléchargées avec succès`,
       });
 
-      // Analytics event pour GitHub Copilot insights
-      if (typeof window !== 'undefined' && window.gtag) {
-        window.gtag('event', 'analytics_export', {
+      // Analytics event pour insights
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'analytics_export', {
           format,
           period: periodFilter,
           sport: appStoreUser.sport,
@@ -198,11 +224,20 @@ const Analytics: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'reports', label: 'Rapports', icon: TrendingUp },
+    { id: 'tableau-bord', label: 'Tableau de bord', icon: BarChart3 },
+    { id: 'rapports', label: 'Rapports', icon: TrendingUp },
     { id: 'export', label: 'Export', icon: Download },
     { id: 'social', label: 'Social', icon: Users }
   ];
+
+  const getPeriodLabel = (period: string) => {
+    switch (period) {
+      case 'week': return 'Semaine';
+      case 'month': return 'Mois';
+      case 'quarter': return 'Trimestre';
+      default: return 'Mois';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -216,8 +251,8 @@ const Analytics: React.FC = () => {
             <Badge variant="secondary" className="bg-white/20 text-white">
               {analyticsData.consistency_rate}% consistance
             </Badge>
-            <Select value={periodFilter} onValueChange={(value: any) => setPeriodFilter(value)}>
-              <SelectTrigger className="w-32 bg-white/20 border-white/30 text-white">
+            <Select value={periodFilter} onValueChange={(value: 'week' | 'month' | 'quarter') => setPeriodFilter(value)}>
+              <SelectTrigger className="w-32 bg-white/20 border-white/30 text-white" aria-label="Sélectionner la période">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -231,11 +266,11 @@ const Analytics: React.FC = () => {
       />
 
       <div className="p-4 space-y-6 max-w-6xl mx-auto">
-        
+
         {/* Navigation */}
         <Card>
           <CardContent className="p-2">
-            <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)} className="space-y-6">
+            <Tabs value={activeTab} onValueChange={(value: 'tableau-bord' | 'rapports' | 'export' | 'social') => setActiveTab(value)} className="space-y-6">
               <TabsList className="grid w-full grid-cols-4">
                 {tabs.map((tab) => {
                   const TabIcon = tab.icon;
@@ -248,9 +283,9 @@ const Analytics: React.FC = () => {
                 })}
               </TabsList>
 
-              {/* Dashboard Tab */}
-              <TabsContent value="dashboard" className="space-y-6">
-                
+              {/* Tableau de bord */}
+              <TabsContent value="tableau-bord" className="space-y-6">
+
                 {/* Métriques principales */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
@@ -260,7 +295,7 @@ const Analytics: React.FC = () => {
                       <div className="text-xs text-blue-600">Entraînements</div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
                     <CardContent className="p-4 text-center">
                       <Target className="h-8 w-8 mx-auto text-green-600 mb-2" />
@@ -268,7 +303,7 @@ const Analytics: React.FC = () => {
                       <div className="text-xs text-green-600">Consistance</div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
                     <CardContent className="p-4 text-center">
                       <Zap className="h-8 w-8 mx-auto text-orange-600 mb-2" />
@@ -276,7 +311,7 @@ const Analytics: React.FC = () => {
                       <div className="text-xs text-orange-600">Calories</div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
                     <CardContent className="p-4 text-center">
                       <Award className="h-8 w-8 mx-auto text-purple-600 mb-2" />
@@ -291,7 +326,7 @@ const Analytics: React.FC = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <TrendingUp className="h-5 w-5" />
-                      <span>Progression {periodFilter}</span>
+                      <span>Progression {getPeriodLabel(periodFilter)}</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -302,7 +337,7 @@ const Analytics: React.FC = () => {
                       </div>
                       <Progress value={analyticsData.goals_achieved} className="h-2" />
                     </div>
-                    
+
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Hydratation</span>
@@ -310,7 +345,7 @@ const Analytics: React.FC = () => {
                       </div>
                       <Progress value={analyticsData.hydration_rate} className="h-2" />
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                       <div className="text-center">
                         <div className="text-lg font-bold text-green-600">+{analyticsData.monthly_improvement}%</div>
@@ -333,10 +368,10 @@ const Analytics: React.FC = () => {
                 />
               </TabsContent>
 
-              {/* Reports Tab */}
-              <TabsContent value="reports" className="space-y-6">
+              {/* Rapports */}
+              <TabsContent value="rapports" className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  
+
                   {/* Rapport de consistance */}
                   <Card className="hover:shadow-lg transition-shadow">
                     <CardHeader>
@@ -358,7 +393,10 @@ const Analytics: React.FC = () => {
                           <span className="text-sm">Série actuelle</span>
                           <span className="font-bold text-blue-600">{analyticsData.streak_days} jours</span>
                         </div>
-                        <Button className="w-full bg-green-600 hover:bg-green-700">
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          onClick={() => toast({ title: "Fonctionnalité en développement", description: "Rapport détaillé bientôt disponible" })}
+                        >
                           <FileText className="h-4 w-4 mr-2" />
                           Rapport détaillé
                         </Button>
@@ -387,9 +425,13 @@ const Analytics: React.FC = () => {
                           <span className="text-sm">Piliers actifs</span>
                           <span className="font-bold text-purple-600">4/4</span>
                         </div>
-                        <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                        <Button 
+                          className="w-full bg-orange-600 hover:bg-orange-700"
+                          onClick={() => handleExport('pdf')}
+                          disabled={exporting}
+                        >
                           <Download className="h-4 w-4 mr-2" />
-                          Télécharger PDF
+                          {exporting ? 'Génération...' : 'Télécharger PDF'}
                         </Button>
                       </div>
                     </CardContent>
@@ -416,7 +458,10 @@ const Analytics: React.FC = () => {
                           <span className="text-sm">Classement</span>
                           <span className="font-bold text-blue-600">Top {analyticsData.ranking_percentile}%</span>
                         </div>
-                        <Button className="w-full bg-red-600 hover:bg-red-700">
+                        <Button 
+                          className="w-full bg-red-600 hover:bg-red-700"
+                          onClick={() => toast({ title: "Fonctionnalité en développement", description: "Comparaison détaillée bientôt disponible" })}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           Voir comparaison
                         </Button>
@@ -426,7 +471,7 @@ const Analytics: React.FC = () => {
                 </div>
               </TabsContent>
 
-              {/* Export Tab */}
+              {/* Export */}
               <TabsContent value="export" className="space-y-6">
                 <Card className="max-w-2xl mx-auto">
                   <CardHeader className="text-center">
@@ -439,35 +484,38 @@ const Analytics: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <Button
                         onClick={() => handleExport('json')}
                         disabled={exporting}
                         className="h-20 flex flex-col space-y-2 bg-blue-600 hover:bg-blue-700"
+                        aria-label="Exporter les données au format JSON"
                       >
                         <Download className="h-5 w-5" />
-                        <span className="text-sm">JSON Complet</span>
+                        <span className="text-sm">{exporting ? 'Export...' : 'JSON Complet'}</span>
                       </Button>
-                      
+
                       <Button
                         onClick={() => handleExport('csv')}
                         disabled={exporting}
                         variant="outline"
                         className="h-20 flex flex-col space-y-2 border-green-200 hover:bg-green-50"
+                        aria-label="Exporter les données au format CSV"
                       >
                         <FileText className="h-5 w-5 text-green-600" />
-                        <span className="text-sm text-green-600">CSV Tableau</span>
+                        <span className="text-sm text-green-600">{exporting ? 'Export...' : 'CSV Tableau'}</span>
                       </Button>
-                      
+
                       <Button
                         onClick={() => handleExport('pdf')}
                         disabled={exporting}
                         variant="outline"
                         className="h-20 flex flex-col space-y-2 border-orange-200 hover:bg-orange-50"
+                        aria-label="Exporter les données au format PDF"
                       >
                         <FileText className="h-5 w-5 text-orange-600" />
-                        <span className="text-sm text-orange-600">Rapport PDF</span>
+                        <span className="text-sm text-orange-600">{exporting ? 'Export...' : 'Rapport PDF'}</span>
                       </Button>
                     </div>
 
@@ -487,7 +535,7 @@ const Analytics: React.FC = () => {
                 </Card>
               </TabsContent>
 
-              {/* Social Tab */}
+              {/* Social */}
               <TabsContent value="social" className="space-y-6">
                 <Card>
                   <CardHeader className="text-center">
@@ -500,14 +548,14 @@ const Analytics: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
                         <Trophy className="h-12 w-12 mx-auto text-purple-600 mb-4" />
                         <div className="text-2xl font-bold text-purple-700">Top {analyticsData.ranking_percentile}%</div>
                         <div className="text-sm text-purple-600">Classement global {appStoreUser?.sport}</div>
                       </div>
-                      
+
                       <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
                         <Share2 className="h-12 w-12 mx-auto text-green-600 mb-4" />
                         <div className="text-2xl font-bold text-green-700">{analyticsData.consistency_rate}%</div>
@@ -519,6 +567,25 @@ const Analytics: React.FC = () => {
                       <p className="text-sm text-amber-800 text-center">
                         🚧 Fonctionnalité en développement - Comparaison avec vos amis bientôt disponible
                       </p>
+                    </div>
+
+                    <div className="flex justify-center space-x-4">
+                      <Button 
+                        variant="outline" 
+                        className="border-blue-200 hover:bg-blue-50"
+                        onClick={() => toast({ title: "Bientôt disponible", description: "Invitation d'amis en développement" })}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Inviter des amis
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="border-green-200 hover:bg-green-50"
+                        onClick={() => toast({ title: "Bientôt disponible", description: "Partage de stats en développement" })}
+                      >
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Partager mes stats
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
