@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { useAppStore } from '@/stores/useAppStore';
 import { supabase } from '@/lib/supabase';
-import { WorkoutExercise } from './useWorkoutSessionCore';
+import type { WorkoutExercise } from '@/types/workout';
 
 export interface UseExerciseHistoryReturn {
   getLastWeightForExercise: (exerciseName: string) => number | null;
@@ -11,7 +11,7 @@ export interface UseExerciseHistoryReturn {
 }
 
 export const useExerciseHistory = (): UseExerciseHistoryReturn => {
-  const { appStoreUser } = useAppStore.getState();
+  const { appStoreUser } = useAppStore();
 
   const getLastWeightForExercise = useCallback((exerciseName: string): number | null => {
     try {
@@ -61,7 +61,7 @@ export const useExerciseHistory = (): UseExerciseHistoryReturn => {
         .select('exercises')
         .eq('user_id', appStoreUser.id)
         .eq('name', workoutName)
-        .eq('status', 'completed')
+        .not('completed_at', 'is', null) // Sessions terminées
         .order('completed_at', { ascending: false })
         .limit(1);
 
@@ -71,11 +71,11 @@ export const useExerciseHistory = (): UseExerciseHistoryReturn => {
       }
       
       // Réinitialiser les exercices pour une nouvelle session
-      return data[0].exercises.map((ex: any) => ({
+      return (data[0].exercises as WorkoutExercise[]).map((ex: WorkoutExercise) => ({
         ...ex,
         id: crypto.randomUUID(),
         completed: false,
-        sets: ex.sets.map((set: any) => ({ 
+        sets: ex.sets.map((set) => ({ 
           ...set, 
           completed: false,
           timestamp: undefined
