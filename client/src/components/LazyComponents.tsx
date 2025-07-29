@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 
 // === LAZY LOADING DES PAGES PRINCIPALES ===
-export const LazyIndex = lazy(() => import('@/pages/Index')); // ✅ Existe
+export const LazyIndex = lazy(() => import('@/pages/index')); // ✅ Existe
 export const LazyProfile = lazy(() => import('@/pages/ProfileComplete')); // ✅ Corrigé
 export const LazyWorkout = lazy(() => import('@/pages/WorkoutPage')); // ✅ Corrigé
 export const LazyNutrition = lazy(() => import('@/pages/Nutrition')); // ✅ Existe
