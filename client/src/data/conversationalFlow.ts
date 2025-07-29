@@ -107,7 +107,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       tips: [
         'Répondez honnêtement pour obtenir les meilleurs résultats',
-        'L\\'IA s\\'adapte à vos réponses en temps réel',
+        'L'IA s'adapte à vos réponses en temps réel',
         'Vous pourrez modifier vos choix à tout moment',
         'Toutes vos données sont chiffrées et sécurisées'
       ],
