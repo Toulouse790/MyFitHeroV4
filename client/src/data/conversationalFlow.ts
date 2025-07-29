@@ -100,12 +100,11 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
     {
       id: 'welcome',
       type: 'welcome',
-      version: '4.2.0',
+      version: '1.0.0',
       title: 'Bienvenue dans MyFitHero ! 🎉',
       subtitle: 'Votre Coach Bien-être Personnel alimenté par IA',
       description: "Je vais vous aider à créer votre programme personnalisé en quelques minutes grâce à l'intelligence artificielle.",
       illustration: '🏆',
-      helpText: 'Cette configuration ne prend que 10-15 minutes et peut être modifiée à tout moment',
       
       tips: [
         'Répondez honnêtement pour obtenir les meilleurs résultats',
@@ -174,19 +173,24 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       inputType: 'single-select',
       searchable: false,
       
-      options: MAIN_OBJECTIVES.map((obj): QuestionOption => ({
-        id: obj.id,
-        label: obj.name,
-        value: obj.id,
-        description: obj.description,
-        icon: obj.icon,
-        triggers: obj.modules as ModuleId[],
-        priority: obj.priority || 1,
-        category: 'objective',
-        metadata: {
-          complexity: obj.modules.length,
-          recommendationScore: 1.0
-        }
+     {
+  id: 'pack_selection',
+  type: 'question',
+  title: 'Choisissez votre programme',
+  question: 'Quel type de programme vous correspond le mieux ?',
+  description: 'Nous avons préparé des packs adaptés à différents objectifs',
+  inputType: 'custom',
+  customComponent: 'PackSelector',
+  illustration: '📦',
+  importance: 'critical',
+  skippable: false,
+  validation: [
+    { type: 'required', message: 'Veuillez sélectionner un pack' }
+  ],
+  nextStep: (packId: string) => {
+    return packId === 'custom' ? 'module_selection' : 'personal_info';
+  }
+}
       })),
       
       validation: [
