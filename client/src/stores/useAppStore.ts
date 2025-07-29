@@ -5,7 +5,6 @@ import type { DailyStats, AiRecommendation } from '@/lib/supabase';
 
 // --- TYPES & INTERFACES ---
 
-// Interface pour l'utilisateur dans le store (simplifié pour éviter les conflits)
 export interface AppUser {
   id: string;
   username?: string | null;
@@ -36,19 +35,14 @@ export interface AppUser {
   fitness_goal?: string;
   weight_kg?: number | null;
   height_cm?: number | null;
-  
-  // Champs additionnels pour le profil complet
   phone?: string | null;
   bio?: string | null;
   city?: string | null;
   country?: string | null;
-  
-  // Champs calculés locaux
   name?: string;
   goal?: string;
 }
 
-// Interface pour les objectifs quotidiens
 export interface DailyGoals {
   water: number;
   calories: number;
@@ -61,42 +55,28 @@ export interface DailyGoals {
 
 // --- HELPER : CALCUL DES OBJECTIFS PERSONNALISÉS ---
 const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
-  // Valeurs par défaut
   let baseCalories = user.daily_calories || 2000;
-  
-  // Calcul BMR si on a les données COMPLÈTES
   if (!user.daily_calories && user.age && user.gender && user.weight_kg && user.height_cm) {
     const weight = user.weight_kg;
     const height = user.height_cm;
-    
-    // Formule Mifflin-St Jeor
     const bmr = user.gender === 'male'
       ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * user.age)
       : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * user.age);
-    
-    // Facteur d'activité selon lifestyle
     const activityFactors: Record<string, number> = {
       'student': 1.4,
       'office_worker': 1.3,
       'physical_job': 1.6,
       'retired': 1.2
     };
-    
     const activityFactor = activityFactors[user.lifestyle || ''] || 1.4;
     baseCalories = Math.round(bmr * activityFactor);
   } else if (!user.daily_calories && (!user.weight_kg || !user.height_cm)) {
-    // Si pas de poids/taille, utiliser des valeurs conservatrices
-    console.warn('⚠️ Calcul calorique avec données incomplètes - demander à l\'utilisateur de compléter son profil');
-    baseCalories = 1800; // Valeur conservatrice
+    baseCalories = 1800;
   }
-
-  // Ajustements selon les objectifs
   let calorieAdjustment = 0;
   if (user.primary_goals?.includes('weight_loss')) calorieAdjustment -= 300;
   if (user.primary_goals?.includes('muscle_gain')) calorieAdjustment += 400;
   if (user.primary_goals?.includes('performance')) calorieAdjustment += 200;
-
-  // Ajustements selon le sport
   const sportAdjustments: Record<string, number> = {
     'basketball': 250,
     'american_football': 500,
@@ -109,14 +89,10 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
     'powerlifting': 300,
     'crossfit': 350
   };
-
   const sportAdjustment = sportAdjustments[user.sport?.toLowerCase() || ''] || 0;
   const finalCalories = baseCalories + calorieAdjustment + sportAdjustment;
-
-  // Calcul des macronutriments (ajustés selon le sport)
   let proteinMultiplier = 1.2;
   let carbMultiplier = 1.0;
-
   if (user.sport?.toLowerCase().includes('strength') || user.sport === 'musculation') {
     proteinMultiplier = 1.5;
     carbMultiplier = 1.0;
@@ -127,28 +103,20 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
     proteinMultiplier = 1.2;
     carbMultiplier = 1.3;
   }
-
   const protein = Math.round((finalCalories * 0.20 / 4) * proteinMultiplier);
   const carbs = Math.round((finalCalories * 0.45 / 4) * carbMultiplier);
   const fat = Math.round((finalCalories * 0.35 / 9));
-
-  // Objectif de sommeil selon le sport
   let sleepHours = 8;
   if (user.sport?.includes('american_football') || user.sport?.includes('rugby')) {
     sleepHours = 9;
   } else if (user.sport?.includes('endurance') || user.sport === 'running') {
     sleepHours = 8.5;
   }
-
-  // Ajustements selon l'âge
   if (user.age && user.age > 45) sleepHours += 0.5;
   if (user.training_frequency && user.training_frequency > 5) sleepHours += 0.5;
-
-  // Hydratation selon sport et poids
-  let waterGoal = 2.5; // Base 2.5L
+  let waterGoal = 2.5;
   if (user.sport?.includes('endurance') || user.sport === 'running') waterGoal = 3.0;
   if (user.sport?.includes('american_football') || user.sport === 'rugby') waterGoal = 3.5;
-
   return {
     calories: finalCalories,
     protein,
@@ -162,28 +130,19 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
 
 // --- INTERFACE DU STORE ---
 interface AppStore {
-  // État
   appStoreUser: AppUser;
   dailyGoals: DailyGoals;
   isLoading: boolean;
-  
-  // Actions pour l'utilisateur
   updateAppStoreUserProfile: (updates: Partial<AppUser>) => void;
   setUser: (user: AppUser) => void;
   clearUser: () => void;
-  
-  // Actions pour les objectifs
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
   calculateAndSetDailyGoals: () => void;
-  
-  // Actions pour les données
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
   fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
   addHydration: (amount: number, type?: string) => Promise<boolean>;
   addMeal: (meal: any) => Promise<boolean>;
   addSleepSession: (sleepData: any) => Promise<boolean>;
-  
-  // Actions pour les modules
   activateModule: (moduleId: string) => Promise<boolean>;
   deactivateModule: (moduleId: string) => Promise<boolean>;
   isModuleActive: (moduleId: string) => boolean;
@@ -225,7 +184,6 @@ const defaultUser: AppUser = {
 export const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
-      // --- ÉTAT INITIAL ---
       appStoreUser: defaultUser,
       dailyGoals: {
         water: 2.5,
@@ -238,41 +196,31 @@ export const useAppStore = create<AppStore>()(
       },
       isLoading: false,
 
-      // --- ACTIONS UTILISATEUR ---
       updateAppStoreUserProfile: (updates: Partial<AppUser>) => {
         set(state => {
           const updatedUser = { ...state.appStoreUser, ...updates };
-          
-          // Champs calculés
           if (!updatedUser.name) {
             updatedUser.name = updatedUser.full_name || updatedUser.username || 'Utilisateur';
           }
-          
           if (!updatedUser.goal && updatedUser.primary_goals?.length) {
             updatedUser.goal = updatedUser.primary_goals[0];
           }
-
           return {
             appStoreUser: updatedUser
           };
         });
-        
-        // Recalculer les objectifs après mise à jour
         setTimeout(() => {
           get().calculateAndSetDailyGoals();
         }, 100);
       },
 
       setUser: (user: AppUser) => {
-        // Champs calculés
         if (!user.name) {
           user.name = user.full_name || user.username || 'Utilisateur';
         }
-        
         if (!user.goal && user.primary_goals?.length) {
           user.goal = user.primary_goals[0];
         }
-
         set({ appStoreUser: user });
         get().calculateAndSetDailyGoals();
       },
@@ -281,7 +229,6 @@ export const useAppStore = create<AppStore>()(
         set({ appStoreUser: defaultUser });
       },
 
-      // --- ACTIONS OBJECTIFS ---
       updateDailyGoals: (goals: Partial<DailyGoals>) => {
         set(state => ({
           dailyGoals: { ...state.dailyGoals, ...goals }
@@ -297,23 +244,19 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      // --- ACTIONS DONNÉES ---
       fetchDailyStats: async (userId: string, date: string): Promise<DailyStats | null> => {
         try {
           set({ isLoading: true });
-          
           const { data, error } = await supabase
             .from('daily_stats')
             .select('*')
             .eq('user_id', userId)
-            .eq('date', date)
+            .eq('stat_date', date)
             .single();
-
           if (error && error.code !== 'PGRST116') {
             console.error('Erreur fetch daily stats:', error);
             return null;
           }
-
           return data || null;
         } catch (error) {
           console.error('Erreur fetchDailyStats:', error);
@@ -332,12 +275,10 @@ export const useAppStore = create<AppStore>()(
             .eq('pillar_type', pillarType)
             .order('created_at', { ascending: false })
             .limit(limit);
-
           if (error) {
             console.error('Erreur fetch AI recommendations:', error);
             return [];
           }
-
           return data || [];
         } catch (error) {
           console.error('Erreur fetchAiRecommendations:', error);
@@ -349,22 +290,19 @@ export const useAppStore = create<AppStore>()(
         try {
           const { appStoreUser } = get();
           const today = new Date().toISOString().split('T')[0];
-
           const { error } = await supabase
-            .from('hydration_entries')
+            .from('hydration_logs')
             .insert({
               user_id: appStoreUser.id,
               amount_ml: amount,
               drink_type: type,
-              recorded_at: new Date().toISOString(),
-              date: today
+              logged_at: new Date().toISOString(),
+              log_date: today
             });
-
           if (error) {
             console.error('Erreur ajout hydratation:', error);
             return false;
           }
-
           return true;
         } catch (error) {
           console.error('Erreur addHydration:', error);
@@ -376,26 +314,23 @@ export const useAppStore = create<AppStore>()(
         try {
           const { appStoreUser } = get();
           const today = new Date().toISOString().split('T')[0];
-
           const { error } = await supabase
             .from('meals')
             .insert({
               user_id: appStoreUser.id,
               meal_type: meal.meal_type,
-              food_name: meal.food_name,
+              foods: meal.foods,
               total_calories: meal.calories,
-              protein_g: meal.protein || 0,
-              carbs_g: meal.carbs || 0,
-              fat_g: meal.fat || 0,
-              date: today,
-              recorded_at: new Date().toISOString()
+              total_protein: meal.protein || 0,
+              total_carbs: meal.carbs || 0,
+              total_fat: meal.fat || 0,
+              meal_date: today,
+              meal_time: new Date().toTimeString().split(' ')[0]
             });
-
           if (error) {
             console.error('Erreur ajout repas:', error);
             return false;
           }
-
           return true;
         } catch (error) {
           console.error('Erreur addMeal:', error);
@@ -406,24 +341,21 @@ export const useAppStore = create<AppStore>()(
       addSleepSession: async (sleepData: any): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-
           const { error } = await supabase
             .from('sleep_sessions')
             .insert({
               user_id: appStoreUser.id,
+              sleep_date: sleepData.date || new Date().toISOString().split('T')[0],
               bedtime: sleepData.bedtime,
               wake_time: sleepData.wake_time,
-              duration_hours: sleepData.duration_hours,
-              quality_score: sleepData.quality_score || 75,
-              date: sleepData.date,
-              recorded_at: new Date().toISOString()
+              duration_minutes: sleepData.duration_minutes,
+              quality_rating: sleepData.quality_rating || 75,
+              notes: sleepData.notes || ''
             });
-
           if (error) {
             console.error('Erreur ajout sommeil:', error);
             return false;
           }
-
           return true;
         } catch (error) {
           console.error('Erreur addSleepSession:', error);
@@ -431,20 +363,15 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      // --- ACTIONS MODULES ---
       activateModule: async (moduleId: string): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
           const currentActiveModules = appStoreUser.active_modules || [];
-          
           if (currentActiveModules.includes(moduleId)) {
             console.log(`Module ${moduleId} déjà activé`);
             return true;
           }
-
           const newActiveModules = [...currentActiveModules, moduleId];
-
-          // Mise à jour en base
           const { error } = await supabase
             .from('user_profiles')
             .update({ 
@@ -452,15 +379,11 @@ export const useAppStore = create<AppStore>()(
               updated_at: new Date().toISOString()
             })
             .eq('id', appStoreUser.id);
-
           if (error) {
             console.error('Erreur activation module:', error);
             return false;
           }
-
-          // Mise à jour du store
           get().updateAppStoreUserProfile({ active_modules: newActiveModules });
-
           console.log(`✅ Module ${moduleId} activé avec succès`);
           return true;
         } catch (error) {
@@ -473,15 +396,11 @@ export const useAppStore = create<AppStore>()(
         try {
           const { appStoreUser } = get();
           const currentActiveModules = appStoreUser.active_modules || [];
-          
           if (!currentActiveModules.includes(moduleId)) {
             console.log(`Module ${moduleId} déjà inactif`);
             return true;
           }
-
           const newActiveModules = currentActiveModules.filter(module => module !== moduleId);
-
-          // Mise à jour en base
           const { error } = await supabase
             .from('user_profiles')
             .update({ 
@@ -489,15 +408,11 @@ export const useAppStore = create<AppStore>()(
               updated_at: new Date().toISOString()
             })
             .eq('id', appStoreUser.id);
-
           if (error) {
             console.error('Erreur désactivation module:', error);
             return false;
           }
-
-          // Mise à jour du store
           get().updateAppStoreUserProfile({ active_modules: newActiveModules });
-
           console.log(`✅ Module ${moduleId} désactivé avec succès`);
           return true;
         } catch (error) {
