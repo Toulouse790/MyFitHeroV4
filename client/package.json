@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "cd client && vite",
     "dev:full": "vite",
-    "build": "cd client && vite build",
+    "build": "vite build",
     "vercel-build": "cd client && vite build",
     "preview": "cd client && vite preview",
     "start": "cd client && vite preview",
