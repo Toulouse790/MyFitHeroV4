@@ -1,5 +1,3 @@
-# Créer le code React optimisé pour la page Sleep
-sleep_code = '''// client/src/components/Sleep.tsx
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -871,19 +869,4 @@ const Sleep: React.FC = () => {
   );
 };
 
-export default Sleep;'''
-
-# Sauvegarder le code dans un fichier
-with open('Sleep_Optimized.tsx', 'w', encoding='utf-8') as f:
-    f.write(sleep_code)
-
-print("Code React optimisé généré avec succès !")
-print("\nPrincipales améliorations :")
-print("✅ Mode Vue Simple vs Vue Détaillée (toggle)")
-print("✅ Actions rapides compactes (4 colonnes)")
-print("✅ Bénéfices prioritaires (top 2 en mode simple)")
-print("✅ Conseils en accordion (prioritaires d'abord)")
-print("✅ Tabs pour organiser stats/bénéfices")
-print("✅ Analyse IA dans une modal")
-print("✅ Interface plus claire et moins chargée")
-print("✅ Analyse du profil collapsible")
+export default Sleep;
