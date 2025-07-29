@@ -35,7 +35,6 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
   version: '4.2.0',
   description: 'Onboarding conversationnel optimisé par IA avec recommandations personnalisées et flux adaptatifs',
   author: 'MyFitHero Team',
-  estimatedDuration: 15,
   modules: ['sport', 'strength', 'nutrition', 'sleep', 'hydration', 'wellness'],
   languages: ['fr', 'en'],
   initialStep: 'welcome',
@@ -108,7 +107,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       tips: [
         'Répondez honnêtement pour obtenir les meilleurs résultats',
-        'L\'IA s\'adapte à vos réponses en temps réel',
+        'L\\'IA s\\'adapte à vos réponses en temps réel',
         'Vous pourrez modifier vos choix à tout moment',
         'Toutes vos données sont chiffrées et sécurisées'
       ],
@@ -121,7 +120,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['onboarding_started', 'welcome_screen_viewed'],
       aiHints: ['user_acquisition_context', 'device_capabilities'],
       
-      ariaLabel: 'Page d\'accueil de l\'onboarding MyFitHero',
+      ariaLabel: 'Page d\\'accueil de l\\'onboarding MyFitHero',
       mobileLayout: 'stack',
       desktopLayout: 'cards'
     },
@@ -132,7 +131,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: "Faisons connaissance ! 👋",
       question: 'Comment souhaitez-vous que je vous appelle ?',
-      description: 'Votre prénom m\'aide à personnaliser votre expérience',
+      description: 'Votre prénom m\\'aide à personnaliser votre expérience',
       illustration: '😊',
       inputType: 'text',
       placeholder: 'Votre prénom...',
@@ -143,7 +142,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
         { type: 'required', message: 'Veuillez saisir votre prénom' },
         { type: 'minLength', value: 2, message: 'Le prénom doit contenir au moins 2 caractères' },
         { type: 'maxLength', value: 50, message: 'Le prénom ne peut pas dépasser 50 caractères' },
-        { type: 'pattern', regex: /^[a-zA-ZÀ-ÿ\s\-']+$/, message: 'Le prénom ne peut contenir que des lettres, espaces, tirets et apostrophes' }
+        { type: 'pattern', regex: /^[a-zA-ZÀ-ÿ\\s\\-']+$/, message: 'Le prénom ne peut contenir que des lettres, espaces, tirets et apostrophes' }
       ],
       
       nextStep: 'main_objective',
@@ -168,28 +167,23 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: 'Parfait {firstName} ! 🌟',
       question: "Quel est votre objectif principal ?",
-      description: 'L\'IA va analyser votre réponse pour recommander les modules parfaits pour vous',
+      description: 'L\\'IA va analyser votre réponse pour recommander les modules parfaits pour vous',
       illustration: '🎯',
       inputType: 'single-select',
       searchable: false,
-     },  
-     {
-  id: 'pack_selection',
-  type: 'question',
-  title: 'Choisissez votre programme',
-  question: 'Quel type de programme vous correspond le mieux ?',
-  description: 'Nous avons préparé des packs adaptés à différents objectifs',
-  inputType: 'custom',
-  customComponent: 'PackSelector',
-  illustration: '📦',
-  importance: 'critical',
-  skippable: false,
-  validation: [
-    { type: 'required', message: 'Veuillez sélectionner un pack' }
-  ],
-  nextStep: (packId: string) => {
-    return packId === 'custom' ? 'module_selection' : 'personal_info';
-  }
+      
+      options: MAIN_OBJECTIVES.map((objective): QuestionOption => ({
+        id: objective.id,
+        label: objective.name,
+        value: objective.id,
+        description: objective.description,
+        icon: objective.icon,
+        category: 'objective',
+        metadata: {
+          recommendedModules: objective.recommended_modules,
+          priority: objective.priority
+        }
+      })),
       
       validation: [
         { type: 'required', message: 'Veuillez sélectionner votre objectif principal' }
@@ -200,24 +194,51 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Choisissez l\'objectif qui vous motive le plus',
-        'L\'IA adaptera automatiquement les recommandations',
+        'Choisissez l\\'objectif qui vous motive le plus',
+        'L\\'IA adaptera automatiquement les recommandations',
         'Vous pourrez avoir des objectifs secondaires plus tard'
       ],
       
       trackingEvents: ['main_objective_selected', 'ai_recommendation_triggered'],
       aiHints: ['analyze_user_motivation', 'predict_module_preferences'],
       
-      ariaLabel: 'Sélection de l\'objectif principal',
+      ariaLabel: 'Sélection de l\\'objectif principal',
       mobileLayout: 'stack',
       desktopLayout: 'grid'
+    },
+
+    /* ========================= PACK SELECTION ========================== */
+    {
+      id: 'pack_selection',
+      type: 'question',
+      title: 'Choisissez votre programme',
+      question: 'Quel type de programme vous correspond le mieux ?',
+      description: 'Nous avons préparé des packs adaptés à différents objectifs',
+      inputType: 'custom',
+      customComponent: 'PackSelector',
+      illustration: '📦',
+      importance: 'critical',
+      skippable: false,
+      validation: [
+        { type: 'required', message: 'Veuillez sélectionner un pack' }
+      ],
+      nextStep: (packId: string) => {
+        return packId === 'custom' ? 'module_selection' : 'personal_info';
+      },
+      estimatedTime: 90,
+      backable: true,
+      
+      trackingEvents: ['pack_selected'],
+      aiHints: ['track_pack_preference'],
+      
+      ariaLabel: 'Sélection du pack de programme'
     },
 
     /* ========================== AI ANALYSIS ========================== */
     {
       id: 'ai_analysis',
       type: 'loading',
-      title: 'L\'IA analyse votre profil... 🤖',
+      title: 'L\\'IA analyse votre profil... 🤖',
       description: 'Création de recommandations personnalisées basées sur votre objectif',
       illustration: '⚡',
       
@@ -240,7 +261,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: 'Recommandations IA Personnalisées 🎯',
       question: 'Basé sur votre objectif, voici mes recommandations intelligentes',
-      description: 'L\'IA a analysé des milliers de profils similaires pour ces suggestions optimales',
+      description: 'L\\'IA a analysé des milliers de profils similaires pour ces suggestions optimales',
       illustration: '🧠',
       inputType: 'multi-select',
       maxSelections: 6,
@@ -277,9 +298,9 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Les modules recommandés sont basés sur l\'analyse IA de votre profil',
+        'Les modules recommandés sont basés sur l\\'analyse IA de votre profil',
         'Plus vous sélectionnez de modules, plus les résultats sont synergiques',
-        'Vous pourrez activer d\'autres modules plus tard dans l\'application'
+        'Vous pourrez activer d\\'autres modules plus tard dans l\\'application'
       ],
       
       warnings: [
@@ -301,7 +322,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: 'Boostez vos résultats de 67% ! 🚀',
       question: 'La nutrition représente 70% de vos résultats',
-      description: 'L\'IA peut créer des plans alimentaires personnalisés qui s\'adaptent à vos goûts et contraintes',
+      description: 'L\\'IA peut créer des plans alimentaires personnalisés qui s\\'adaptent à vos goûts et contraintes',
       illustration: '🥗',
       inputType: 'single-select',
       
@@ -321,7 +342,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
           id: 'skip_nutrition',
           label: 'Non merci, continuer sans nutrition',
           value: 'skip_nutrition',
-          description: 'Vous pourrez l\'ajouter plus tard',
+          description: 'Vous pourrez l\\'ajouter plus tard',
           icon: '➡️',
           color: '#6B7280'
         }
@@ -346,7 +367,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['nutrition_upsell_shown', 'upsell_response'],
       aiHints: ['track_upsell_effectiveness', 'personalize_upsell_message'],
       
-      ariaLabel: 'Proposition d\'ajout du module nutrition'
+      ariaLabel: 'Proposition d\\'ajout du module nutrition'
     },
 
     {
@@ -354,7 +375,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: 'Optimisez votre récupération ! 😴',
       question: 'Le sommeil améliore vos performances de 43%',
-      description: 'L\'IA peut analyser votre sommeil et suggérer des améliorations personnalisées',
+      description: 'L\\'IA peut analyser votre sommeil et suggérer des améliorations personnalisées',
       illustration: '🌙',
       inputType: 'single-select',
       
@@ -374,7 +395,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
           id: 'skip_sleep',
           label: 'Non merci, continuer sans optimisation du sommeil',
           value: 'skip_sleep',
-          description: 'Disponible plus tard dans l\'application',
+          description: 'Disponible plus tard dans l\\'application',
           icon: '➡️',
           color: '#6B7280'
         }
@@ -399,7 +420,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['sleep_upsell_shown', 'upsell_response'],
       aiHints: ['track_upsell_effectiveness', 'personalize_sleep_benefits'],
       
-      ariaLabel: 'Proposition d\'ajout du module sommeil'
+      ariaLabel: 'Proposition d\\'ajout du module sommeil'
     },
 
     /* ========================= PERSONAL INFO ======================= */
@@ -407,7 +428,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       id: 'personal_info',
       type: 'form',
       title: 'Parlons de vous 📊',
-      question: 'Aidez l\'IA à personnaliser vos programmes',
+      question: 'Aidez l\\'IA à personnaliser vos programmes',
       description: 'Ces informations permettent des recommandations ultra-précises et sécurisées',
       illustration: '👤',
       inputType: 'single-select',
@@ -438,7 +459,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['personal_info_completed', 'user_profile_created'],
       aiHints: ['calculate_user_profile', 'determine_program_intensity'],
       
-      ariaLabel: 'Formulaire d\'informations personnelles',
+      ariaLabel: 'Formulaire d\\'informations personnelles',
       sensitive: true,
       encrypted: true,
       gdprCategory: 'personal_data',
@@ -453,7 +474,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['sport'],
       title: 'Votre sport principal 🏃‍♂️',
       question: 'Quel sport pratiquez-vous principalement ?',
-      description: 'L\'IA créera des programmes spécifiques à votre discipline',
+      description: 'L\\'IA créera des programmes spécifiques à votre discipline',
       illustration: '⚽',
       inputType: 'single-select',
       searchable: true,
@@ -477,7 +498,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Si votre sport n\'apparaît pas, tapez son nom pour le rechercher',
+        'Si votre sport n\\'apparaît pas, tapez son nom pour le rechercher',
         'Sélectionnez "Autre sport" si vous ne le trouvez pas'
       ],
       
@@ -524,7 +545,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['sport'],
       title: 'Votre niveau sportif 📊',
       question: 'Comment décririez-vous votre niveau ?',
-      description: 'Soyez honnête, cela détermine l\'intensité de vos programmes',
+      description: 'Soyez honnête, cela détermine l\\'intensité de vos programmes',
       illustration: '📈',
       inputType: 'single-select',
       
@@ -551,7 +572,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Un niveau mal évalué peut conduire à des blessures ou à l\'ennui',
+        'Un niveau mal évalué peut conduire à des blessures ou à l\\'ennui',
         'Vous pourrez ajuster votre niveau en fonction de vos progrès'
       ],
       
@@ -567,7 +588,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['sport'],
       title: 'Période de saison 🗓️',
       question: 'Dans quelle période vous trouvez-vous actuellement ?',
-      description: 'L\'IA adaptera l\'intensité et le focus de vos entraînements',
+      description: 'L\\'IA adaptera l\\'intensité et le focus de vos entraînements',
       illustration: '📅',
       inputType: 'single-select',
       
@@ -603,7 +624,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['sport'],
       title: 'Votre équipement 🏋️‍♂️',
       question: 'À quel équipement avez-vous accès ?',
-      description: 'L\'IA adaptera les exercices à votre matériel disponible',
+      description: 'L\\'IA adaptera les exercices à votre matériel disponible',
       illustration: '🎪',
       inputType: 'single-select',
       
@@ -621,7 +642,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       })),
       
       validation: [
-        { type: 'required', message: 'Veuillez sélectionner votre niveau d\'équipement' }
+        { type: 'required', message: 'Veuillez sélectionner votre niveau d\\'équipement' }
       ],
       
       nextStep: (_, data) => getNextModuleStep(data.selectedModules || [], 'sport'),
@@ -631,7 +652,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['sport_equipment_selected'],
       aiHints: ['filter_exercises_by_equipment', 'suggest_equipment_upgrades'],
       
-      ariaLabel: 'Sélection du niveau d\'équipement'
+      ariaLabel: 'Sélection du niveau d\\'équipement'
     },
 
     /* ======================= MODULE: STRENGTH ======================= */
@@ -641,7 +662,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['strength'],
       title: 'Objectif musculation 💪',
       question: "Quel est votre objectif principal en musculation ?",
-      description: 'L\'IA déterminera votre style d\'entraînement optimal',
+      description: 'L\\'IA déterminera votre style d\\'entraînement optimal',
       illustration: '🏋️‍♀️',
       inputType: 'single-select',
       
@@ -667,14 +688,14 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Vous pouvez avoir plusieurs objectifs, mais un principal aide l\'IA',
-        'Les programmes s\'adaptent selon vos progrès'
+        'Vous pouvez avoir plusieurs objectifs, mais un principal aide l\\'IA',
+        'Les programmes s\\'adaptent selon vos progrès'
       ],
       
       trackingEvents: ['strength_objective_selected'],
       aiHints: ['design_strength_progression', 'calculate_volume_intensity'],
       
-      ariaLabel: 'Sélection de l\'objectif de musculation'
+      ariaLabel: 'Sélection de l\\'objectif de musculation'
     },
 
     {
@@ -683,7 +704,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['strength'],
       title: 'Votre expérience 📈',
       question: 'Depuis combien de temps faites-vous de la musculation ?',
-      description: 'L\'IA ajustera la complexité des exercices proposés',
+      description: 'L\\'IA ajustera la complexité des exercices proposés',
       illustration: '🎯',
       inputType: 'single-select',
       
@@ -701,7 +722,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       })),
       
       validation: [
-        { type: 'required', message: 'Veuillez sélectionner votre niveau d\'expérience' }
+        { type: 'required', message: 'Veuillez sélectionner votre niveau d\\'expérience' }
       ],
       
       nextStep: (_, data) => getNextModuleStep(data.selectedModules || [], 'strength'),
@@ -711,7 +732,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['strength_experience_selected'],
       aiHints: ['assess_technical_readiness', 'prevent_overtraining'],
       
-      ariaLabel: 'Sélection du niveau d\'expérience en musculation'
+      ariaLabel: 'Sélection du niveau d\\'expérience en musculation'
     },
 
     /* ======================= MODULE: NUTRITION ====================== */
@@ -720,8 +741,8 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',  
       requiredModules: ['nutrition'],
       title: 'Vos préférences alimentaires 🥗',
-      question: 'Quel type d\'alimentation vous convient ?',
-      description: 'L\'IA personnalisera vos plans de repas selon vos goûts et contraintes',
+      question: 'Quel type d\\'alimentation vous convient ?',
+      description: 'L\\'IA personnalisera vos plans de repas selon vos goûts et contraintes',
       illustration: '🍽️',
       inputType: 'single-select',
       
@@ -744,8 +765,8 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'L\'IA s\'adapte à tous les régimes alimentaires',
-        'Vous pourrez affiner vos préférences dans l\'application'
+        'L\\'IA s\\'adapte à tous les régimes alimentaires',
+        'Vous pourrez affiner vos préférences dans l\\'application'
       ],
       
       trackingEvents: ['dietary_preference_selected'],
@@ -760,7 +781,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['nutrition'],
       title: 'Objectif nutritionnel 🎯',
       question: 'Que souhaitez-vous atteindre avec la nutrition ?',
-      description: 'L\'IA déterminera votre approche calorique et vos macronutriments',
+      description: 'L\\'IA déterminera votre approche calorique et vos macronutriments',
       illustration: '📊',
       inputType: 'single-select',
       
@@ -788,7 +809,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['nutrition_objective_selected'],
       aiHints: ['calculate_caloric_needs', 'design_meal_timing'],
       
-      ariaLabel: 'Sélection de l\'objectif nutritionnel'
+      ariaLabel: 'Sélection de l\\'objectif nutritionnel'
     },
 
     {
@@ -797,7 +818,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['nutrition'],
       title: 'Allergies et intolérances ⚠️',
       question: 'Avez-vous des allergies ou intolérances alimentaires ?',
-      description: 'L\'IA évitera automatiquement ces aliments dans vos plans',
+      description: 'L\\'IA évitera automatiquement ces aliments dans vos plans',
       illustration: '🚫',
       inputType: 'multi-select',
       
@@ -831,7 +852,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       requiredModules: ['sleep'],
       title: 'Vos habitudes de sommeil 😴',
-      question: 'Combien d\'heures dormez-vous en moyenne par nuit ?',
+      question: 'Combien d\\'heures dormez-vous en moyenne par nuit ?',
       description: 'Le sommeil est crucial pour la récupération et les performances',
       illustration: '🌙',
       inputType: 'slider',
@@ -862,7 +883,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       tips: [
         'Comptez le temps réellement endormi, pas le temps au lit',
-        'L\'IA optimisera vos horaires d\'entraînement selon votre sommeil'
+        'L\\'IA optimisera vos horaires d\\'entraînement selon votre sommeil'
       ],
       
       trackingEvents: ['sleep_duration_selected'],
@@ -877,7 +898,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['sleep'],
       title: 'Qualité du sommeil 🌟',
       question: 'Comment évaluez-vous la qualité de votre sommeil ?',
-      description: 'L\'IA proposera des conseils personnalisés d\'amélioration',
+      description: 'L\\'IA proposera des conseils personnalisés d\\'amélioration',
       illustration: '⭐',
       inputType: 'single-select',
       
@@ -911,7 +932,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['sleep'],
       title: 'Difficultés de sommeil 🤔',
       question: 'Rencontrez-vous des difficultés particulières ?',
-      description: 'L\'IA personnalisera ses conseils selon vos problèmes spécifiques',
+      description: 'L\\'IA personnalisera ses conseils selon vos problèmes spécifiques',
       illustration: '💭',
       inputType: 'multi-select',
       
@@ -919,7 +940,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       options: [
         { id: 'none', label: 'Aucune difficulté particulière', value: 'none', icon: '✅' },
-        { id: 'falling_asleep', label: 'Mal à m\'endormir', value: 'falling_asleep', icon: '😵‍💫' },
+        { id: 'falling_asleep', label: 'Mal à m\\'endormir', value: 'falling_asleep', icon: '😵‍💫' },
         { id: 'staying_asleep', label: 'Réveils nocturnes', value: 'staying_asleep', icon: '🌃' },
         { id: 'early_waking', label: 'Réveil trop tôt', value: 'early_waking', icon: '🌅' },
         { id: 'restless_sleep', label: 'Sommeil agité', value: 'restless_sleep', icon: '🌀' },
@@ -966,7 +987,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       },
       
       validation: [
-        { type: 'required', message: 'Veuillez définir votre objectif d\'hydratation' },
+        { type: 'required', message: 'Veuillez définir votre objectif d\\'hydratation' },
         { type: 'range', min: 1, max: 5, message: 'Entre 1 et 5 litres par jour' }
       ],
       
@@ -975,14 +996,14 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'L\'objectif varie selon votre poids, activité et climat',
-        'L\'IA ajustera selon vos entraînements'
+        'L\\'objectif varie selon votre poids, activité et climat',
+        'L\\'IA ajustera selon vos entraînements'
       ],
       
       trackingEvents: ['hydration_goal_set'],
       aiHints: ['calculate_personalized_hydration', 'factor_exercise_intensity'],
       
-      ariaLabel: 'Définition de l\'objectif d\'hydratation'
+      ariaLabel: 'Définition de l\\'objectif d\\'hydratation'
     },
 
     {
@@ -990,8 +1011,8 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       requiredModules: ['hydration'],
       title: 'Rappels intelligents 🔔',
-      question: 'Souhaitez-vous des rappels d\'hydratation personnalisés ?',
-      description: 'L\'IA enverra des notifications basées sur votre activité et météo',
+      question: 'Souhaitez-vous des rappels d\\'hydratation personnalisés ?',
+      description: 'L\\'IA enverra des notifications basées sur votre activité et météo',
       illustration: '📱',
       inputType: 'toggle',
       
@@ -1002,14 +1023,14 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Les rappels s\'adaptent à vos habitudes',
-        'Vous pouvez les personnaliser dans l\'application'
+        'Les rappels s\\'adaptent à vos habitudes',
+        'Vous pouvez les personnaliser dans l\\'application'
       ],
       
       trackingEvents: ['hydration_reminders_configured'],
       aiHints: ['setup_smart_notifications'],
       
-      ariaLabel: 'Configuration des rappels d\'hydratation'
+      ariaLabel: 'Configuration des rappels d\\'hydratation'
     },
 
     /* ======================= MODULE: WELLNESS ====================== */
@@ -1019,7 +1040,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['wellness'],
       title: 'Évaluation bien-être 🧘‍♀️',
       question: 'Comment évaluez-vous votre niveau de stress actuel ?',
-      description: 'L\'IA adaptera vos programmes selon votre état de bien-être',
+      description: 'L\\'IA adaptera vos programmes selon votre état de bien-être',
       illustration: '🌸',
       inputType: 'slider',
       min: 1,
@@ -1057,7 +1078,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       requiredModules: ['wellness'],
       title: 'Objectifs bien-être 🎯',
       question: 'Sur quels aspects aimeriez-vous vous concentrer ?',
-      description: 'L\'IA créera un programme de bien-être personnalisé',
+      description: 'L\\'IA créera un programme de bien-être personnalisé',
       illustration: '🌈',
       inputType: 'multi-select',
       maxSelections: 3,
@@ -1066,7 +1087,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       options: [
         { id: 'stress_management', label: 'Gestion du stress', value: 'stress_management', icon: '🧘‍♂️' },
-        { id: 'energy_boost', label: 'Augmenter l\'énergie', value: 'energy_boost', icon: '⚡' },
+        { id: 'energy_boost', label: 'Augmenter l\\'énergie', value: 'energy_boost', icon: '⚡' },
         { id: 'mental_clarity', label: 'Clarté mentale', value: 'mental_clarity', icon: '🧠' },
         { id: 'emotional_balance', label: 'Équilibre émotionnel', value: 'emotional_balance', icon: '⚖️' },
         { id: 'mindfulness', label: 'Pleine conscience', value: 'mindfulness', icon: '🌸' },
@@ -1093,7 +1114,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: 'Dernières questions ✨',
       question: 'Partagez votre principale motivation',
-      description: 'Qu\'est-ce qui vous motive le plus dans cette démarche ?',
+      description: 'Qu\\'est-ce qui vous motive le plus dans cette démarche ?',
       illustration: '🔥',
       inputType: 'textarea',
       placeholder: 'Décrivez ce qui vous motive...',
@@ -1109,7 +1130,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       backable: true,
       
       tips: [
-        'Plus vous êtes spécifique, mieux l\'IA peut vous aider',
+        'Plus vous êtes spécifique, mieux l\\'IA peut vous aider',
         'Cette information aide à personnaliser vos encouragements'
       ],
       
@@ -1125,7 +1146,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: 'Conditions de santé 🏥',
       question: 'Avez-vous des conditions médicales particulières ?',
-      description: 'L\'IA adaptera les programmes pour votre sécurité',
+      description: 'L\\'IA adaptera les programmes pour votre sécurité',
       illustration: '🩺',
       inputType: 'multi-select',
       
@@ -1161,14 +1182,14 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       id: 'privacy_consent',
       type: 'question',
       title: 'Confidentialité & Conditions 🔒',
-      question: 'Acceptez-vous nos conditions d\'utilisation ?',
+      question: 'Acceptez-vous nos conditions d\\'utilisation ?',
       description: 'Vos données sont chiffrées, sécurisées et ne sont jamais vendues',
       illustration: '🛡️',
       inputType: 'toggle',
       
       validation: [
         { type: 'required', message: 'Vous devez accepter les conditions pour continuer' },
-        { type: 'custom', message: 'L\'acceptation est obligatoire', validator: (value) => value === true }
+        { type: 'custom', message: 'L\\'acceptation est obligatoire', validator: (value) => value === true }
       ],
       
       nextStep: 'marketing_consent',
@@ -1183,7 +1204,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       trackingEvents: ['privacy_consent_given'],
       
-      ariaLabel: 'Acceptation des conditions d\'utilisation',
+      ariaLabel: 'Acceptation des conditions d\\'utilisation',
       importance: 'critical',
       sensitive: true,
       gdprCategory: 'consent'
@@ -1237,7 +1258,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       id: 'completion',
       type: 'confirmation',
       title: 'Bienvenue dans MyFitHero ! 🚀',
-      description: 'Votre voyage personnalisé vous attend. L\'IA a créé vos programmes sur mesure.',
+      description: 'Votre voyage personnalisé vous attend. L\\'IA a créé vos programmes sur mesure.',
       illustration: '🎊',
       
       estimatedTime: 60,
@@ -1247,14 +1268,14 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       trackingEvents: ['onboarding_completed', 'user_journey_started'],
       aiHints: ['finalize_user_profile', 'trigger_first_recommendations'],
       
-      ariaLabel: 'Confirmation de fin d\'onboarding'
+      ariaLabel: 'Confirmation de fin d\\'onboarding'
     },
 
     /* ======================== ERROR HANDLING ======================= */
     {
       id: 'error_recovery',
       type: 'error',
-      title: 'Oups, quelque chose s\'est mal passé 😅',
+      title: 'Oups, quelque chose s\\'est mal passé 😅',
       description: 'Ne vous inquiétez pas, vos réponses sont sauvegardées',
       illustration: '🔧',
       
@@ -1264,7 +1285,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       trackingEvents: ['error_recovery_shown'],
       
-      ariaLabel: 'Page de récupération d\'erreur'
+      ariaLabel: 'Page de récupération d\\'erreur'
     },
 
     {
@@ -1280,7 +1301,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       
       trackingEvents: ['technical_error_occurred'],
       
-      ariaLabel: 'Page d\'erreur technique'
+      ariaLabel: 'Page d\\'erreur technique'
     }
   ]
 };
@@ -1527,10 +1548,4 @@ export const ONBOARDING_CONFIG = {
   
   // Analytics
   trackingEnabled: true,
-  debugMode: process.env.NODE_ENV === 'development',
-  
-  // Performance
-  lazyLoadModules: true,
-  cacheValidation: true,
-  prefetchNextStep: true
-};
+  debugMode: process.env.NODE_ENV === '
