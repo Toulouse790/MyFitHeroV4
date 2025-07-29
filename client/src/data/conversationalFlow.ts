@@ -190,8 +190,6 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
   nextStep: (packId: string) => {
     return packId === 'custom' ? 'module_selection' : 'personal_info';
   }
-}
-      },
       
       validation: [
         { type: 'required', message: 'Veuillez sélectionner votre objectif principal' }
