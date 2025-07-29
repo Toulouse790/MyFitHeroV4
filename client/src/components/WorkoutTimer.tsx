@@ -1,7 +1,7 @@
 // client/src/components/WorkoutTimer.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Play, Pause, Square, RotateCcw, Clock, Target, Zap } from 'lucide-react';
-import { useWorkoutSession } from '@/hooks/useWorkoutSession';
+import { useWorkoutSession } from '@/hooks/workout/useWorkoutSession';
 
 interface WorkoutTimerProps {
   isVisible: boolean;
