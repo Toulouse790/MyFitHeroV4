@@ -131,7 +131,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       type: 'question',
       title: "Faisons connaissance ! 👋",
       question: 'Comment souhaitez-vous que je vous appelle ?',
-      description: 'Votre prénom m\\'aide à personnaliser votre expérience',
+      description: 'Votre prénom m\'aide à personnaliser votre expérience',
       illustration: '😊',
       inputType: 'text',
       placeholder: 'Votre prénom...',
