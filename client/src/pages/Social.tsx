@@ -1443,7 +1443,7 @@ const Social: React.FC = () => {
                         <div className="text-center py-8 text-gray-500">
                           <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                           <p>
-                            {friendsSearch ? 'Aucun ami trouvé' : 'Connectez-vous avec d'autres athlètes'}
+                            {friendsSearch ? 'Aucun ami trouvé' : 'Connectez-vous avec d'autres athlètes'
                           </p>
                           <p className="text-sm">
                             {friendsSearch ? 'Essayez un autre terme de recherche' : `Trouvez des partenaires d'entraînement ${appStoreUser?.sport}`}
