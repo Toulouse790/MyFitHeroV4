@@ -56,9 +56,9 @@ interface PrivacySettings {
 }
 
 const Settings: React.FC = () => {
-  const [location, setLocation] = useLocation(); // Corrigé pour Wouter
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const { appStoreUser, setAppStoreUser } = useAppStore();
+  const { appStoreUser, setAppStoreUser, clearStore } = useAppStore();
   
   const {
     isLoading: wearableLoading,
@@ -79,6 +79,7 @@ const Settings: React.FC = () => {
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(false);
   const [syncInterval, setSyncInterval] = useState(30);
   const [lastCachedData, setLastCachedData] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Profile settings state
   const [profileData, setProfileData] = useState({
@@ -117,6 +118,122 @@ const Settings: React.FC = () => {
     units: 'metric',
     currency: 'EUR'
   });
+
+  // 🆕 FONCTION DE SUPPRESSION DE COMPTE
+  const handleDeleteAccount = useCallback(async () => {
+    if (!appStoreUser?.id) return;
+
+    // Double confirmation
+    const firstConfirm = window.confirm(
+      "⚠️ ATTENTION : Vous êtes sur le point de supprimer définitivement votre compte MyFitHero.\n\nCette action supprimera :\n- Votre profil et toutes vos données personnelles\n- Tout votre historique d'entraînements\n- Vos statistiques et progressions\n- Vos données de nutrition et hydratation\n- Vos connexions sociales\n\nÊtes-vous absolument certain de vouloir continuer ?"
+    );
+
+    if (!firstConfirm) return;
+
+    const secondConfirm = window.confirm(
+      "🚨 DERNIÈRE CHANCE\n\nTapez 'SUPPRIMER' dans la prochaine boîte de dialogue pour confirmer la suppression définitive de votre compte."
+    );
+
+    if (!secondConfirm) return;
+
+    const finalConfirmation = window.prompt(
+      "Pour confirmer la suppression définitive, tapez exactement : SUPPRIMER"
+    );
+
+    if (finalConfirmation !== "SUPPRIMER") {
+      toast({
+        title: "Suppression annulée",
+        description: "La suppression de votre compte a été annulée.",
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      // 1. Supprimer toutes les données utilisateur dans l'ordre
+      const userId = appStoreUser.id;
+
+      // Supprimer les données liées
+      const tablesToClean = [
+        'user_workouts',
+        'user_nutrition',
+        'user_hydration', 
+        'user_sleep',
+        'user_analytics',
+        'user_preferences',
+        'user_social_connections',
+        'user_achievements',
+        'user_wearable_data',
+        'user_profiles'
+      ];
+
+      for (const table of tablesToClean) {
+        const { error } = await supabase
+          .from(table)
+          .delete()
+          .eq('user_id', userId);
+        
+        if (error) {
+          console.warn(`Erreur suppression ${table}:`, error);
+        }
+      }
+
+      // 2. Supprimer le compte Auth Supabase
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      
+      if (authError) {
+        // Si on n'a pas les droits admin, on utilise une RPC
+        const { error: rpcError } = await supabase.rpc('delete_user_account', {
+          user_id: userId
+        });
+        
+        if (rpcError) {
+          throw new Error('Impossible de supprimer le compte: ' + rpcError.message);
+        }
+      }
+
+      // 3. Nettoyer le store local
+      clearStore();
+      
+      // 4. Nettoyer le localStorage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // 5. Analytics de suppression
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'account_deleted', {
+          user_id: userId,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      // 6. Déconnexion et redirection
+      await supabase.auth.signOut();
+      
+      toast({
+        title: "Compte supprimé",
+        description: "Votre compte MyFitHero a été définitivement supprimé. Nous espérons vous revoir bientôt !",
+        duration: 5000,
+      });
+
+      // Redirection vers page d'adieu
+      setTimeout(() => {
+        setLocation('/goodbye');
+      }, 2000);
+
+    } catch (error) {
+      console.error('Erreur suppression compte:', error);
+      toast({
+        title: "Erreur de suppression",
+        description: "Une erreur est survenue lors de la suppression. Contactez le support si le problème persiste.",
+        variant: "destructive",
+        duration: 8000,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [appStoreUser?.id, clearStore, setLocation, toast]);
 
   // Chargement des préférences
   const loadSettings = useCallback(async () => {
@@ -237,7 +354,7 @@ const Settings: React.FC = () => {
     }
   }, [appStoreUser?.id, notifications, toast]);
 
-  // 🆕 NOUVELLE FONCTION : Sauvegarde des préférences
+  // Sauvegarde des préférences
   const handleSavePreferences = useCallback(async () => {
     if (!appStoreUser?.id) return;
 
@@ -273,7 +390,7 @@ const Settings: React.FC = () => {
     }
   }, [appStoreUser?.id, preferences, toast]);
 
-  // 🆕 NOUVELLE FONCTION : Sauvegarde de la confidentialité
+  // Sauvegarde de la confidentialité
   const handleSavePrivacy = useCallback(async () => {
     if (!appStoreUser?.id) return;
 
@@ -417,7 +534,7 @@ const Settings: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation('/profile')} // Corrigé pour Wouter
+            onClick={() => setLocation('/profile')}
             className="text-white hover:bg-white/20"
           >
             <User className="w-4 h-4 mr-2" />
@@ -765,7 +882,6 @@ const Settings: React.FC = () => {
                   </div>
                 ))}
                 
-                {/* 🆕 BOUTON DE SAUVEGARDE CONFIDENTIALITÉ */}
                 <Button 
                   onClick={handleSavePrivacy} 
                   disabled={loading}
@@ -777,6 +893,7 @@ const Settings: React.FC = () => {
                 
                 <Separator />
                 
+                {/* 🆕 ZONE DE DANGER AVEC SUPPRESSION DE COMPTE BRANCHÉE */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-red-600 flex items-center">
                     <AlertCircle className="mr-2" size={16} />
@@ -784,11 +901,16 @@ const Settings: React.FC = () => {
                   </h3>
                   <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-700 mb-3">
-                      Cette action est irréversible. Toutes vos données seront définitivement supprimées.
+                      ⚠️ <strong>ATTENTION :</strong> Cette action supprimera définitivement votre compte MyFitHero et toutes vos données associées (profil, entraînements, statistiques, etc.). Cette action est <strong>irréversible</strong>.
                     </p>
-                    <Button variant="destructive" className="w-full">
+                    <Button 
+                      variant="destructive" 
+                      className="w-full"
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                    >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Supprimer définitivement mon compte
+                      {isDeleting ? 'Suppression en cours...' : 'Supprimer définitivement mon compte'}
                     </Button>
                   </div>
                 </div>
@@ -888,7 +1010,6 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* 🆕 BOUTON DE SAUVEGARDE PRÉFÉRENCES BRANCHÉ */}
                 <Button 
                   onClick={handleSavePreferences}
                   disabled={loading}
