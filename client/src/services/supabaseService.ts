@@ -582,20 +582,77 @@ export class MuscleRecoveryDBService {
   static async getUserRecoveryProfile(userId: string): Promise<UserRecoveryProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('user_recovery_
-  static async markNotificationAsRead(id: string): Promise<void> {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
+        .from('user_recovery_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
-      const { error } = await supabase
-        .from('user_notifications')
-        .update({ is_read: true })
-        .eq('id', id)
-        .eq('user_id', user.id);
+      if (error && error.code !== 'PGRST116') throw error;
+      return data || null;
+    } catch (error) {
+      console.error('Error fetching user recovery profile:', error);
+      return null;
+    }
+  }
+
+  static async createOrUpdateRecoveryProfile(profile: any): Promise<UserRecoveryProfile | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_recovery_profiles')
+        .upsert(profile, { onConflict: 'user_id' })
+        .select()
+        .single();
 
       if (error) throw error;
+      return data;
     } catch (error) {
+      console.error('Error creating/updating recovery profile:', error);
+      return null;
+    }
+  }
+
+  static async getMuscleRecoveryData(userId: string): Promise<MuscleRecoveryData[]> {
+    try {
+      const { data, error } = await supabase
+        .from('muscle_recovery_data')
+        .select('*')
+        .eq('user_id', userId)
+        .order('last_updated', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching muscle recovery data:', error);
+      return [];
+    }
+  }
+
+  static async saveMuscleRecoveryData(userId: string, recoveryData: any[]): Promise<boolean> {
+    try {
+      // Supprimer les anciennes données
+      await supabase
+        .from('muscle_recovery_data')
+        .delete()
+        .eq('user_id', userId);
+
+      // Insérer les nouvelles données
+      const dataToInsert = recoveryData.map(data => ({
+        user_id: userId,
+        ...data
+      }));
+
+      const { error } = await supabase
+        .from('muscle_recovery_data')
+        .insert(dataToInsert);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error saving muscle recovery data:', error);
+      return false;
+    }
+  }
+}
       console.error('Error marking notification as read:', error);
       throw error;
     }
