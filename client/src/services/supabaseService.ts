@@ -575,7 +575,14 @@ export class NotificationService {
       return [];
     }
   }
+// Ajouter cette classe à la fin du fichier services/supabaseService.ts
 
+// ===== MUSCLE RECOVERY =====
+export class MuscleRecoveryDBService {
+  static async getUserRecoveryProfile(userId: string): Promise<UserRecoveryProfile | null> {
+    try {
+      const { data, error } = await supabase
+        .from('user_recovery_
   static async markNotificationAsRead(id: string): Promise<void> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
