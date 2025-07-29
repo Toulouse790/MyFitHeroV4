@@ -1,5 +1,4 @@
-# Créer le code React optimisé pour la page Sleep
-sleep_code = '''// client/src/components/Sleep.tsx
+// client/src/components/Sleep.tsx
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -871,7 +870,7 @@ const Sleep: React.FC = () => {
   );
 };
 
-export default Sleep;'''
+export default Sleep;
 
 # Sauvegarder le code dans un fichier
 with open('Sleep_Optimized.tsx', 'w', encoding='utf-8') as f:
