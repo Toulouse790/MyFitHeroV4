@@ -768,73 +768,157 @@ export default function ConversationalOnboarding({
           </div>
         );
 
-     case 'slider':
+      case 'slider':
         const sliderValue = state.currentResponse || currentStep.defaultValue || 7;
         const sliderMin = currentStep.min || 1;
         const sliderMax = currentStep.max || 10;
+        const sliderStep = currentStep.step || 0.5;
         
         return (
           <div className="space-y-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {sliderValue}
+                {currentStep.unit && <span className="text-lg ml-1">{currentStep.unit}</span>}
+              </div>
+              {currentStep.scaleLabels && (
+                <div className="text-sm text-gray-600">
+                  {currentStep.scaleLabels[Math.round(sliderValue)] || ''}
+                </div>
+              )}
+            </div>
             <div className="px-4">
               <Slider
                 value={[sliderValue]}
-                onValueChange={(value) => setState(prev => ({ 
-                  ...prev, 
-                  currentResponse: value[0] 
-                }))}
-                min={sliderMin}
+                onValueChange={(value) => setState(prev => ({ ...prev, currentResponse: value[0] }))}
                 max={sliderMax}
-                step={currentStep.step || 1}
+                min={sliderMin}
+                step={sliderStep}
                 className="w-full"
                 disabled={state.isLoading}
               />
-            </div>
-            <div className="flex justify-between text-sm text-gray-500 px-4">
-              <span>{currentStep.minLabel || sliderMin}</span>
-              <span className="font-semibold text-lg text-gray-900">{sliderValue}</span>
-              <span>{currentStep.maxLabel || sliderMax}</span>
-            </div>
-            {currentStep.scaleLabels && (
-              <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                <div>{currentStep.scaleLabels.low}</div>
-                <div className="text-right">{currentStep.scaleLabels.high}</div>
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>{sliderMin}{currentStep.unit}</span>
+                <span>{sliderMax}{currentStep.unit}</span>
               </div>
-            )}
+            </div>
           </div>
         );
 
-      case 'single_choice':
+      case 'toggle':
         return (
-          <div className="space-y-3">
+          <div className="flex items-center justify-center space-x-4 py-4">
+            <span className={cn(
+              "text-lg font-medium transition-colors",
+              state.currentResponse === false ? "text-gray-900" : "text-gray-500"
+            )}>
+              Non
+            </span>
+            <Switch
+              checked={state.currentResponse || false}
+              onCheckedChange={(checked) => setState(prev => ({ ...prev, currentResponse: checked }))}
+              disabled={state.isLoading}
+              className="data-[state=checked]:bg-blue-600"
+            />
+            <span className={cn(
+              "text-lg font-medium transition-colors",
+              state.currentResponse === true ? "text-gray-900" : "text-gray-500"
+            )}>
+              Oui
+            </span>
+          </div>
+        );
+
+      case 'single-select':
+        // Gestion spéciale pour les composants personnalisés
+        if (currentStep.id === 'personal_info') {
+          return (
+            <PersonalInfoForm
+              onComplete={(data) => {
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: data,
+                  data: {
+                    ...prev.data,
+                    age: data.age,
+                    gender: data.gender,
+                    lifestyle: data.lifestyle,
+                    availableTimePerDay: data.availableTimePerDay,
+                    height: data.height,
+                    currentWeight: data.currentWeight
+                  }
+                }));
+                
+                // Auto-continuer après la saisie
+                setTimeout(() => {
+                  goToNextStep();
+                }, 500);
+              }}
+              initialData={{
+                age: state.data.age,
+                gender: state.data.gender,
+                lifestyle: state.data.lifestyle,
+                availableTimePerDay: state.data.availableTimePerDay,
+                height: state.data.height,
+                currentWeight: state.data.currentWeight
+              }}
+            />
+          );
+        }
+        
+        if (currentStep.id === 'sport_selection') {
+          return (
+            <SportSelector
+              onSelect={(sport) => setState(prev => ({ ...prev, currentResponse: sport.id }))}
+              selectedSport={state.selectedSport}
+              placeholder="Recherchez votre sport..."
+            />
+          );
+        }
+        
+        if (currentStep.id === 'sport_position' && state.selectedSport) {
+          return (
+            <PositionSelector
+              sport={state.selectedSport}
+              onSelect={(position) => setState(prev => ({ ...prev, currentResponse: position }))}
+              selectedPosition={typeof state.currentResponse === 'string' ? state.currentResponse : undefined}
+            />
+          );
+        }
+        
+        // Options standard
+        return (
+          <div className="grid gap-3 max-w-2xl mx-auto">
             {currentStep.options?.map((option: QuestionOption) => (
               <button
                 key={option.id}
                 onClick={() => setState(prev => ({ ...prev, currentResponse: option.value }))}
                 disabled={state.isLoading}
                 className={cn(
-                  "w-full p-4 rounded-lg border-2 text-left transition-all duration-200",
-                  "hover:border-blue-300 hover:bg-blue-50",
+                  "p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed",
                   state.currentResponse === option.value
-                    ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                    : "border-gray-200 bg-white"
+                    ? "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-sm"
+                    : "border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50"
                 )}
               >
                 <div className="flex items-center space-x-3">
                   {option.icon && (
-                    <div className="flex-shrink-0">
-                      {React.createElement(option.icon, { 
-                        className: "w-5 h-5 text-gray-600" 
-                      })}
+                    <div className="text-2xl flex-shrink-0">
+                      {option.icon}
                     </div>
                   )}
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{option.label}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-gray-900 mb-1">
+                      {option.label}
+                    </div>
                     {option.description && (
-                      <div className="text-sm text-gray-500 mt-1">{option.description}</div>
+                      <div className="text-sm text-gray-600 line-clamp-2">
+                        {option.description}
+                      </div>
                     )}
                   </div>
                   {state.currentResponse === option.value && (
-                    <Check className="w-5 h-5 text-blue-500" />
+                    <Check className="h-5 w-5 text-blue-600 flex-shrink-0" />
                   )}
                 </div>
               </button>
@@ -842,360 +926,571 @@ export default function ConversationalOnboarding({
           </div>
         );
 
-      case 'multiple_choice':
-        const selectedValues = Array.isArray(state.currentResponse) ? state.currentResponse : [];
+      case 'multi-select':
+        const currentSelections = Array.isArray(state.currentResponse) ? state.currentResponse : [];
         
         return (
-          <div className="space-y-3">
-            {currentStep.options?.map((option: QuestionOption) => {
-              const isSelected = selectedValues.includes(option.value);
-              
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => {
-                    const newSelection = isSelected
-                      ? selectedValues.filter(v => v !== option.value)
-                      : [...selectedValues, option.value];
-                    setState(prev => ({ ...prev, currentResponse: newSelection }));
-                  }}
-                  disabled={state.isLoading}
-                  className={cn(
-                    "w-full p-4 rounded-lg border-2 text-left transition-all duration-200",
-                    "hover:border-blue-300 hover:bg-blue-50",
-                    isSelected
-                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                      : "border-gray-200 bg-white"
-                  )}
-                >
-                  <div className="flex items-center space-x-3">
-                    {option.icon && (
-                      <div className="flex-shrink-0">
-                        {React.createElement(option.icon, { 
-                          className: "w-5 h-5 text-gray-600" 
-                        })}
-                      </div>
+          <div className="space-y-4">
+            <div className="grid gap-3 max-w-2xl mx-auto">
+              {currentStep.options?.map((option: QuestionOption) => {
+                const isSelected = currentSelections.includes(option.value);
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => {
+                      const newSelections = isSelected
+                        ? currentSelections.filter(v => v !== option.value)
+                        : [...currentSelections, option.value];
+                      setState(prev => ({ ...prev, currentResponse: newSelections }));
+                    }}
+                    disabled={state.isLoading}
+                    className={cn(
+                      "p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md disabled:opacity-50",
+                      isSelected
+                        ? "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-sm"
+                        : "border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50"
                     )}
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{option.label}</div>
-                      {option.description && (
-                        <div className="text-sm text-gray-500 mt-1">{option.description}</div>
+                  >
+                    <div className="flex items-center space-x-3">
+                      {option.icon && (
+                        <div className="text-2xl flex-shrink-0">
+                          {option.icon}
+                        </div>
                       )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 mb-1">
+                          {option.label}
+                        </div>
+                        {option.description && (
+                          <div className="text-sm text-gray-600 line-clamp-2">
+                            {option.description}
+                          </div>
+                        )}
+                      </div>
+                      <div className={cn(
+                        "w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0",
+                        isSelected 
+                          ? "border-blue-500 bg-blue-500" 
+                          : "border-gray-300"
+                      )}>
+                        {isSelected && <Check className="h-3 w-3 text-white" />}
+                      </div>
                     </div>
-                    {isSelected && (
-                      <Check className="w-5 h-5 text-blue-500" />
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
+            
             {currentStep.maxSelections && (
               <div className="text-sm text-gray-500 text-center">
-                {selectedValues.length}/{currentStep.maxSelections} sélection(s)
+                {currentSelections.length}/{currentStep.maxSelections} sélection(s)
               </div>
             )}
           </div>
         );
 
-      case 'switch':
-        return (
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">{currentStep.switchLabel || currentStep.title}</div>
-              {currentStep.switchDescription && (
-                <div className="text-sm text-gray-500 mt-1">{currentStep.switchDescription}</div>
-              )}
-            </div>
-            <Switch
-              checked={state.currentResponse || false}
-              onCheckedChange={(checked) => setState(prev => ({ 
-                ...prev, 
-                currentResponse: checked 
-              }))}
-              disabled={state.isLoading}
+      case 'custom':
+        // Gestion du PackSelector
+        if (currentStep.customComponent === 'PackSelector') {
+          return (
+            <PackSelector
+              onSelect={(packId) => {
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: packId,
+                  data: {
+                    ...prev.data,
+                    selectedPack: packId
+                  }
+                }));
+              }}
+              recommendedPacks={getRecommendedPacks(state.data.mainObjective || '')}
             />
-          </div>
-        );
-
-      case 'sport_selector':
-        return (
-          <SportSelector
-            sports={[...AVAILABLE_SPORTS, ...dynamicSports]}
-            selectedSport={state.currentResponse}
-            onSportSelect={(sportId) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: sportId 
-            }))}
-            isLoading={sportsLoading || state.isLoading}
-          />
-        );
-
-      case 'position_selector':
-        return (
-          <PositionSelector
-            sport={state.selectedSport}
-            selectedPosition={state.currentResponse}
-            onPositionSelect={(position) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: position 
-            }))}
-            isLoading={state.isLoading}
-          />
-        );
-
-      case 'personal_info':
-        return (
-          <PersonalInfoForm
-            data={state.currentResponse || {}}
-            onChange={(data) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: data 
-            }))}
-            isLoading={state.isLoading}
-          />
-        );
-
-      case 'pack_selector':
-        return (
-          <PackSelector
-            packs={SMART_PACKS}
-            selectedPack={state.currentResponse}
-            onPackSelect={(packId) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: packId 
-            }))}
-            isLoading={state.isLoading}
-          />
-        );
+          );
+        }
+        return null;
 
       default:
         return (
-          <div className="text-center text-gray-500 py-8">
+          <div className="text-center text-gray-500 p-8">
             Type de question non supporté: {currentStep.inputType}
           </div>
         );
     }
-  }, [currentStep, state, dynamicSports, sportsLoading]);
+  }, [currentStep, state, goToNextStep]);
 
-  // Gestion de la completion
-  useEffect(() => {
-    if (state.currentStepId === 'completion') {
-      completeOnboarding();
+  // Rendu du résumé
+  const renderSummaryContent = useCallback(() => {
+    const sections = [
+      {
+        title: "Informations personnelles",
+        icon: <User className="h-5 w-5" />,
+        items: [
+          { label: "Prénom", value: state.data.firstName },
+          { label: "Âge", value: state.data.age ? `${state.data.age} ans` : null },
+          { label: "Genre", value: state.data.gender },
+          { label: "Style de vie", value: LIFESTYLE_OPTIONS.find(l => l.id === state.data.lifestyle)?.name }
+        ].filter(item => item.value)
+      },
+      {
+        title: "Programme choisi",
+        icon: <Package className="h-5 w-5" />,
+        items: [
+          { 
+            label: "Pack", 
+            value: SMART_PACKS.find(p => p.id === state.data.selectedPack)?.name 
+          },
+          {
+            label: "Durée estimée",
+            value: `${getEstimatedTimeForPack(state.data.selectedPack || '')} minutes`
+          }
+        ].filter(item => item.value)
+      },
+      {
+        title: "Objectif principal",
+        icon: <Target className="h-5 w-5" />,
+        items: [
+          { 
+            label: "Objectif", 
+            value: MAIN_OBJECTIVES.find(o => o.id === state.data.mainObjective)?.name 
+          }
+        ].filter(item => item.value)
+      },
+      {
+        title: "Modules sélectionnés",
+        icon: <Settings className="h-5 w-5" />,
+        items: state.data.selectedModules?.map(moduleId => ({
+          label: AVAILABLE_MODULES.find(m => m.id === moduleId)?.name || moduleId,
+          value: "✓"
+        })) || []
+      }
+    ];
+
+    if (state.data.sport) {
+      sections.push({
+        title: "Sport et niveau",
+        icon: <Award className="h-5 w-5" />,
+        items: [
+          { 
+            label: "Sport", 
+            value: AVAILABLE_SPORTS.find(s => s.id === state.data.sport)?.name 
+          },
+          { 
+            label: "Position", 
+            value: state.data.sportPosition 
+          },
+          { 
+            label: "Niveau", 
+            value: SPORT_LEVELS.find(l => l.id === state.data.sportLevel)?.name 
+          }
+        ].filter(item => item.value)
+      });
     }
-  }, [state.currentStepId, completeOnboarding]);
 
-  // Affichage du loading
+    return (
+      <div className="space-y-6">
+        {sections.map((section, index) => (
+          section.items.length > 0 && (
+            <Card key={index} className="border-gray-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2">
+                  {section.icon}
+                  <span>{section.title}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  {section.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="flex justify-between items-center">
+                      <span className="text-gray-600">{item.label}</span>
+                      <span className="font-medium text-gray-900">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        ))}
+        
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <Zap className="h-4 w-4 text-blue-600" />
+            <span className="font-semibold text-blue-900">Temps de configuration</span>
+          </div>
+          <p className="text-blue-800 text-sm">
+            Terminé en {Math.round((new Date().getTime() - state.startTime.getTime()) / 1000 / 60)} minutes
+          </p>
+        </div>
+      </div>
+    );
+  }, [state.data, state.startTime]);
+
+  // Rendu principal du contenu de l'étape
+  const renderStepContent = useCallback(() => {
+    if (!currentStep) return null;
+
+    const stepIcons = {
+      'welcome': '🎉',
+      'get_name': '👋',
+      'main_objective': '🎯',
+      'pack_selection': '📦',
+      'module_selection': '🧩',
+      'personal_info': '👤',
+      'sport_selection': '🏃‍♂️',
+      'sport_position': '⚽',
+      'strength_setup': '💪',
+      'nutrition_setup': '🥗',
+      'sleep_setup': '😴',
+      'hydration_setup': '💧',
+      'wellness_assessment': '🧘‍♂️',
+      'final_questions': '📝',
+      'summary': '📋',
+      'completion': '🎊'
+    };
+
+    const defaultIcon = stepIcons[currentStep.id as keyof typeof stepIcons] || currentStep.illustration || '❓';
+
+    switch (currentStep.type) {
+      case 'info':
+        return (
+          <div className="text-center space-y-8 max-w-3xl mx-auto">
+            <div className="text-6xl mb-6">{defaultIcon}</div>
+            <div className="space-y-4">
+              <h1 className="text-4xl font-bold text-gray-900 leading-tight">
+                {currentStep.title}
+              </h1>
+              {currentStep.subtitle && (
+                <p className="text-xl text-gray-600 font-medium">
+                  {currentStep.subtitle}
+                </p>
+              )}
+              {currentStep.description && (
+                <p className="text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
+                  {currentStep.description}
+                </p>
+              )}
+            </div>
+            
+            {currentStep.tips && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-6 rounded-xl">
+                <h3 className="font-semibold text-blue-900 mb-3 flex items-center">
+                  <Star className="h-5 w-5 mr-2" />
+                  💡 Ce qui vous attend
+                </h3>
+                <ul className="text-sm text-blue-800 space-y-2">
+                  {currentStep.tips.map((tip, index) => (
+                    <li key={index} className="flex items-start">
+                      <Check className="h-4 w-4 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            <Button 
+              onClick={goToNextStep} 
+              size="lg" 
+              className="w-full max-w-md h-12 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              disabled={state.isLoading}
+            >
+              {state.isLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Chargement...
+                </div>
+              ) : (
+                <>
+                  Commencer la configuration
+                  <ChevronRight className="ml-2 h-5 w-5" />
+                </>
+              )}
+            </Button>
+          </div>
+        );
+
+      case 'question':
+        return (
+          <div className="space-y-8 max-w-4xl mx-auto">
+            <div className="text-center space-y-4">
+              <div className="text-5xl mb-4">{defaultIcon}</div>
+              <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+                {currentStep.title?.replace('{firstName}', state.data.firstName || 'vous')}
+              </h1>
+              {currentStep.question && (
+                <p className="text-xl text-gray-700 font-medium">
+                  {currentStep.question}
+                </p>
+              )}
+              {currentStep.description && (
+                <p className="text-gray-600 max-w-2xl mx-auto">
+                  {currentStep.description}
+                </p>
+              )}
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              {renderQuestionInput()}
+            </div>
+
+            {state.validationErrors.length > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-2xl mx-auto">
+                <div className="flex items-center mb-2">
+                  <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+                  <span className="font-semibold text-red-800">Correction nécessaire</span>
+                </div>
+                {state.validationErrors.map((error, index) => (
+                  <div key={index} className="text-red-700 text-sm ml-7">
+                    • {error}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex justify-between items-center max-w-2xl mx-auto pt-4">
+              <div className="flex items-center space-x-3">
+                {state.stepHistory.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    onClick={goToPreviousStep}
+                    disabled={state.isLoading}
+                    className="flex items-center"
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    Précédent
+                  </Button>
+                )}
+                
+                {currentStep.skippable && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={skipCurrentStep}
+                    disabled={state.isLoading}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    Passer
+                  </Button>
+                )}
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                {currentStep.tips && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setState(prev => ({ ...prev, showTips: !prev.showTips }))}
+                    className="flex items-center"
+                  >
+                    <Star className="h-4 w-4 mr-2" />
+                    Conseils
+                  </Button>
+                )}
+                
+                <Button 
+                  onClick={goToNextStep}
+                  disabled={state.isLoading || (currentStep.inputType !== 'info' && !state.currentResponse && state.currentResponse !== false)}
+                  className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                  {state.isLoading ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Chargement...
+                    </div>
+                  ) : (
+                    <>
+                      Continuer
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'summary':
+        return (
+          <div className="space-y-8 max-w-4xl mx-auto">
+            <div className="text-center space-y-4">
+              <div className="text-5xl mb-4">{defaultIcon}</div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {currentStep.title}
+              </h1>
+              <p className="text-xl text-gray-600">
+                {currentStep.description}
+              </p>
+            </div>
+
+            <div className="max-w-3xl mx-auto">
+              {renderSummaryContent()}
+            </div>
+
+            <div className="flex justify-center pt-4">
+              <Button 
+                onClick={completeOnboarding}
+                disabled={state.isLoading}
+                size="lg"
+                className="w-full max-w-md h-12 text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              >
+                {state.isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Finalisation...
+                  </div>
+                ) : (
+                  <>
+                    Créer mon profil MyFitHero
+                    <Check className="ml-2 h-5 w-5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'confirmation':
+        return (
+          <div className="text-center space-y-8 max-w-3xl mx-auto">
+            <div className="text-6xl mb-6">{defaultIcon}</div>
+            <h1 className="text-4xl font-bold text-gray-900">
+              {currentStep.title}
+            </h1>
+            <p className="text-xl text-gray-600">
+              {currentStep.description}
+            </p>
+            
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 p-8 rounded-xl">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <Check className="h-8 w-8 text-green-600" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-green-900 mb-3">
+                🎉 Félicitations !
+              </h3>
+              <p className="text-green-800 text-lg leading-relaxed">
+                Votre profil MyFitHero est maintenant configuré et personnalisé selon vos besoins. 
+                Vous allez être redirigé vers votre tableau de bord personnalisé dans quelques instants.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <Heart className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <div className="font-semibold text-blue-900">Programmes personnalisés</div>
+                <div className="text-sm text-blue-700">Adaptés à vos objectifs</div>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <div className="font-semibold text-purple-900">IA intuitive</div>
+                <div className="text-sm text-purple-700">Qui apprend de vos progrès</div>
+              </div>
+              <div className="p-4 bg-green-50 rounded-lg">
+                <Award className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className="font-semibold text-green-900">Suivi en temps réel</div>
+                <div className="text-sm text-green-700">De tous vos progrès</div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="text-center space-y-4 py-12">
+            <AlertCircle className="h-12 w-12 text-amber-500 mx-auto" />
+            <h2 className="text-xl font-semibold text-gray-900">
+              Type d'étape non reconnu
+            </h2>
+            <p className="text-gray-600">
+              Type: {currentStep.type} pour l'étape {currentStep.id}
+            </p>
+          </div>
+        );
+    }
+  }, [currentStep, state, renderQuestionInput, renderSummaryContent, goToNextStep, goToPreviousStep, skipCurrentStep, completeOnboarding]);
+
+  // Gestion des erreurs de chargement
   if (sportsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement de votre configuration...</p>
-        </div>
+        <Card className="p-8 max-w-md">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <h3 className="text-lg font-semibold">Chargement...</h3>
+            <p className="text-gray-600">Préparation de votre expérience personnalisée</p>
+          </div>
+        </Card>
       </div>
     );
   }
 
-  // Affichage d'erreur si pas d'étape courante
   if (!currentStep) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Erreur de configuration
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Impossible de charger l'étape de configuration.
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
+        <Card className="p-8 max-w-md">
+          <div className="text-center space-y-4">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto" />
+            <h3 className="text-lg font-semibold text-gray-900">Erreur de configuration</h3>
+            <p className="text-gray-600">
+              Impossible de charger l'étape d'onboarding. Veuillez rafraîchir la page.
             </p>
             <Button onClick={() => window.location.reload()}>
-              Recharger la page
+              Rafraîchir
             </Button>
-          </CardContent>
+          </div>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header avec progression */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
+    <div className="hero-container">
+      {/* En-tête avec progression */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">MF</span>
+                </div>
+                <div className="font-bold text-xl text-gray-900">MyFitHero</div>
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Configuration MyFitHero</h1>
-                <p className="text-sm text-gray-500">
-                  Étape {state.data.progress.completedSteps.length + 1} sur {state.data.progress.totalSteps}
-                </p>
-              </div>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                Configuration
+              </Badge>
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <Clock className="w-4 h-4" />
-                <span>~{state.data.progress.estimatedTimeLeft} min</span>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Clock className="h-4 w-4" />
+                <span>~{state.data.progress.estimatedTimeLeft} min restantes</span>
               </div>
-              {onSkip && (
-                <Button variant="ghost" size="sm" onClick={onSkip}>
-                  Passer
+              {onSkip && currentStep.skippable && (
+                <Button variant="ghost" onClick={onSkip} className="text-gray-500 hover:text-gray-700">
+                  Ignorer tout
                 </Button>
               )}
             </div>
           </div>
           
-          <Progress value={progressPercentage} className="h-2" />
-        </div>
-      </div>
-
-      {/* Contenu principal */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card className="w-full">
-          <CardHeader className="pb-6">
-            <div className="flex items-start space-x-4">
-              {currentStep.icon && (
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  {React.createElement(currentStep.icon, { 
-                    className: "w-6 h-6 text-blue-600" 
-                  })}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Progression: {progressPercentage}%
+                </span>
+                <span className="text-sm text-gray-500">
+                  ({state.data.progress.completedSteps.length}/{state.data.progress.totalSteps})
+                </span>
+              </div>
+              {state.data.selectedPack && (
+                <div className="text-sm text-gray-500">
+                  Pack: {SMART_PACKS.find(p => p.id === state.data.selectedPack)?.name}
                 </div>
               )}
-              <div className="flex-1">
-                <CardTitle className="text-2xl font-bold text-gray-900 mb-2">
-                  {currentStep.title}
-                </CardTitle>
-                {currentStep.description && (
-                  <p className="text-gray-600 leading-relaxed">
-                    {currentStep.description}
-                  </p>
-                )}
-              </div>
             </div>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            {/* Affichage des erreurs de validation */}
-            {state.validationErrors.length > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="flex items-center space-x-2 mb-2">
-                  <AlertCircle className="w-5 h-5 text-red-500" />
-                  <h4 className="font-medium text-red-800">Correction nécessaire</h4>
-                </div>
-                <ul className="list-disc list-inside space-y-1 text-sm text-red-700">
-                  {state.validationErrors.map((error, index) => (
-                    <li key={index}>{error}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Conseils et astuces */}
-            {currentStep.tips && currentStep.tips.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <button
-                  onClick={() => setState(prev => ({ ...prev, showTips: !prev.showTips }))}
-                  className="flex items-center space-x-2 text-blue-800 font-medium mb-2"
-                >
-                  <Star className="w-4 h-4" />
-                  <span>Conseils</span>
-                  <ChevronRight className={cn(
-                    "w-4 h-4 transition-transform",
-                    state.showTips && "rotate-90"
-                  )} />
-                </button>
-                {state.showTips && (
-                  <ul className="space-y-2 text-sm text-blue-700">
-                    {currentStep.tips.map((tip, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-                        <span>{tip}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-
-            {/* Rendu de la question */}
-            <div className="space-y-4">
-              {renderQuestionInput()}
-            </div>
-
-            {/* Boutons de navigation */}
-            <div className="flex items-center justify-between pt-6 border-t">
-              <div className="flex items-center space-x-3">
-                {state.stepHistory.length > 0 && (
-                  <Button
-                    variant="outline"
-                    onClick={goToPreviousStep}
-                    disabled={state.isLoading}
-                    className="flex items-center space-x-2"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>Précédent</span>
-                  </Button>
-                )}
-                
-                {currentStep.skippable && (
-                  <Button
-                    variant="ghost"
-                    onClick={skipCurrentStep}
-                    disabled={state.isLoading}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    Passer cette étape
-                  </Button>
-                )}
-              </div>
-
-              <Button
-                onClick={goToNextStep}
-                disabled={state.isLoading || (
-                  currentStep.validation?.some(rule => rule.type === 'required') && 
-                  !state.currentResponse
-                )}
-                className="flex items-center space-x-2 min-w-[120px]"
-              >
-                {state.isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                    <span>Chargement...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Continuer</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Debug panel */}
-        {debug && (
-          <Card className="mt-6 bg-gray-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-mono">Debug Info</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-xs font-mono">
-                <div><strong>Current Step:</strong> {state.currentStepId}</div>
-                <div><strong>Response:</strong> {JSON.stringify(state.currentResponse)}</div>
-                <div><strong>Selected Pack:</strong> {state.data.selectedPack}</div>
-                <div><strong>Available Steps:</strong> {state.availableSteps.join(', ')}</div>
-                <div><strong>Completed:</strong> {state.data.progress.completedSteps.join(', ')}</div>
-                <div><strong>History:</strong> {state.stepHistory.join(' → ')}</div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </div>
-  );
-}
+            <Progress 
+              value={progressPercentage} 
+              className="h-2 bg-gray-100" 
+            />
