@@ -333,7 +333,8 @@ const Social: React.FC = () => {
         {
           id: '2',
           title: 'Hydratation Parfaite',
-          description: 'Boire 2.5L d'eau par jour pendant 14 jours',
+          // Utilisation de guillemets doubles pour éviter les conflits avec l'apostrophe
+          description: "Boire 2.5L d'eau par jour pendant 14 jours",
           creator_id: 'creator2',
           pillar: 'hydration',
           challenge_type: 'individual',
