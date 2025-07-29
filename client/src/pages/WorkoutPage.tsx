@@ -1,4 +1,4 @@
-// client/src/components/WorkoutPage.tsx
+// client/src/pages/WorkoutPage.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Dumbbell,
@@ -20,7 +20,8 @@ import {
   Info
 } from 'lucide-react';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { useWorkoutSession, WorkoutExercise } from '../hooks/useWorkoutSession';
+import { useWorkoutSession } from '../hooks/workout/useWorkoutSession';
+import type { WorkoutExercise } from '@/types/workout';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
