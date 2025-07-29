@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppStore } from '@/store/appStore';
+import { useAppStore, useScales, useWeight, useProfile } from '@/store/appStore';
 import AvatarUpload from '@/components/AvatarUpload';
 import UserProfileTabs from '@/components/UserProfileTabs';
 import { toast } from 'react-hot-toast';
@@ -13,107 +13,78 @@ import {
   Minus,
   Bluetooth,
   Wifi,
-  Settings,
   Calendar,
-  Target,
-  Activity
+  Activity,
+  Loader2
 } from 'lucide-react';
 
-interface WeightEntry {
-  date: string;
-  weight: number;
-  source: 'manual' | 'scale' | 'import';
-}
+const ProfilePage: React.FC = () => {
+  // Hooks personnalisés du store
+  const { user } = useAppStore();
+  const { userProfile, updateUserProfile, isLoading, error } = useProfile();
+  const { 
+    connectedScales, 
+    isScanning, 
+    isSyncing, 
+    lastScaleSync,
+    connectScale,
+    syncScaleWeight,
+    scanForScales,
+    loadConnectedScales 
+  } = useScales();
+  const { 
+    weightHistory, 
+    loadWeightHistory, 
+    calculateBMI, 
+    getWeightTrend, 
+    getLatestWeight 
+  } = useWeight();
 
-interface ScaleDevice {
-  id: string;
-  name: string;
-  brand: string;
-  model: string;
-  batteryLevel?: number;
-  isConnected: boolean;
-  lastSync?: string;
-  connectionType: 'bluetooth' | 'wifi' | 'api';
-}
-
-const ProfilePage = () => {
-  const { user, userProfile, updateUserProfile } = useAppStore();
-  
-  // États locaux
-  const [currentWeight, setCurrentWeight] = useState(userProfile?.weight_kg?.toString() || '');
-  const [height, setHeight] = useState(userProfile?.height_cm?.toString() || '');
-  const [age, setAge] = useState(userProfile?.age?.toString() || '');
-  const [gender, setGender] = useState(userProfile?.gender || '');
-  const [activityLevel, setActivityLevel] = useState(userProfile?.activity_level || 'moderate');
-  const [fitnessGoal, setFitnessGoal] = useState(userProfile?.fitness_goal || 'maintain');
-  
-  // États pour la balance connectée
-  const [isScanning, setIsScanning] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [connectedScales, setConnectedScales] = useState<ScaleDevice[]>([]);
-  const [weightHistory, setWeightHistory] = useState<WeightEntry[]>([]);
+  // États locaux pour les champs modifiables
+  const [currentWeight, setCurrentWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [activityLevel, setActivityLevel] = useState('moderate');
+  const [fitnessGoal, setFitnessGoal] = useState('maintain');
   const [showWeightHistory, setShowWeightHistory] = useState(false);
 
-  // Simuler des données d'historique (à remplacer par tes vraies données)
+  // Charger les données au montage du composant
   useEffect(() => {
-    const mockHistory: WeightEntry[] = [
-      { date: '2024-01-15', weight: 75.2, source: 'scale' },
-      { date: '2024-01-10', weight: 75.8, source: 'manual' },
-      { date: '2024-01-05', weight: 76.1, source: 'scale' },
-      { date: '2024-01-01', weight: 76.5, source: 'manual' },
-    ];
-    setWeightHistory(mockHistory);
-
-    // Simuler une balance connectée
-    const mockScale: ScaleDevice = {
-      id: 'scale-001',
-      name: 'Balance Xiaomi',
-      brand: 'Xiaomi',
-      model: 'Mi Body Composition Scale 2',
-      batteryLevel: 85,
-      isConnected: true,
-      lastSync: '2024-01-15T08:30:00Z',
-      connectionType: 'bluetooth'
-    };
-    setConnectedScales([mockScale]);
-  }, []);
-
-  // Calculer l'IMC
-  const calculateBMI = () => {
-    const weightNum = parseFloat(currentWeight);
-    const heightNum = parseFloat(height);
-    if (weightNum && heightNum) {
-      const heightInMeters = heightNum / 100;
-      return (weightNum / (heightInMeters * heightInMeters)).toFixed(1);
+    if (user?.id) {
+      // Charger les données utilisateur
+      loadConnectedScales(user.id);
+      loadWeightHistory(user.id);
     }
-    return null;
-  };
+  }, [user?.id, loadConnectedScales, loadWeightHistory]);
 
-  // Calculer la tendance du poids
-  const getWeightTrend = () => {
-    if (weightHistory.length < 2) return null;
-    const latest = weightHistory[0].weight;
-    const previous = weightHistory[1].weight;
-    const diff = latest - previous;
-    
-    if (Math.abs(diff) < 0.1) return { type: 'stable', diff: 0 };
-    return { 
-      type: diff > 0 ? 'up' : 'down', 
-      diff: Math.abs(diff) 
-    };
-  };
+  // Synchroniser les états locaux avec le profil utilisateur
+  useEffect(() => {
+    if (userProfile) {
+      setCurrentWeight(userProfile.weight_kg?.toString() || '');
+      setHeight(userProfile.height_cm?.toString() || '');
+      setAge(userProfile.age?.toString() || '');
+      setGender(userProfile.gender || '');
+      setActivityLevel(userProfile.activityLevel || 'moderate');
+      setFitnessGoal(userProfile.fitnessGoal || 'maintain');
+    }
+  }, [userProfile]);
 
   // Sauvegarder le profil
   const handleSaveProfile = async () => {
+    if (!user?.id) {
+      toast.error('Utilisateur non connecté');
+      return;
+    }
+
     try {
       await updateUserProfile({
         weight_kg: parseFloat(currentWeight) || undefined,
         height_cm: parseInt(height) || undefined,
         age: parseInt(age) || undefined,
         gender: gender || undefined,
-        activity_level: activityLevel,
-        fitness_goal: fitnessGoal,
-        updated_at: new Date().toISOString()
+        activityLevel: activityLevel,
+        fitnessGoal: fitnessGoal
       });
       toast.success('Profil mis à jour avec succès !');
     } catch (error) {
@@ -122,66 +93,78 @@ const ProfilePage = () => {
     }
   };
 
-  // Synchroniser avec la balance
+  // Synchroniser avec une balance
   const handleSyncScale = async (scaleId: string) => {
-    setIsSyncing(true);
     try {
-      // Simuler la synchronisation (remplace par ton API)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simuler une nouvelle mesure
-      const newWeight = 74.8 + (Math.random() - 0.5) * 2;
-      const newEntry: WeightEntry = {
-        date: new Date().toISOString(),
-        weight: parseFloat(newWeight.toFixed(1)),
-        source: 'scale'
-      };
-      
-      setWeightHistory(prev => [newEntry, ...prev]);
-      setCurrentWeight(newWeight.toFixed(1));
-      
-      // Mettre à jour la dernière synchronisation
-      setConnectedScales(prev => prev.map(scale => 
-        scale.id === scaleId 
-          ? { ...scale, lastSync: new Date().toISOString() }
-          : scale
-      ));
-      
+      const newWeight = await syncScaleWeight(scaleId);
+      setCurrentWeight(newWeight.toString());
       toast.success('Poids synchronisé avec succès !');
     } catch (error) {
       toast.error('Erreur lors de la synchronisation');
-    } finally {
-      setIsSyncing(false);
+      console.error('Scale sync error:', error);
     }
   };
 
   // Scanner pour de nouvelles balances
   const handleScanForScales = async () => {
-    setIsScanning(true);
     try {
-      // Simuler la recherche (remplace par ton API Bluetooth/WiFi)
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      toast.success('Recherche terminée. Aucune nouvelle balance trouvée.');
+      const devices = await scanForScales();
+      if (devices.length === 0) {
+        toast.success('Recherche terminée. Aucune nouvelle balance trouvée.');
+      } else {
+        toast.success(`${devices.length} balance(s) trouvée(s)`);
+      }
     } catch (error) {
       toast.error('Erreur lors de la recherche');
-    } finally {
-      setIsScanning(false);
+      console.error('Scale scan error:', error);
     }
   };
 
+  // Connecter une nouvelle balance
+  const handleConnectScale = async (device: any) => {
+    try {
+      await connectScale(device);
+      toast.success(`${device.name} connectée avec succès !`);
+    } catch (error) {
+      toast.error('Échec de la connexion');
+      console.error('Scale connect error:', error);
+    }
+  };
+
+  // Calculs basés sur les vraies données
   const bmi = calculateBMI();
   const weightTrend = getWeightTrend();
+  const latestWeight = getLatestWeight();
+
+  // Afficher un loader si les données sont en cours de chargement
+  if (isLoading && !userProfile) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="animate-spin" size={24} />
+          <span>Chargement du profil...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         
+        {/* Affichage des erreurs */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
         {/* Header avec avatar */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <div className="flex flex-col items-center">
             <AvatarUpload />
             <h1 className="text-2xl font-bold mt-4 text-gray-900">
-              {userProfile?.display_name || user?.email?.split('@')[0] || 'Utilisateur'}
+              {userProfile?.displayName || user?.email?.split('@')[0] || 'Utilisateur'}
             </h1>
             <p className="text-gray-500 mt-1">{user?.email}</p>
             
@@ -205,6 +188,12 @@ const ProfilePage = () => {
                     {weightTrend.diff > 0 ? `${weightTrend.diff.toFixed(1)}kg` : 'Stable'}
                   </div>
                   <div className="text-gray-500">Tendance</div>
+                </div>
+              )}
+              {latestWeight && (
+                <div className="text-center">
+                  <div className="font-semibold text-green-600">{latestWeight} kg</div>
+                  <div className="text-gray-500">Poids actuel</div>
                 </div>
               )}
             </div>
@@ -232,6 +221,7 @@ const ProfilePage = () => {
                 onChange={(e) => setCurrentWeight(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: 70.5"
+                disabled={isLoading}
               />
             </div>
             
@@ -247,6 +237,7 @@ const ProfilePage = () => {
                 onChange={(e) => setHeight(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: 175"
+                disabled={isLoading}
               />
             </div>
             
@@ -262,6 +253,7 @@ const ProfilePage = () => {
                 onChange={(e) => setAge(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: 25"
+                disabled={isLoading}
               />
             </div>
             
@@ -273,6 +265,7 @@ const ProfilePage = () => {
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
               >
                 <option value="">Sélectionner</option>
                 <option value="male">Homme</option>
@@ -289,6 +282,7 @@ const ProfilePage = () => {
                 value={activityLevel}
                 onChange={(e) => setActivityLevel(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
               >
                 <option value="sedentary">Sédentaire</option>
                 <option value="light">Légèrement actif</option>
@@ -306,6 +300,7 @@ const ProfilePage = () => {
                 value={fitnessGoal}
                 onChange={(e) => setFitnessGoal(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={isLoading}
               >
                 <option value="lose_weight">Perdre du poids</option>
                 <option value="maintain">Maintenir le poids</option>
@@ -318,9 +313,17 @@ const ProfilePage = () => {
           
           <button
             onClick={handleSaveProfile}
-            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            disabled={isLoading}
+            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            Enregistrer les modifications
+            {isLoading ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                Enregistrement...
+              </>
+            ) : (
+              'Enregistrer les modifications'
+            )}
           </button>
         </div>
 
@@ -435,7 +438,7 @@ const ProfilePage = () => {
           {weightHistory.length > 0 ? (
             <div className="space-y-3">
               {(showWeightHistory ? weightHistory : weightHistory.slice(0, 3)).map((entry, index) => (
-                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <div key={entry.id || index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${
                       entry.source === 'scale' ? 'bg-green-500' : 
