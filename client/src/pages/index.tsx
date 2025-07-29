@@ -693,4 +693,4 @@ const IndexPage = () => {
   );
 };
 
-export default IndexPage;
+export default indexPage;
