@@ -647,7 +647,7 @@ const Hydration: React.FC = () => {
                   <span>Historique</span>
                 </Button>
               </div>
-            </Content>
+            </CardContent>
           </Card>
         </div>
 
