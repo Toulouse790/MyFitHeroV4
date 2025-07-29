@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'wouter';
-import { Dumbbell, Apple, Droplets, Home, BarChart3, Users } from 'lucide-react';
+import { Dumbbell, Apple, Droplets, Home, BarChart3, Users, Heart, Moon, User } from 'lucide-react';
 
 interface NavItem {
   id: string;
@@ -33,11 +33,25 @@ const navItems: NavItem[] = [
     color: 'text-fitness-growth'
   },
   {
-    id: 'social',
-    label: 'Social',
-    icon: Users,
-    path: '/social',
-    color: 'text-purple-600'
+    id: 'hydration',
+    label: 'Hydratation',
+    icon: Droplets,
+    path: '/hydration',
+    color: 'text-fitness-hydration'
+  },
+  {
+    id: 'recovery',
+    label: 'Récupération',
+    icon: Heart,
+    path: '/recovery',
+    color: 'text-pink-600'
+  },
+  {
+    id: 'sleep',
+    label: 'Sommeil',
+    icon: Moon,
+    path: '/sleep',
+    color: 'text-blue-400'
   },
   {
     id: 'analytics',
@@ -47,11 +61,18 @@ const navItems: NavItem[] = [
     color: 'text-indigo-600'
   },
   {
-    id: 'hydration',
-    label: 'Hydratation',
-    icon: Droplets,
-    path: '/hydration',
-    color: 'text-fitness-hydration'
+    id: 'social',
+    label: 'Social',
+    icon: Users,
+    path: '/social',
+    color: 'text-purple-600'
+  },
+  {
+    id: 'profile',
+    label: 'Profil',
+    icon: User,
+    path: '/profile',
+    color: 'text-gray-600'
   }
 ];
 
