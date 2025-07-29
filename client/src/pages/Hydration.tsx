@@ -86,23 +86,26 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
       color: 'bg-orange-500'
     },
     tips: [
-      { 
-        icon: Footprints, 
-        title: 'Pré-hydratation', 
-        description: 'Buvez 500ml 2-3h avant l\\'effort et 250ml 15min avant le départ.', 
-        priority: 'high' 
+      {
+        icon: Footprints,
+        title: 'Pré-hydratation',
+        // Utilisation de guillemets doubles pour encapsuler l'apostrophe dans "l'effort"
+        description: "Buvez 500ml 2-3h avant l'effort et 250ml 15min avant le départ.",
+        priority: 'high'
       },
-      { 
-        icon: Clock, 
-        title: 'Pendant l\\'effort', 
-        description: '150-250ml toutes les 15-20min selon l\\'intensité et la température.', 
-        priority: 'high' 
+      {
+        icon: Clock,
+        // Utilisation de guillemets doubles pour encapsuler l'apostrophe
+        title: "Pendant l'effort",
+        description: "150-250ml toutes les 15-20min selon l'intensité et la température.",
+        priority: 'high'
       },
-      { 
-        icon: Thermometer, 
-        title: 'Post-effort', 
-        description: 'Buvez 150% du poids perdu en sueur dans les 6h suivant l\\'effort.', 
-        priority: 'medium' 
+      {
+        icon: Thermometer,
+        title: 'Post-effort',
+        // Utilisation de guillemets doubles pour encapsuler l'apostrophe
+        description: "Buvez 150% du poids perdu en sueur dans les 6h suivant l'effort.",
+        priority: 'medium'
       },
     ]
   },
