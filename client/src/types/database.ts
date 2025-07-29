@@ -382,7 +382,41 @@ export interface Database {
         };
         Update: Partial<Omit<Database['public']['Tables']['daily_stats']['Row'], 'id'>>;
       };
+// Ajouter ces interfaces à la fin du fichier types/database.ts
 
+export interface UserRecoveryProfile {
+  id: string;
+  user_id: string;
+  recovery_rate_multiplier: number;
+  sleep_quality_impact: number;
+  nutrition_quality_impact: number;
+  stress_level_impact: number;
+  hydration_impact: number;
+  age_factor: number;
+  fitness_level_factor: number;
+  injury_history: string[];
+  supplements: string[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MuscleRecoveryData {
+  id: string;
+  user_id: string;
+  muscle_group: string;
+  last_workout_date?: string;
+  workout_intensity?: string;
+  workout_volume?: number;
+  workout_duration_minutes?: number;
+  recovery_status: string;
+  recovery_percentage: number;
+  estimated_full_recovery: string;
+  fatigue_level: number;
+  soreness_level: number;
+  readiness_score: number;
+  last_updated?: string;
+  created_at?: string;
+}
       /* ----- Ajoute d’autres tables plus tard si ton code les utilise --- */
     }; // 👈 fin de Tables
   };   // 👈 fin de namespace public
