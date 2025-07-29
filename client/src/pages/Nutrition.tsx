@@ -1,5 +1,4 @@
-# Créer le code React optimisé pour la page Nutrition
-nutrition_code = '''// client/src/components/Nutrition.tsx
+// client/src/pages/Nutrition.tsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -964,4 +963,4 @@ const Nutrition: React.FC = () => {
   );
 };
 
-export default Nutrition;'''
+export default Nutrition;
