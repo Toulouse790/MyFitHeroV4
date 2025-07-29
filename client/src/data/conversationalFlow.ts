@@ -172,7 +172,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
       illustration: '🎯',
       inputType: 'single-select',
       searchable: false,
-      
+     },  
      {
   id: 'pack_selection',
   type: 'question',
