@@ -16,7 +16,6 @@ import {
   LazyNutrition,
   LazyHydration,
   LazySleep,
-  LazyWorkout
 } from '@/components/LazyComponents';
 
 import { useWearableSync } from '@/hooks/useWearableSync';
