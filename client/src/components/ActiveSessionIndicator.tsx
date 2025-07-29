@@ -1,7 +1,7 @@
 // client/src/components/ActiveSessionIndicator.tsx
 import React from 'react';
 import { Pause, Play, Square } from 'lucide-react';
-import { useWorkoutSession } from '@/hooks/useWorkoutSession';
+import { useWorkoutSession } from '@/hooks/workout/useWorkoutSession';
 
 export const ActiveSessionIndicator: React.FC = () => {
   const { currentSession, pauseSession, resumeSession, completeSession } = useWorkoutSession();
