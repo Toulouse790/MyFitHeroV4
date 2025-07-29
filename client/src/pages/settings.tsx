@@ -56,7 +56,7 @@ interface PrivacySettings {
 }
 
 const Settings: React.FC = () => {
-  const router = useRouter();
+  const [location, setLocation] = useLocation(); // Corrigé pour Wouter
   const { toast } = useToast();
   const { appStoreUser, setAppStoreUser } = useAppStore();
   
@@ -237,6 +237,78 @@ const Settings: React.FC = () => {
     }
   }, [appStoreUser?.id, notifications, toast]);
 
+  // 🆕 NOUVELLE FONCTION : Sauvegarde des préférences
+  const handleSavePreferences = useCallback(async () => {
+    if (!appStoreUser?.id) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: appStoreUser.id,
+          app_preferences: preferences,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Préférences mises à jour",
+        description: "Vos préférences d'application ont été sauvegardées.",
+      });
+
+    } catch (error) {
+      console.error('Erreur sauvegarde préférences:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder les préférences.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [appStoreUser?.id, preferences, toast]);
+
+  // 🆕 NOUVELLE FONCTION : Sauvegarde de la confidentialité
+  const handleSavePrivacy = useCallback(async () => {
+    if (!appStoreUser?.id) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: appStoreUser.id,
+          privacy,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Confidentialité mise à jour",
+        description: "Vos paramètres de confidentialité ont été sauvegardés.",
+      });
+
+    } catch (error) {
+      console.error('Erreur sauvegarde confidentialité:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de sauvegarder la confidentialité.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [appStoreUser?.id, privacy, toast]);
+
   // Synchronisation wearables
   const handleAppleHealthSync = useCallback(async () => {
     const data = await syncAppleHealth();
@@ -345,7 +417,7 @@ const Settings: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/profile')}
+            onClick={() => setLocation('/profile')} // Corrigé pour Wouter
             className="text-white hover:bg-white/20"
           >
             <User className="w-4 h-4 mr-2" />
@@ -516,7 +588,7 @@ const Settings: React.FC = () => {
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   <Save className="mr-2 h-4 w-4" />
-                  Sauvegarder les notifications
+                  {loading ? 'Sauvegarde...' : 'Sauvegarder les notifications'}
                 </Button>
               </CardContent>
             </Card>
@@ -693,6 +765,16 @@ const Settings: React.FC = () => {
                   </div>
                 ))}
                 
+                {/* 🆕 BOUTON DE SAUVEGARDE CONFIDENTIALITÉ */}
+                <Button 
+                  onClick={handleSavePrivacy} 
+                  disabled={loading}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  {loading ? 'Sauvegarde...' : 'Sauvegarder la confidentialité'}
+                </Button>
+                
                 <Separator />
                 
                 <div className="space-y-4">
@@ -806,9 +888,14 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
                 
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                {/* 🆕 BOUTON DE SAUVEGARDE PRÉFÉRENCES BRANCHÉ */}
+                <Button 
+                  onClick={handleSavePreferences}
+                  disabled={loading}
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                >
                   <Save className="mr-2 h-4 w-4" />
-                  Sauvegarder les préférences
+                  {loading ? 'Sauvegarde...' : 'Sauvegarder les préférences'}
                 </Button>
               </CardContent>
             </Card>
