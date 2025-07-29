@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import WorkoutDashboard from '@/components/WorkoutDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -80,7 +81,6 @@ const WorkoutDashboard = () => (
     </CardContent>
   </Card>
 );
-import WorkoutDashboard from '@/components/WorkoutDashboard';
 const DailyCheckIn = () => (
   <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
     <CardContent className="p-4">
