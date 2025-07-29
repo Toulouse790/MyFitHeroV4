@@ -1,4 +1,4 @@
-// hooks/workout/useWorkoutExercises.ts
+hooks/workout/useWorkoutExercises.ts
 import { useCallback } from 'react';
 import { useToast } from '../use-toast';
 import { WorkoutSession, WorkoutExercise, ExerciseSet } from './useWorkoutSessionCore';
@@ -95,8 +95,8 @@ export const useWorkoutExercises = (
     updateSession({ exercises: updatedExercises });
 
     toast({
-      title: 'Exercice terminé',
-      description: 'Bravo ! Toutes les séries sont complétées',
+      title: "Exercice terminé",
+      description: "Bravo ! Toutes les séries sont complétées",
     });
   }, [currentSession, updateSession, toast]);
 
@@ -119,8 +119,8 @@ export const useWorkoutExercises = (
     updateSession({ exercises: updatedExercises });
 
     toast({
-      title: 'Série ajoutée',
-      description: 'Nouvelle série ajoutée à l\'exercice',
+      title: "Série ajoutée",
+      description: "Nouvelle série ajoutée à l'exercice",
     });
   }, [currentSession, updateSession, toast]);
 
@@ -140,8 +140,8 @@ export const useWorkoutExercises = (
     updateSession({ exercises: updatedExercises });
 
     toast({
-      title: 'Série supprimée',
-      description: 'La série a été retirée de l\'exercice',
+      title: "Série supprimée",
+      description: "La série a été retirée de l'exercice",
     });
   }, [currentSession, updateSession, toast]);
 
