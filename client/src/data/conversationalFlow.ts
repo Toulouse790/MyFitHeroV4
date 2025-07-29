@@ -1,20 +1,3 @@
-// client/src/data/conversationalFlow.ts
-import type { 
-  ConversationalFlow, 
-  ConversationalStep, 
-  OnboardingData,
-  StepNextFunction,
-  StepConditionFunction,
-  QuestionOption
-} from '@/types/conversationalOnboarding';
-import {
-  MAIN_OBJECTIVES,
-  AVAILABLE_MODULES,
-  AVAILABLE_SPORTS,
-  DIETARY_PREFERENCES,
-  STRENGTH_OBJECTIVES,
-  NUTRITION_OBJECTIVES,
-  EQUIPMENT_LEVELS,// client/src/data/conversationalFlow.ts
 import type { 
   ConversationalFlow, 
   ConversationalStep, 
