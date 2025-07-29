@@ -121,11 +121,12 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
       color: 'bg-purple-500'
     },
     tips: [
-      { 
-        icon: Shield, 
-        title: 'Électrolytes cruciaux', 
-        description: 'La sueur sous l\\'équipement fait perdre beaucoup de sodium. Compensez avec des boissons enrichies.', 
-        priority: 'high' 
+      {
+        icon: Shield,
+        // Utilisation de guillemets doubles pour encapsuler l'apostrophe dans "l'équipement"
+        title: 'Électrolytes cruciaux',
+        description: "La sueur sous l'équipement fait perdre beaucoup de sodium. Compensez avec des boissons enrichies.",
+        priority: 'high'
       },
       { 
         icon: Dumbbell, 
@@ -787,19 +788,4 @@ const Hydration: React.FC = () => {
   );
 };
 
-export default Hydration;'''
-
-# Sauvegarder le code dans un fichier
-with open('Hydration_Optimized.tsx', 'w', encoding='utf-8') as f:
-    f.write(hydration_code)
-
-print("Code React optimisé généré avec succès !")
-print("\nPrincipales améliorations :")
-print("✅ Focus sur l'action principale (ajout d'eau)")
-print("✅ Conseils réduits à 1 prioritaire + collapsible pour le reste")
-print("✅ Historique limité à 3 entrées")
-print("✅ Analyse personnalisée dans une modal")
-print("✅ Rappel contextuel conditionnel")
-print("✅ Coaching IA dans une modal")
-print("✅ Actions secondaires regroupées")
-print("✅ Interface plus claire et moins chargée")
+export default Hydration;
