@@ -541,7 +541,7 @@ const IndexPage = () => {
 
   // Page d'authentification modernisée
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+    <div className="hero-gradient-bg flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="text-4xl mb-4">🏋️‍♂️</div>
