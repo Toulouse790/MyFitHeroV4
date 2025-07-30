@@ -1,31 +1,49 @@
+######################
 # Dépendances
+######################
 node_modules/
 jspm_packages/
 
-# Builds
+######################
+# Builds / Outputs
+######################
 dist/
 build/
 .vite/
 .turbo/
-.next
-.nuxt
-.out
-.storybook-out
+.next/
+.nuxt/
+.out/
 .storybook/
+.storybook-out/
 storybook-static/
+.vite-cache/
+.nyc_output/
+coverage/
+*.map
+*.bundle.js
+*.chunk.js
 
-# Env
+######################
+# Fichiers .env (sécurité)
+######################
 .env
 .env.*
 !.env.example
+
+# Client
 /client/.env
 /client/.env.*
 !/client/.env.example
+
+# Server
 /server/.env
 /server/.env.*
 !/server/.env.example
 
-# IDE/OS
+######################
+# IDE / Système
+######################
 .vscode/
 .idea/
 .DS_Store
@@ -39,7 +57,9 @@ Thumbs.db
 *.swo
 *~
 
+######################
 # Logs & caches
+######################
 logs/
 *.log
 npm-debug.log*
@@ -48,66 +68,61 @@ yarn-error.log*
 pnpm-debug.log*
 .npm
 .eslintcache
+.cache/
 .rpt2_cache/
 .rts2_cache_cjs/
 .rts2_cache_es/
 .rts2_cache_umd/
-.cache/
 .parcel-cache/
 .webpack-cache/
-.vite-cache/
-.nyc_output/
-coverage/
-*.lcov
 
-# Runtime
+######################
+# Runtime / Process
+######################
 pids/
 *.pid
 *.seed
 *.pid.lock
 
-# REPL
+######################
+# Historique Node REPL
+######################
 .node_repl_history
 
-# npm pack
+######################
+# Archives / Packs
+######################
 *.tgz
 *.tar.gz
 
-# Yarn
+######################
+# Intégrité Yarn
+######################
 .yarn-integrity
 
-# Temp
+######################
+# Fichiers temporaires
+######################
 tmp/
 temp/
 
-# Public/server assets générés
+######################
+# Public généré / Assets
+######################
 server/public/
-
-# Assets lourds
-*.mp4
-*.mov
-*.avi
-*.zip
-*.dmg
-*.iso
-
-# Fichiers générés
-*.map
-*.bundle.js
-*.chunk.js
 client/public/js/bundle*.js
 client/public/css/main*.css
 
-# Images non optimisées
+######################
+# Images sources non optimisées
+######################
 client/public/images/original/
 client/src/assets/raw/
 
-# Vercel
+######################
+# Vercel / Sentry / E2E
+######################
 .vercel/
-
-# Playwright/Cypress
+.sentryclirc
 .playwright/
 cypress/
-
-# Sentry
-.sentryclirc
