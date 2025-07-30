@@ -1,5 +1,5 @@
 {
-  "name": "MyFitHero V4",
+  "name": "MyFitHero",
   "short_name": "MyFitHero",
   "description": "Application de fitness intelligente avec IA - Suivi complet d'entraînement, nutrition, sommeil et hydratation",
   "theme_color": "#2563eb",
@@ -14,8 +14,8 @@
   "icons": [
     {
       "src": "/favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
+      "sizes": "32x32",
+      "type": "image/png"
     },
     {
       "src": "/placeholder.svg",
