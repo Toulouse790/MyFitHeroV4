@@ -33,7 +33,28 @@ export interface AiRecommendation {
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+// Singleton pattern pour éviter les multiples instances
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
+
+const getSupabaseClient = () => {
+  if (!supabaseInstance) {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Variables d\'environnement Supabase manquantes');
+    }
+    
+    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+  }
+  
+  return supabaseInstance;
+};
+
+export const supabase = getSupabaseClient();
