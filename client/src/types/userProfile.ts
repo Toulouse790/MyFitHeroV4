@@ -1,7 +1,11 @@
+// Types de base pour MyFitHero
 export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
 export type FitnessGoals = 'weight_loss' | 'muscle_gain' | 'endurance' | 'strength' | 'flexibility' | 'general_health';
 export type ModuleType = 'nutrition' | 'workout' | 'sleep' | 'hydration' | 'recovery' | 'mental_health';
+
+// Interface principale UserProfile (version complète)
 export interface UserProfile {
+  // Champs existants de ton interface actuelle
   id: string;
   username?: string | null;
   full_name?: string | null;
@@ -37,9 +41,23 @@ export interface UserProfile {
   daily_calories?: number | null;
   created_at?: string;
   weight?: number | null;
+
+  // Nouveaux champs recommandés (optionnels)
+  activity_level?: ActivityLevel;
+  height?: number | null;
+  target_weight?: number | null;
+  preferred_workout_time?: 'morning' | 'afternoon' | 'evening' | 'flexible';
+  dietary_restrictions?: string[];
+  meal_preferences?: 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian' | 'keto' | 'paleo';
+  ai_coaching_style?: 'encouraging' | 'direct' | 'analytical' | 'motivational';
+  enable_notifications?: boolean;
+  preferred_measurement_system?: 'metric' | 'imperial';
+  last_active?: string;
+  onboarding_completed_at?: string;
+  profile_version?: number;
 }
 
-// Type pour les données spécifiques au sport
+// Interface pour les données spécifiques au sport (inchangée)
 export interface SportProfileData {
   sport?: string | null;
   sport_position?: string | null;
@@ -50,34 +68,4 @@ export interface SportProfileData {
   sport_specific_stats?: Record<string, number>;
   injuries?: string[];
   primary_goals?: string[];
-}
-activity_level?: ActivityLevel;
-  height?: number | null; // Important pour les calculs BMI/calories
-  target_weight?: number | null;
-  weekly_goal_weight_change?: number | null;
-  
-  // Préférences d'entraînement
-  preferred_workout_time?: 'morning' | 'afternoon' | 'evening' | 'flexible';
-  home_gym_equipment?: string[];
-  gym_membership?: boolean;
-  
-  // Nutrition
-  dietary_restrictions?: string[];
-  allergies?: string[];
-  meal_preferences?: 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian' | 'keto' | 'paleo';
-  
-  // Tracking preferences
-  enable_notifications?: boolean;
-  preferred_measurement_system?: 'metric' | 'imperial';
-  
-  // Coaching IA
-  ai_coaching_style?: 'encouraging' | 'direct' | 'analytical' | 'motivational';
-  coaching_frequency?: 'daily' | 'weekly' | 'monthly';
-  
-  // Timestamps améliorés
-  last_active?: string;
-  onboarding_completed_at?: string;
-  
-  // Versions pour migration
-  profile_version?: number;
 }
