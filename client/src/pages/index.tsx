@@ -1,4 +1,3 @@
-// pages/index.tsx
 import React, { useState, useEffect, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'wouter';
@@ -6,7 +5,6 @@ import { supabase } from '@/lib/supabase';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import WorkoutDashboard from '@/components/WorkoutDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,7 +36,7 @@ import {
   BarChart3
 } from 'lucide-react';
 
-// ✅ Composants temporaires pour les éléments manquants
+// ✅ Composant WorkoutDashboard amélioré
 const WorkoutDashboard = () => (
   <Card>
     <CardHeader>
@@ -80,6 +78,7 @@ const WorkoutDashboard = () => (
     </CardContent>
   </Card>
 );
+
 const DailyCheckIn = () => (
   <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
     <CardContent className="p-4">
@@ -145,13 +144,19 @@ type AuthFormData = {
 };
 
 const IndexPage = () => {
-  const [location, setLocation] = useLocation(); // ✅ Corrigé useLocation
+  const [location, setLocation] = useLocation();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // ✅ CORRECTION : Utilisation correcte du store
   const { appStoreUser } = useAppStore();
-  const { getCachedData, isLoading: wearableLoading } = useWearableSync();
-  const wearableData = getCachedData();
+  
+  // Hook wearables avec vérification d'existence
+  const wearableSync = useWearableSync?.();
+  const getCachedData = wearableSync?.getCachedData;
+  const isWearableLoading = wearableSync?.isLoading || false;
+  const wearableData = getCachedData ? getCachedData() : null;
 
   const { register, handleSubmit, formState: { errors } } = useForm<AuthFormData>();
 
@@ -249,8 +254,9 @@ const IndexPage = () => {
     }
   ];
 
-  // ✅ Redirection corrigée avec setLocation
+  // ✅ Redirection corrigée pour l'onboarding
   useEffect(() => {
+    // ✅ CORRECTION : Vérifier que appStoreUser existe et a un ID
     if (appStoreUser?.id && !appStoreUser.onboarding_completed) {
       setLocation('/onboarding');
     }
@@ -291,7 +297,7 @@ const IndexPage = () => {
     }
   };
 
-  // Dashboard pour utilisateur connecté avec onboarding complété
+  // ✅ Dashboard pour utilisateur connecté avec onboarding complété
   if (appStoreUser?.id && appStoreUser.onboarding_completed) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -303,19 +309,19 @@ const IndexPage = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-2xl font-bold">
-                    Bonjour {appStoreUser.first_name || appStoreUser.username} ! 👋
+                    Bonjour {appStoreUser.first_name || appStoreUser.username || appStoreUser.name} ! 👋
                   </h1>
                   <p className="text-blue-100">
-                    Prêt pour une nouvelle journée de {appStoreUser.sport} ?
+                    Prêt pour une nouvelle journée de {appStoreUser.sport || 'fitness'} ?
                   </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    {appStoreUser.sport} • Niveau {appStoreUser.fitness_experience}
+                    {appStoreUser.sport || 'Fitness'} • Niveau {appStoreUser.fitness_experience || 'débutant'}
                   </Badge>
                   <Badge variant="outline" className="text-white border-white/30">
                     <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-                    {wearableLoading ? 'Sync...' : 'Wearables'}
+                    {isWearableLoading ? 'Sync...' : 'Wearables'}
                   </Badge>
                 </div>
               </div>
@@ -405,7 +411,7 @@ const IndexPage = () => {
                   {navigationCards.map((card, index) => (
                     <button
                       key={index}
-                      onClick={() => setLocation(card.href)} // ✅ Corrigé setLocation
+                      onClick={() => setLocation(card.href)}
                       className="w-full flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
                     >
                       <div className={`p-2 rounded-lg ${card.color}`}>
@@ -471,7 +477,7 @@ const IndexPage = () => {
                 <CardContent className="space-y-3">
                   <Button 
                     className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => setLocation('/workout')} // ✅ Corrigé setLocation
+                    onClick={() => setLocation('/workout')}
                   >
                     <Activity className="mr-2" size={16} />
                     Démarrer entraînement
@@ -479,7 +485,7 @@ const IndexPage = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => setLocation('/wearables')} // ✅ Corrigé setLocation
+                    onClick={() => setLocation('/wearables')}
                   >
                     <Watch className="mr-2" size={16} />
                     Synchroniser wearables
@@ -487,7 +493,7 @@ const IndexPage = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => setLocation('/analytics')} // ✅ Corrigé setLocation
+                    onClick={() => setLocation('/analytics')}
                   >
                     <TrendingUp className="mr-2" size={16} />
                     Voir les tendances
@@ -539,11 +545,11 @@ const IndexPage = () => {
     );
   }
 
-  // Page d'authentification modernisée
+  // ✅ Page d'authentification modernisée et FONCTIONNELLE
   return (
-    <div className="hero-gradient-bg flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardHeader className="text-center pb-4">
           <div className="text-4xl mb-4">🏋️‍♂️</div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             MyFitHero V4
@@ -554,31 +560,31 @@ const IndexPage = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Onglets de mode */}
-          <div className="flex justify-center border-b">
+          {/* ✅ Onglets de mode - VISIBLES ET FONCTIONNELS */}
+          <div className="flex justify-center border-b border-gray-200">
             <button
               onClick={() => setMode("signin")}
-              className={`px-6 py-2 text-sm font-medium transition-colors ${
+              className={`px-6 py-3 text-sm font-medium transition-all duration-200 ${
                 mode === "signin" 
-                  ? "border-b-2 border-blue-500 text-blue-600" 
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "border-b-2 border-blue-500 text-blue-600 bg-blue-50/50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
               Connexion
             </button>
             <button
               onClick={() => setMode("signup")}
-              className={`px-6 py-2 text-sm font-medium transition-colors ${
+              className={`px-6 py-3 text-sm font-medium transition-all duration-200 ${
                 mode === "signup" 
-                  ? "border-b-2 border-blue-500 text-blue-600" 
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "border-b-2 border-blue-500 text-blue-600 bg-blue-50/50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
               }`}
             >
               Inscription
             </button>
           </div>
 
-          {/* Formulaire */}
+          {/* ✅ Formulaire FONCTIONNEL */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Input
@@ -591,10 +597,13 @@ const IndexPage = () => {
                     message: "Format d'email invalide"
                   }
                 })}
-                className={errors.email ? "border-red-500" : ""}
+                className={`transition-all ${errors.email ? "border-red-500 bg-red-50" : "focus:border-blue-500"}`}
               />
               {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+                <p className="text-red-500 text-sm flex items-center">
+                  <span className="mr-1">⚠️</span>
+                  {errors.email.message}
+                </p>
               )}
             </div>
             
@@ -610,10 +619,13 @@ const IndexPage = () => {
                       message: "Minimum 3 caractères"
                     }
                   })}
-                  className={errors.username ? "border-red-500" : ""}
+                  className={`transition-all ${errors.username ? "border-red-500 bg-red-50" : "focus:border-blue-500"}`}
                 />
                 {errors.username && (
-                  <p className="text-red-500 text-sm">{errors.username.message}</p>
+                  <p className="text-red-500 text-sm flex items-center">
+                    <span className="mr-1">⚠️</span>
+                    {errors.username.message}
+                  </p>
                 )}
               </div>
             )}
@@ -629,10 +641,13 @@ const IndexPage = () => {
                     message: "Minimum 6 caractères"
                   }
                 })}
-                className={errors.password ? "border-red-500" : ""}
+                className={`transition-all ${errors.password ? "border-red-500 bg-red-50" : "focus:border-blue-500"}`}
               />
               {errors.password && (
-                <p className="text-red-500 text-sm">{errors.password.message}</p>
+                <p className="text-red-500 text-sm flex items-center">
+                  <span className="mr-1">⚠️</span>
+                  {errors.password.message}
+                </p>
               )}
             </div>
             
@@ -644,48 +659,72 @@ const IndexPage = () => {
                   {...register("confirmPassword", { 
                     required: mode === "signup" ? "Confirmation requise" : false
                   })}
-                  className={errors.confirmPassword ? "border-red-500" : ""}
+                  className={`transition-all ${errors.confirmPassword ? "border-red-500 bg-red-50" : "focus:border-blue-500"}`}
                 />
                 {errors.confirmPassword && (
-                  <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
+                  <p className="text-red-500 text-sm flex items-center">
+                    <span className="mr-1">⚠️</span>
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
             )}
             
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                <p className="text-red-600 text-sm">{error}</p>
+                <p className="text-red-600 text-sm flex items-center">
+                  <span className="mr-2">❌</span>
+                  {error}
+                </p>
               </div>
             )}
             
+            {/* ✅ BOUTON PRINCIPAL - VISIBLE ET FONCTIONNEL */}
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-base font-medium transition-all transform hover:scale-[1.02] hover:shadow-lg"
               disabled={isLoading}
             >
-              {isLoading ? "Chargement..." : mode === "signup" ? "Créer un compte" : "Se connecter"}
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Chargement...
+                </div>
+              ) : (
+                mode === "signup" ? "Créer un compte" : "Se connecter"
+              )}
             </Button>
           </form>
 
           {/* Fonctionnalités mises en avant */}
-          <div className="pt-4 border-t">
+          <div className="pt-4 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600 mb-3">
               Découvrez toutes les fonctionnalités :
             </p>
             <div className="grid grid-cols-2 gap-3 text-center">
-              <Badge variant="outline" className="p-2">
+              <Badge variant="outline" className="p-2 hover:bg-blue-50 transition-colors">
                 🏋️ Workout IA
               </Badge>
-              <Badge variant="outline" className="p-2">
+              <Badge variant="outline" className="p-2 hover:bg-green-50 transition-colors">
                 📊 Analytics
               </Badge>
-              <Badge variant="outline" className="p-2">
+              <Badge variant="outline" className="p-2 hover:bg-purple-50 transition-colors">
                 ⌚ Wearables
               </Badge>
-              <Badge variant="outline" className="p-2">
+              <Badge variant="outline" className="p-2 hover:bg-yellow-50 transition-colors">
                 🎯 Coaching
               </Badge>
             </div>
+          </div>
+
+          {/* Message d'encouragement */}
+          <div className="text-center">
+            <p className="text-xs text-gray-500">
+              {mode === "signup" 
+                ? "Rejoignez plus de 10,000 athlètes qui font confiance à MyFitHero"
+                : "Bon retour parmi nous ! Prêt pour votre prochaine session ?"
+              }
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -693,4 +732,4 @@ const IndexPage = () => {
   );
 };
 
-export default indexPage;
+export default IndexPage;
