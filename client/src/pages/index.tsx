@@ -1,194 +1,215 @@
-// pages/index.tsx - VERSION DE DEBUG MINIMALISTE
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-
-type AuthFormData = {
-  email: string;
-  password: string;
-  confirmPassword?: string;
-  username?: string;
-};
+// pages/index.tsx - VERSION ULTRA-SIMPLE QUI DOIT MARCHER
+import React from 'react';
 
 const IndexPage = () => {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { register, handleSubmit, formState: { errors } } = useForm<AuthFormData>();
-
-  const onSubmit = async (data: AuthFormData) => {
-    console.log('Form submitted:', data);
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      // Simulation d'une requête
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Formulaire soumis avec succès !');
-    } catch (err: any) {
-      setError('Erreur de test');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6">
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #dbeafe 0%, #ffffff 50%, #fae8ff 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+        padding: '40px',
+        width: '100%',
+        maxWidth: '400px'
+      }}>
+        
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="text-4xl mb-4">🏋️‍♂️</div>
-          <h1 className="text-3xl font-bold text-blue-600">
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏋️‍♂️</div>
+          <h1 style={{ 
+            fontSize: '32px', 
+            fontWeight: 'bold', 
+            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            margin: '0 0 8px 0'
+          }}>
             MyFitHero V4
           </h1>
-          <p className="text-gray-600 mt-2">
-            Test de connexion
+          <p style={{ color: '#6b7280', margin: 0 }}>
+            Votre compagnon intelligent pour la santé
           </p>
         </div>
-        
+
         {/* Onglets */}
-        <div className="flex justify-center border-b border-gray-200 mb-6">
-          <button
-            onClick={() => setMode("signin")}
-            className={`px-6 py-3 text-sm font-medium transition-all duration-200 ${
-              mode === "signin" 
-                ? "border-b-2 border-blue-500 text-blue-600 bg-blue-50" 
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
+        <div style={{ 
+          display: 'flex', 
+          borderBottom: '1px solid #e5e7eb',
+          marginBottom: '24px'
+        }}>
+          <button style={{
+            flex: 1,
+            padding: '12px 24px',
+            border: 'none',
+            background: 'none',
+            borderBottom: '2px solid #3b82f6',
+            color: '#3b82f6',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
             Connexion
           </button>
-          <button
-            onClick={() => setMode("signup")}
-            className={`px-6 py-3 text-sm font-medium transition-all duration-200 ${
-              mode === "signup" 
-                ? "border-b-2 border-blue-500 text-blue-600 bg-blue-50" 
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
+          <button style={{
+            flex: 1,
+            padding: '12px 24px',
+            border: 'none',
+            background: 'none',
+            color: '#6b7280',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}>
             Inscription
           </button>
         </div>
 
         {/* Formulaire */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              {...register("email", { 
-                required: "L'email est requis",
-                pattern: {
-                  value: /^\S+@\S+$/i,
-                  message: "Format d'email invalide"
-                }
-              })}
-              className={`w-full px-3 py-2 border rounded-md transition-all ${
-                errors.email ? "border-red-500 bg-red-50" : "border-gray-300 focus:border-blue-500"
-              }`}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                ⚠️ {errors.email.message}
-              </p>
-            )}
-          </div>
+        <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            style={{
+              padding: '12px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              outline: 'none',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+          />
           
-          {mode === "signup" && (
-            <div>
-              <input
-                type="text"
-                placeholder="Nom d'utilisateur"
-                {...register("username", { 
-                  required: mode === "signup" ? "Le nom d'utilisateur est requis" : false,
-                  minLength: {
-                    value: 3,
-                    message: "Minimum 3 caractères"
-                  }
-                })}
-                className={`w-full px-3 py-2 border rounded-md transition-all ${
-                  errors.username ? "border-red-500 bg-red-50" : "border-gray-300 focus:border-blue-500"
-                }`}
-              />
-              {errors.username && (
-                <p className="text-red-500 text-sm mt-1">
-                  ⚠️ {errors.username.message}
-                </p>
-              )}
-            </div>
-          )}
-          
-          <div>
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              {...register("password", { 
-                required: "Le mot de passe est requis",
-                minLength: {
-                  value: 6,
-                  message: "Minimum 6 caractères"
-                }
-              })}
-              className={`w-full px-3 py-2 border rounded-md transition-all ${
-                errors.password ? "border-red-500 bg-red-50" : "border-gray-300 focus:border-blue-500"
-              }`}
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">
-                ⚠️ {errors.password.message}
-              </p>
-            )}
-          </div>
-          
-          {mode === "signup" && (
-            <div>
-              <input
-                type="password"
-                placeholder="Confirmer le mot de passe"
-                {...register("confirmPassword", { 
-                  required: mode === "signup" ? "Confirmation requise" : false
-                })}
-                className={`w-full px-3 py-2 border rounded-md transition-all ${
-                  errors.confirmPassword ? "border-red-500 bg-red-50" : "border-gray-300 focus:border-blue-500"
-                }`}
-              />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">
-                  ⚠️ {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-          )}
-          
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-600 text-sm">
-                ❌ {error}
-              </p>
-            </div>
-          )}
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            required
+            style={{
+              padding: '12px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              outline: 'none',
+              transition: 'border-color 0.2s'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+          />
           
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-md font-medium transition-all transform hover:scale-[1.02] disabled:opacity-50"
+            style={{
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #3b82f6, #7c3aed)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              marginTop: '8px'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 10px 25px rgba(59, 130, 246, 0.3)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              alert('Formulaire de test soumis !');
+            }}
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Chargement...
-              </div>
-            ) : (
-              mode === "signup" ? "Créer un compte" : "Se connecter"
-            )}
+            Se connecter
           </button>
         </form>
 
-        {/* Debug info */}
-        <div className="mt-6 p-3 bg-gray-100 rounded-md text-sm">
-          <p><strong>Mode actuel :</strong> {mode}</p>
-          <p><strong>État de chargement :</strong> {isLoading ? 'Oui' : 'Non'}</p>
-          <p><strong>Erreur :</strong> {error || 'Aucune'}</p>
+        {/* Fonctionnalités */}
+        <div style={{ 
+          marginTop: '24px', 
+          paddingTop: '24px', 
+          borderTop: '1px solid #e5e7eb' 
+        }}>
+          <p style={{ 
+            textAlign: 'center', 
+            fontSize: '14px', 
+            color: '#6b7280',
+            marginBottom: '12px' 
+          }}>
+            Découvrez toutes les fonctionnalités :
+          </p>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gap: '8px',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              padding: '8px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              fontSize: '12px',
+              backgroundColor: '#f9fafb'
+            }}>
+              🏋️ Workout IA
+            </div>
+            <div style={{
+              padding: '8px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              fontSize: '12px',
+              backgroundColor: '#f9fafb'
+            }}>
+              📊 Analytics
+            </div>
+            <div style={{
+              padding: '8px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              fontSize: '12px',
+              backgroundColor: '#f9fafb'
+            }}>
+              ⌚ Wearables
+            </div>
+            <div style={{
+              padding: '8px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              fontSize: '12px',
+              backgroundColor: '#f9fafb'
+            }}>
+              🎯 Coaching
+            </div>
+          </div>
+        </div>
+
+        {/* Message d'encouragement */}
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <p style={{ fontSize: '12px', color: '#9ca3af' }}>
+            Bon retour parmi nous ! Prêt pour votre prochaine session ?
+          </p>
+        </div>
+
+        {/* Info de debug */}
+        <div style={{
+          marginTop: '20px',
+          padding: '12px',
+          backgroundColor: '#f3f4f6',
+          borderRadius: '6px',
+          fontSize: '12px'
+        }}>
+          <p><strong>✅ Version ultra-simple chargée</strong></p>
+          <p>Si vous voyez ceci, React fonctionne !</p>
         </div>
       </div>
     </div>
