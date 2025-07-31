@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation } from 'wouter';
@@ -8,14 +9,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// ✅ Imports corrects - utilisation des composants Lazy existants
-import {
-  LazyNutrition,
-  LazyHydration,
-  LazySleep,
-} from '@/components/LazyComponents';
-
 import { useWearableSync } from '@/hooks/useWearableSync';
 import { 
   Dumbbell,
@@ -36,7 +29,21 @@ import {
   BarChart3
 } from 'lucide-react';
 
-// ✅ Composant WorkoutDashboard amélioré
+// ✅ Imports des composants Lazy (si disponibles)
+let LazyNutrition: React.ComponentType<any> | null = null;
+let LazyHydration: React.ComponentType<any> | null = null;
+let LazySleep: React.ComponentType<any> | null = null;
+
+try {
+  const LazyComponents = require('@/components/LazyComponents');
+  LazyNutrition = LazyComponents.LazyNutrition;
+  LazyHydration = LazyComponents.LazyHydration;
+  LazySleep = LazyComponents.LazySleep;
+} catch (error) {
+  console.log('LazyComponents non disponibles, utilisation de composants de base');
+}
+
+// ✅ Composant WorkoutDashboard
 const WorkoutDashboard = () => (
   <Card>
     <CardHeader>
@@ -136,6 +143,18 @@ const BadgeSystem = ({ showProgress, compact }: { showProgress?: boolean; compac
   </Card>
 );
 
+// Composant de fallback pour les composants Lazy manquants
+const FallbackComponent = ({ title }: { title: string }) => (
+  <Card>
+    <CardContent className="p-6">
+      <div className="text-center">
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <p className="text-gray-600">Module en cours de développement</p>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 type AuthFormData = {
   email: string;
   password: string;
@@ -149,14 +168,18 @@ const IndexPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  // ✅ CORRECTION : Utilisation correcte du store
+  // ✅ Hook store corrigé
   const { appStoreUser } = useAppStore();
   
-  // Hook wearables avec vérification d'existence
-  const wearableSync = useWearableSync?.();
-  const getCachedData = wearableSync?.getCachedData;
-  const isWearableLoading = wearableSync?.isLoading || false;
-  const wearableData = getCachedData ? getCachedData() : null;
+  // ✅ Hook wearables existant
+  const { 
+    isLoading: isWearableLoading, 
+    getCachedData, 
+    lastSyncTime,
+    syncError 
+  } = useWearableSync();
+  
+  const wearableData = getCachedData();
 
   const { register, handleSubmit, formState: { errors } } = useForm<AuthFormData>();
 
@@ -220,7 +243,7 @@ const IndexPage = () => {
     }
   ];
 
-  // Statistiques rapides
+  // Statistiques rapides - compatibles avec votre interface WearableData
   const quickStats = [
     {
       title: 'Pas aujourd\'hui',
@@ -231,14 +254,14 @@ const IndexPage = () => {
     },
     {
       title: 'Calories brûlées',
-      value: wearableData?.caloriesBurned?.toString() || '0',
+      value: (wearableData?.caloriesBurned || 0).toString(),
       icon: Zap,
       color: 'text-orange-600',
       bg: 'bg-orange-50'
     },
     {
       title: 'FC moyenne',
-      value: wearableData?.heartRate ? 
+      value: wearableData?.heartRate?.length ? 
         `${Math.round(wearableData.heartRate.reduce((a, b) => a + b, 0) / wearableData.heartRate.length)} BPM` : 
         '0 BPM',
       icon: Heart,
@@ -247,16 +270,15 @@ const IndexPage = () => {
     },
     {
       title: 'Minutes actives',
-      value: wearableData?.activeMinutes?.toString() || '0',
+      value: (wearableData?.activeMinutes || 0).toString(),
       icon: Target,
       color: 'text-green-600',
       bg: 'bg-green-50'
     }
   ];
 
-  // ✅ Redirection corrigée pour l'onboarding
+  // ✅ Redirection vers onboarding si nécessaire
   useEffect(() => {
-    // ✅ CORRECTION : Vérifier que appStoreUser existe et a un ID
     if (appStoreUser?.id && !appStoreUser.onboarding_completed) {
       setLocation('/onboarding');
     }
@@ -297,13 +319,13 @@ const IndexPage = () => {
     }
   };
 
-  // ✅ Dashboard pour utilisateur connecté avec onboarding complété
+  // ✅ Dashboard pour utilisateur connecté
   if (appStoreUser?.id && appStoreUser.onboarding_completed) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-6 space-y-6">
           
-          {/* Header avec informations utilisateur et status wearables */}
+          {/* Header avec informations utilisateur */}
           <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -320,13 +342,17 @@ const IndexPage = () => {
                     {appStoreUser.sport || 'Fitness'} • Niveau {appStoreUser.fitness_experience || 'débutant'}
                   </Badge>
                   <Badge variant="outline" className="text-white border-white/30">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-                    {isWearableLoading ? 'Sync...' : 'Wearables'}
+                    <div className={`w-2 h-2 rounded-full mr-2 ${
+                      syncError ? 'bg-red-400' : 
+                      isWearableLoading ? 'bg-yellow-400 animate-pulse' : 
+                      'bg-green-400 animate-pulse'
+                    }`} />
+                    {isWearableLoading ? 'Sync...' : syncError ? 'Erreur' : 'Wearables'}
                   </Badge>
                 </div>
               </div>
               
-              {/* Stats rapides intégrées */}
+              {/* Stats rapides */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {quickStats.map((stat, index) => (
                   <div key={index} className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
@@ -346,7 +372,7 @@ const IndexPage = () => {
           {/* Check-in quotidien */}
           <DailyCheckIn />
           
-          {/* Navigation principale avec deux modes */}
+          {/* Navigation principale */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             {/* Section principale avec onglets */}
@@ -375,28 +401,27 @@ const IndexPage = () => {
                   <WorkoutDashboard />
                 </TabsContent>
                 
-                {/* ✅ Utilisation des composants Lazy avec Suspense */}
                 <TabsContent value="nutrition">
                   <Suspense fallback={<div className="p-4 text-center">Chargement nutrition...</div>}>
-                    <LazyNutrition />
+                    {LazyNutrition ? <LazyNutrition /> : <FallbackComponent title="Nutrition" />}
                   </Suspense>
                 </TabsContent>
                 
                 <TabsContent value="hydration">
                   <Suspense fallback={<div className="p-4 text-center">Chargement hydratation...</div>}>
-                    <LazyHydration />
+                    {LazyHydration ? <LazyHydration /> : <FallbackComponent title="Hydratation" />}
                   </Suspense>
                 </TabsContent>
                 
                 <TabsContent value="sleep">
                   <Suspense fallback={<div className="p-4 text-center">Chargement sommeil...</div>}>
-                    <LazySleep />
+                    {LazySleep ? <LazySleep /> : <FallbackComponent title="Sommeil" />}
                   </Suspense>
                 </TabsContent>
               </Tabs>
             </div>
 
-            {/* Sidebar avec navigation et réalisations */}
+            {/* Sidebar */}
             <div className="space-y-6">
               
               {/* Navigation rapide */}
@@ -424,45 +449,6 @@ const IndexPage = () => {
                       <ChevronRight className="text-gray-400 flex-shrink-0" size={16} />
                     </button>
                   ))}
-                </CardContent>
-              </Card>
-
-              {/* Réalisations récentes */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Award className="mr-2" size={20} />
-                    Réalisations récentes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <Target className="text-yellow-600" size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Objectif 10K pas</p>
-                      <p className="text-xs text-gray-500">Atteint aujourd'hui</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Activity className="text-blue-600" size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Série active</p>
-                      <p className="text-xs text-gray-500">7 jours consécutifs</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Heart className="text-green-600" size={16} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Zone cardio</p>
-                      <p className="text-xs text-gray-500">30 min aujourd'hui</p>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -506,7 +492,7 @@ const IndexPage = () => {
           {/* Système de badges */}
           <BadgeSystem showProgress={true} compact={false} />
 
-          {/* Footer avec informations MyFitHero V4 */}
+          {/* Footer MyFitHero V4 */}
           <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-purple-100">
             <CardContent className="p-6">
               <div className="text-center">
@@ -545,7 +531,7 @@ const IndexPage = () => {
     );
   }
 
-  // ✅ Page d'authentification modernisée et FONCTIONNELLE
+  // ✅ PAGE D'AUTHENTIFICATION - COMPLÈTEMENT FONCTIONNELLE
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
@@ -560,7 +546,7 @@ const IndexPage = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* ✅ Onglets de mode - VISIBLES ET FONCTIONNELS */}
+          {/* ✅ ONGLETS DE MODE - FONCTIONNELS */}
           <div className="flex justify-center border-b border-gray-200">
             <button
               onClick={() => setMode("signin")}
@@ -584,7 +570,7 @@ const IndexPage = () => {
             </button>
           </div>
 
-          {/* ✅ Formulaire FONCTIONNEL */}
+          {/* ✅ FORMULAIRE COMPLET ET FONCTIONNEL */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Input
@@ -679,7 +665,7 @@ const IndexPage = () => {
               </div>
             )}
             
-            {/* ✅ BOUTON PRINCIPAL - VISIBLE ET FONCTIONNEL */}
+            {/* ✅ BOUTON DE SOUMISSION - VISIBLE ET FONCTIONNEL */}
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 text-base font-medium transition-all transform hover:scale-[1.02] hover:shadow-lg"
