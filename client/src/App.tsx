@@ -1,79 +1,148 @@
-import React, { Suspense } from 'react';
-import { Router, Route, Switch } from 'wouter'; 
-import IndexPage from '@/pages/index';
-
-// Composant de chargement
-const LoadingSpinner = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-    <div className="text-center">
-      <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-lg font-medium text-gray-600">Chargement...</p>
-      <p className="text-sm text-gray-400 mt-1">MyFitHero V4</p>
-    </div>
-  </div>
-);
-
-// Page 404 stylée
-const NotFoundPage = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
-    <div className="text-center max-w-md mx-auto p-8">
-      <div className="text-8xl mb-6">🚫</div>
-      <h1 className="text-6xl font-bold text-red-600 mb-4">404</h1>
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Page non trouvée
-      </h2>
-      <p className="text-gray-600 mb-8 text-lg">
-        Cette page n'existe pas dans MyFitHero V4
-      </p>
-      
-      <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 mb-6">
-        <p className="text-sm text-gray-600">
-          URL demandée : <code className="bg-gray-200 px-2 py-1 rounded text-xs">{window.location.pathname}</code>
-        </p>
-      </div>
-      
-      <button 
-        onClick={() => window.location.href = '/'}
-        className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg font-medium"
-      >
-        🏠 Retour à l'accueil
-      </button>
-    </div>
-  </div>
-);
+import React from 'react';
+import { Router, Route } from 'wouter';
 
 const App: React.FC = () => {
-  console.log("🟢 MyFitHero V4 - Route:", window.location.pathname);
+  console.log("🟢 Route actuelle:", window.location.pathname);
   
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Router>
-        <Switch>
-          {/* Page d'accueil avec authentification */}
-          <Route path="/" exact>
-            <IndexPage />
-          </Route>
+    <Router>
+      {/* Page d'accueil */}
+      <Route path="/">
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          backgroundColor: '#dcfce7' // bg-green-100
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{ 
+              fontSize: '2.5rem', 
+              fontWeight: 'bold', 
+              color: '#16a34a', // text-green-600
+              marginBottom: '1rem' 
+            }}>
+              ✅ Page d'ACCUEIL
+            </h1>
+            <p style={{ fontSize: '1.125rem' }}>Route : /</p>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '1rem' }}>
+              MyFitHero V4
+            </p>
+          </div>
+        </div>
+      </Route>
+
+      {/* Page login */}
+      <Route path="/login">
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center', 
+          backgroundColor: '#dbeafe' // bg-blue-100
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              color: '#2563eb', // text-blue-600
+              marginBottom: '1rem'
+            }}>
+              🔐 Page de CONNEXION
+            </h1>
+            <p style={{ fontSize: '1.125rem' }}>Route : /login</p>
+          </div>
+        </div>
+      </Route>
+
+      {/* Page register */}
+      <Route path="/register">
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f3e8ff' // bg-purple-100
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: '2.5rem',
+              fontWeight: 'bold',
+              color: '#9333ea', // text-purple-600
+              marginBottom: '1rem'
+            }}>
+              📝 Page d'INSCRIPTION
+            </h1>
+            <p style={{ fontSize: '1.125rem' }}>Route : /register</p>
+          </div>
+        </div>
+      </Route>
+
+      {/* Page 404 - sans path = catch-all */}
+      <Route>
+        {(params) => {
+          // Cette route se déclenche si aucune autre ne correspond
+          const currentPath = window.location.pathname;
           
-          {/* Routes d'authentification - redirigent vers IndexPage */}
-          <Route path="/login" exact>
-            <IndexPage />
-          </Route>
+          // Ne pas afficher 404 pour les routes connues
+          if (currentPath === '/' || currentPath === '/login' || currentPath === '/register') {
+            return null;
+          }
           
-          <Route path="/register" exact>
-            <IndexPage />
-          </Route>
-          
-          <Route path="/auth" exact>
-            <IndexPage />
-          </Route>
-          
-          {/* Route catch-all pour 404 */}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Switch>
-      </Router>
-    </Suspense>
+          return (
+            <div style={{
+              minHeight: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#fecaca' // bg-red-100
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <h1 style={{
+                  fontSize: '4rem',
+                  fontWeight: 'bold',
+                  color: '#dc2626', // text-red-600
+                  marginBottom: '1rem'
+                }}>
+                  🚨 404 - PAGE INTROUVABLE
+                </h1>
+                <p style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>
+                  Cette page n'existe pas !
+                </p>
+                <p style={{
+                  fontSize: '1.125rem',
+                  backgroundColor: '#e5e7eb',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.5rem',
+                  display: 'inline-block',
+                  marginBottom: '1.5rem'
+                }}>
+                  Route tentée : {currentPath}
+                </p>
+                <br />
+                <button
+                  onClick={() => window.location.href = '/'}
+                  style={{
+                    padding: '0.75rem 1.5rem',
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    fontSize: '1.125rem',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#b91c1c'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#dc2626'}
+                >
+                  🏠 Retour à l'accueil
+                </button>
+              </div>
+            </div>
+          );
+        }}
+      </Route>
+    </Router>
   );
 };
 
