@@ -76,7 +76,7 @@ interface FitnessProfile {
   height_ft: number;
   height_in: number;
   age: number;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female' | 'null';
   body_fat_percentage?: number;
   
   // Sports US populaires
