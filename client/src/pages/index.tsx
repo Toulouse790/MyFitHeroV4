@@ -8,7 +8,7 @@ const IndexPage: React.FC = () => {
       <div className="w-full max-w-md">
         {/* En-tête */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🚀</div>
+          <div className="text-6xl mb-4 animate-pulse">🚀</div>
           <h1 className="text-4xl font-bold text-white mb-2">
             MyFitHero V4
           </h1>
@@ -50,7 +50,7 @@ const IndexPage: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Nom d'utilisateur"
-                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
             )}
@@ -59,7 +59,7 @@ const IndexPage: React.FC = () => {
               <input
                 type="email"
                 placeholder="Email"
-                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-sm"
               />
             </div>
             
@@ -67,7 +67,7 @@ const IndexPage: React.FC = () => {
               <input
                 type="password"
                 placeholder="Mot de passe"
-                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-sm"
               />
             </div>
 
@@ -76,7 +76,7 @@ const IndexPage: React.FC = () => {
                 <input
                   type="password"
                   placeholder="Confirmer le mot de passe"
-                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-transparent backdrop-blur-sm"
                 />
               </div>
             )}
@@ -84,6 +84,10 @@ const IndexPage: React.FC = () => {
             <button
               type="submit"
               className="w-full py-3 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-200 transform hover:scale-105 shadow-lg"
+              onClick={(e) => {
+                e.preventDefault();
+                alert(isLogin ? 'Connexion simulée !' : 'Inscription simulée !');
+              }}
             >
               {isLogin ? 'Se connecter' : "S'inscrire"}
             </button>
@@ -92,12 +96,19 @@ const IndexPage: React.FC = () => {
           {/* Liens supplémentaires */}
           <div className="mt-6 text-center space-y-2">
             {isLogin && (
-              <a href="#" className="block text-white/80 hover:text-white text-sm">
+              <a 
+                href="#" 
+                className="block text-white/80 hover:text-white text-sm transition-colors duration-200"
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert('Fonctionnalité bientôt disponible !');
+                }}
+              >
                 Mot de passe oublié ?
               </a>
             )}
             
-            <div className="text-white/60 text-xs">
+            <div className="text-white/60 text-xs mt-4">
               Version 4.0 - Alimenté par l'IA
             </div>
           </div>
@@ -105,22 +116,32 @@ const IndexPage: React.FC = () => {
 
         {/* Features teaser */}
         <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-          <div className="text-white/80">
-            <div className="text-2xl mb-1">💪</div>
-            <div className="text-xs">Workouts</div>
+          <div className="text-white/80 transform hover:scale-110 transition-transform duration-200 cursor-pointer">
+            <div className="text-3xl mb-2">💪</div>
+            <div className="text-sm font-medium">Workouts</div>
+            <div className="text-xs text-white/60">IA personnalisée</div>
           </div>
-          <div className="text-white/80">
-            <div className="text-2xl mb-1">🥗</div>
-            <div className="text-xs">Nutrition</div>
+          <div className="text-white/80 transform hover:scale-110 transition-transform duration-200 cursor-pointer">
+            <div className="text-3xl mb-2">🥗</div>
+            <div className="text-sm font-medium">Nutrition</div>
+            <div className="text-xs text-white/60">Plans sur mesure</div>
           </div>
-          <div className="text-white/80">
-            <div className="text-2xl mb-1">😴</div>
-            <div className="text-xs">Sommeil</div>
+          <div className="text-white/80 transform hover:scale-110 transition-transform duration-200 cursor-pointer">
+            <div className="text-3xl mb-2">😴</div>
+            <div className="text-sm font-medium">Sommeil</div>
+            <div className="text-xs text-white/60">Suivi optimisé</div>
           </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-white/40 text-xs">
+            © 2025 MyFitHero V4 - Tous droits réservés
+          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default index;
+export default IndexPage;
