@@ -1,20 +1,23 @@
+// client/src/main.tsx
 import React from 'react';
-import { Router, Route } from 'wouter';
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import ErrorBoundary from './components/ErrorBoundary';
+import './i18n/i18n';
+import './index.css'; // ✅ CSS global, souvent Tailwind ou équivalent
 
-// Import direct de votre page d'accueil
-import IndexPage from '@/pages/index';
+const rootElement = document.getElementById('root');
 
-const App: React.FC = () => {
-  return (
-    <Router>
-      <Route path="/">
-        <IndexPage />
-      </Route>
-      <Route>
-        <div>Page 404</div>
-      </Route>
-    </Router>
-  );
-};
+if (!rootElement) {
+  throw new Error('Élément root introuvable. Assurez-vous que votre fichier HTML contient un div avec id="root".');
+}
 
-export default App;
+const root = createRoot(rootElement);
+
+root.render(
+  <React.StrictMode>
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  </React.StrictMode>
+);
