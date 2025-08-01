@@ -1,23 +1,14 @@
-// client/src/main.tsx
+// client/src/App.tsx
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import ErrorBoundary from './components/ErrorBoundary';
-import './i18n/i18n';
-import './index.css'; // ✅ CSS global, souvent Tailwind ou équivalent
 
-const rootElement = document.getElementById('root');
-
-if (!rootElement) {
-  throw new Error('Élément root introuvable. Assurez-vous que votre fichier HTML contient un div avec id="root".');
+function App() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 text-center">
+      <h1 className="text-3xl font-bold text-gray-800">
+        Bienvenue sur MyFitHero V4 🚀
+      </h1>
+    </div>
+  );
 }
 
-const root = createRoot(rootElement);
-
-root.render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </React.StrictMode>
-);
+export default App;
