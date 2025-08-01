@@ -2261,8 +2261,7 @@ export type {
 
 // Export des utilitaires
 export {
-  supabase,
-  pwaConfig,
+   pwaConfig,
   AppErrorBoundary,
   AppLoadingSpinner,
   AuthGuard
