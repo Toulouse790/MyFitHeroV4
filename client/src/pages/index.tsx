@@ -18,8 +18,7 @@ import { Router, Route, useLocation, useRouter } from 'wouter';
 import { createClient } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
+import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
 
 // ====================================================================
 // Configuration et Types de Base
@@ -1360,427 +1359,68 @@ const useOfflineSync = () => {
 };
 
 // ====================================================================
-// Composants Lazy-Loaded pour l'Optimisation des Performances
+// Composants Lazy-loaded pour les pages principales
 // ====================================================================
 
 // Pages principales
-const OnboardingPage = lazy(() => import('@/pages/OnboardingPage'));
-const DashboardPage = lazy(() => import('@/pages/DashboardPage'));
-const WorkoutPage = lazy(() => import('@/pages/WorkoutPage'));
-const NutritionPage = lazy(() => import('@/pages/NutritionPage'));
-const SleepPage = lazy(() => import('@/pages/SleepPage'));
-const HydrationPage = lazy(() => import('@/pages/HydrationPage'));
-const WellnessPage = lazy(() => import('@/pages/WellnessPage'));
-const SocialPage = lazy(() => import('@/pages/SocialPage'));
-const AnalyticsPage = lazy(() => import('@/pages/AnalyticsPage'));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const OnboardingPage = lazy(() => import('./ProfileComplete'));
+const DashboardPage = lazy(() => import('./Admin'));
+const WorkoutPage = lazy(() => import('./WorkoutPage'));
+const NutritionPage = lazy(() => import('./Nutrition'));
+const SleepPage = lazy(() => import('./Sleep'));
+const HydrationPage = lazy(() => import('./Hydration'));
+const WellnessPage = lazy(() => import('./RecoveryPage').then(m => ({ default: m.RecoveryPage })));
+const SocialPage = lazy(() => import('./Social'));
+const AnalyticsPage = lazy(() => import('./Analytics'));
+const SettingsPage = lazy(() => import('./settings'));
+const ProfilePage = lazy(() => import('./ProfilePage'));
+const NotFoundPage = lazy(() => import('./NotFound'));
+
 
 // Composants spécialisés
-const USOnboardingFlow = lazy(() => import('@/components/onboarding/USOnboardingFlow'));
-const ConversationalChat = lazy(() => import('@/components/ai/ConversationalChat'));
-const WorkoutTracker = lazy(() => import('@/components/fitness/WorkoutTracker'));
-const USNutritionTracker = lazy(() => import('@/components/nutrition/USNutritionTracker'));
-const SleepAnalyzer = lazy(() => import('@/components/sleep/SleepAnalyzer'));
-const HydrationReminder = lazy(() => import('@/components/hydration/HydrationReminder'));
-const MoodTracker = lazy(() => import('@/components/wellness/MoodTracker'));
-const SocialFeed = lazy(() => import('@/components/social/SocialFeed'));
-const ChallengeBoard = lazy(() => import('@/components/social/ChallengeBoard'));
-const ProgressCharts = lazy(() => import('@/components/analytics/ProgressCharts'));
+const USOnboardingFlow = lazy(() => import('../components/USMarketOnboarding').then(m => ({ default: m.USMarketOnboarding })));
+const ConversationalChat = lazy(() => import('../components/AIIntelligence').then(m => ({ default: m.AIIntelligence })));
+const WorkoutTracker = lazy(() => import('../components/WorkoutTimer').then(m => ({ default: m.WorkoutTimer })));
+const USNutritionTracker = lazy(() => import('../components/USMarketDashboard').then(m => ({ default: m.USMarketDashboard })));
+const SleepAnalyzer = lazy(() => import('../components/SmartHealthDashboard').then(m => ({ default: m.SmartHealthDashboard })));
+const HydrationReminder = lazy(() => import('../components/PWAControls').then(m => ({ default: m.PWAControls })));
+const MoodTracker = lazy(() => import('../components/DailyCheckIn').then(m => ({ default: m.DailyCheckIn })));
+const SocialFeed = lazy(() => import('../components/SocialDashboard').then(m => ({ default: m.SocialDashboard })));
+const ChallengeBoard = lazy(() => import('../components/FriendsComparison').then(m => ({ default: m.FriendsComparison })));
+const UserProfile = lazy(() => import('../components/UserProfileTabs').then(m => ({ default: m.UserProfileTabs })));
+// DebugPage n'existe pas, nous le retirons pour l'instant
+// const DebugPage = lazy(() => import('./Debug'));
 
 // ====================================================================
-// Composant Principal d'Index avec Error Boundary Avancé
+// Définition des Routes de l'Application
 // ====================================================================
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-  errorInfo?: ErrorInfo;
-  errorId: string;
-}
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-}
-
-class AppErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { 
-      hasError: false,
-      errorId: ''
-    };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { 
-      hasError: true, 
-      error,
-      errorId: `mfh_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    this.setState({ errorInfo });
-    
-    // Log error avec détails du contexte US
-    const errorReport = {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      errorId: this.state.errorId,
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      userId: useAppStore.getState().user?.id,
-      appVersion: 'MyFitHero-V4-1.0.0',
-      market: 'US'
-    };
-    
-    // En développement, log dans la console
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🚨 MyFitHero V4 Error Boundary');
-      console.error('Error:', error);
-      console.error('Error Info:', errorInfo);
-      console.error('Full Report:', errorReport);
-      console.groupEnd();
-    }
-    
-    // En production, envoyer à un service de monitoring
-    if (process.env.NODE_ENV === 'production') {
-      this.reportError(errorReport);
-    }
-    
-    // Callback optionnel
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
-  }
-
-  private async reportError(errorReport: any) {
-    try {
-      await fetch('/api/errors/report', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(errorReport)
-      });
-    } catch (err) {
-      console.error('Failed to report error:', err);
-    }
-  }
-
-  private handleRetry = () => {
-    this.setState({ 
-      hasError: false, 
-      error: undefined, 
-      errorInfo: undefined,
-      errorId: ''
-    });
-  };
-
-  private handleReload = () => {
-    window.location.reload();
-  };
-
-  private handleReportIssue = () => {
-    const subject = encodeURIComponent(`MyFitHero V4 Error Report - ${this.state.errorId}`);
-    const body = encodeURIComponent(`
-Error ID: ${this.state.errorId}
-Error: ${this.state.error?.message}
-URL: ${window.location.href}
-Timestamp: ${new Date().toISOString()}
-
-Please describe what you were doing when this error occurred:
-[Your description here]
-    `);
-    
-    window.open(`mailto:support@myfithero.com?subject=${subject}&body=${body}`);
-  };
-
-  render() {
-    if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 p-4">
-          <div className="text-center max-w-2xl mx-auto">
-            <div className="text-8xl mb-6 animate-bounce">💥</div>
-            
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              Oops! Something went wrong
-            </h1>
-            
-            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-              Don't worry, your fitness journey continues! Our technical team has been automatically notified.
-            </p>
-            
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-lg">
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>Error ID:</strong> {this.state.errorId}
-              </p>
-              <p className="text-sm text-gray-600 mb-4">
-                <strong>Time:</strong> {new Date().toLocaleString('en-US')}
-              </p>
-              
-              {process.env.NODE_ENV === 'development' && this.state.error && (
-                <details className="text-left mb-4">
-                  <summary className="font-semibold text-gray-700 cursor-pointer mb-2">
-                    Technical Details (Development Mode)
-                  </summary>
-                  <pre className="text-xs text-red-600 overflow-auto max-h-32 bg-red-50 p-3 rounded">
-                    {this.state.error.toString()}
-                    {this.state.errorInfo?.componentStack}
-                  </pre>
-                </details>
-              )}
-            </div>
-            
-            <div className="space-y-4">
-              <button 
-                onClick={this.handleRetry}
-                className="block w-full px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              >
-                🔄 Try Again
-              </button>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button 
-                  onClick={this.handleReload}
-                  className="px-6 py-3 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-                >
-                  🏠 Reload App
-                </button>
-                
-                <button 
-                  onClick={this.handleReportIssue}
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-                >
-                  📧 Report Issue
-                </button>
-              </div>
-            </div>
-            
-            <p className="text-xs text-gray-400 mt-8">
-              MyFitHero V4 - Your AI-Powered Fitness Companion 🇺🇸
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-// ====================================================================
-// Composant de Chargement Sophistiqué avec Animations
-// ====================================================================
-
-const AppLoadingSpinner: React.FC<{ 
-  message?: string; 
-  progress?: number;
-  showProgress?: boolean;
-}> = React.memo(({ 
-  message = "Loading MyFitHero V4...", 
-  progress = 0,
-  showProgress = false 
-}) => {
-  const [loadingMessages] = useState([
-    "Preparing your personalized experience...",
-    "Loading US fitness database...",
-    "Calibrating AI recommendations...",
-    "Syncing your progress...",
-    "Almost ready to crush your goals!"
-  ]);
-  
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentMessageIndex(prev => (prev + 1) % loadingMessages.length);
-    }, 2000);
-    
-    return () => clearInterval(interval);
-  }, [loadingMessages.length]);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="text-center max-w-md mx-auto p-8">
-        {/* Logo animé */}
-        <div className="relative mb-8">
-          <div className="w-20 h-20 mx-auto mb-4">
-            <div className="w-full h-full border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <div 
-              className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin absolute top-2 left-2 opacity-60" 
-              style={{animationDelay: '0.2s', animationDuration: '0.8s'}}
-            />
-            <div 
-              className="w-12 h-12 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin absolute top-4 left-4 opacity-40" 
-              style={{animationDelay: '0.4s', animationDuration: '0.6s'}}
-            />
-          </div>
-          
-          {/* Icône centrale */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl animate-pulse">🚀</span>
-          </div>
-        </div>
-        
-        {/* Titre */}
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
-          MyFitHero V4
-        </h2>
-        
-        {/* Message de chargement rotatif */}
-        <p className="text-gray-600 mb-6 h-6 transition-opacity duration-500">
-          {loadingMessages[currentMessageIndex]}
-        </p>
-        
-        {/* Barre de progression (optionnelle) */}
-        {showProgress && (
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-            <div 
-              className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            />
-          </div>
-        )}
-        
-        {/* Indicateurs de fonctionnalités */}
-        <div className="grid grid-cols-3 gap-4 mt-8 text-xs text-gray-500">
-          <div className="flex flex-col items-center">
-            <span className="text-lg mb-1">💪</span>
-            <span>AI Workouts</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-lg mb-1">🇺🇸</span>
-            <span>US Market</span>
-          </div>
-          <div className="flex flex-col items-center">
-            <span className="text-lg mb-1">📱</span>
-            <span>PWA Ready</span>
-          </div>
-        </div>
-        
-        <p className="text-xs text-gray-400 mt-6">
-          Built for American fitness enthusiasts
-        </p>
-      </div>
-    </div>
-  );
-});
-
-AppLoadingSpinner.displayName = 'AppLoadingSpinner';
-
-// ====================================================================
-// Composant Page 404 Thématique Fitness
-// ====================================================================
-
-const NotFoundPage: React.FC = React.memo(() => {
-  const [location] = useLocation();
-  const router = useRouter();
-  const [suggestions] = useState([
-    { path: '/dashboard', label: '🏠 Dashboard', description: 'Your fitness home base' },
-    { path: '/workouts', label: '💪 Workouts', description: 'Track your training' },
-    { path: '/nutrition', label: '🥗 Nutrition', description: 'US food database' },
-    { path: '/social', label: '👥 Community', description: 'Connect with friends' }
-  ]);
-  
-  const handleGoHome = () => router.push('/dashboard');
-  const handleGoBack = () => window.history.back();
-  const handleSuggestion = (path: string) => router.push(path);
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 p-4">
-      <div className="text-center max-w-2xl mx-auto">
-        {/* Animation d'erreur fitness */}
-        <div className="text-8xl mb-6 animate-bounce">🏃‍♂️💨</div>
-        
-        <h1 className="text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-pink-600 mb-4">
-          404
-        </h1>
-        
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          This page went for a run!
-        </h2>
-        
-        <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-          Looks like this page is doing cardio somewhere else. 
-          But don't worry, your <strong>MyFitHero V4</strong> journey continues!
-        </p>
-        
-        {/* URL demandée */}
-        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 mb-8 shadow-lg">
-          <p className="text-sm text-gray-600 mb-2">
-            <strong>Page you were looking for:</strong>
-          </p>
-          <code className="bg-gray-200 px-3 py-2 rounded-lg text-sm font-mono text-gray-800 break-all">
-            {location}
-          </code>
-        </div>
-        
-        {/* Suggestions de pages */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">
-            Where would you like to go?
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {suggestions.map((suggestion) => (
-              <button
-                key={suggestion.path}
-                onClick={() => handleSuggestion(suggestion.path)}
-                className="p-4 bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-left border border-white/40"
-              >
-                <div className="font-semibold text-gray-800 mb-1">
-                  {suggestion.label}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {suggestion.description}
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Actions principales */}
-        <div className="space-y-4">
-          <button 
-            onClick={handleGoHome}
-            className="block w-full px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-          >
-            🏠 Back to Dashboard
-          </button>
-          
-          <button 
-            onClick={handleGoBack}
-            className="block w-full px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 hover:shadow-lg transform hover:scale-105 transition-all duration-300"
-          >
-            ← Previous Page
-          </button>
-        </div>
-        
-        {/* Message encourageant */}
-        <div className="mt-8 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
-          <p className="text-sm text-green-700 font-medium">
-            💡 <strong>Pro Tip:</strong> Use the navigation menu to explore all MyFitHero V4 features!
-          </p>
-        </div>
-        
-        <p className="text-xs text-gray-400 mt-6">
-          MyFitHero V4 - Your AI-Powered Fitness Companion 🇺🇸
-        </p>
-      </div>
-    </div>
-  );
-});
-
-NotFoundPage.displayName = 'NotFoundPage';
+const routes = {
+  '/': OnboardingPage,
+  '/dashboard': DashboardPage,
+  '/workout': WorkoutPage,
+  '/nutrition': NutritionPage,
+  '/sleep': SleepPage,
+  '/hydration': HydrationPage,
+  '/wellness': WellnessPage,
+  '/social': SocialPage,
+  '/analytics': AnalyticsPage,
+  '/settings': SettingsPage,
+  '/profile': ProfilePage,
+  '/us-onboarding': USOnboardingFlow,
+  '/chat': ConversationalChat,
+  '/workout-tracker': WorkoutTracker,
+  '/us-nutrition': USNutritionTracker,
+  '/sleep-analyzer': SleepAnalyzer,
+  '/hydration-reminder': HydrationReminder,
+  '/mood-tracker': MoodTracker,
+  '/social-feed': SocialFeed,
+  '/challenges': ChallengeBoard,
+  '/progress': ProgressCharts,
+  '/user/:id': UserProfile,
+  '/admin': AdminDashboard,
+  '/debug': DebugPage,
+};
 
 // ====================================================================
 // Configuration des Routes de l'Application
@@ -1796,24 +1436,24 @@ interface RouteConfig {
   description?: string;
 }
 
-const routes: RouteConfig[] = [
+const appRoutes: RouteConfig[] = [
   // Routes publiques
   {
     path: '/',
-    component: lazy(() => import('@/pages/LandingPage')),
+    component: lazy(() => import('./Landing')),
     exact: true,
     title: 'MyFitHero V4 - AI-Powered Fitness for Americans',
     description: 'The ultimate US-ready fitness & wellness app with AI coaching, nutrition tracking, and social features.'
   },
   {
     path: '/login',
-    component: lazy(() => import('@/pages/AuthPage')),
+    component: lazy(() => import('./Auth')),
     title: 'Sign In - MyFitHero V4',
     description: 'Sign in to your MyFitHero V4 account and continue your fitness journey.'
   },
   {
     path: '/register',
-    component: lazy(() => import('@/pages/AuthPage')),
+    component: lazy(() => import('./Auth')),
     title: 'Create Account - MyFitHero V4',
     description: 'Join thousands of Americans achieving their fitness goals with MyFitHero V4.'
   },
@@ -1853,7 +1493,7 @@ const routes: RouteConfig[] = [
   },
   {
     path: '/workouts/:id',
-    component: lazy(() => import('@/pages/WorkoutDetailPage')),
+    component: lazy(() => import('./WorkoutDetail')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Workout Details - MyFitHero V4'
@@ -1900,7 +1540,7 @@ const routes: RouteConfig[] = [
   },
   {
     path: '/social/challenges',
-    component: lazy(() => import('@/pages/ChallengesPage')),
+    component: lazy(() => import('./Challenges')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Fitness Challenges - MyFitHero V4',
@@ -1932,7 +1572,7 @@ const routes: RouteConfig[] = [
   // Routes spécialisées
   {
     path: '/ai-coach',
-    component: lazy(() => import('@/pages/AICoachPage')),
+    component: lazy(() => import('./AICoach')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'AI Coach - MyFitHero V4',
@@ -1940,14 +1580,14 @@ const routes: RouteConfig[] = [
   },
   {
     path: '/exercises',
-    component: lazy(() => import('@/pages/ExercisesPage')),
+    component: lazy(() => import('./Exercises')),
     requiresAuth: true,
     title: 'Exercise Library - MyFitHero V4',
     description: 'Comprehensive exercise library with 450+ video-guided workouts.'
   },
   {
     path: '/exercises/:id',
-    component: lazy(() => import('@/pages/ExerciseDetailPage')),
+    component: lazy(() => import('./ExerciseDetail')),
     requiresAuth: true,
     title: 'Exercise Details - MyFitHero V4'
   },
@@ -1955,19 +1595,19 @@ const routes: RouteConfig[] = [
   // Routes utilitaires
   {
     path: '/privacy',
-    component: lazy(() => import('@/pages/PrivacyPage')),
+    component: lazy(() => import('./Privacy')),
     title: 'Privacy Policy - MyFitHero V4',
     description: 'Your privacy matters. Learn how we protect your fitness data.'
   },
   {
     path: '/terms',
-    component: lazy(() => import('@/pages/TermsPage')),
+    component: lazy(() => import('./Terms')),
     title: 'Terms of Service - MyFitHero V4',
     description: 'Terms and conditions for using MyFitHero V4 fitness application.'
   },
   {
     path: '/support',
-    component: lazy(() => import('@/pages/SupportPage')),
+    component: lazy(() => import('./Support')),
     title: 'Support - MyFitHero V4',
     description: 'Get help and support for your MyFitHero V4 experience.'
   }
@@ -2107,13 +1747,12 @@ const MyFitHeroV4Index: React.FC = () => {
         // Configurer les métriques de performance
         if (process.env.NODE_ENV === 'production') {
           // Web Vitals et autres métriques
-          const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
           
-          getCLS(console.log);
-          getFID(console.log);
-          getFCP(console.log);
-          getLCP(console.log);
-          getTTFB(console.log);
+          onCLS(console.log);
+          onFID(console.log);
+          onFCP(console.log);
+          onLCP(console.log);
+          onTTFB(console.log);
         }
 
         setIsInitialized(true);
@@ -2163,7 +1802,7 @@ const MyFitHeroV4Index: React.FC = () => {
         <Suspense fallback={<AppLoadingSpinner />}>
           <Router>
             {/* Routes principales */}
-            {routes.map(({ path, component: Component, requiresAuth, requiresOnboarding }) => (
+            {appRoutes.map(({ path, component: Component, requiresAuth, requiresOnboarding }) => (
               <Route key={path} path={path}>
                 <AuthGuard requiresAuth={requiresAuth} requiresOnboarding={requiresOnboarding}>
                   <Component />
@@ -2175,38 +1814,19 @@ const MyFitHeroV4Index: React.FC = () => {
             <Route path="/debug" nest>
               {process.env.NODE_ENV === 'development' && (
                 <Route>
-                  {() => lazy(() => import('@/pages/DebugPage'))}
+                  <div />
                 </Route>
               )}
             </Route>
             
             {/* Route catch-all pour 404 */}
             <Route>
-              {() => {
-                const knownPaths = routes.map(r => r.path);
-                const currentPath = window.location.pathname;
-                
-                // Ne pas afficher 404 pour les routes connues
-                if (knownPaths.some(path => 
-                  currentPath === path || 
-                  (path.includes(':') && new RegExp(path.replace(/:[^/]+/g, '[^/]+')).test(currentPath))
-                )) {
-                  return null;
-                }
-                
-                return <NotFoundPage />;
-              }}
+              <NotFoundPage />
             </Route>
           </Router>
         </Suspense>
         
         {/* Composants Analytics et Monitoring */}
-        {process.env.NODE_ENV === 'production' && (
-          <>
-            <Analytics />
-            <SpeedInsights />
-          </>
-        )}
         
         {/* Informations de version (visible en développement) */}
         {process.env.NODE_ENV === 'development' && (

@@ -1,10 +1,11 @@
 // src/data/packs.ts
 export type ModuleId =
   | 'sport'
-  | 'musculation'
+  | 'strength'
   | 'nutrition'
   | 'hydration'
-  | 'sleep';
+  | 'sleep'
+  | 'wellness';
 
 export interface Pack {
   id: string;
@@ -18,13 +19,13 @@ export const PACKS: Pack[] = [
     id: 'sport_full',
     name: 'Sport Complet',
     // 👇 Ajout de "sleep"
-    modules: ['sport', 'musculation', 'nutrition', 'hydration', 'sleep'],
+    modules: ['sport', 'strength', 'nutrition', 'hydration', 'sleep'],
     description: 'Programme global : entraînement, récupération et alimentation.',
   },
   {
     id: 'health',
     name: 'Forme & Santé',
-    modules: ['musculation', 'nutrition', 'sleep'],
+    modules: ['strength', 'nutrition', 'sleep'],
     description: 'Remise en forme douce et hygiène de vie.',
   },
   {

@@ -1,5 +1,5 @@
 // client/src/data/onboardingData.ts
-import { OnboardingModule, SportOption } from '@/types/onboarding';
+import { OnboardingModule, SportOption } from '@/types/onboarding-types';
 
 export const AVAILABLE_MODULES: OnboardingModule[] = [
   {
@@ -88,7 +88,7 @@ export const MAIN_OBJECTIVES = [
     name: 'Performance Athlétique',
     description: 'Améliorer mes performances sportives et compétitives',
     icon: '🏆',
-    modules: ['sport', 'strength', 'nutrition', 'sleep'],
+    recommended_modules: ['sport', 'strength', 'nutrition', 'sleep'],
     priority: 1
   },
   {
@@ -96,7 +96,7 @@ export const MAIN_OBJECTIVES = [
     name: 'Santé & Bien-être',
     description: 'Maintenir une santé optimale et un bien-être général',
     icon: '❤️',
-    modules: ['nutrition', 'sleep', 'hydration', 'wellness'],
+    recommended_modules: ['nutrition', 'sleep', 'hydration', 'wellness'],
     priority: 2
   },
   {
@@ -104,7 +104,7 @@ export const MAIN_OBJECTIVES = [
     name: 'Transformation Corporelle',
     description: 'Perdre du poids, prendre du muscle ou recomposer mon corps',
     icon: '⚖️',
-    modules: ['strength', 'nutrition', 'hydration'],
+    recommended_modules: ['strength', 'nutrition', 'hydration'],
     priority: 3
   },
   {
@@ -112,7 +112,7 @@ export const MAIN_OBJECTIVES = [
     name: 'Énergie & Récupération',
     description: 'Améliorer mon niveau d\'énergie et ma capacité de récupération',
     icon: '⚡',
-    modules: ['sleep', 'nutrition', 'hydration', 'wellness'],
+    recommended_modules: ['sleep', 'nutrition', 'hydration', 'wellness'],
     priority: 4
   },
   {
@@ -120,7 +120,7 @@ export const MAIN_OBJECTIVES = [
     name: 'Transformation Complète',
     description: 'Optimiser tous les aspects de ma vie et de ma santé',
     icon: '🌟',
-    modules: ['sport', 'strength', 'nutrition', 'sleep', 'hydration', 'wellness'],
+    recommended_modules: ['sport', 'strength', 'nutrition', 'sleep', 'hydration', 'wellness'],
     priority: 5
   }
 ];

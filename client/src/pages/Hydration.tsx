@@ -1,4 +1,3 @@
-client/src/components/Hydration.tsx
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -29,7 +28,7 @@ import {
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import AIIntelligence from '@/components/AIIntelligence';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { UniformHeader } from '@/components/UniformHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,12 +38,15 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Database } from '../types/database';
 
 // --- TYPES & INTERFACES ---
+type DrinkType = Database['public']['Tables']['hydration_logs']['Row']['drink_type'];
+type HydrationContext = Database['public']['Tables']['hydration_logs']['Row']['hydration_context'];
 type SportCategory = 'endurance' | 'contact' | 'court' | 'strength';
 
 interface RecommendedDrink {
-  type: string;
+  type: DrinkType;
   name: string;
   icon: React.ElementType;
   amount: number;
@@ -64,13 +66,8 @@ interface SportHydrationConfig {
   }[];
 }
 
-interface HydrationLog {
-  id: string;
-  amount_ml: number;
-  drink_type: string;
-  logged_at: string;
-  hydration_context?: string;
-}
+type HydrationLog = Database['public']['Tables']['hydration_logs']['Row'];
+type DailyStats = Database['public']['Tables']['daily_stats']['Row'];
 
 // --- CONFIGURATION HYDRATATION PAR SPORT ---
 const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
@@ -201,6 +198,7 @@ const Hydration: React.FC = () => {
   const [selectedAmount, setSelectedAmount] = useState(250);
   const [isLoading, setIsLoading] = useState(true);
   const [dailyLogs, setDailyLogs] = useState<HydrationLog[]>([]);
+  const [dailyStats, setDailyStats] = useState<DailyStats | null>(null);
   const [lastDrinkTime, setLastDrinkTime] = useState<Date | null>(null);
   const [showReminders, setShowReminders] = useState(false);
   const [showCoachingModal, setShowCoachingModal] = useState(false);
@@ -238,7 +236,7 @@ const Hydration: React.FC = () => {
 
   // --- CALCUL OBJECTIF PERSONNALISÉ ---
   const personalizedGoalMl = useMemo(() => {
-    const weight = appStoreUser?.weight_kg ?? 70;
+    const weight = appStoreUser?.weight ?? 70;
     const baseGoalMl = weight * 35;
     
     let adjustments = 0;
@@ -262,8 +260,8 @@ const Hydration: React.FC = () => {
     }
     
     const activityLevel = appStoreUser?.activity_level;
-    if (activityLevel === 'very_active') adjustments += 500;
-    else if (activityLevel === 'active') adjustments += 300;
+    if (activityLevel === 'extra_active') adjustments += 500;
+    else if (activityLevel === 'moderately_active') adjustments += 300;
     
     return Math.round(baseGoalMl + adjustments);
   }, [appStoreUser, sportConfig.goalModifierMl]);
@@ -275,40 +273,58 @@ const Hydration: React.FC = () => {
     try {
       setIsLoading(true);
       
-      const { data: dailyStats, error: statsError } = await supabase
+      const today = new Date().toISOString().split('T')[0];
+
+      const { data: statsData, error: statsError } = await supabase
         .from('daily_stats')
-        .select('water_intake_ml')
+        .select('*')
         .eq('user_id', appStoreUser.id)
-        .eq('stat_date', todayDate)
+        .eq('stat_date', today)
         .single();
 
-      const { data: logs, error: logsError } = await supabase
+      const { data: logsData, error: logsError } = await supabase
         .from('hydration_logs')
         .select('*')
         .eq('user_id', appStoreUser.id)
-        .eq('log_date', todayDate)
+        .eq('log_date', today)
         .order('logged_at', { ascending: false });
 
-      if (!statsError && dailyStats) {
-        setCurrentMl(dailyStats.water_intake_ml || 0);
+      if (statsError && statsError.code !== 'PGRST116') {
+        console.error('Error fetching daily stats:', statsError);
+        toast({ title: "Erreur de chargement des stats", variant: "destructive" });
+      }
+      
+      if (logsError) {
+        console.error('Error fetching hydration logs:', logsError);
+        toast({ title: "Erreur de chargement des logs", variant: "destructive" });
       }
 
-      if (!logsError && logs) {
-        setDailyLogs(logs);
-        if (logs.length > 0) {
-          setLastDrinkTime(new Date(logs[0].logged_at));
-        }
+      const currentStats = statsData as DailyStats | null;
+      const currentLogs = logsData as HydrationLog[] | null;
+
+      setDailyStats(currentStats);
+      setDailyLogs(currentLogs || []);
+
+      if (currentStats) {
+        setCurrentMl(currentStats.water_intake_ml ?? 0);
+      } else {
+        setCurrentMl(0);
+      }
+
+      if (currentLogs && currentLogs.length > 0) {
+        setLastDrinkTime(new Date(currentLogs[0].logged_at));
       }
 
     } catch (error) {
       console.error('Erreur chargement hydratation:', error);
+      toast({ title: "Erreur inattendue", description: "Impossible de charger les données d'hydratation.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
-  }, [appStoreUser?.id, todayDate]);
+  }, [appStoreUser?.id, toast]);
 
   // --- HANDLERS ---
-  const handleAddWater = useCallback(async (amount: number, type: string = 'water', context: string = 'normal') => {
+  const handleAddWater = useCallback(async (amount: number, type: DrinkType = 'water', context: HydrationContext = 'normal') => {
     if (!appStoreUser?.id) return;
 
     try {
@@ -340,8 +356,7 @@ const Hydration: React.FC = () => {
           hydration_goal_ml: personalizedGoalMl,
           updated_at: now.toISOString()
         }, {
-          onConflict: 'user_id,stat_date',
-          ignoreDuplicates: false
+          onConflict: 'user_id,stat_date'
         });
 
       if (statsError) throw statsError;
@@ -395,7 +410,7 @@ const Hydration: React.FC = () => {
       const { error: statsError } = await supabase
         .from('daily_stats')
         .upsert({
-          user_id: appStoreUser?.id,
+          user_id: appStoreUser?.id!,
           stat_date: todayDate,
           water_intake_ml: newTotal,
           hydration_goal_ml: personalizedGoalMl,
@@ -534,13 +549,13 @@ const Hydration: React.FC = () => {
                     <div className="space-y-3 text-sm">
                       <p>
                         En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser?.age || '?'} ans 
-                        ({appStoreUser?.weight_kg || '?'}kg) pratiquant le {appStoreUser?.sport || 'sport'}, 
+                        ({appStoreUser?.weight || '?'}kg) pratiquant le {appStoreUser?.sport || 'sport'}, 
                         votre objectif de {goalHydrationL.toFixed(1)}L est adapté à vos besoins.
                       </p>
                       <div className="space-y-1 text-xs text-gray-600">
-                        <p>• Base: {Math.round((appStoreUser?.weight_kg || 70) * 35)}ml (35ml/kg)</p>
+                        <p>• Base: {Math.round((appStoreUser?.weight || 70) * 35)}ml (35ml/kg)</p>
                         <p>• Bonus sport {userSportCategory}: +{sportConfig.goalModifierMl}ml</p>
-                        <p>• Ajustements profil: +{personalizedGoalMl - Math.round((appStoreUser?.weight_kg || 70) * 35) - sportConfig.goalModifierMl}ml</p>
+                        <p>• Ajustements profil: +{personalizedGoalMl - Math.round((appStoreUser?.weight || 70) * 35) - sportConfig.goalModifierMl}ml</p>
                       </div>
                     </div>
                   </DialogContent>
