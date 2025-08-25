@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Target,
   Award,
@@ -42,11 +42,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar'>('line');
 
-  useEffect(() => {
-    loadAnalyticsData();
-  }, [appStoreUser?.id, selectedPeriod]);
-
-  const loadAnalyticsData = async () => {
+  const loadAnalyticsData = useCallback(async () => {
     if (!appStoreUser?.id) return;
 
     try {
@@ -72,9 +68,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [appStoreUser?.id, selectedPeriod]);
 
-  const handleExportData = () => {
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [loadAnalyticsData]);
+
+  const handleExportData = useCallback(() => {
     const exportData = {
       period: selectedPeriod,
       pillars: pillarProgress,
@@ -90,16 +90,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     a.download = `analytics-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, [selectedPeriod, pillarProgress, performanceMetrics, insights]);
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = useCallback((priority: string) => {
     switch (priority) {
       case 'high': return '#ef4444';
       case 'medium': return '#f59e0b';
       case 'low': return '#10b981';
       default: return adaptiveColors.text;
     }
-  };
+  }, [adaptiveColors.text]);
 
   if (loading) {
     return (
