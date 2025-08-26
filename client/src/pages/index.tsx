@@ -1378,18 +1378,21 @@ const NotFoundPage = lazy(() => import('./NotFound'));
 
 
 // Composants spécialisés
-const USOnboardingFlow = lazy(() => import('../components/USMarketOnboarding').then(m => ({ default: m.USMarketOnboarding })));
-const ConversationalChat = lazy(() => import('../components/AIIntelligence').then(m => ({ default: m.AIIntelligence })));
-const WorkoutTracker = lazy(() => import('../components/WorkoutTimer').then(m => ({ default: m.WorkoutTimer })));
-const USNutritionTracker = lazy(() => import('../components/USMarketDashboard').then(m => ({ default: m.USMarketDashboard })));
-const SleepAnalyzer = lazy(() => import('../components/SmartHealthDashboard').then(m => ({ default: m.SmartHealthDashboard })));
-const HydrationReminder = lazy(() => import('../components/PWAControls').then(m => ({ default: m.PWAControls })));
-const MoodTracker = lazy(() => import('../components/DailyCheckIn').then(m => ({ default: m.DailyCheckIn })));
-const SocialFeed = lazy(() => import('../components/SocialDashboard').then(m => ({ default: m.SocialDashboard })));
-const ChallengeBoard = lazy(() => import('../components/FriendsComparison').then(m => ({ default: m.FriendsComparison })));
-const UserProfile = lazy(() => import('../components/UserProfileTabs').then(m => ({ default: m.UserProfileTabs })));
-// DebugPage n'existe pas, nous le retirons pour l'instant
-// const DebugPage = lazy(() => import('./Debug'));
+const USOnboardingFlow = lazy(() => import('../components/USMarketOnboarding'));
+const ConversationalChat = lazy(() => import('../components/AIIntelligence'));
+const WorkoutTracker = lazy(() => import('../components/WorkoutTimer'));
+const USNutritionTracker = lazy(() => import('../components/USMarketDashboard'));
+const SleepAnalyzer = lazy(() => import('../components/SmartHealthDashboard'));
+const HydrationReminder = lazy(() => import('../components/PWAControls'));
+const MoodTracker = lazy(() => import('../components/DailyCheckIn'));
+const SocialFeed = lazy(() => import('../components/SocialDashboard'));
+const ChallengeBoard = lazy(() => import('../components/FriendsComparison'));
+const UserProfile = lazy(() => import('../components/UserProfileTabs'));
+const ProgressCharts = lazy(() => import('../components/ProgressCharts'));
+const AdminDashboard = lazy(() => import('../components/AdminDashboard'));
+const DebugPage = lazy(() => import('../components/DebugPage'));
+const AppLoadingSpinner = lazy(() => import('../components/AppLoadingSpinner'));
+const AppErrorBoundary = lazy(() => import('../components/AppErrorBoundary'));
 
 // ====================================================================
 // Définition des Routes de l'Application
@@ -1440,20 +1443,20 @@ const appRoutes: RouteConfig[] = [
   // Routes publiques
   {
     path: '/',
-    component: lazy(() => import('./Landing')),
+    component: lazy(() => import('./LandingPage')),
     exact: true,
     title: 'MyFitHero V4 - AI-Powered Fitness for Americans',
     description: 'The ultimate US-ready fitness & wellness app with AI coaching, nutrition tracking, and social features.'
   },
   {
     path: '/login',
-    component: lazy(() => import('./Auth')),
+    component: lazy(() => import('./AuthPage')),
     title: 'Sign In - MyFitHero V4',
     description: 'Sign in to your MyFitHero V4 account and continue your fitness journey.'
   },
   {
     path: '/register',
-    component: lazy(() => import('./Auth')),
+    component: lazy(() => import('./AuthPage')),
     title: 'Create Account - MyFitHero V4',
     description: 'Join thousands of Americans achieving their fitness goals with MyFitHero V4.'
   },
@@ -1493,7 +1496,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/workouts/:id',
-    component: lazy(() => import('./WorkoutDetail')),
+    component: lazy(() => import('./WorkoutDetailPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Workout Details - MyFitHero V4'
@@ -1540,7 +1543,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/social/challenges',
-    component: lazy(() => import('./Challenges')),
+    component: lazy(() => import('./ChallengesPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Fitness Challenges - MyFitHero V4',
@@ -1572,7 +1575,7 @@ const appRoutes: RouteConfig[] = [
   // Routes spécialisées
   {
     path: '/ai-coach',
-    component: lazy(() => import('./AICoach')),
+    component: lazy(() => import('./AICoachPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'AI Coach - MyFitHero V4',
@@ -1580,14 +1583,14 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/exercises',
-    component: lazy(() => import('./Exercises')),
+    component: lazy(() => import('./ExercisesPage')),
     requiresAuth: true,
     title: 'Exercise Library - MyFitHero V4',
     description: 'Comprehensive exercise library with 450+ video-guided workouts.'
   },
   {
     path: '/exercises/:id',
-    component: lazy(() => import('./ExerciseDetail')),
+    component: lazy(() => import('./ExerciseDetailPage')),
     requiresAuth: true,
     title: 'Exercise Details - MyFitHero V4'
   },
@@ -1595,19 +1598,19 @@ const appRoutes: RouteConfig[] = [
   // Routes utilitaires
   {
     path: '/privacy',
-    component: lazy(() => import('./Privacy')),
+    component: lazy(() => import('./PrivacyPage')),
     title: 'Privacy Policy - MyFitHero V4',
     description: 'Your privacy matters. Learn how we protect your fitness data.'
   },
   {
     path: '/terms',
-    component: lazy(() => import('./Terms')),
+    component: lazy(() => import('./TermsPage')),
     title: 'Terms of Service - MyFitHero V4',
     description: 'Terms and conditions for using MyFitHero V4 fitness application.'
   },
   {
     path: '/support',
-    component: lazy(() => import('./Support')),
+    component: lazy(() => import('./SupportPage')),
     title: 'Support - MyFitHero V4',
     description: 'Get help and support for your MyFitHero V4 experience.'
   }

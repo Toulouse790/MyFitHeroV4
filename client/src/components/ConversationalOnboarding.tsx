@@ -29,20 +29,19 @@ import {
   Brain,
   Package
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '../config/supabaseClient';
+import { useToast } from '../hooks/use-toast';
 import { 
   ConversationalStep, 
   OnboardingData,
   ValidationRule,
   QuestionOption
-} from '@/types/conversationalOnboarding';
+} from '../types/conversationalOnboarding';
 import { 
   CONVERSATIONAL_ONBOARDING_FLOW,
   getConditionalNextStep,
   calculateEstimatedTime
-} from '@/data/conversationalFlow';
+} from '../data/conversationalFlow';
 import { 
   AVAILABLE_SPORTS, 
   MAIN_OBJECTIVES, 
@@ -57,20 +56,20 @@ import {
   SEASON_PERIODS,
   TRAINING_AVAILABILITY,
   HEALTH_CONDITIONS
-} from '@/data/onboardingData';
+} from '../data/onboardingData';
 import { 
   SMART_PACKS, 
   getQuestionsForPack, 
   shouldAskQuestion,
   getRecommendedPacks,
   getEstimatedTimeForPack 
-} from '@/data/smartPacks';
+} from '../data/smartPacks';
 import SportSelector from './SportSelector';
 import PositionSelector from './PositionSelector';
 import PersonalInfoForm from './PersonalInfoForm';
 import PackSelector from './PackSelector';
-import { useSports } from '@/services/sportsService';
-import { SportOption } from '@/types/onboarding';
+import { useSports } from '../services/sportsService';
+import { SportOption } from '../types/onboarding';
 
 // Utility function to combine classNames
 const cn = (...classes: (string | boolean | undefined)[]) => {
@@ -106,7 +105,7 @@ export default function ConversationalOnboarding({
   debug = false 
 }: ConversationalOnboardingProps) {
   const { toast } = useToast();
-  const { sports: dynamicSports, isLoading: sportsLoading } = useSports();
+  const { sports: dynamicSports, loading: sportsLoading } = useSports();
 
   // État principal consolidé
   const [state, setState] = useState<OnboardingState>(() => ({
@@ -127,7 +126,14 @@ export default function ConversationalOnboarding({
         backCount: 0,
         errorCount: 0,
         helpViewCount: 0,
-        moduleSpecificSteps: {},
+        moduleSpecificSteps: {
+          sport: { steps: [], completed: [], skipped: [], timeSpent: 0 },
+          strength: { steps: [], completed: [], skipped: [], timeSpent: 0 },
+          nutrition: { steps: [], completed: [], skipped: [], timeSpent: 0 },
+          hydration: { steps: [], completed: [], skipped: [], timeSpent: 0 },
+          sleep: { steps: [], completed: [], skipped: [], timeSpent: 0 },
+          wellness: { steps: [], completed: [], skipped: [], timeSpent: 0 }
+        },
         userPreferences: {
           preferredInputTypes: [],
           skipsTendency: 0,
@@ -448,7 +454,7 @@ export default function ConversationalOnboarding({
         console.log('🟡 [DEBUG] Données préparées pour upsert:', upsertData);
       }
       
-      const { data: insertedData, error } = await supabase
+      const { data: insertedData, error } = await (supabase as any)
         .from('user_profiles')
         .upsert(upsertData, {
           onConflict: 'id'
@@ -522,7 +528,7 @@ export default function ConversationalOnboarding({
 
       // Gestion de la sélection de sport
       if (currentStep.id === 'sport_selection') {
-        const selectedSportData = dynamicSports.find(sport => sport.id === state.currentResponse) || 
+        const selectedSportData = (dynamicSports as any[]).find(sport => sport.id === state.currentResponse) || 
                                  AVAILABLE_SPORTS.find(sport => sport.id === state.currentResponse);
         
         if (selectedSportData) {
@@ -558,13 +564,13 @@ export default function ConversationalOnboarding({
       } else {
         // Logique standard
         if (typeof currentStep.nextStep === 'function') {
-          nextStepId = currentStep.nextStep(state.currentResponse, updatedData);
+          nextStepId = (currentStep.nextStep(state.currentResponse, updatedData) as string);
         } else {
           nextStepId = currentStep.nextStep || 'completion';
         }
         
         // Utilisation de la logique conditionnelle
-        nextStepId = getConditionalNextStep(currentStep.id, state.currentResponse, updatedData) || nextStepId;
+        nextStepId = (getConditionalNextStep(currentStep.id, state.currentResponse, updatedData) as string) || nextStepId;
       }
       
       setState(prev => ({
@@ -662,7 +668,7 @@ export default function ConversationalOnboarding({
       // Marquer l'onboarding comme terminé
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await supabase
+        await (supabase as any)
           .from('user_profiles')
           .update({ onboarding_completed: true })
           .eq('id', user.id);
@@ -796,8 +802,8 @@ export default function ConversationalOnboarding({
             </div>
             {currentStep.scaleLabels && (
               <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                <div>{currentStep.scaleLabels.low}</div>
-                <div className="text-right">{currentStep.scaleLabels.high}</div>
+                <div>{(currentStep.scaleLabels as any).low || ''}</div>
+                <div className="text-right">{(currentStep.scaleLabels as any).high || ''}</div>
               </div>
             )}
           </div>
@@ -920,13 +926,15 @@ export default function ConversationalOnboarding({
       case 'sport_selector':
         return (
           <SportSelector
-            sports={[...AVAILABLE_SPORTS, ...dynamicSports]}
-            selectedSport={state.currentResponse}
-            onSportSelect={(sportId) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: sportId 
-            }))}
-            isLoading={sportsLoading || state.isLoading}
+            {...({
+              sports: [...AVAILABLE_SPORTS, ...(dynamicSports as any[])],
+              selectedSport: state.currentResponse,
+              onSportSelect: (sportId) => setState(prev => ({ 
+                ...prev, 
+                currentResponse: sportId 
+              })),
+              isLoading: sportsLoading || state.isLoading
+            } as any)}
           />
         );
 
@@ -934,37 +942,40 @@ export default function ConversationalOnboarding({
         return (
           <PositionSelector
             sport={state.selectedSport}
-            selectedPosition={state.currentResponse}
-            onPositionSelect={(position) => setState(prev => ({ 
+            selectedPositions={Array.isArray(state.currentResponse) ? state.currentResponse : []}
+            onPositionChange={(positions) => setState(prev => ({ 
               ...prev, 
-              currentResponse: position 
+              currentResponse: positions 
             }))}
-            isLoading={state.isLoading}
           />
         );
 
       case 'personal_info':
         return (
           <PersonalInfoForm
-            data={state.currentResponse || {}}
-            onChange={(data) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: data 
-            }))}
-            isLoading={state.isLoading}
+            {...({
+              data: state.currentResponse || {},
+              onChange: (data) => setState(prev => ({ 
+                ...prev, 
+                currentResponse: data 
+              })),
+              isLoading: state.isLoading
+            } as any)}
           />
         );
 
       case 'pack_selector':
         return (
           <PackSelector
-            packs={SMART_PACKS}
-            selectedPack={state.currentResponse}
-            onPackSelect={(packId) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: packId 
-            }))}
-            isLoading={state.isLoading}
+            {...({
+              packs: SMART_PACKS,
+              selectedPack: state.currentResponse,
+              onPackSelect: (packId) => setState(prev => ({ 
+                ...prev, 
+                currentResponse: packId 
+              })),
+              isLoading: state.isLoading
+            } as any)}
           />
         );
 

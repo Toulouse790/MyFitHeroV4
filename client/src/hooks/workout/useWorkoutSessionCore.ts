@@ -1,7 +1,7 @@
 // hooks/workout/useWorkoutSessionCore.ts
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../use-toast';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import type { WorkoutSession, WorkoutExercise, ExerciseSet } from '@/types/workout';
@@ -86,7 +86,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('workouts')
         .upsert(workoutData);
 
@@ -133,8 +133,8 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         targetDuration,
         status: 'active',
         caloriesBurned: 0,
-        workout_type,
-        difficulty,
+        workout_type: workout_type as "strength" | "cardio" | "flexibility" | "sports" | "other",
+        difficulty: difficulty as "beginner" | "intermediate" | "advanced",
         exercises
       };
 
@@ -149,8 +149,8 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
       });
 
       // Analytics
-      if (typeof window !== 'undefined' && window.gtag) {
-        window.gtag('event', 'workout_started', {
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'workout_started', {
           workout_name: workoutName,
           workout_type,
           user_id: appStoreUser.id
@@ -212,7 +212,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
     // Mettre à jour les stats quotidiennes
     try {
       const today = new Date().toISOString().split('T')[0];
-      await supabase
+      await (supabase as any)
         .from('daily_stats')
         .upsert({
           user_id: appStoreUser.id,
@@ -233,8 +233,8 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
     });
 
     // Analytics
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'workout_completed', {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'workout_completed', {
         duration_minutes: Math.round(durationSec / 60),
         calories_burned: completed.caloriesBurned,
         workout_type: completed.workout_type,
@@ -271,7 +271,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
             .limit(1);
 
           if (!error && data && data.length > 0) {
-            const dbSession = data[0];
+            const dbSession = data[0] as any;
             // Convertir les données DB vers le format WorkoutSession
             const session: WorkoutSession = {
               id: dbSession.id,

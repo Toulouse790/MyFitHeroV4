@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 
 interface PrivacySettings {
   profile_visibility: 'public' | 'friends' | 'private';
@@ -80,7 +80,7 @@ const PrivacyManager: React.FC = () => {
     try {
       const updatedSettings = { ...settings, ...newSettings };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_privacy_settings')
         .upsert({
           user_id: appStoreUser.id,

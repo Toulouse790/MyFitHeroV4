@@ -297,3 +297,5 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
     </div>
   );
 };
+
+export default USMarketDashboard;

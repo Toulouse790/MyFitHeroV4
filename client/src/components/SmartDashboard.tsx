@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLocation } from 'wouter';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';
 import { DailyStats, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';

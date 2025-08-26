@@ -5,7 +5,7 @@ import {
   ChevronRight, Filter, MoreHorizontal, Mail, Phone, MapPin
 } from 'lucide-react';
 import { socialService, UserConnection, SocialStats } from '@/services/socialService';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 
 interface SocialConnectionsProps {

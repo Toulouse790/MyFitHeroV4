@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { aiService, type AIAnalysis, type CoachingResponse, type ContextualRecommendation } from '@/services/aiService';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useAnimateOnMount } from '@/hooks/useAnimations';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 

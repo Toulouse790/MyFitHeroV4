@@ -1,8 +1,8 @@
-# 🏆 MyFitHero V4 – The Ultimate US-Ready Fitness & Wellness App
+# 🏆 MyFitHero – The Ultimate US-Ready Fitness & Wellness App
 
 > **🚀 100% US Market Ready – All 8 Phases Completed!**
 
-**MyFitHero V4** is the first fitness & wellness app designed from the ground up for the American market:  
+**MyFitHero** is the first fitness & wellness app designed from the ground up for the American market:  
 native imperial units, American sports culture, and a conversational onboarding experience that covers every pillar of well-being.
 
 ![React](https://img.shields.io/badge/React-18.2-blue)
@@ -13,7 +13,7 @@ native imperial units, American sports culture, and a conversational onboarding 
 
 ---
 
-## 🇺🇸 Why MyFitHero V4 is Unique
+## 🇺🇸 Why MyFitHero is Unique
 
 - **The only fitness onboarding 100% US-native**: All flows, units, and terminology are American by default (lbs, ft/in, fl oz, °F).
 - **Covers every pillar of well-being**: Sport, nutrition, sleep, hydration, mental health, and social – all in one unified, intelligent journey.

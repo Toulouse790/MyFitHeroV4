@@ -21,7 +21,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
   const [timeElapsed, setTimeElapsed] = useState(0); // en secondes
   const [timerState, setTimerState] = useState<TimerState>('idle');
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const { startSession, updateSessionDuration, completeSession, cancelSession } = useWorkoutSession();
+  const { startSession, completeSession, cancelSession } = useWorkoutSession();
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -39,19 +39,18 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
     
     // Démarrer une session si c'est la première fois
     if (timerState === 'idle') {
-      startSession(workoutName, targetDuration);
+      startSession(workoutName, { targetDuration });
     }
     
     setTimerState('running');
     const id = setInterval(() => {
       setTimeElapsed(prev => {
         const newTime = prev + 1;
-        updateSessionDuration(newTime);
         return newTime;
       });
     }, 1000);
     setIntervalId(id);
-  }, [timerState, workoutName, targetDuration, startSession, updateSessionDuration]);
+  }, [timerState, workoutName, targetDuration, startSession]);
 
   const pauseTimer = useCallback(() => {
     if (intervalId) {
@@ -244,3 +243,5 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
     </div>
   );
 };
+
+export default WorkoutTimer;

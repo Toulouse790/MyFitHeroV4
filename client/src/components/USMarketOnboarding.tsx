@@ -314,3 +314,5 @@ export const USMarketOnboarding: React.FC<USMarketOnboardingProps> = ({ onComple
     </Card>
   );
 };
+
+export default USMarketOnboarding;

@@ -7,7 +7,7 @@ import {
   Activity,
   Flame
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 import { useAnimateOnMount } from '@/hooks/useAnimations';
 import AdvancedCharts from '@/components/AdvancedCharts';

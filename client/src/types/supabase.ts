@@ -12,11 +12,19 @@ export interface UserProfile {
   first_name: string | null;
   last_name: string | null;
   date_of_birth: string | null;
+  age: number | null;
   gender: 'male' | 'female' | 'other' | null;
   height: number | null;
   weight: number | null;
   activity_level: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active' | null;
   fitness_goals: string[] | null;
+  sport: string | null;
+  sport_position: string | null;
+  sport_level: string | null;
+  lifestyle: string | null;
+  training_frequency: number | null;
+  primary_goals: string[] | null;
+  fitness_experience: string | null;
   created_at: string;
   updated_at: string;
 }

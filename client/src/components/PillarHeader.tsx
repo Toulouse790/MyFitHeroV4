@@ -11,7 +11,7 @@ import {
   Award,
   Flame
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { supabase } from '@/lib/supabase';
 import { useAnimateOnMount, useProgressAnimation, useHaptic } from '@/hooks/useAnimations';
 
@@ -74,7 +74,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
     if (!showAIRecommendation || !appStoreUser?.id) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('ai_recommendations')
         .select('*')
         .eq('user_id', appStoreUser.id)
@@ -107,7 +107,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
 
     try {
       const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('daily_goals')
         .select('*')
         .eq('user_id', appStoreUser.id)
@@ -162,7 +162,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
     if (!appStoreUser?.id) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('daily_check_ins')
         .select('date, completed_goals')
         .eq('user_id', appStoreUser.id)

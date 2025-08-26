@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Camera, User, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 
 interface AvatarUploadProps {
   currentAvatar?: string;
@@ -100,13 +100,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       const avatarUrl = publicUrlData.publicUrl;
 
       // Mettre à jour le profil utilisateur
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('user_profiles')
         .update({
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', appStoreUser.id);
+        .eq('id', appStoreUser.id);
 
       if (updateError) {
         throw updateError;
@@ -146,13 +146,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     setIsUploading(true);
     try {
       // Supprimer du profil
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_profiles')
         .update({
           avatar_url: null,
           updated_at: new Date().toISOString()
         })
-        .eq('user_id', appStoreUser.id);
+        .eq('id', appStoreUser.id);
 
       if (error) {
         throw error;

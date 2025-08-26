@@ -23,7 +23,7 @@ import {
   Brain,
   ChevronRight
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import AIIntelligence from '@/components/AIIntelligence';
 import { UniformHeader } from '@/components/UniformHeader';

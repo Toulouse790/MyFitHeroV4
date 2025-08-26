@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect } from 'wouter';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 
 interface ProtectedRouteProps {
   children: React.ReactElement;

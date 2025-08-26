@@ -13,8 +13,8 @@ import {
   Unlock,
   Moon
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
-import { supabase } from '@/lib/supabase';
+import { useAppStore } from '../store/useAppStore';
+import { supabase } from '../config/supabaseClient';
 
 interface Badge {
   id: string;
@@ -151,13 +151,13 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
     setIsLoading(true);
     try {
       // Récupérer les badges de l'utilisateur
-      const { data: userBadges } = await supabase
+      const { data: userBadges } = await (supabase as any)
         .from('user_badges')
         .select('*')
         .eq('user_id', appStoreUser.id);
 
       // Récupérer les statistiques pour calculer les progrès
-      const { data: stats } = await supabase
+      const { data: stats } = await (supabase as any)
         .from('daily_check_ins')
         .select('*')
         .eq('user_id', appStoreUser.id);
@@ -236,7 +236,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
 
   const awardBadge = async (badge: Badge) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_badges')
         .insert({
           user_id: appStoreUser.id,

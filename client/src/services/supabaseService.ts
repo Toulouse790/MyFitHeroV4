@@ -1,25 +1,15 @@
 // services/supabaseService.ts
-import { supabase } from '@/lib/supabase';
-import type { 
-  UserProfile, 
-  UserProfileInsert, 
-  UserProfileUpdate,
-  DailyStats,
-  DailyStatsInsert,
-  DailyStatsUpdate,
-  Workout,
-  WorkoutInsert,
-  WorkoutUpdate,
-  Meal,
-  MealInsert,
-  SleepSession,
-  SleepSessionInsert,
-  HydrationLog,
-  HydrationLogInsert,
-  AiRecommendation,
-  UserGoal,
-  UserNotification
-} from '@/types/database';
+import { supabase } from '../config/supabaseClient';
+import type {
+  UserProfile, UserProfileInsert, UserProfileUpdate,
+  DailyStats, DailyStatsInsert, DailyStatsUpdate,
+  Workout, WorkoutInsert, WorkoutUpdate,
+  Meal, MealInsert,
+  SleepSession, SleepSessionInsert,
+  HydrationLog, HydrationLogInsert,
+  AiRecommendation, UserGoal, UserNotification,
+  UserRecoveryProfile, MuscleRecoveryData
+} from '../types/database';
 
 // ===== USER PROFILES =====
 export class UserProfileService {
@@ -47,7 +37,7 @@ export class UserProfileService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_profiles')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', user.id)
@@ -67,7 +57,7 @@ export class UserProfileService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_profiles')
         .insert({ ...profile, id: user.id })
         .select()
@@ -132,7 +122,7 @@ export class DailyStatsService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('daily_stats')
         .upsert(
           { 
@@ -162,7 +152,7 @@ export class DailyStatsService {
       if (!user) throw new Error('No authenticated user');
 
       // Utiliser une fonction RPC pour l'incrémentation atomique
-      const { error } = await supabase.rpc('increment_workout_stats', {
+      const { error } = await (supabase as any).rpc('increment_workout_stats', {
         p_user_id: user.id,
         p_date: date,
         p_minutes: minutes,
@@ -204,7 +194,7 @@ export class WorkoutService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('workouts')
         .insert({ ...workout, user_id: user.id })
         .select()
@@ -223,7 +213,7 @@ export class WorkoutService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('workouts')
         .update(updates)
         .eq('id', id)
@@ -280,7 +270,7 @@ export class MealService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('meals')
         .insert({ ...meal, user_id: user.id })
         .select()
@@ -347,7 +337,7 @@ export class SleepService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('sleep_sessions')
         .insert({ ...session, user_id: user.id })
         .select()
@@ -415,7 +405,7 @@ export class HydrationService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('hydration_logs')
         .insert({ 
           ...log, 
@@ -471,7 +461,7 @@ export class AiRecommendationService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('ai_recommendations')
         .update({
           is_applied: true,
@@ -525,19 +515,21 @@ export class UserGoalService {
         .single();
 
       if (fetchError) throw fetchError;
+      if (!currentGoal) throw new Error('Goal not found');
 
-      const progressHistory = Array.isArray(currentGoal.progress_history) 
-        ? currentGoal.progress_history 
+      const currentGoalData = currentGoal as any;
+      const progressHistory = Array.isArray(currentGoalData.progress_history) 
+        ? currentGoalData.progress_history 
         : [];
 
       // Ajouter l'entrée à l'historique
       progressHistory.push({
         date: new Date().toISOString(),
         value: newValue,
-        previous_value: currentGoal.current_value
+        previous_value: currentGoalData.current_value
       });
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_goals')
         .update({
           current_value: newValue,
@@ -575,7 +567,7 @@ export class NotificationService {
       return [];
     }
   }
-// Ajouter cette classe à la fin du fichier services/supabaseService.ts
+}
 
 // ===== MUSCLE RECOVERY =====
 export class MuscleRecoveryDBService {
@@ -597,7 +589,7 @@ export class MuscleRecoveryDBService {
 
   static async createOrUpdateRecoveryProfile(profile: any): Promise<UserRecoveryProfile | null> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('user_recovery_profiles')
         .upsert(profile, { onConflict: 'user_id' })
         .select()
@@ -641,7 +633,7 @@ export class MuscleRecoveryDBService {
         ...data
       }));
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('muscle_recovery_data')
         .insert(dataToInsert);
 
@@ -650,11 +642,6 @@ export class MuscleRecoveryDBService {
     } catch (error) {
       console.error('Error saving muscle recovery data:', error);
       return false;
-    }
-  }
-}
-      console.error('Error marking notification as read:', error);
-      throw error;
     }
   }
 }

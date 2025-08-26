@@ -25,7 +25,7 @@ import {
   Brain,
   Info
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import AIIntelligence from '@/components/AIIntelligence';
 import { supabase } from '../lib/supabase';
@@ -334,7 +334,7 @@ const Hydration: React.FC = () => {
       setCurrentMl(newTotal);
       setLastDrinkTime(now);
       
-      const { error: logError } = await supabase
+      const { error: logError } = await (supabase as any)
         .from('hydration_logs')
         .insert({
           user_id: appStoreUser.id,
@@ -347,7 +347,7 @@ const Hydration: React.FC = () => {
 
       if (logError) throw logError;
 
-      const { error: statsError } = await supabase
+      const { error: statsError } = await (supabase as any)
         .from('daily_stats')
         .upsert({
           user_id: appStoreUser.id,
@@ -407,7 +407,7 @@ const Hydration: React.FC = () => {
 
       if (deleteError) throw deleteError;
 
-      const { error: statsError } = await supabase
+      const { error: statsError } = await (supabase as any)
         .from('daily_stats')
         .upsert({
           user_id: appStoreUser?.id!,

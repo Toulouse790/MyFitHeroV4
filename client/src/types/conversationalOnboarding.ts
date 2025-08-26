@@ -1,5 +1,6 @@
 // client/src/types/conversationalOnboarding.ts
-import type { ModuleId } from '@/data/packs';
+import React from 'react';
+import type { ModuleId } from '../data/packs';
 
 /* ================================================================== */
 /*                     INTERFACES PRINCIPALES                          */
@@ -91,6 +92,13 @@ export type StepInputType =
   | 'range'                   // Double slider (min/max)
   | 'tags'                    // Saisie de tags
   | 'location'                // Sélecteur de localisation
+  | 'single_choice'           // Choix unique (alias de radio)
+  | 'multiple_choice'         // Choix multiples (alias de multi-select)
+  | 'switch'                  // Switch/Toggle (alias de toggle)
+  | 'sport_selector'          // Sélecteur de sport personnalisé
+  | 'position_selector'       // Sélecteur de position personnalisé
+  | 'personal_info'           // Formulaire d'informations personnelles
+  | 'pack_selector'           // Sélecteur de pack personnalisé
   | 'custom';                 // Composant personnalisé
 
 /* ================================================================== */
@@ -177,12 +185,19 @@ export interface ConversationalStep {
   min?: number;                         // valeur min pour nombre/slider
   max?: number;                         // valeur max pour nombre/slider
   step?: number;                        // pas pour slider/number
+  minLabel?: string;                    // label pour valeur min du slider
+  maxLabel?: string;                    // label pour valeur max du slider
   multiple?: boolean;                   // sélection multiple autorisée
   searchable?: boolean;                 // recherche dans les options
   clearable?: boolean;                  // peut être vidé
   unit?: string;                        // unité affichée (kg, cm, etc.)
-  scaleLabels?: Record<number, string>; // labels pour slider
+  scaleLabels?: Record<number, string> | { low?: string; high?: string }; // labels pour slider
   maxSelections?: number;               // max sélections pour multi-select
+  
+  // Propriétés spécifiques aux composants
+  switchLabel?: string;                 // label pour les switch
+  switchDescription?: string;           // description pour les switch
+  icon?: React.ComponentType<any>;      // icône du step
   
   // Logique et validation
   validation?: ValidationRule[];
@@ -335,7 +350,8 @@ export interface OnboardingData {
   fitnessGoals?: string[];              // objectifs secondaires
   timeline?: 'short' | 'medium' | 'long'; // 3 mois, 6 mois, 1 an+
   
-  // Modules sélectionnés
+  // Pack et modules sélectionnés
+  selectedPack?: string;                // ID du pack sélectionné
   selectedModules?: ModuleId[];
   modulePreferences?: Record<ModuleId, {
     priority: number;                   // 1-5

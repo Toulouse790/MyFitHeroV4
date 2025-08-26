@@ -21,7 +21,7 @@ import {
   Zap,
   Heart
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/appStore';
 
 const ProfileComplete: React.FC = () => {
   const router = useRouter();

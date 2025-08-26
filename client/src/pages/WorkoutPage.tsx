@@ -1,33 +1,33 @@
-// client/src/pages/WorkoutPage.tsx
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
 import {
   Dumbbell,
-  Target,
   Play,
-  CheckCircle,
-  TrendingUp,
-  Plus,
-  Minus,
-  Edit3,
-  Save,
   Pause,
-  Square,
-  ChevronDown,
+  Target,
+  CheckCircle,
   ChevronUp,
+  ChevronDown,
+  Minus,
+  Plus,
+  Save,
+  Edit3,
+  TrendingUp,
+  Trophy,
+  Square,
   Zap,
   Clock,
-  Trophy,
   Info
 } from 'lucide-react';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { useWorkoutSession } from '../hooks/workout/useWorkoutSession';
 import type { WorkoutExercise } from '@/types/workout';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface WorkoutPageProps {
   userProfile?: SupabaseAuthUserType;
@@ -41,7 +41,7 @@ interface SetEditState {
 }
 
 const WorkoutPage: React.FC<WorkoutPageProps> = () => {
-  const {
+  const { 
     currentSession,
     isSessionActive,
     startSession,
@@ -52,21 +52,29 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     addExercise,
     updateExerciseSet,
     completeExercise,
-    loadExercisesFromLastSession,
     addSetToExercise,
-    removeSetFromExercise
+    removeSetFromExercise,
+    loadExercisesFromLastSession,
+    getLastWeightForExercise,
+    calculateCalories,
+    formatTime
   } = useWorkoutSession();
-
+  const [, setLocation] = useLocation();
   const [editingSet, setEditingSet] = useState<SetEditState | null>(null);
   const [workoutTime, setWorkoutTime] = useState(0);
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [quickMode, setQuickMode] = useState(false);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Exemple de données d'exercices par défaut
-  const defaultExercises: Omit<WorkoutExercise, 'id'>[] = [
+  // Exercices par défaut
+  const defaultExercises: WorkoutExercise[] = [
     {
+      id: 'ex-1',
       name: 'Développé Couché',
+      category: 'strength',
+      muscle_groups: ['chest', 'shoulders', 'triceps'],
       sets: [
         { reps: 10, weight: 60, completed: false },
         { reps: 8, weight: 65, completed: false },
@@ -76,7 +84,10 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       restTime: 120
     },
     {
+      id: 'ex-2',
       name: 'Squats',
+      category: 'strength',
+      muscle_groups: ['quads', 'glutes', 'hamstrings'],
       sets: [
         { reps: 12, weight: 80, completed: false },
         { reps: 10, weight: 85, completed: false },
@@ -86,11 +97,14 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       restTime: 90
     },
     {
+      id: 'ex-3',
       name: 'Tractions',
+      category: 'strength',
+      muscle_groups: ['back', 'biceps'],
       sets: [
         { reps: 8, completed: false },
         { reps: 6, completed: false },
-        { reps: 4, completed: false }
+        { reps: 5, completed: false }
       ],
       completed: false,
       restTime: 90
@@ -101,7 +115,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
   const workoutTips = [
     { icon: Zap, text: "Concentrez-vous sur la forme plutôt que sur le poids", priority: "high" },
     { icon: Clock, text: "Respectez vos temps de repos pour optimiser la récupération", priority: "medium" },
-    { icon: Trophy, text: "Chaque série compte, même si elle semble facile", priority: "high" }
+    { icon: Info, text: "Chaque série compte, même si elle semble facile", priority: "high" }
   ];
 
   const getCurrentTip = () => {
@@ -109,25 +123,24 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     return highPriorityTips[Math.floor(Math.random() * highPriorityTips.length)];
   };
 
-  const handleStartWorkout = () => {
+  const handleStartWorkout = async () => {
     const workoutName = "Entraînement Force";
-
-    // Charger les exercices avec les données de la dernière session
-    const exercisesToAdd = loadExercisesFromLastSession(workoutName, defaultExercises);
-
-    // Démarrer la session
-    startSession(workoutName, 45);
-
-    // Ajouter les exercices à la session
-    setTimeout(() => {
-      exercisesToAdd.forEach(exercise => {
-        addExercise(exercise);
-      });
-      // Ouvrir le premier exercice par défaut
-      if (exercisesToAdd.length > 0) {
-        setExpandedExercise(exercisesToAdd[0].name);
-      }
-    }, 100);
+    // Charger avec les données de la dernière session
+    const exercisesToAdd = await loadExercisesFromLastSession(workoutName);
+    
+    // Démarrer la session avec les exercices
+    await startSession(workoutName, {
+      workout_type: 'strength',
+      difficulty: 'intermediate',
+      exercises: exercisesToAdd.length > 0 ? exercisesToAdd : defaultExercises
+    });
+    
+    // Ouvrir le premier exercice par défaut
+    if (exercisesToAdd.length > 0) {
+      setExpandedExercise(exercisesToAdd[0].id);
+    } else if (defaultExercises.length > 0) {
+      setExpandedExercise(defaultExercises[0].name);
+    }
   };
 
   const handleSetEdit = (exerciseId: string, setIndex: number, field: 'reps' | 'weight' | 'duration') => {
@@ -223,15 +236,21 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
   const progressPercentage = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
 
   // Calculer les calories brûlées (estimation basique)
-  const estimatedCalories = Math.round(workoutTime * 0.15); // ~9 cal/min pour musculation
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const estimatedCalories = calculateCalories ? calculateCalories(workoutTime) : Math.round(workoutTime * 0.15);
 
   const currentTip = getCurrentTip();
+
+  const handleCompleteWorkout = async () => {
+    if (currentSession) {
+      await completeSession();
+      setShowSessionSummary(true);
+      setLocation('/');
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">

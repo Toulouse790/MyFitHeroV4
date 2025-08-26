@@ -37,7 +37,7 @@ import {
   ThumbsUp,
   AlertTriangle
 } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { UniformHeader } from '@/components/UniformHeader';

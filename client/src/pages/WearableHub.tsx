@@ -22,8 +22,8 @@ import {
 } from 'lucide-react';
 import WearableStats from '@/components/WearableStats';
 import WearableNotificationCenter from '@/components/WearableNotificationCenter';
-import SettingsPageImproved from '@/pages/SettingsPageImproved';
-import { useAppStore } from '@/stores/useAppStore';
+import Settings from '@/pages/settings';
+import { useAppStore } from '@/store/useAppStore';
 
 interface WearableDevice {
   id: string;
@@ -494,7 +494,7 @@ const WearableHub: React.FC = () => {
 
           {/* Paramètres */}
           <TabsContent value="settings">
-            <SettingsPageImproved />
+            <Settings />
           </TabsContent>
         </Tabs>
       </div>

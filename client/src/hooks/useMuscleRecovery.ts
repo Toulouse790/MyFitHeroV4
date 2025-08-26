@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MuscleRecoveryService } from '@/services/muscleRecoveryService';
 import { WorkoutService, UserProfileService, SleepService, DailyStatsService } from '@/services/supabaseService';
-import { useAppStore } from '@/store/appStore';
+import { useAppStore } from '@/store/useAppStore';
 import type { 
   MuscleRecoveryData, 
   UserRecoveryProfile, 
@@ -35,7 +35,7 @@ interface UseMuscleRecoveryReturn {
 }
 
 export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
-  const { user } = useAppStore();
+  const { appStoreUser } = useAppStore();
   
   // État local
   const [muscleRecoveryData, setMuscleRecoveryData] = useState<MuscleRecoveryData[]>([]);
@@ -48,7 +48,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
   // Fonction pour rafraîchir toutes les données de récupération
   const refreshRecoveryData = useCallback(async () => {
-    if (!user?.id) {
+    if (!appStoreUser?.id) {
       setError('Utilisateur non connecté');
       return;
     }
@@ -58,7 +58,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
       setError(null);
 
       // 1. Récupérer le profil de récupération
-      let profile = await MuscleRecoveryService.getUserRecoveryProfile(user.id);
+      let profile = await MuscleRecoveryService.getUserRecoveryProfile(appStoreUser.id);
       
       if (!profile) {
         // Créer le profil s'il n'existe pas
@@ -71,7 +71,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
         if (userProfile) {
           profile = await MuscleRecoveryService.createOrUpdateRecoveryProfile(
-            user.id,
+            appStoreUser.id,
             userProfile,
             sleepData,
             nutritionData
@@ -91,7 +91,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
       // 3. Calculer la récupération musculaire
       const recoveryData = await MuscleRecoveryService.calculateMuscleRecovery(
-        user.id,
+        appStoreUser.id,
         completedWorkouts,
         profile
       );
@@ -99,10 +99,10 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
       setMuscleRecoveryData(recoveryData);
 
       // 4. Générer les recommandations
-      if (user) {
+      if (appStoreUser) {
         const recs = await MuscleRecoveryService.generateRecoveryRecommendations(
           recoveryData,
-          user
+          appStoreUser
         );
         setRecommendations(recs);
       }
@@ -112,7 +112,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
       setGlobalMetrics(metrics);
 
       // 6. Sauvegarder en base
-      await MuscleRecoveryService.saveMuscleRecoveryData(user.id, recoveryData);
+      await MuscleRecoveryService.saveMuscleRecoveryData(appStoreUser.id, recoveryData);
 
       setLastUpdated(new Date().toISOString());
 
@@ -123,11 +123,11 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [appStoreUser?.id]);
 
   // Fonction pour mettre à jour le profil de récupération
   const updateRecoveryProfile = useCallback(async () => {
-    if (!user?.id) return;
+    if (!appStoreUser?.id) return;
 
     try {
       setIsLoading(true);
@@ -141,7 +141,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
       if (userProfile) {
         const updatedProfile = await MuscleRecoveryService.createOrUpdateRecoveryProfile(
-          user.id,
+          appStoreUser.id,
           userProfile,
           sleepData,
           nutritionData
@@ -156,14 +156,14 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id]);
+  }, [appStoreUser?.id]);
 
   // Charger les données au montage et quand l'utilisateur change
   useEffect(() => {
-    if (user?.id) {
+    if (appStoreUser?.id) {
       refreshRecoveryData();
     }
-  }, [user?.id, refreshRecoveryData]);
+  }, [appStoreUser?.id, refreshRecoveryData]);
 
   // Fonctions utilitaires
   const getMuscleRecovery = useCallback((muscleGroup: MuscleGroup): MuscleRecoveryData | null => {

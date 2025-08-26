@@ -1457,3 +1457,58 @@ export interface Database {
     }
   }
 }
+
+// Types extraits pour faciliter l'utilisation
+export type UserProfile = Database['public']['Tables']['user_profiles']['Row'];
+export type UserProfileInsert = Database['public']['Tables']['user_profiles']['Insert'];
+export type UserProfileUpdate = Database['public']['Tables']['user_profiles']['Update'];
+
+export type DailyStats = Database['public']['Tables']['daily_stats']['Row'];
+export type DailyStatsInsert = Database['public']['Tables']['daily_stats']['Insert'];
+export type DailyStatsUpdate = Database['public']['Tables']['daily_stats']['Update'];
+
+export type Workout = Database['public']['Tables']['workouts']['Row'];
+export type WorkoutInsert = Database['public']['Tables']['workouts']['Insert'];
+export type WorkoutUpdate = Database['public']['Tables']['workouts']['Update'];
+
+export type Meal = Database['public']['Tables']['meals']['Row'];
+export type MealInsert = Database['public']['Tables']['meals']['Insert'];
+
+export type SleepSession = Database['public']['Tables']['sleep_sessions']['Row'];
+export type SleepSessionInsert = Database['public']['Tables']['sleep_sessions']['Insert'];
+
+export type HydrationLog = Database['public']['Tables']['hydration_logs']['Row'];
+export type HydrationLogInsert = Database['public']['Tables']['hydration_logs']['Insert'];
+
+export type AiRecommendation = Database['public']['Tables']['ai_recommendations']['Row'];
+export type UserGoal = Database['public']['Tables']['user_goals']['Row'];
+export type UserNotification = Database['public']['Tables']['user_notifications']['Row'];
+
+// Types pour la récupération musculaire
+export interface UserRecoveryProfile {
+  id: string;
+  user_id: string;
+  recovery_rate_preference: 'slow' | 'moderate' | 'fast';
+  muscle_sensitivity_scores: Record<string, number>;
+  preferred_recovery_methods: string[];
+  sleep_quality_weight: number;
+  nutrition_quality_weight: number;
+  stress_level_weight: number;
+  workout_intensity_weight: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MuscleRecoveryData {
+  id: string;
+  user_id: string;
+  muscle_group: string;
+  soreness_level: number;
+  recovery_percentage: number;
+  recommended_rest_hours: number;
+  last_workout_date: string;
+  recovery_methods_used: string[];
+  effectiveness_scores: Record<string, number>;
+  created_at: string;
+  updated_at: string;
+}
