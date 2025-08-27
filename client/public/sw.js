@@ -1,5 +1,5 @@
-// Service Worker pour MyFitHero V4
-const CACHE_NAME = 'myfithero-v4-cache-v1';
+// Service Worker pour MyFitHero
+const CACHE_NAME = 'myfithero-cache-v1';
 const STATIC_CACHE = 'myfithero-static-v1';
 const DYNAMIC_CACHE = 'myfithero-dynamic-v1';
 
@@ -203,7 +203,7 @@ self.addEventListener('push', (event) => {
   };
   
   event.waitUntil(
-    self.registration.showNotification('MyFitHero V4', options)
+    self.registration.showNotification('MyFitHero', options)
   );
 });
 

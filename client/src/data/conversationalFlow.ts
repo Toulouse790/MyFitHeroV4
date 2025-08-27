@@ -29,7 +29,7 @@ import { ModuleId } from './packs';
 /* ================================================================== */
 
 export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
-  id: 'myfithero_onboarding_v4_ai',
+  id: 'myfithero_onboarding_ai',
   name: 'MyFitHero - AI-Powered Wellness Journey',
   version: '4.2.0',
   description: 'Onboarding conversationnel optimisé par IA avec recommandations personnalisées et flux adaptatifs',
@@ -72,7 +72,7 @@ export const CONVERSATIONAL_ONBOARDING_FLOW: ConversationalFlow = {
   },
   
   // Branding et personnalisation
-  theme: 'myfithero_v4',
+  theme: 'myfithero',
   branding: {
     logo: '/assets/myfithero-logo.svg',
     colors: {

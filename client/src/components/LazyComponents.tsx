@@ -37,7 +37,7 @@ export const OptimizedSuspenseFallback = ({ text = "Chargement..." }: { text?: s
     {/* Texte avec animation */}
     <div className="mt-4 text-center">
       <p className="text-lg font-medium text-gray-600 animate-pulse">{text}</p>
-      <p className="mt-1 text-sm text-gray-400">MyFitHero V4</p>
+      <p className="mt-1 text-sm text-gray-400">MyFitHero</p>
     </div>
     
     {/* Barre de progression animée */}

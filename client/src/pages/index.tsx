@@ -1,5 +1,5 @@
 // ====================================================================
-// MyFitHero V4 - Index Principal - Architecturé pour le Marché US
+// MyFitHero - Index Principal - Architecturé pour le Marché US
 // ====================================================================
 
 import React, { 
@@ -31,7 +31,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    storageKey: 'myfithero-v4-auth',
+    storageKey: 'myfithero-auth',
     storage: window.localStorage,
     autoRefreshToken: true,
     detectSessionInUrl: true
@@ -43,7 +43,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'X-Client-Info': 'myfithero-v4@1.0.0'
+      'X-Client-Info': 'myfithero@1.0.0'
     }
   }
 });
@@ -942,7 +942,7 @@ const useAppStore = create<AppState>()(
         }))
       }),
       {
-        name: 'myfithero-v4-store',
+        name: 'myfithero-store',
         partialize: (state) => ({
           user: state.user,
           preferences: state.preferences,
@@ -1445,20 +1445,20 @@ const appRoutes: RouteConfig[] = [
     path: '/',
     component: lazy(() => import('./LandingPage')),
     exact: true,
-    title: 'MyFitHero V4 - AI-Powered Fitness for Americans',
+    title: 'MyFitHero - AI-Powered Fitness for Americans',
     description: 'The ultimate US-ready fitness & wellness app with AI coaching, nutrition tracking, and social features.'
   },
   {
     path: '/login',
     component: lazy(() => import('./AuthPage')),
-    title: 'Sign In - MyFitHero V4',
-    description: 'Sign in to your MyFitHero V4 account and continue your fitness journey.'
+    title: 'Sign In - MyFitHero',
+    description: 'Sign in to your MyFitHero account and continue your fitness journey.'
   },
   {
     path: '/register',
     component: lazy(() => import('./AuthPage')),
-    title: 'Create Account - MyFitHero V4',
-    description: 'Join thousands of Americans achieving their fitness goals with MyFitHero V4.'
+    title: 'Create Account - MyFitHero',
+    description: 'Join thousands of Americans achieving their fitness goals with MyFitHero.'
   },
   
   // Routes d'onboarding
@@ -1466,14 +1466,14 @@ const appRoutes: RouteConfig[] = [
     path: '/onboarding',
     component: OnboardingPage,
     requiresAuth: true,
-    title: 'Welcome to MyFitHero V4',
+    title: 'Welcome to MyFitHero',
     description: 'Let\'s personalize your fitness journey with our AI-powered onboarding.'
   },
   {
     path: '/onboarding/:step',
     component: OnboardingPage,
     requiresAuth: true,
-    title: 'Setup Your Profile - MyFitHero V4',
+    title: 'Setup Your Profile - MyFitHero',
     description: 'Personalized fitness setup designed specifically for Americans.'
   },
   
@@ -1483,7 +1483,7 @@ const appRoutes: RouteConfig[] = [
     component: DashboardPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Dashboard - MyFitHero V4',
+    title: 'Dashboard - MyFitHero',
     description: 'Your personalized fitness dashboard with AI insights and progress tracking.'
   },
   {
@@ -1491,7 +1491,7 @@ const appRoutes: RouteConfig[] = [
     component: WorkoutPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Workouts - MyFitHero V4',
+    title: 'Workouts - MyFitHero',
     description: 'AI-powered workouts tailored for your sport and fitness goals.'
   },
   {
@@ -1499,14 +1499,14 @@ const appRoutes: RouteConfig[] = [
     component: lazy(() => import('./WorkoutDetailPage')),
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Workout Details - MyFitHero V4'
+    title: 'Workout Details - MyFitHero'
   },
   {
     path: '/nutrition',
     component: NutritionPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Nutrition - MyFitHero V4',
+    title: 'Nutrition - MyFitHero',
     description: 'Track your nutrition with the most comprehensive US food database.'
   },
   {
@@ -1514,7 +1514,7 @@ const appRoutes: RouteConfig[] = [
     component: SleepPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Sleep Tracking - MyFitHero V4',
+    title: 'Sleep Tracking - MyFitHero',
     description: 'Optimize your recovery with advanced sleep analytics and recommendations.'
   },
   {
@@ -1522,7 +1522,7 @@ const appRoutes: RouteConfig[] = [
     component: HydrationPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Hydration - MyFitHero V4',
+    title: 'Hydration - MyFitHero',
     description: 'Stay hydrated with personalized goals and smart reminders in fl oz.'
   },
   {
@@ -1530,7 +1530,7 @@ const appRoutes: RouteConfig[] = [
     component: WellnessPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Mental Wellness - MyFitHero V4',
+    title: 'Mental Wellness - MyFitHero',
     description: 'Track your mental health, mood, and stress with AI-powered insights.'
   },
   {
@@ -1538,7 +1538,7 @@ const appRoutes: RouteConfig[] = [
     component: SocialPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Community - MyFitHero V4',
+    title: 'Community - MyFitHero',
     description: 'Connect with friends, join challenges, and share your fitness journey.'
   },
   {
@@ -1546,7 +1546,7 @@ const appRoutes: RouteConfig[] = [
     component: lazy(() => import('./ChallengesPage')),
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Fitness Challenges - MyFitHero V4',
+    title: 'Fitness Challenges - MyFitHero',
     description: 'Join community challenges and compete with friends across America.'
   },
   {
@@ -1554,22 +1554,22 @@ const appRoutes: RouteConfig[] = [
     component: AnalyticsPage,
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Progress Analytics - MyFitHero V4',
+    title: 'Progress Analytics - MyFitHero',
     description: 'Detailed analytics and insights about your fitness progress and trends.'
   },
   {
     path: '/profile',
     component: ProfilePage,
     requiresAuth: true,
-    title: 'Your Profile - MyFitHero V4',
+    title: 'Your Profile - MyFitHero',
     description: 'Manage your profile, preferences, and fitness goals.'
   },
   {
     path: '/settings',
     component: SettingsPage,
     requiresAuth: true,
-    title: 'Settings - MyFitHero V4',
-    description: 'Customize your MyFitHero V4 experience, privacy, and notifications.'
+    title: 'Settings - MyFitHero',
+    description: 'Customize your MyFitHero experience, privacy, and notifications.'
   },
   
   // Routes spécialisées
@@ -1578,41 +1578,41 @@ const appRoutes: RouteConfig[] = [
     component: lazy(() => import('./AICoachPage')),
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'AI Coach - MyFitHero V4',
+    title: 'AI Coach - MyFitHero',
     description: 'Get personalized coaching and recommendations from your AI fitness assistant.'
   },
   {
     path: '/exercises',
     component: lazy(() => import('./ExercisesPage')),
     requiresAuth: true,
-    title: 'Exercise Library - MyFitHero V4',
+    title: 'Exercise Library - MyFitHero',
     description: 'Comprehensive exercise library with 450+ video-guided workouts.'
   },
   {
     path: '/exercises/:id',
     component: lazy(() => import('./ExerciseDetailPage')),
     requiresAuth: true,
-    title: 'Exercise Details - MyFitHero V4'
+    title: 'Exercise Details - MyFitHero'
   },
   
   // Routes utilitaires
   {
     path: '/privacy',
     component: lazy(() => import('./PrivacyPage')),
-    title: 'Privacy Policy - MyFitHero V4',
+    title: 'Privacy Policy - MyFitHero',
     description: 'Your privacy matters. Learn how we protect your fitness data.'
   },
   {
     path: '/terms',
     component: lazy(() => import('./TermsPage')),
-    title: 'Terms of Service - MyFitHero V4',
-    description: 'Terms and conditions for using MyFitHero V4 fitness application.'
+    title: 'Terms of Service - MyFitHero',
+    description: 'Terms and conditions for using MyFitHero fitness application.'
   },
   {
     path: '/support',
     component: lazy(() => import('./SupportPage')),
-    title: 'Support - MyFitHero V4',
-    description: 'Get help and support for your MyFitHero V4 experience.'
+    title: 'Support - MyFitHero',
+    description: 'Get help and support for your MyFitHero experience.'
   }
 ];
 
@@ -1713,10 +1713,10 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 };
 
 // ====================================================================
-// Composant Principal MyFitHero V4 Index
+// Composant Principal MyFitHero Index
 // ====================================================================
 
-const MyFitHeroV4Index: React.FC = () => {
+const MyFitHeroIndex: React.FC = () => {
   const { isLoading, user, preferences } = useAppStore();
   const [isInitialized, setIsInitialized] = useState(false);
   const [appVersion] = useState('4.0.0');
@@ -1796,7 +1796,7 @@ const MyFitHeroV4Index: React.FC = () => {
 
   // Affichage du chargement initial
   if (!isInitialized || isLoading) {
-    return <AppLoadingSpinner message="Initializing MyFitHero V4..." showProgress />;
+    return <AppLoadingSpinner message="Initializing MyFitHero..." showProgress />;
   }
 
   return (
@@ -1834,7 +1834,7 @@ const MyFitHeroV4Index: React.FC = () => {
         {/* Informations de version (visible en développement) */}
         {process.env.NODE_ENV === 'development' && (
           <div className="fixed bottom-4 left-4 bg-black/80 text-white text-xs p-2 rounded-lg font-mono">
-            MyFitHero V4 - v{appVersion} (build {buildNumber})
+            MyFitHero - v{appVersion} (build {buildNumber})
           </div>
         )}
       </div>
@@ -1842,7 +1842,7 @@ const MyFitHeroV4Index: React.FC = () => {
   );
 };
 
-export default React.memo(MyFitHeroV4Index);
+export default React.memo(MyFitHeroIndex);
 
 // ====================================================================
 // Exports Utilitaires pour l'Application

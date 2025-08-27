@@ -81,7 +81,7 @@ export const usePWA = (): PWAState & PWAActions => {
       setDeferredPrompt(null);
       toast({
         title: "App installée !",
-        description: "MyFitHero V4 a été ajouté à votre écran d'accueil",
+        description: "MyFitHero a été ajouté à votre écran d'accueil",
       });
     });
     
@@ -192,7 +192,7 @@ export const useOfflineStorage = () => {
 
   useEffect(() => {
     const openDB = () => {
-      const request = indexedDB.open('MyFitHeroV4DB', 1);
+      const request = indexedDB.open('MyFitHeroDB', 1);
       
       request.onupgradeneeded = (event) => {
         const database = (event.target as IDBOpenDBRequest).result;

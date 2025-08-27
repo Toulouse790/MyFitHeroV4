@@ -1,8 +1,8 @@
-# 🎯 MyFitHero V4 - Onboarding Conversationnel
+# 🎯 MyFitHero - Onboarding Conversationnel
 
 ## 📋 Vue d'ensemble
 
-L'onboarding conversationnel de MyFitHero V4 est un système intelligent et adaptatif qui guide les utilisateurs à travers un processus de configuration personnalisé. Il s'adapte dynamiquement aux modules sélectionnés et utilise des données en temps réel depuis Supabase.
+L'onboarding conversationnel de MyFitHero est un système intelligent et adaptatif qui guide les utilisateurs à travers un processus de configuration personnalisé. Il s'adapte dynamiquement aux modules sélectionnés et utilise des données en temps réel depuis Supabase.
 
 ## 🏗️ Architecture
 
@@ -371,6 +371,6 @@ export DEBUG=myfithero:*
 
 ## 🎉 Conclusion
 
-L'onboarding conversationnel de MyFitHero V4 offre une expérience utilisateur moderne et personnalisée. Le système est extensible, maintenu et optimisé pour une utilisation en production.
+L'onboarding conversationnel de MyFitHero offre une expérience utilisateur moderne et personnalisée. Le système est extensible, maintenu et optimisé pour une utilisation en production.
 
 Pour toute question ou contribution, consultez la documentation développeur ou ouvrez une issue sur le repository.
