@@ -26,6 +26,11 @@ export interface AppUser extends UserProfile {
   sport_specific_stats?: Record<string, number>;
   name?: string;
   goal?: string;
+  profile_type?: string;
+  active_modules?: string[];
+  available_time_per_day?: number;
+  season_period?: string;
+  injuries?: string[];
 }
 
 export interface DailyGoals {
@@ -243,7 +248,15 @@ const defaultUser: AppUser = {
   daily_calories: null,
   level: 1,
   totalPoints: 0,
-  joinDate: ''
+  joinDate: '',
+  age: null,
+  sport: null,
+  sport_position: null,
+  sport_level: null,
+  lifestyle: null,
+  training_frequency: null,
+  primary_goals: null,
+  fitness_experience: null
 };
 
 // Objectifs par défaut

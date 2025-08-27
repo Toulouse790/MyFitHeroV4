@@ -8,7 +8,7 @@ const WorkoutDetailPage = lazy(() => import('@/pages/WorkoutDetailPage'));
 const ExercisesPage = lazy(() => import('@/pages/ExercisesPage'));
 const ExerciseDetailPage = lazy(() => import('@/pages/ExerciseDetailPage'));
 const ChallengesPage = lazy(() => import('@/pages/ChallengesPage'));
-const RecoveryPage = lazy(() => import('@/pages/RecoveryPage'));
+const RecoveryPage = lazy(() => import('@/pages/RecoveryPage').then(module => ({ default: module.RecoveryPage })));
 const AICoachPage = lazy(() => import('@/pages/AICoachPage'));
 
 export const fitnessRoutes: RouteConfig[] = [

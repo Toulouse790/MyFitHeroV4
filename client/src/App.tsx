@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { useLocation } from 'wouter';
 import { AppRouter } from '@/routes/AppRouter';
-import { AppLoadingSpinner } from '@/components/AppLoadingSpinner';
+import AppLoadingSpinner from '@/components/AppLoadingSpinner';
 
 const App: React.FC = () => {
   const [location] = useLocation();

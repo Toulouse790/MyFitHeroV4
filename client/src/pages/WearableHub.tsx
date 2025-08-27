@@ -1,5 +1,6 @@
 // pages/WearableHub.tsx
 import React, { useState, useEffect, useCallback } from 'react';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Activity, 
   Heart, 
-  Settings, 
+  Settings as SettingsIcon, 
   Bell, 
   TrendingUp, 
   Watch,
@@ -133,18 +134,15 @@ const WearableHub: React.FC = () => {
 
       toast({
         title: "Synchronisation réussie",
-        description: "Toutes vos données wearables sont à jour.",
-        action: {
-          label: "Voir les stats",
-          onClick: () => setActiveTab('analytics')
-        }
+        description: "Toutes vos données wearables sont à jour."
       });
 
       // Analytics
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'wearable_manual_sync', {
-          user_id: appStoreUser?.id,
-          devices_count: devices.filter(d => d.connected).length
+          event_category: 'engagement',
+          event_label: 'manual_sync',
+          value: devices.filter(d => d.connected).length
         });
       }
 
@@ -327,7 +325,7 @@ const WearableHub: React.FC = () => {
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
-              <Settings size={16} />
+              <SettingsIcon size={16} />
               <span>Paramètres</span>
             </TabsTrigger>
           </TabsList>

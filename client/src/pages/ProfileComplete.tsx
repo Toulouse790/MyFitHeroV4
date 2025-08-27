@@ -1,6 +1,7 @@
 // pages/profile-complete.tsx
 import React, { useMemo } from 'react';
 import { useLocation, useRoute } from 'wouter';
+import { useAppNavigation } from '@/routes/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +25,7 @@ import {
 import { useAppStore } from '@/store/appStore';
 
 const ProfileComplete: React.FC = () => {
-  const router = useRouter();
+  const { navigateTo } = useAppNavigation();
   const { appStoreUser } = useAppStore();
 
   // Calcul de complétude du profil optimisé
@@ -37,8 +38,8 @@ const ProfileComplete: React.FC = () => {
       { key: 'age', value: appStoreUser.age, required: true },
       { key: 'gender', value: appStoreUser.gender, required: true },
       { key: 'sport', value: appStoreUser.sport, required: true },
-      { key: 'height_cm', value: appStoreUser.height_cm, required: true },
-      { key: 'weight_kg', value: appStoreUser.weight_kg, required: true },
+      { key: 'height', value: appStoreUser.height, required: true },
+      { key: 'weight', value: appStoreUser.weight, required: true },
       { key: 'phone', value: appStoreUser.phone, required: false },
       { key: 'city', value: appStoreUser.city, required: false },
       { key: 'bio', value: appStoreUser.bio, required: false },
@@ -64,11 +65,11 @@ const ProfileComplete: React.FC = () => {
     };
   }, [appStoreUser]);
 
-  // Calcul BMI optimisé
-  const bmiData = useMemo(() => {
-    if (!appStoreUser?.height_cm || !appStoreUser?.weight_kg) return null;
-    
-    const bmi = appStoreUser.weight_kg / Math.pow(appStoreUser.height_cm / 100, 2);
+  // Calcul du BMI
+  const bmi = useMemo(() => {
+    if (!appStoreUser?.height || !appStoreUser?.weight) return null;
+
+    const bmi = appStoreUser.weight / Math.pow(appStoreUser.height / 100, 2);
     let category = '';
     let color = '';
     
@@ -114,14 +115,14 @@ const ProfileComplete: React.FC = () => {
       icon: Dumbbell,
       color: 'bg-green-50 border-green-200',
       fields: [
-        { label: 'Taille', value: appStoreUser?.height_cm ? `${appStoreUser.height_cm} cm` : '-', key: 'height_cm', required: true },
-        { label: 'Poids', value: appStoreUser?.weight_kg ? `${appStoreUser.weight_kg} kg` : '-', key: 'weight_kg', required: true },
+        { label: 'Taille', value: appStoreUser?.height ? `${appStoreUser.height} cm` : '-', key: 'height', required: true },
+        { label: 'Poids', value: appStoreUser?.weight ? `${appStoreUser.weight} kg` : '-', key: 'weight', required: true },
         { 
           label: 'IMC', 
-          value: bmiData ? `${bmiData.value} (${bmiData.category})` : '-', 
+          value: bmi ? `${bmi.value} (${bmi.category})` : '-', 
           key: 'bmi',
           required: false,
-          color: bmiData?.color
+          color: bmi?.color
         },
         { label: 'Ville', value: appStoreUser?.city || '-', key: 'city', required: false }
       ]
@@ -212,7 +213,7 @@ const ProfileComplete: React.FC = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push('/profile')}
+            onClick={() => navigateTo('/profile')}
             className="text-white hover:bg-white/20"
           >
             <Edit className="w-4 h-4 mr-2" />
@@ -373,7 +374,7 @@ const ProfileComplete: React.FC = () => {
               <div className="flex justify-center space-x-4">
                 <Button
                   size="lg"
-                  onClick={() => router.push('/profile')}
+                  onClick={() => navigateTo('/profile')}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   <Edit className="mr-2 h-4 w-4" />
@@ -382,7 +383,7 @@ const ProfileComplete: React.FC = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => router.push('/')}
+                  onClick={() => navigateTo('/')}
                 >
                   Retour au dashboard
                 </Button>

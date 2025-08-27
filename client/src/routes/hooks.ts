@@ -28,14 +28,14 @@ export const useCurrentRoute = (): {
  * Hook pour la navigation avec métadonnées
  */
 export const useAppNavigation = () => {
-  const router = useRouter();
+  const [location, setLocation] = useLocation();
   const { currentRoute } = useCurrentRoute();
   
   const navigateTo = (path: string, options?: { replace?: boolean }) => {
     if (options?.replace) {
-      router.replace(path);
+      setLocation(path, { replace: true });
     } else {
-      router.push(path);
+      setLocation(path);
     }
   };
   
@@ -52,7 +52,7 @@ export const useAppNavigation = () => {
     goBack,
     goHome,
     currentRoute,
-    router
+    location
   };
 };
 

@@ -1,6 +1,26 @@
 // client/src/pages/Nutrition.tsx
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Déclaration globale pour window.gtag
+declare global {
+  interface Window {
+    gtag?: (
+      command: 'event',
+      action: string,
+      parameters: {
+        meal_type?: string;
+        meal_name?: string;
+        sport?: string;
+        user_id?: string;
+        event_category?: string;
+        event_label?: string;
+        value?: number;
+      }
+    ) => void;
+  }
+}
+
 import { 
   Target, 
   Coffee,
@@ -376,13 +396,13 @@ const Nutrition: React.FC = () => {
 
   // --- CALCULS PERSONNALISÉS SÉCURISÉS ---
   const personalizedGoals = useMemo((): NutritionGoals => {
-    const weight = appStoreUser?.weight_kg ?? 70;
-    const height = appStoreUser?.height_cm ?? 170;
+    const weight = appStoreUser?.weight ?? 70;
+    const height = appStoreUser?.height ?? 170;
     const age = appStoreUser?.age ?? 30;
     const gender = appStoreUser?.gender ?? 'male';
     
     // Vérifier si le profil est complet
-    const isIncomplete = !appStoreUser?.weight_kg || !appStoreUser?.height_cm || !appStoreUser?.age;
+    const isIncomplete = !appStoreUser?.weight || !appStoreUser?.height || !appStoreUser?.age;
     setProfileIncomplete(isIncomplete);
     
     let baseCalories = appStoreUser?.daily_calories || 0;
@@ -441,11 +461,11 @@ const Nutrition: React.FC = () => {
 
       if (!error && data) {
         setDailyData({
-          calories: data.total_calories || 0,
-          protein: data.total_protein || 0,
-          carbs: data.total_carbs || 0,
-          fat: data.total_fat || 0,
-          water: data.water_intake_ml || 0,
+          calories: (data as any).total_calories || 0,
+          protein: (data as any).total_protein || 0,
+          carbs: (data as any).total_carbs || 0,
+          fat: (data as any).total_fat || 0,
+          water: (data as any).water_intake_ml || 0,
           lastUpdated: new Date()
         });
       }
@@ -561,16 +581,7 @@ const Nutrition: React.FC = () => {
 
   useEffect(() => {
     if (profileIncomplete) {
-      toast({
-        title: "Profil incomplet",
-        description: "Complétez votre profil pour des recommandations nutritionnelles précises",
-        variant: "default",
-        action: (
-          <Button size="sm" onClick={handleCompleteProfile}>
-            Compléter
-          </Button>
-        )
-      });
+      toast.warning("Complétez votre profil pour des recommandations nutritionnelles précises");
     }
   }, [profileIncomplete, toast, handleCompleteProfile]);
 
