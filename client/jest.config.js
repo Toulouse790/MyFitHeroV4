@@ -3,7 +3,7 @@
  * Configuration complète avec support MSW, TypeScript et React Testing Library
  */
 
-module.exports = {
+export default {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleNameMapping: {
