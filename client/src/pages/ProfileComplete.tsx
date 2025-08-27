@@ -22,7 +22,7 @@ import {
   Zap,
   Heart
 } from 'lucide-react';
-import { useAppStore } from '@/store/appStore';
+import { useAppStore } from '@/store/useAppStore';
 
 const ProfileComplete: React.FC = () => {
   const { navigateTo } = useAppNavigation();
