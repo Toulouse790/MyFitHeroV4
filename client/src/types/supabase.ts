@@ -1,4 +1,8 @@
 // types/supabase.ts
+
+// Imports des nouveaux types workout
+export * from './workout.types';
+
 export interface UserProfile {
   id: string;
   full_name: string;

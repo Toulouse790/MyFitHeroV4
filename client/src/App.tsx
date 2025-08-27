@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { useLocation } from 'wouter';
-import { AppRouter } from '@/routes/AppRouter';
-import AppLoadingSpinner from '@/components/AppLoadingSpinner';
+import { AppRouter } from '@/router/AppRouter';
+import { LoadingRoute } from '@/router/components/LoadingRoute';
 
 const App: React.FC = () => {
   const [location] = useLocation();
@@ -9,9 +9,10 @@ const App: React.FC = () => {
   console.log("🟢 MyFitHero V4 - Route actuelle:", location);
   
   return (
-    <Suspense fallback={<AppLoadingSpinner />}>
-      <AppRouter currentPath={location} />
+    <Suspense fallback={<LoadingRoute />}>
+      <AppRouter />
     </Suspense>
   );
 };
+
 export default App;
