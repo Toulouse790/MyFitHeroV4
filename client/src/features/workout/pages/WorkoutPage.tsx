@@ -19,7 +19,7 @@ import { WorkoutService } from '@/services/workout.service';
 // Composants refactorisés
 import { WorkoutSessionHeader } from '@/features/workout/components/WorkoutSessionHeader';
 import { WorkoutProgressCard } from '@/features/workout/components/WorkoutProgressCard';
-import { WorkoutTipCard, getCurrentTip } from '@/features/workout/components/WorkoutTipCard';
+import { WorkoutTipCard } from '@/features/workout/components/WorkoutTipCard';
 import { ExerciseCard } from '@/features/workout/components/ExerciseCard';
 import { WorkoutStatsCard } from '@/features/workout/components/WorkoutStatsCard';
 import { WorkoutSessionSummary } from '@/features/workout/components/WorkoutSessionSummary';
@@ -32,6 +32,14 @@ interface WorkoutPageProps {
   initialExercises?: WorkoutExercise[];
   workoutName?: string;
 }
+
+// Helpers
+const getCurrentTip = () => ({
+  title: "Conseil d'entraînement",
+  description: "Gardez une bonne posture pendant tous vos exercices pour éviter les blessures.",
+  category: "Sécurité",
+  importance: 'medium' as const
+});
 
 export const WorkoutPage: React.FC<WorkoutPageProps> = ({
   initialExercises = [],

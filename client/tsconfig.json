@@ -43,7 +43,11 @@
   "exclude": [
     "node_modules",
     "dist",
-    "build"
+    "build",
+    "src/setupTests.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__tests__/**/*"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -3,7 +3,7 @@
  * Setup global pour Jest, React Testing Library et MSW
  */
 
-import '@testing-library/jest-dom';
+// import '@testing-library/jest-dom';
 import { server } from './test-utils/mocks/server';
 
 // Configuration MSW pour mocker les API

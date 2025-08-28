@@ -1,48 +1,36 @@
 import { lazy } from 'react';
 
-// === LAZY LOADING DES PAGES PRINCIPALES ===
-export const LazyIndex = lazy(() => import('@/pages/index')); // ✅ Existe
-export const LazyProfile = lazy(() => import('@/pages/ProfileComplete')); // ✅ Corrigé
-export const LazyWorkout = lazy(() => import('@/pages/WorkoutPage')); // ✅ Corrigé
-export const LazyNutrition = lazy(() => import('@/pages/Nutrition')); // ✅ Existe
-export const LazySleep = lazy(() => import('@/pages/Sleep')); // ✅ Existe
-export const LazyHydration = lazy(() => import('@/pages/Hydration')); // ✅ Existe
-export const LazySocial = lazy(() => import('@/pages/Social')); // ✅ Existe
+// === FEATURES-BASED IMPORTS ===
+export const LazySleep = lazy(() => import('@/features/sleep/pages/SleepPage'));
+export const LazySocial = lazy(() => import('@/features/social/pages/SocialPage'));
+export const LazyHydration = lazy(() => import('@/features/hydration/pages/HydrationPage'));
+export const LazyWorkout = lazy(() => import('@/features/workout/pages/WorkoutPage'));
 
-// === PAGES ADDITIONNELLES ===
-export const LazyAnalytics = lazy(() => import('@/pages/Analytics')); // ✅ Ajouté
-export const LazySettings = lazy(() => import('@/pages/settings')); // ✅ Ajouté
-export const LazyNotFound = lazy(() => import('@/pages/NotFound')); // ✅ Ajouté
-
-// === LAZY LOADING DES COMPOSANTS LOURDS ===
-// Note: Commentés car probablement non existants - à vérifier
-// export const LazySmartDashboard = lazy(() => import('@/components/SmartDashboard'));
-// export const LazyAIIntelligence = lazy(() => import('@/components/AIIntelligence'));
-export const LazyOnboardingQuestionnaire = lazy(() => import('@/components/OnboardingQuestionnaire'));
-// export const LazySocialDashboard = lazy(() => import('@/components/SocialDashboard'));
+// === LEGACY IMPORTS (à migrer) ===
+export const LazyNutrition = lazy(() => import('@/pages/Nutrition'));
+export const LazyProfile = lazy(() => import('@/pages/ProfileComplete'));
+export const LazySettings = lazy(() => import('@/pages/settings'));
+export const LazyAnalytics = lazy(() => import('@/pages/Analytics'));
+export const LazyNotFound = lazy(() => import('@/pages/NotFound'));
 
 // === COMPOSANT DE FALLBACK OPTIMISÉ ===
 export const OptimizedSuspenseFallback = ({ text = "Chargement..." }: { text?: string }) => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
     <div className="relative">
-      {/* Spinner principal */}
       <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-      {/* Spinner secondaire avec délai */}
-      <div 
-        className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin absolute top-2 left-2" 
-        style={{ animationDelay: '0.2s', animationDuration: '0.8s' }}
-      ></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <div className="w-6 h-6 bg-blue-600 rounded-full animate-pulse"></div>
+      </div>
     </div>
-    
-    {/* Texte avec animation */}
-    <div className="mt-4 text-center">
-      <p className="text-lg font-medium text-gray-600 animate-pulse">{text}</p>
-      <p className="mt-1 text-sm text-gray-400">MyFitHero</p>
-    </div>
-    
-    {/* Barre de progression animée */}
-    <div className="mt-6 w-48 h-1 bg-gray-200 rounded-full overflow-hidden">
-      <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+    <p className="mt-4 text-blue-600 font-medium animate-pulse">{text}</p>
+    <div className="mt-2 flex space-x-1">
+      {[...Array(3)].map((_, i) => (
+        <div 
+          key={i}
+          className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: `${i * 0.1}s` }}
+        />
+      ))}
     </div>
   </div>
 );
