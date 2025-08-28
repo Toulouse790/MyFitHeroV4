@@ -19,7 +19,17 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
-    "test:debug": "jest --detectOpenHandles --forceExit"
+    "test:debug": "jest --detectOpenHandles --forceExit",
+    "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "analyze": "npm run build && npx webpack-bundle-analyzer dist/static/js/*.js",
+    "analyze:source-map": "npm run build && npx source-map-explorer 'dist/static/js/*.js'",
+    "duplicates": "jscpd src --threshold 1 --format html --output ./reports/duplicates",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "pre-commit": "npm run format && npm run lint && npm run type-check && npm run test:ci"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
