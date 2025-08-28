@@ -7,6 +7,7 @@ import { Trophy, Star, Zap, Target, Crown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { BadgeService, UserBadge, BadgeProgress } from '@/services/badgeService';
 import { supabase } from '@/lib/supabase';
+import { RARITY_CONFIGS, type BadgeRarity } from '@/utils/badgeConfig';
 
 interface BadgeDisplayProps {
   className?: string;
@@ -76,19 +77,10 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
     }
   };
 
-  const getRarityColor = (rarity: string): string => {
-    switch (rarity) {
-      case 'common':
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-      case 'rare':
-        return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'epic':
-        return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'legendary':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300';
-    }
+  const getRarityClasses = (rarity: string): string => {
+    const rarityKey = rarity as BadgeRarity;
+    const config = RARITY_CONFIGS[rarityKey] || RARITY_CONFIGS.common;
+    return `${config.bgColor} ${config.textColor} ${config.borderColor}`;
   };
 
   const formatDate = (dateString: string): string => {
@@ -141,7 +133,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
                   key={item.badge.id}
                   className={`p-4 border-2 rounded-lg ${
                     item.isEarned 
-                      ? `${getRarityColor(item.badge.rarity)} bg-opacity-20` 
+                      ? `${getRarityClasses(item.badge.rarity)} bg-opacity-20` 
                       : 'bg-gray-50 border-gray-200'
                   }`}
                 >
@@ -149,7 +141,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
                     <div className="flex items-center space-x-3">
                       <div className={`p-2 rounded-lg ${
                         item.isEarned 
-                          ? getRarityColor(item.badge.rarity)
+                          ? getRarityClasses(item.badge.rarity)
                           : 'bg-gray-200 text-gray-600'
                       }`}>
                         {getBadgeIcon(item.badge.category)}
@@ -236,11 +228,11 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
               {displayBadges.map((userBadge) => (
                 <div 
                   key={userBadge.id}
-                  className={`p-4 border-2 rounded-lg ${getRarityColor(userBadge.badge?.rarity || 'common')} bg-opacity-20`}
+                  className={`p-4 border-2 rounded-lg ${getRarityClasses(userBadge.badge?.rarity || 'common')} bg-opacity-20`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${getRarityColor(userBadge.badge?.rarity || 'common')}`}>
+                      <div className={`p-2 rounded-lg ${getRarityClasses(userBadge.badge?.rarity || 'common')}`}>
                         {getBadgeIcon(userBadge.badge?.category || 'workout')}
                       </div>
                       <div>

@@ -1,6 +1,7 @@
 // client/src/components/BadgeNotification.tsx
 import React, { useState, useEffect } from 'react';
 import { Trophy, X, Share2, Eye, Star, Zap, Target, Award } from 'lucide-react';
+import { RARITY_CONFIGS, type BadgeRarity } from '@/utils/badgeConfig';
 
 interface BadgeNotificationProps {
   badge: {
@@ -39,44 +40,53 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
     }
   }, [isVisible, onClose]);
 
-  const getRarityConfig = (rarity: string) => {
-    switch (rarity) {
-      case 'legendary':
-        return {
-          bg: 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600',
-          border: 'border-yellow-400',
-          text: 'text-yellow-100',
-          glow: 'shadow-yellow-400/50',
-          particles: '✨'
-        };
-      case 'epic':
-        return {
-          bg: 'bg-gradient-to-br from-purple-500 via-indigo-600 to-blue-700',
-          border: 'border-purple-400',
-          text: 'text-purple-100',
-          glow: 'shadow-purple-400/50',
-          particles: '🌟'
-        };
-      case 'rare':
-        return {
-          bg: 'bg-gradient-to-br from-blue-500 via-cyan-600 to-teal-700',
-          border: 'border-blue-400',
-          text: 'text-blue-100',
-          glow: 'shadow-blue-400/50',
-          particles: '💎'
-        };
-      default:
-        return {
-          bg: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
-          border: 'border-green-400',
-          text: 'text-green-100',
-          glow: 'shadow-green-400/50',
-          particles: '🌱'
-        };
-    }
+  const getRarityDisplayConfig = (rarity: string) => {
+    const rarityKey = rarity as BadgeRarity;
+    const baseConfig = RARITY_CONFIGS[rarityKey] || RARITY_CONFIGS.common;
+    
+    // Configuration d'affichage spécifique pour les notifications avec gradients et animations
+    const displayConfigs = {
+      mythic: {
+        bg: 'bg-gradient-to-br from-red-500 via-pink-600 to-purple-700',
+        border: 'border-red-400',
+        text: 'text-red-100',
+        glow: 'shadow-red-400/50',
+        particles: '🔥'
+      },
+      legendary: {
+        bg: 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600',
+        border: 'border-yellow-400',
+        text: 'text-yellow-100',
+        glow: 'shadow-yellow-400/50',
+        particles: '✨'
+      },
+      epic: {
+        bg: 'bg-gradient-to-br from-purple-500 via-indigo-600 to-blue-700',
+        border: 'border-purple-400',
+        text: 'text-purple-100',
+        glow: 'shadow-purple-400/50',
+        particles: '🌟'
+      },
+      rare: {
+        bg: 'bg-gradient-to-br from-blue-500 via-cyan-600 to-teal-700',
+        border: 'border-blue-400',
+        text: 'text-blue-100',
+        glow: 'shadow-blue-400/50',
+        particles: '💎'
+      },
+      common: {
+        bg: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
+        border: 'border-green-400',
+        text: 'text-green-100',
+        glow: 'shadow-green-400/50',
+        particles: '🌱'
+      }
+    };
+
+    return displayConfigs[rarityKey] || displayConfigs.common;
   };
 
-  const config = getRarityConfig(badge.rarity);
+  const config = getRarityDisplayConfig(badge.rarity);
 
   if (!isVisible) return null;
 

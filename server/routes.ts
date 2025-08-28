@@ -54,8 +54,9 @@ function generateAdaptiveCoaching(userContext: any, currentState: any, goal: any
 
 // Génération de recommandations contextuelles (simulation n8n)
 function generateContextualRecommendations(context: any, userProfile: any, currentTime: any) {
-  const hour = new Date().getHours();
-  const day = new Date().getDay();
+  const date = currentTime ? new Date(currentTime) : new Date();
+  const hour = date.getHours();
+  const day = date.getDay();
   const isWeekend = [0, 6].includes(day);
   
   const recommendations = [];
@@ -215,10 +216,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analyse prédictive des patterns utilisateur
   app.post("/api/ai/analyze-patterns", authenticateToken, async (req: Request, res: Response) => {
     try {
-      if (!isAuthenticatedRequest(req)) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-
       const { pillar, timeframe = '7d' } = req.body;
       
       // Simulation d'analyse prédictive avancée
@@ -280,10 +277,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Coaching adaptatif personnalisé
   app.post("/api/ai/adaptive-coaching", authenticateToken, async (req: Request, res: Response) => {
     try {
-      if (!isAuthenticatedRequest(req)) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-
       const { user_context, current_state, goal } = req.body;
       
       // Simulation de coaching IA contextuel
@@ -315,10 +308,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Détection d'anomalies intelligente
   app.post("/api/ai/detect-anomalies", authenticateToken, async (req: Request, res: Response) => {
     try {
-      if (!isAuthenticatedRequest(req)) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-
       const { data_points, pillar } = req.body;
       
       // Simulation de détection d'anomalies
@@ -357,10 +346,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Prédictions personnalisées
   app.post("/api/ai/predictions", authenticateToken, async (req: Request, res: Response) => {
     try {
-      if (!isAuthenticatedRequest(req)) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-
       const { horizon = '7d' } = req.body;
       
       const predictions = {
@@ -395,10 +380,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Route de recommandations contextuelles n8n
   app.post("/api/ai/contextual-recommendations", authenticateToken, async (req: Request, res: Response) => {
     try {
-      if (!isAuthenticatedRequest(req)) {
-        return res.status(401).json({ message: 'Authentication required' });
-      }
-
       const { context, user_profile, current_time } = req.body;
       
       // Simulation d'intégration n8n pour recommandations contextuelles
