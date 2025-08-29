@@ -1,7 +1,3 @@
-/**
- * Configuration Jest pour l'application MyFitHero
- * Configuration complète avec support MSW, TypeScript et React Testing Library
- */
 
 export default {
   preset: 'ts-jest',

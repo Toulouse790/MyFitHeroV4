@@ -14,30 +14,22 @@
     "vercel-build": "cd client && vite build",
     "preview": "cd client && vite preview",
     "start": "cd client && vite preview",
-
     "check": "tsc",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch",
-
     "prepare": "echo 'Ready'",
-
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
     "test:debug": "jest --detectOpenHandles --forceExit",
-
     "lint": "eslint client/src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint client/src --ext .ts,.tsx --fix",
-
     "format": "prettier --write \"client/src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"client/src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
-
     "analyze": "npm run build && npx webpack-bundle-analyzer client/dist/assets/*.js",
     "analyze:source-map": "npm run build && npx source-map-explorer 'client/dist/assets/*.js'",
-
     "duplicates": "jscpd client/src --threshold 1 --format html --output ./reports/duplicates",
-
     "pre-commit": "npm run format:check && npm run lint && npm run type-check && npm run test:ci"
   },
   "dependencies": {
@@ -155,11 +147,11 @@
     "postcss": "^8.4.47",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.17",
-    "ts-jest": "^29.4.1",
     "tsx": "^4.19.1",
     "typescript": "5.6.3",
     "vite": "^5.4.14",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "whatwg-fetch": "^3.6.20"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
