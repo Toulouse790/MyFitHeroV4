@@ -18,21 +18,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22.x'
-        cache: 'pnpm'
-
-    - name: Install pnpm 🔧
-      uses: pnpm/action-setup@v2
-      with:
-        version: 8
+        cache: 'npm'   # <<< on force npm
 
     - name: Install dependencies 📥
-      run: pnpm install --no-frozen-lockfile
+      run: npm ci     # <<< npm au lieu de pnpm
 
     - name: TypeScript Check 🔍
       run: cd client && npx tsc --noEmit --skipLibCheck
 
     - name: Build 🔨
-      run: pnpm build
+      run: npm run build
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -46,7 +41,7 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./client/dist
-        cname: myfithero.com # Remplacer par votre domaine
+        cname: myfithero.com # Remplace par ton domaine réel si tu en as un
 
     - name: Upload artifacts 📋
       uses: actions/upload-artifact@v4.6.2
