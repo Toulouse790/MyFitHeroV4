@@ -1,0 +1,2 @@
+import{r as o,j as r}from"./index-Dc4E0O40.js";import{e as t}from"./badge-BbLtXON1.js";const i=o.forwardRef(({className:s,value:a,...e},l)=>r.jsx("div",{ref:l,className:t("relative h-4 w-full overflow-hidden rounded-full bg-secondary",s),...e,children:r.jsx("div",{className:"h-full w-full flex-1 bg-primary transition-all",style:{transform:`translateX(-${100-(a||0)}%)`}})}));i.displayName="Progress";export{i as P};
+//# sourceMappingURL=progress-EDxYGVw0.js.map

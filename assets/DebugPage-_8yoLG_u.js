@@ -1,0 +1,2 @@
+import{j as e}from"./index-Dc4E0O40.js";const t=()=>e.jsxs("div",{className:"p-4",children:[e.jsx("h2",{className:"text-2xl font-bold mb-4",children:"Page de Debug"}),e.jsx("div",{className:"bg-white rounded-lg shadow p-6",children:e.jsx("p",{className:"text-gray-600",children:"Les outils de debug seront bientôt disponibles."})})]});export{t as default};
+//# sourceMappingURL=DebugPage-_8yoLG_u.js.map

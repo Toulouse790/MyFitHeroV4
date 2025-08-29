@@ -1,0 +1,63 @@
+{
+  "name": "MyFitHero",
+  "short_name": "MyFitHero",
+  "description": "Application de fitness intelligente avec IA - Suivi complet d'entraînement, nutrition, sommeil et hydratation",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "categories": ["health", "fitness", "sports"],
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/placeholder.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/placeholder.svg", 
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouvel entraînement",
+      "url": "/workout",
+      "description": "Démarrer un nouvel entraînement"
+    },
+    {
+      "name": "Nutrition",
+      "url": "/nutrition", 
+      "description": "Suivre votre nutrition"
+    },
+    {
+      "name": "Hydratation",
+      "url": "/hydration",
+      "description": "Enregistrer votre hydratation"
+    },
+    {
+      "name": "Profil",
+      "url": "/profile",
+      "description": "Voir votre profil"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ]
+}

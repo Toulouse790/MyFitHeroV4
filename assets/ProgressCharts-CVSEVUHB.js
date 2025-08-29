@@ -1,0 +1,2 @@
+import{j as s}from"./index-Dc4E0O40.js";const r=()=>s.jsxs("div",{className:"p-4",children:[s.jsx("h2",{className:"text-2xl font-bold mb-4",children:"Graphiques de Progrès"}),s.jsx("div",{className:"bg-white rounded-lg shadow p-6",children:s.jsx("p",{className:"text-gray-600",children:"Les graphiques de progrès seront bientôt disponibles."})})]});export{r as default};
+//# sourceMappingURL=ProgressCharts-CVSEVUHB.js.map
