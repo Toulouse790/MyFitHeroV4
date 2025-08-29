@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UnitSystem, UnitPreferences, getUnitSystemFromLocale, getUnitPreferences } from '@/utils/unitConversion';
+import {
+  UnitSystem,
+  UnitPreferences,
+  getUnitSystemFromLocale,
+  getUnitPreferences,
+} from '@/utils/unitConversion';
 
 export interface UserPreferences {
   language: string;
@@ -19,7 +24,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   dateFormat: 'MM/DD/YYYY',
   timeFormat: '12h',
   currency: 'USD',
-  theme: 'system'
+  theme: 'system',
 };
 
 export const useUserPreferences = () => {
@@ -44,7 +49,7 @@ export const useUserPreferences = () => {
             unitSystem: detectedSystem,
             units: getUnitPreferences(detectedSystem),
             dateFormat: detectedSystem === 'imperial' ? 'MM/DD/YYYY' : 'DD/MM/YYYY',
-            currency: detectedSystem === 'imperial' ? 'USD' : 'EUR'
+            currency: detectedSystem === 'imperial' ? 'USD' : 'EUR',
           };
           setPreferences(detectedPrefs);
           localStorage.setItem('userPreferences', JSON.stringify(detectedPrefs));
@@ -65,7 +70,7 @@ export const useUserPreferences = () => {
     const updated = { ...preferences, ...newPreferences };
     setPreferences(updated);
     localStorage.setItem('userPreferences', JSON.stringify(updated));
-    
+
     // Changer la langue si nécessaire
     if (newPreferences.language && newPreferences.language !== i18n.language) {
       i18n.changeLanguage(newPreferences.language);
@@ -80,7 +85,7 @@ export const useUserPreferences = () => {
       units: newUnits,
       dateFormat: system === 'imperial' ? 'MM/DD/YYYY' : 'DD/MM/YYYY',
       timeFormat: system === 'imperial' ? '12h' : '24h',
-      currency: system === 'imperial' ? 'USD' : 'EUR'
+      currency: system === 'imperial' ? 'USD' : 'EUR',
     };
     savePreferences(updates);
   };
@@ -93,7 +98,7 @@ export const useUserPreferences = () => {
       unitSystem: system,
       units: getUnitPreferences(system),
       dateFormat: system === 'imperial' ? 'MM/DD/YYYY' : 'DD/MM/YYYY',
-      currency: system === 'imperial' ? 'USD' : 'EUR'
+      currency: system === 'imperial' ? 'USD' : 'EUR',
     };
     savePreferences(updates);
   };
@@ -103,7 +108,7 @@ export const useUserPreferences = () => {
     const options: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
     };
 
     switch (preferences.dateFormat) {
@@ -123,7 +128,7 @@ export const useUserPreferences = () => {
     const options: Intl.DateTimeFormatOptions = {
       hour: '2-digit',
       minute: '2-digit',
-      hour12: preferences.timeFormat === '12h'
+      hour12: preferences.timeFormat === '12h',
     };
     return date.toLocaleTimeString(preferences.language, options);
   };
@@ -132,7 +137,7 @@ export const useUserPreferences = () => {
   const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat(preferences.language, {
       style: 'currency',
-      currency: preferences.currency
+      currency: preferences.currency,
     }).format(amount);
   };
 
@@ -140,15 +145,17 @@ export const useUserPreferences = () => {
   const formatNumber = (number: number, decimals: number = 2): string => {
     return new Intl.NumberFormat(preferences.language, {
       minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      maximumFractionDigits: decimals,
     }).format(number);
   };
 
   // Détection si l'utilisateur est aux US
   const isUSUser = (): boolean => {
-    return preferences.unitSystem === 'imperial' && 
-           preferences.language.startsWith('en') && 
-           preferences.currency === 'USD';
+    return (
+      preferences.unitSystem === 'imperial' &&
+      preferences.language.startsWith('en') &&
+      preferences.currency === 'USD'
+    );
   };
 
   return {
@@ -161,6 +168,6 @@ export const useUserPreferences = () => {
     formatTime,
     formatCurrency,
     formatNumber,
-    isUSUser
+    isUSUser,
   };
 };

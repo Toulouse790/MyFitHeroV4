@@ -20,7 +20,13 @@ export interface UserProfile {
   gender: 'male' | 'female' | 'other' | null;
   height: number | null;
   weight: number | null;
-  activity_level: 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extra_active' | null;
+  activity_level:
+    | 'sedentary'
+    | 'lightly_active'
+    | 'moderately_active'
+    | 'very_active'
+    | 'extra_active'
+    | null;
   fitness_goals: string[] | null;
   sport: string | null;
   sport_position: string | null;
@@ -183,7 +189,13 @@ export interface UserAnalytics {
 export interface UserAchievement {
   id: string;
   user_id: string;
-  achievement_type: 'workout_streak' | 'weight_loss' | 'distance_goal' | 'strength_pr' | 'consistency' | 'other';
+  achievement_type:
+    | 'workout_streak'
+    | 'weight_loss'
+    | 'distance_goal'
+    | 'strength_pr'
+    | 'consistency'
+    | 'other';
   title: string;
   description: string;
   icon: string | null;

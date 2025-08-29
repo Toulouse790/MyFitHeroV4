@@ -30,7 +30,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
     weight: initialData?.weight || 0,
     height: initialData?.height || 0,
     lifestyle: initialData?.lifestyle || 'office_worker',
-    availableTimePerDay: initialData?.availableTimePerDay || 60
+    availableTimePerDay: initialData?.availableTimePerDay || 60,
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -38,10 +38,10 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
 
   const tips = [
     "Métabolisme change avec l'âge",
-    "Différences hormonales importantes",
-    "Mesures précises = calculs justes",
-    "Influence besoins énergétiques quotidiens",
-    "Optimise programme selon disponibilité"
+    'Différences hormonales importantes',
+    'Mesures précises = calculs justes',
+    'Influence besoins énergétiques quotidiens',
+    'Optimise programme selon disponibilité',
   ];
 
   const steps = [
@@ -49,7 +49,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
     { id: 'gender', title: 'Genre', icon: User },
     { id: 'morphology', title: 'Morphologie', icon: Weight },
     { id: 'lifestyle', title: 'Style de vie', icon: Briefcase },
-    { id: 'time', title: 'Temps disponible', icon: Clock }
+    { id: 'time', title: 'Temps disponible', icon: Clock },
   ];
 
   const validateCurrentStep = () => {
@@ -59,9 +59,14 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
       case 1: // Gender
         return ['male', 'female'].includes(formData.gender);
       case 2: // Morphology
-        return formData.weight >= 45 && formData.weight <= 200 && 
-               formData.height >= 120 && formData.height <= 230 &&
-               formData.weight > 0 && formData.height > 0;
+        return (
+          formData.weight >= 45 &&
+          formData.weight <= 200 &&
+          formData.height >= 120 &&
+          formData.height <= 230 &&
+          formData.weight > 0 &&
+          formData.height > 0
+        );
       case 3: // Lifestyle
         return LIFESTYLE_OPTIONS.some(option => option.id === formData.lifestyle);
       case 4: // Time
@@ -122,16 +127,16 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-4">
               <div className="text-center">
                 <span className="text-4xl font-bold text-blue-600">{formData.age} ans</span>
               </div>
-              
+
               <div className="px-4">
                 <Slider
                   value={[formData.age]}
-                  onValueChange={(value) => setFormData({...formData, age: value[0]})}
+                  onValueChange={value => setFormData({ ...formData, age: value[0] })}
                   min={13}
                   max={100}
                   step={1}
@@ -142,12 +147,12 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                   <span>100 ans</span>
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <Input
                   type="number"
                   value={formData.age}
-                  onChange={(e) => setFormData({...formData, age: Number(e.target.value)})}
+                  onChange={e => setFormData({ ...formData, age: Number(e.target.value) })}
                   className="w-24 mx-auto text-center"
                   min="13"
                   max="100"
@@ -188,20 +193,22 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-3">
               {[
                 { id: 'male', label: 'Homme', emoji: '👨' },
-                { id: 'female', label: 'Femme', emoji: '👩' }
-              ].map((option) => (
+                { id: 'female', label: 'Femme', emoji: '👩' },
+              ].map(option => (
                 <button
                   key={option.id}
-                  onClick={() => setFormData({...formData, gender: option.id as 'male' | 'female'})}
+                  onClick={() =>
+                    setFormData({ ...formData, gender: option.id as 'male' | 'female' })
+                  }
                   className={cn(
-                    "w-full p-4 rounded-lg border-2 text-left transition-all duration-200 hover:shadow-md",
+                    'w-full p-4 rounded-lg border-2 text-left transition-all duration-200 hover:shadow-md',
                     formData.gender === option.id
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
                   <div className="flex items-center space-x-3">
@@ -209,9 +216,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                     <div className="flex-1">
                       <div className="font-semibold">{option.label}</div>
                     </div>
-                    {formData.gender === option.id && (
-                      <Check className="h-5 w-5 text-blue-600" />
-                    )}
+                    {formData.gender === option.id && <Check className="h-5 w-5 text-blue-600" />}
                   </div>
                 </button>
               ))}
@@ -235,7 +240,9 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                   <Star className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-gray-600">Nous avons besoin de ces informations pour des calculs précis</p>
+              <p className="text-gray-600">
+                Nous avons besoin de ces informations pour des calculs précis
+              </p>
               {showTip && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
                   <Button
@@ -250,7 +257,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-6">
               {/* Poids */}
               <div className="space-y-3">
@@ -263,7 +270,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                     min="45"
                     max="200"
                     value={formData.weight || 70}
-                    onChange={(e) => setFormData({...formData, weight: parseInt(e.target.value)})}
+                    onChange={e => setFormData({ ...formData, weight: parseInt(e.target.value) })}
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -278,7 +285,9 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                     max="200"
                     value={formData.weight || ''}
                     placeholder="70"
-                    onChange={(e) => setFormData({...formData, weight: parseInt(e.target.value) || 0})}
+                    onChange={e =>
+                      setFormData({ ...formData, weight: parseInt(e.target.value) || 0 })
+                    }
                     className="w-20 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-500">kg</span>
@@ -296,7 +305,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                     min="120"
                     max="230"
                     value={formData.height || 175}
-                    onChange={(e) => setFormData({...formData, height: parseInt(e.target.value)})}
+                    onChange={e => setFormData({ ...formData, height: parseInt(e.target.value) })}
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -311,7 +320,9 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                     max="230"
                     value={formData.height || ''}
                     placeholder="175"
-                    onChange={(e) => setFormData({...formData, height: parseInt(e.target.value) || 0})}
+                    onChange={e =>
+                      setFormData({ ...formData, height: parseInt(e.target.value) || 0 })
+                    }
                     className="w-20 px-3 py-2 border border-gray-300 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-sm text-gray-500">cm</span>
@@ -337,7 +348,9 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                   <Star className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-gray-600">Cela influence vos besoins nutritionnels et d'entraînement</p>
+              <p className="text-gray-600">
+                Cela influence vos besoins nutritionnels et d'entraînement
+              </p>
               {showTip && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
                   <Button
@@ -352,17 +365,26 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-3">
-              {LIFESTYLE_OPTIONS.map((option) => (
+              {LIFESTYLE_OPTIONS.map(option => (
                 <button
                   key={option.id}
-                  onClick={() => setFormData({...formData, lifestyle: option.id as 'student' | 'office_worker' | 'physical_job' | 'retired'})}
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      lifestyle: option.id as
+                        | 'student'
+                        | 'office_worker'
+                        | 'physical_job'
+                        | 'retired',
+                    })
+                  }
                   className={cn(
-                    "w-full p-4 rounded-lg border-2 text-left transition-all duration-200 hover:shadow-md",
+                    'w-full p-4 rounded-lg border-2 text-left transition-all duration-200 hover:shadow-md',
                     formData.lifestyle === option.id
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
                   )}
                 >
                   <div className="flex items-center space-x-3">
@@ -396,7 +418,9 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                   <Star className="h-4 w-4" />
                 </Button>
               </div>
-              <p className="text-gray-600">Combien de temps pouvez-vous consacrer à votre santé ?</p>
+              <p className="text-gray-600">
+                Combien de temps pouvez-vous consacrer à votre santé ?
+              </p>
               {showTip && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 relative">
                   <Button
@@ -411,18 +435,20 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-4">
               <div className="text-center">
                 <span className="text-4xl font-bold text-blue-600">
                   {formData.availableTimePerDay} min
                 </span>
               </div>
-              
+
               <div className="px-4">
                 <Slider
                   value={[formData.availableTimePerDay]}
-                  onValueChange={(value) => setFormData({...formData, availableTimePerDay: value[0]})}
+                  onValueChange={value =>
+                    setFormData({ ...formData, availableTimePerDay: value[0] })
+                  }
                   min={15}
                   max={300}
                   step={15}
@@ -433,27 +459,27 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                   <span>5h</span>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2">
-                {[30, 45, 60, 90, 120, 180].map((time) => (
+                {[30, 45, 60, 90, 120, 180].map(time => (
                   <button
                     key={time}
-                    onClick={() => setFormData({...formData, availableTimePerDay: time})}
+                    onClick={() => setFormData({ ...formData, availableTimePerDay: time })}
                     className={cn(
-                      "p-3 rounded-lg border text-center transition-all duration-200",
+                      'p-3 rounded-lg border text-center transition-all duration-200',
                       formData.availableTimePerDay === time
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-gray-200 hover:border-gray-300"
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
                     )}
                   >
                     <div className="font-semibold">{time} min</div>
                     <div className="text-xs text-gray-600">
-                      {time === 30 && "Rapide"}
-                      {time === 45 && "Optimal"}
-                      {time === 60 && "Complet"}
-                      {time === 90 && "Étendu"}
-                      {time === 120 && "Intensif"}
-                      {time === 180 && "Dévoué"}
+                      {time === 30 && 'Rapide'}
+                      {time === 45 && 'Optimal'}
+                      {time === 60 && 'Complet'}
+                      {time === 90 && 'Étendu'}
+                      {time === 120 && 'Intensif'}
+                      {time === 180 && 'Dévoué'}
                     </div>
                   </button>
                 ))}
@@ -476,14 +502,16 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
             const Icon = step.icon;
             return (
               <div key={step.id} className="flex items-center">
-                <div className={cn(
-                  "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200",
-                  index < currentStep 
-                    ? "bg-blue-500 border-blue-500 text-white"
-                    : index === currentStep 
-                    ? "bg-blue-50 border-blue-500 text-blue-600"
-                    : "bg-gray-100 border-gray-300 text-gray-400"
-                )}>
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200',
+                    index < currentStep
+                      ? 'bg-blue-500 border-blue-500 text-white'
+                      : index === currentStep
+                        ? 'bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-gray-100 border-gray-300 text-gray-400'
+                  )}
+                >
                   {index < currentStep ? (
                     <Check className="h-5 w-5" />
                   ) : (
@@ -491,16 +519,18 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
                   )}
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={cn(
-                    "w-12 h-0.5 mx-2 transition-all duration-200",
-                    index < currentStep ? "bg-blue-500" : "bg-gray-200"
-                  )} />
+                  <div
+                    className={cn(
+                      'w-12 h-0.5 mx-2 transition-all duration-200',
+                      index < currentStep ? 'bg-blue-500' : 'bg-gray-200'
+                    )}
+                  />
                 )}
               </div>
             );
           })}
         </div>
-        
+
         <div className="text-center">
           <Badge variant="outline" className="text-sm">
             Étape {currentStep + 1} sur {steps.length}
@@ -510,9 +540,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
 
       {/* Step content */}
       <Card>
-        <CardContent className="p-8">
-          {renderStepContent()}
-        </CardContent>
+        <CardContent className="p-8">{renderStepContent()}</CardContent>
       </Card>
 
       {/* Navigation buttons */}
@@ -525,7 +553,7 @@ export default function PersonalInfoForm({ onComplete, initialData }: PersonalIn
         >
           Précédent
         </Button>
-        
+
         <Button
           onClick={handleNext}
           disabled={!validateCurrentStep()}

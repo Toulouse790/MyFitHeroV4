@@ -24,7 +24,9 @@ export const useSocialStore = create<SocialStore>()(
       loadProfile: async () => {
         set({ isLoading: true, error: null });
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { data, error } = await supabase
@@ -42,13 +44,13 @@ export const useSocialStore = create<SocialStore>()(
       },
 
       // Actions - Placeholder implementations
-  updateProfile: async (updates: any) => {
-    set((state: any) => ({
-      profile: state.profile ? { ...state.profile, ...updates } : null
-    }));
-    
-    // TODO: Implement Supabase call when types are ready
-    /*
+      updateProfile: async (updates: any) => {
+        set((state: any) => ({
+          profile: state.profile ? { ...state.profile, ...updates } : null,
+        }));
+
+        // TODO: Implement Supabase call when types are ready
+        /*
     try {
       const { error } = await supabase
         .from('social_profiles')
@@ -60,18 +62,18 @@ export const useSocialStore = create<SocialStore>()(
       console.error('Error updating profile:', error);
     }
     */
-  },
+      },
 
-      updatePrivacySettings: async (settings) => {
+      updatePrivacySettings: async settings => {
         await get().updateProfile({ privacy: settings });
       },
 
       // Actions - Friends
       loadFriends: async () => {
-    set((state: any) => ({ ...state, loading: { ...state.loading, friends: true } }));
-    
-    // TODO: Implement Supabase call when types are ready
-    /*
+        set((state: any) => ({ ...state, loading: { ...state.loading, friends: true } }));
+
+        // TODO: Implement Supabase call when types are ready
+        /*
     try {
       const { data, error } = await supabase
         .from('friends')
@@ -95,10 +97,10 @@ export const useSocialStore = create<SocialStore>()(
       }));
     }
     */
-    set((state: any) => ({ ...state, loading: { ...state.loading, friends: false } }));
-  },
+        set((state: any) => ({ ...state, loading: { ...state.loading, friends: false } }));
+      },
 
-      searchUsers: async (query) => {
+      searchUsers: async query => {
         try {
           const { data, error } = await supabase
             .from('social_profiles')
@@ -114,19 +116,21 @@ export const useSocialStore = create<SocialStore>()(
         }
       },
 
-      sendFriendRequest: async (userId) => {
+      sendFriendRequest: async userId => {
         set({ isLoading: true, error: null });
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
-          const { error } = await supabase
-            .from('friends')
-            .insert([{
+          const { error } = await supabase.from('friends').insert([
+            {
               userId: user.id,
               friendId: userId,
-              status: 'pending'
-            }]);
+              status: 'pending',
+            },
+          ]);
 
           if (error) throw error;
 
@@ -136,7 +140,7 @@ export const useSocialStore = create<SocialStore>()(
         }
       },
 
-      acceptFriendRequest: async (requestId) => {
+      acceptFriendRequest: async requestId => {
         set({ isLoading: true, error: null });
         try {
           const { error } = await supabase
@@ -152,19 +156,16 @@ export const useSocialStore = create<SocialStore>()(
         }
       },
 
-      removeFriend: async (friendId) => {
+      removeFriend: async friendId => {
         set({ isLoading: true, error: null });
         try {
-          const { error } = await supabase
-            .from('friends')
-            .delete()
-            .eq('friendId', friendId);
+          const { error } = await supabase.from('friends').delete().eq('friendId', friendId);
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             friends: state.friends.filter(f => f.friendId !== friendId),
-            isLoading: false
+            isLoading: false,
           }));
         } catch (error: any) {
           set({ error: error.message, isLoading: false });
@@ -177,11 +178,13 @@ export const useSocialStore = create<SocialStore>()(
         try {
           const { data, error } = await supabase
             .from('activity_posts')
-            .select(`
+            .select(
+              `
               *,
               author:social_profiles!activity_posts_userId_fkey(*),
               comments(*)
-            `)
+            `
+            )
             .order('created_at', { ascending: false })
             .limit(20);
 
@@ -193,55 +196,59 @@ export const useSocialStore = create<SocialStore>()(
         }
       },
 
-      createPost: async (postData) => {
+      createPost: async postData => {
         set({ isLoading: true, error: null });
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { data, error } = await supabase
             .from('activity_posts')
-            .insert([{
-              ...postData,
-              userId: user.id,
-              likes: 0,
-              shares: 0,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            }])
+            .insert([
+              {
+                ...postData,
+                userId: user.id,
+                likes: 0,
+                shares: 0,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              },
+            ])
             .select()
             .single();
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             posts: [data, ...state.posts],
-            isLoading: false
+            isLoading: false,
           }));
         } catch (error: any) {
           set({ error: error.message, isLoading: false });
         }
       },
 
-      likePost: async (postId) => {
+      likePost: async postId => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           // Incrémenter les likes
           const { error } = await supabase.rpc('increment_post_likes', {
-            post_id: postId
+            post_id: postId,
           });
 
           if (error) throw error;
 
           // Mettre à jour localement
-          set((state) => ({
+          set(state => ({
             posts: state.posts.map(post =>
-              post.id === postId 
-                ? { ...post, likes: post.likes + 1 }
-                : post
-            )
+              post.id === postId ? { ...post, likes: post.likes + 1 } : post
+            ),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -250,50 +257,50 @@ export const useSocialStore = create<SocialStore>()(
 
       commentOnPost: async (postId, content) => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { data, error } = await supabase
             .from('comments')
-            .insert([{
-              postId,
-              userId: user.id,
-              content,
-              likes: 0,
-              created_at: new Date().toISOString()
-            }])
+            .insert([
+              {
+                postId,
+                userId: user.id,
+                content,
+                likes: 0,
+                created_at: new Date().toISOString(),
+              },
+            ])
             .select()
             .single();
 
           if (error) throw error;
 
           // Mettre à jour le post localement
-          set((state) => ({
+          set(state => ({
             posts: state.posts.map(post =>
-              post.id === postId 
-                ? { ...post, comments: [...post.comments, data] }
-                : post
-            )
+              post.id === postId ? { ...post, comments: [...post.comments, data] } : post
+            ),
           }));
         } catch (error: any) {
           set({ error: error.message });
         }
       },
 
-      sharePost: async (postId) => {
+      sharePost: async postId => {
         try {
           const { error } = await supabase.rpc('increment_post_shares', {
-            post_id: postId
+            post_id: postId,
           });
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             posts: state.posts.map(post =>
-              post.id === postId 
-                ? { ...post, shares: post.shares + 1 }
-                : post
-            )
+              post.id === postId ? { ...post, shares: post.shares + 1 } : post
+            ),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -306,11 +313,13 @@ export const useSocialStore = create<SocialStore>()(
         try {
           const { data, error } = await supabase
             .from('challenges')
-            .select(`
+            .select(
+              `
               *,
               creator:social_profiles!challenges_creatorId_fkey(*),
               participants:challenge_participants(*)
-            `)
+            `
+            )
             .eq('status', 'active')
             .order('created_at', { ascending: false });
 
@@ -322,49 +331,55 @@ export const useSocialStore = create<SocialStore>()(
         }
       },
 
-      createChallenge: async (challengeData) => {
+      createChallenge: async challengeData => {
         set({ isLoading: true, error: null });
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { data, error } = await supabase
             .from('challenges')
-            .insert([{
-              ...challengeData,
-              creatorId: user.id,
-              status: 'active',
-              created_at: new Date().toISOString()
-            }])
+            .insert([
+              {
+                ...challengeData,
+                creatorId: user.id,
+                status: 'active',
+                created_at: new Date().toISOString(),
+              },
+            ])
             .select()
             .single();
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             challenges: [data, ...state.challenges],
-            isLoading: false
+            isLoading: false,
           }));
         } catch (error: any) {
           set({ error: error.message, isLoading: false });
         }
       },
 
-      joinChallenge: async (challengeId) => {
+      joinChallenge: async challengeId => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
-          const { error } = await supabase
-            .from('challenge_participants')
-            .insert([{
+          const { error } = await supabase.from('challenge_participants').insert([
+            {
               challengeId,
               userId: user.id,
               progress: 0,
               rank: 0,
               completed: false,
-              joinedAt: new Date().toISOString()
-            }]);
+              joinedAt: new Date().toISOString(),
+            },
+          ]);
 
           if (error) throw error;
 
@@ -376,7 +391,9 @@ export const useSocialStore = create<SocialStore>()(
 
       updateChallengeProgress: async (challengeId, progress) => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { error } = await supabase
@@ -396,7 +413,9 @@ export const useSocialStore = create<SocialStore>()(
       // Actions - Notifications
       loadNotifications: async () => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { data, error } = await supabase
@@ -414,7 +433,7 @@ export const useSocialStore = create<SocialStore>()(
         }
       },
 
-      markNotificationRead: async (notificationId) => {
+      markNotificationRead: async notificationId => {
         try {
           const { error } = await supabase
             .from('notifications')
@@ -423,12 +442,10 @@ export const useSocialStore = create<SocialStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             notifications: state.notifications.map(notif =>
-              notif.id === notificationId 
-                ? { ...notif, read: true }
-                : notif
-            )
+              notif.id === notificationId ? { ...notif, read: true } : notif
+            ),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -437,7 +454,9 @@ export const useSocialStore = create<SocialStore>()(
 
       markAllNotificationsRead: async () => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Non authentifié');
 
           const { error } = await supabase
@@ -448,10 +467,8 @@ export const useSocialStore = create<SocialStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
-            notifications: state.notifications.map(notif =>
-              ({ ...notif, read: true })
-            )
+          set(state => ({
+            notifications: state.notifications.map(notif => ({ ...notif, read: true })),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -463,10 +480,12 @@ export const useSocialStore = create<SocialStore>()(
         try {
           const { data, error } = await supabase
             .from('leaderboard')
-            .select(`
+            .select(
+              `
               *,
               profile:social_profiles(*)
-            `)
+            `
+            )
             .eq('category', category)
             .eq('period', period)
             .order('rank', { ascending: true })
@@ -483,7 +502,9 @@ export const useSocialStore = create<SocialStore>()(
       // Actions - Real-time
       connectRealTime: () => {
         // Implémentation WebSocket/Supabase Realtime
-        const { data: { user } } = supabase.auth.getUser();
+        const {
+          data: { user },
+        } = supabase.auth.getUser();
         // ... logique de connexion temps réel
         set({ realTimeConnected: true });
       },
@@ -492,36 +513,37 @@ export const useSocialStore = create<SocialStore>()(
         set({ realTimeConnected: false });
       },
 
-      handleRealTimeEvent: (event) => {
+      handleRealTimeEvent: event => {
         // Gestion des événements temps réel
         console.log('Real-time event:', event);
       },
 
       // Actions - Utility
-      setSearchQuery: (query) => set({ searchQuery: query }),
-      
-      setFilters: (filters) => set({ selectedFilters: filters }),
-      
+      setSearchQuery: query => set({ searchQuery: query }),
+
+      setFilters: filters => set({ selectedFilters: filters }),
+
       clearError: () => set({ error: null }),
-      
-      resetStore: () => set({
-        profile: null,
-        friends: [],
-        posts: [],
-        challenges: [],
-        notifications: [],
-        leaderboard: [],
-        searchQuery: '',
-        selectedFilters: [],
-        activeChallengeId: null,
-        isLoading: false,
-        error: null,
-        realTimeConnected: false,
-      }),
+
+      resetStore: () =>
+        set({
+          profile: null,
+          friends: [],
+          posts: [],
+          challenges: [],
+          notifications: [],
+          leaderboard: [],
+          searchQuery: '',
+          selectedFilters: [],
+          activeChallengeId: null,
+          isLoading: false,
+          error: null,
+          realTimeConnected: false,
+        }),
     }),
     {
       name: 'social-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         profile: state.profile,
         friends: state.friends,
         posts: state.posts.slice(0, 10), // Limite pour la persistence

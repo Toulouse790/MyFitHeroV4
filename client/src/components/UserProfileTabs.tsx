@@ -5,7 +5,7 @@ const tabs = [
   { id: 'general', label: 'Général' },
   { id: 'goals', label: 'Objectifs' },
   { id: 'recovery', label: 'Récupération' },
-  { id: 'settings', label: 'Paramètres' }
+  { id: 'settings', label: 'Paramètres' },
 ];
 
 interface UserProfileTabsProps {
@@ -13,10 +13,7 @@ interface UserProfileTabsProps {
   onTabChange?: (tabId: string) => void;
 }
 
-const UserProfileTabs: React.FC<UserProfileTabsProps> = ({ 
-  className = '',
-  onTabChange
-}) => {
+const UserProfileTabs: React.FC<UserProfileTabsProps> = ({ className = '', onTabChange }) => {
   const [activeTab, setActiveTab] = useState('general');
 
   const handleTabClick = (tabId: string) => {
@@ -28,7 +25,7 @@ const UserProfileTabs: React.FC<UserProfileTabsProps> = ({
     <div className={`bg-white rounded-xl shadow-sm ${className}`}>
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8 px-6" aria-label="Tabs">
-          {tabs.map((tab) => (
+          {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
@@ -43,7 +40,7 @@ const UserProfileTabs: React.FC<UserProfileTabsProps> = ({
           ))}
         </nav>
       </div>
-      
+
       <div className="p-6">
         {activeTab === 'general' && (
           <div>
@@ -51,21 +48,21 @@ const UserProfileTabs: React.FC<UserProfileTabsProps> = ({
             <p className="text-gray-600">Contenu de l'onglet général...</p>
           </div>
         )}
-        
+
         {activeTab === 'goals' && (
           <div>
             <h3 className="text-lg font-semibold mb-4">Objectifs</h3>
             <p className="text-gray-600">Contenu de l'onglet objectifs...</p>
           </div>
         )}
-        
+
         {activeTab === 'recovery' && (
           <div>
             <h3 className="text-lg font-semibold mb-4">Récupération</h3>
             <p className="text-gray-600">Contenu de l'onglet récupération...</p>
           </div>
         )}
-        
+
         {activeTab === 'settings' && (
           <div>
             <h3 className="text-lg font-semiblient mb-4">Paramètres</h3>

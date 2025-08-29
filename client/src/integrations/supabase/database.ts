@@ -5,12 +5,40 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type PillarType = 'workout' | 'nutrition' | 'sleep' | 'hydration' | 'general';
 export type Gender = 'male' | 'female' | 'other';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-export type FitnessGoal = 'weight_loss' | 'muscle_gain' | 'maintenance' | 'strength' | 'endurance' | 'performance' | 'recovery' | 'energy' | 'sleep_quality' | 'general_health' | 'general' | 'none';
-export type SportLevel = 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | 'none';
+export type FitnessGoal =
+  | 'weight_loss'
+  | 'muscle_gain'
+  | 'maintenance'
+  | 'strength'
+  | 'endurance'
+  | 'performance'
+  | 'recovery'
+  | 'energy'
+  | 'sleep_quality'
+  | 'general_health'
+  | 'general'
+  | 'none';
+export type SportLevel =
+  | 'recreational'
+  | 'amateur_competitive'
+  | 'semi_professional'
+  | 'professional'
+  | 'none';
 export type SeasonPeriod = 'off_season' | 'pre_season' | 'in_season' | 'recovery';
 export type Lifestyle = 'student' | 'office_worker' | 'physical_job' | 'retired';
 export type ProfileType = 'complete' | 'wellness' | 'sport_only' | 'sleep_focus';
-export type DietaryPreference = 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian' | 'flexitarian' | 'keto' | 'paleo' | 'mediterranean' | 'halal' | 'kosher' | 'other';
+export type DietaryPreference =
+  | 'omnivore'
+  | 'vegetarian'
+  | 'vegan'
+  | 'pescatarian'
+  | 'flexitarian'
+  | 'keto'
+  | 'paleo'
+  | 'mediterranean'
+  | 'halal'
+  | 'kosher'
+  | 'other';
 export type EquipmentLevel = 'no_equipment' | 'minimal_equipment' | 'some_equipment' | 'full_gym';
 export type FitnessExperience = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 export type SubscriptionStatus = 'free' | 'premium' | 'pro' | 'enterprise' | 'trial' | 'expired';
@@ -22,10 +50,40 @@ export type AppliedBy = 'user' | 'auto';
 export type RiskLevel = 'info' | 'warning' | 'critical';
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export type DrinkType = 'water' | 'tea' | 'coffee' | 'juice' | 'sports_drink' | 'other';
-export type HydrationContext = 'normal' | 'workout' | 'meal' | 'wake_up' | 'before_sleep' | 'medication' | 'thirst';
-export type FoodCategory = 'fruits' | 'vegetables' | 'proteins' | 'grains' | 'dairy' | 'fats' | 'beverages' | 'snacks' | 'other';
-export type ExerciseCategory = 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'cardio' | 'flexibility';
-export type Equipment = 'bodyweight' | 'dumbbells' | 'barbell' | 'resistance_band' | 'machine' | 'other';
+export type HydrationContext =
+  | 'normal'
+  | 'workout'
+  | 'meal'
+  | 'wake_up'
+  | 'before_sleep'
+  | 'medication'
+  | 'thirst';
+export type FoodCategory =
+  | 'fruits'
+  | 'vegetables'
+  | 'proteins'
+  | 'grains'
+  | 'dairy'
+  | 'fats'
+  | 'beverages'
+  | 'snacks'
+  | 'other';
+export type ExerciseCategory =
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'arms'
+  | 'legs'
+  | 'core'
+  | 'cardio'
+  | 'flexibility';
+export type Equipment =
+  | 'bodyweight'
+  | 'dumbbells'
+  | 'barbell'
+  | 'resistance_band'
+  | 'machine'
+  | 'other';
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 export type MovementType = 'push' | 'pull' | 'legs' | 'core' | 'full_body';
 export type ExerciseMechanic = 'compound' | 'isolation';

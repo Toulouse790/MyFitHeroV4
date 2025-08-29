@@ -17,29 +17,31 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 }
 
 // Wrapper avec tous les providers nécessaires
-const AllTheProviders = ({ 
-  children, 
+const AllTheProviders = ({
+  children,
   queryClient,
   initialEntries = ['/'],
-  theme = 'light' 
+  theme = 'light',
 }: {
   children: ReactNode;
   queryClient?: QueryClient;
   initialEntries?: string[];
   theme?: 'light' | 'dark' | 'system';
 }) => {
-  const testQueryClient = queryClient || new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        cacheTime: 0,
-        staleTime: 0,
+  const testQueryClient =
+    queryClient ||
+    new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+          cacheTime: 0,
+          staleTime: 0,
+        },
+        mutations: {
+          retry: false,
+        },
       },
-      mutations: {
-        retry: false,
-      },
-    },
-  });
+    });
 
   return (
     <QueryClientProvider client={testQueryClient}>
@@ -53,23 +55,11 @@ const AllTheProviders = ({
 };
 
 // Fonction de rendu personnalisée
-const customRender = (
-  ui: ReactElement,
-  options: CustomRenderOptions = {}
-) => {
-  const { 
-    initialEntries, 
-    queryClient, 
-    theme,
-    ...renderOptions 
-  } = options;
+const customRender = (ui: ReactElement, options: CustomRenderOptions = {}) => {
+  const { initialEntries, queryClient, theme, ...renderOptions } = options;
 
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <AllTheProviders 
-      queryClient={queryClient}
-      initialEntries={initialEntries}
-      theme={theme}
-    >
+    <AllTheProviders queryClient={queryClient} initialEntries={initialEntries} theme={theme}>
       {children}
     </AllTheProviders>
   );
@@ -143,8 +133,7 @@ export const expectAccessibleInput = (element: HTMLElement, label: string) => {
 };
 
 // Helper pour attendre les queries async
-export const waitForLoadingToFinish = () =>
-  new Promise((resolve) => setTimeout(resolve, 0));
+export const waitForLoadingToFinish = () => new Promise(resolve => setTimeout(resolve, 0));
 
 // Re-export everything
 export * from '@testing-library/react';

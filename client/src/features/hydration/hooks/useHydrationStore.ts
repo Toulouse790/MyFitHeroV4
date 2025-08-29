@@ -1,12 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
-import type { 
-  HydrationStore, 
-  HydrationEntry, 
-  HydrationGoal, 
-  HydrationStats 
-} from '../types';
+import type { HydrationStore, HydrationEntry, HydrationGoal, HydrationStats } from '../types';
 
 export const useHydrationStore = create<HydrationStore>()(
   persist(
@@ -20,11 +15,13 @@ export const useHydrationStore = create<HydrationStore>()(
       error: null,
 
       // Actions - Entries
-      addEntry: async (entryData) => {
+      addEntry: async entryData => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
           const newEntry: Omit<HydrationEntry, 'id'> = {
@@ -42,7 +39,7 @@ export const useHydrationStore = create<HydrationStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             entries: [...state.entries, data],
             isLoading: false,
           }));
@@ -50,7 +47,7 @@ export const useHydrationStore = create<HydrationStore>()(
           // Recalculer les stats après ajout
           get().calculateStats('daily');
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur lors de l\'ajout';
+          const message = error instanceof Error ? error.message : "Erreur lors de l'ajout";
           set({ error: message, isLoading: false });
           throw error;
         }
@@ -58,7 +55,7 @@ export const useHydrationStore = create<HydrationStore>()(
 
       updateEntry: async (id, updates) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const { data, error } = await supabase
             .from('hydration_entries')
@@ -72,10 +69,8 @@ export const useHydrationStore = create<HydrationStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
-            entries: state.entries.map((entry) =>
-              entry.id === id ? data : entry
-            ),
+          set(state => ({
+            entries: state.entries.map(entry => (entry.id === id ? data : entry)),
             isLoading: false,
           }));
 
@@ -87,19 +82,16 @@ export const useHydrationStore = create<HydrationStore>()(
         }
       },
 
-      deleteEntry: async (id) => {
+      deleteEntry: async id => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          const { error } = await supabase
-            .from('hydration_entries')
-            .delete()
-            .eq('id', id);
+          const { error } = await supabase.from('hydration_entries').delete().eq('id', id);
 
           if (error) throw error;
 
-          set((state) => ({
-            entries: state.entries.filter((entry) => entry.id !== id),
+          set(state => ({
+            entries: state.entries.filter(entry => entry.id !== id),
             isLoading: false,
           }));
 
@@ -113,9 +105,11 @@ export const useHydrationStore = create<HydrationStore>()(
 
       loadEntries: async (startDate, endDate) => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
           let query = supabase
@@ -135,9 +129,9 @@ export const useHydrationStore = create<HydrationStore>()(
 
           if (error) throw error;
 
-          set({ 
-            entries: data || [], 
-            isLoading: false 
+          set({
+            entries: data || [],
+            isLoading: false,
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Erreur lors du chargement';
@@ -147,11 +141,13 @@ export const useHydrationStore = create<HydrationStore>()(
       },
 
       // Actions - Goals
-      setGoal: async (dailyTarget) => {
+      setGoal: async dailyTarget => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
           // Désactiver l'ancien objectif
@@ -178,13 +174,14 @@ export const useHydrationStore = create<HydrationStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             goals: [...state.goals, data],
             currentGoal: data,
             isLoading: false,
           }));
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur lors de la définition de l\'objectif';
+          const message =
+            error instanceof Error ? error.message : "Erreur lors de la définition de l'objectif";
           set({ error: message, isLoading: false });
           throw error;
         }
@@ -192,7 +189,7 @@ export const useHydrationStore = create<HydrationStore>()(
 
       updateGoal: async (id, updates) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const { data, error } = await supabase
             .from('hydration_goals')
@@ -206,15 +203,14 @@ export const useHydrationStore = create<HydrationStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
-            goals: state.goals.map((goal) =>
-              goal.id === id ? data : goal
-            ),
+          set(state => ({
+            goals: state.goals.map(goal => (goal.id === id ? data : goal)),
             currentGoal: data.isActive ? data : state.currentGoal,
             isLoading: false,
           }));
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur lors de la mise à jour de l\'objectif';
+          const message =
+            error instanceof Error ? error.message : "Erreur lors de la mise à jour de l'objectif";
           set({ error: message, isLoading: false });
           throw error;
         }
@@ -222,9 +218,11 @@ export const useHydrationStore = create<HydrationStore>()(
 
       loadGoals: async () => {
         set({ isLoading: true, error: null });
-        
+
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
           const { data, error } = await supabase
@@ -237,22 +235,23 @@ export const useHydrationStore = create<HydrationStore>()(
 
           const activeGoal = data?.find(goal => goal.isActive) || null;
 
-          set({ 
-            goals: data || [], 
+          set({
+            goals: data || [],
             currentGoal: activeGoal,
-            isLoading: false 
+            isLoading: false,
           });
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur lors du chargement des objectifs';
+          const message =
+            error instanceof Error ? error.message : 'Erreur lors du chargement des objectifs';
           set({ error: message, isLoading: false });
           throw error;
         }
       },
 
       // Actions - Stats
-      calculateStats: async (period) => {
+      calculateStats: async period => {
         const { entries, currentGoal } = get();
-        
+
         if (!entries.length || !currentGoal) {
           set({ stats: null });
           return;
@@ -260,23 +259,19 @@ export const useHydrationStore = create<HydrationStore>()(
 
         const now = new Date();
         const today = now.toISOString().split('T')[0];
-        
+
         // Stats quotidiennes
-        const todayEntries = entries.filter(entry => 
-          entry.timestamp.split('T')[0] === today
-        );
-        
+        const todayEntries = entries.filter(entry => entry.timestamp.split('T')[0] === today);
+
         const dailyAmount = todayEntries.reduce((sum, entry) => sum + entry.amount, 0);
         const dailyPercentage = (dailyAmount / currentGoal.dailyTarget) * 100;
 
         // Stats hebdomadaires
         const weekStart = new Date(now);
         weekStart.setDate(now.getDate() - 6);
-        
-        const weekEntries = entries.filter(entry => 
-          new Date(entry.timestamp) >= weekStart
-        );
-        
+
+        const weekEntries = entries.filter(entry => new Date(entry.timestamp) >= weekStart);
+
         const weeklyTotal = weekEntries.reduce((sum, entry) => sum + entry.amount, 0);
         const weeklyAverage = weeklyTotal / 7;
         const weeklyTarget = currentGoal.dailyTarget * 7;
@@ -325,7 +320,7 @@ export const useHydrationStore = create<HydrationStore>()(
     }),
     {
       name: 'hydration-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         entries: state.entries,
         goals: state.goals,
         currentGoal: state.currentGoal,

@@ -1,17 +1,18 @@
 // src/pages/ExercisesPage.tsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { useQuery } from "@tanstack/react-query";
-import clsx from "clsx";
-import { motion, AnimatePresence } from "framer-motion";
-import { debounce } from "lodash-es";
-import create from "zustand";
-import { persist } from "zustand/middleware";
-import { AiOutlineHeart, AiFillHeart, AiOutlineSearch } from "react-icons/ai";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { useQuery } from '@tanstack/react-query';
+import clsx from 'clsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import { debounce } from 'lodash-es';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { AiOutlineHeart, AiFillHeart, AiOutlineSearch } from 'react-icons/ai';
 
 // ---------------- supabase client ----------------
-const supabaseUrl = "https://zfmlzxhxhaezdkzjanbc.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbWx6eGh4aGFlemRremphbmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NDc4MzIsImV4cCI6MjA2NjMyMzgzMn0.x6GpX8ep6YxVEZQt7pcH0SIWzxhTYcXLnaVmD5IGErw"; // à remplacer réels
+const supabaseUrl = 'https://zfmlzxhxhaezdkzjanbc.supabase.co';
+const supabaseAnonKey =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbWx6eGh4aGFlemRremphbmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NDc4MzIsImV4cCI6MjA2NjMyMzgzMn0.x6GpX8ep6YxVEZQt7pcH0SIWzxhTYcXLnaVmD5IGErw'; // à remplacer réels
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // ---------------- Typescript Types ----------------
@@ -21,18 +22,18 @@ export interface ExerciseLibrary {
   id: string;
   name: string;
   description: string | null;
-  category: "chest" | "back" | "shoulders" | "arms" | "legs" | "core" | "cardio" | "flexibility";
+  category: 'chest' | 'back' | 'shoulders' | 'arms' | 'legs' | 'core' | 'cardio' | 'flexibility';
   muscle_groups: string[]; // tab de muscles ciblés
-  equipment: "bodyweight" | "dumbbells" | "barbell" | "resistance_band" | "machine" | "other";
-  difficulty: "beginner" | "intermediate" | "advanced";
+  equipment: 'bodyweight' | 'dumbbells' | 'barbell' | 'resistance_band' | 'machine' | 'other';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   instructions: string | null;
   notes: string | null;
   image_url: string | null;
   video_url: string | null;
-  movement_type: "push" | "pull" | "legs" | "core" | "full_body";
-  exercise_mechanic: "compound" | "isolation";
-  force_type: "push" | "pull" | "static";
-  level_of_home_use: "no_equipment" | "minimal_equipment" | "some_equipment";
+  movement_type: 'push' | 'pull' | 'legs' | 'core' | 'full_body';
+  exercise_mechanic: 'compound' | 'isolation';
+  force_type: 'push' | 'pull' | 'static';
+  level_of_home_use: 'no_equipment' | 'minimal_equipment' | 'some_equipment';
   is_outdoor_friendly: boolean;
 }
 
@@ -43,9 +44,9 @@ export interface SportDrill {
   description: string | null;
   sport: string;
   position: string | null;
-  season_phase: "pre_season" | "in_season" | "off_season" | "recovery" | null;
-  goal: "speed" | "power" | "endurance" | "skill" | "agility" | "technical" | null;
-  difficulty: "beginner" | "intermediate" | "advanced" | null;
+  season_phase: 'pre_season' | 'in_season' | 'off_season' | 'recovery' | null;
+  goal: 'speed' | 'power' | 'endurance' | 'skill' | 'agility' | 'technical' | null;
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | null;
   duration_seconds: number | null;
   equipment: string | null;
   instructions: string | null;
@@ -76,21 +77,20 @@ const useFavoritesStore = create<FavoritesState>()(
   persist(
     (set, get) => ({
       favorites: new Set(),
-      addFavorite: (id) =>
-        set((state) => ({ favorites: new Set(state.favorites).add(id) })),
-      removeFavorite: (id) =>
-        set((state) => {
+      addFavorite: id => set(state => ({ favorites: new Set(state.favorites).add(id) })),
+      removeFavorite: id =>
+        set(state => {
           const newSet = new Set(state.favorites);
           newSet.delete(id);
           return { favorites: newSet };
         }),
-      toggleFavorite: (id) => {
+      toggleFavorite: id => {
         const { favorites, addFavorite, removeFavorite } = get();
         if (favorites.has(id)) removeFavorite(id);
         else addFavorite(id);
       },
     }),
-    { name: "myfithero-exercise-favorites" }
+    { name: 'myfithero-exercise-favorites' }
   )
 );
 
@@ -123,28 +123,31 @@ async function fetchExercises({
   filterPosition,
   filterSeasonPhase,
 }: FetchExercisesParams) {
-  let query = supabase.from<ExerciseLibrary>("exercises_library").select("*", { count: "exact" }).order("name");
+  let query = supabase
+    .from<ExerciseLibrary>('exercises_library')
+    .select('*', { count: 'exact' })
+    .order('name');
 
-  if (searchTerm && searchTerm.trim() !== "") {
+  if (searchTerm && searchTerm.trim() !== '') {
     const term = searchTerm.trim().toLowerCase();
-    query = query.ilike("name", `%${term}%`);
+    query = query.ilike('name', `%${term}%`);
   }
 
   if (filterCategory && filterCategory.length > 0) {
-    query = query.in("category", filterCategory);
+    query = query.in('category', filterCategory);
   }
   if (filterDifficulty && filterDifficulty.length > 0) {
-    query = query.in("difficulty", filterDifficulty);
+    query = query.in('difficulty', filterDifficulty);
   }
   if (filterEquipment && filterEquipment.length > 0) {
-    query = query.in("equipment", filterEquipment);
+    query = query.in('equipment', filterEquipment);
   }
   if (filterMovementType && filterMovementType.length > 0) {
-    query = query.in("movement_type", filterMovementType);
+    query = query.in('movement_type', filterMovementType);
   }
   if (filterMuscleGroups && filterMuscleGroups.length > 0) {
-    filterMuscleGroups.forEach((muscle) => {
-      query = query.contains("muscle_groups", [muscle]);
+    filterMuscleGroups.forEach(muscle => {
+      query = query.contains('muscle_groups', [muscle]);
     });
   }
 
@@ -161,27 +164,23 @@ async function fetchExercises({
 
 function useExercises(params: FetchExercisesParams) {
   const key = [
-    "exercises",
+    'exercises',
     params.page,
     params.pageSize,
     params.searchTerm,
-    params.filterCategory?.join(","),
-    params.filterDifficulty?.join(","),
-    params.filterEquipment?.join(","),
-    params.filterMovementType?.join(","),
-    params.filterMuscleGroups?.join(","),
+    params.filterCategory?.join(','),
+    params.filterDifficulty?.join(','),
+    params.filterEquipment?.join(','),
+    params.filterMovementType?.join(','),
+    params.filterMuscleGroups?.join(','),
     params.filterSport,
     params.filterPosition,
     params.filterSeasonPhase,
   ];
-  return useQuery(
-    key,
-    () => fetchExercises(params),
-    {
-      keepPreviousData: true,
-      staleTime: 30000,
-    }
-  );
+  return useQuery(key, () => fetchExercises(params), {
+    keepPreviousData: true,
+    staleTime: 30000,
+  });
 }
 
 // ---------------- Component SearchBar ----------------
@@ -215,7 +214,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => 
         className="w-full border border-gray-300 rounded-md py-2 pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
         aria-label="Rechercher un exercice"
       />
-      <AiOutlineSearch className="absolute left-3 top-2.5 text-gray-400 dark:text-gray-500" size={22} />
+      <AiOutlineSearch
+        className="absolute left-3 top-2.5 text-gray-400 dark:text-gray-500"
+        size={22}
+      />
     </div>
   );
 };
@@ -230,22 +232,42 @@ interface FilterPanelProps {
     movementType: string[];
     muscleGroups: string[];
   };
-  onChange: (field: keyof FilterPanelProps["filters"], values: string[]) => void;
+  onChange: (field: keyof FilterPanelProps['filters'], values: string[]) => void;
 }
 
-const categories = ["chest", "back", "shoulders", "arms", "legs", "core", "cardio", "flexibility"];
-const difficulties = ["beginner", "intermediate", "advanced"];
-const equipmentOptions = ["bodyweight", "dumbbells", "barbell", "resistance_band", "machine", "other"];
-const movementTypes = ["push", "pull", "legs", "core", "full_body"];
+const categories = ['chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'cardio', 'flexibility'];
+const difficulties = ['beginner', 'intermediate', 'advanced'];
+const equipmentOptions = [
+  'bodyweight',
+  'dumbbells',
+  'barbell',
+  'resistance_band',
+  'machine',
+  'other',
+];
+const movementTypes = ['push', 'pull', 'legs', 'core', 'full_body'];
 const muscleGroups = [
-  "pectorals", "triceps", "deltoids", "biceps", "quadriceps",
-  "glutes", "hamstrings", "core", "calves", "back", "abdominals",
-  "obliques", "forearms", "shoulders", "chest", "legs"
+  'pectorals',
+  'triceps',
+  'deltoids',
+  'biceps',
+  'quadriceps',
+  'glutes',
+  'hamstrings',
+  'core',
+  'calves',
+  'back',
+  'abdominals',
+  'obliques',
+  'forearms',
+  'shoulders',
+  'chest',
+  'legs',
 ];
 
 const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onChange }) => {
-  const renderCheckboxes = (field: keyof FilterPanelProps["filters"], values: string[]) => {
-    return values.map((item) => {
+  const renderCheckboxes = (field: keyof FilterPanelProps['filters'], values: string[]) => {
+    return values.map(item => {
       const checked = filters[field].includes(item);
       return (
         <label
@@ -254,8 +276,8 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onChange }) => {
           aria-checked={checked}
           role="checkbox"
           tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
               toggle(item, field);
             }
           }}
@@ -269,9 +291,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onChange }) => {
           />
           <div
             className={clsx(
-              "w-5 h-5 border rounded-md flex items-center justify-center",
-              checked ? "bg-blue-600 border-blue-600" : "border-gray-300",
-              "dark:border-gray-600 dark:bg-gray-800"
+              'w-5 h-5 border rounded-md flex items-center justify-center',
+              checked ? 'bg-blue-600 border-blue-600' : 'border-gray-300',
+              'dark:border-gray-600 dark:bg-gray-800'
             )}
           >
             {checked && (
@@ -292,12 +314,12 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onChange }) => {
   };
 
   const toggle = useCallback(
-    (item: string, field: keyof FilterPanelProps["filters"]) => {
+    (item: string, field: keyof FilterPanelProps['filters']) => {
       const current = filters[field];
       if (current.includes(item)) {
         onChange(
           field,
-          current.filter((v) => v !== item)
+          current.filter(v => v !== item)
         );
       } else {
         onChange(field, [...current, item]);
@@ -312,23 +334,33 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onChange }) => {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-gray-700 dark:text-gray-300">
         <div>
           <strong>Catégorie</strong>
-          <div className="flex flex-wrap gap-2 mt-1">{renderCheckboxes("category", categories)}</div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {renderCheckboxes('category', categories)}
+          </div>
         </div>
         <div>
           <strong>Difficulté</strong>
-          <div className="flex flex-wrap gap-2 mt-1">{renderCheckboxes("difficulty", difficulties)}</div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {renderCheckboxes('difficulty', difficulties)}
+          </div>
         </div>
         <div>
           <strong>Equipement</strong>
-          <div className="flex flex-wrap gap-2 mt-1">{renderCheckboxes("equipment", equipmentOptions)}</div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {renderCheckboxes('equipment', equipmentOptions)}
+          </div>
         </div>
         <div>
           <strong>Type de mouvement</strong>
-          <div className="flex flex-wrap gap-2 mt-1">{renderCheckboxes("movementType", movementTypes)}</div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {renderCheckboxes('movementType', movementTypes)}
+          </div>
         </div>
         <div className="md:col-span-2">
           <strong>Groupes musculaires</strong>
-          <div className="flex flex-wrap gap-2 mt-1">{renderCheckboxes("muscleGroups", muscleGroups)}</div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {renderCheckboxes('muscleGroups', muscleGroups)}
+          </div>
         </div>
       </div>
     </section>
@@ -372,12 +404,14 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, isFavorite, onTog
         )}
       </div>
       <h4 className="text-lg font-semibold mb-1 text-gray-900 dark:text-white">{exercise.name}</h4>
-      <p className="flex-grow text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-3">{exercise.description}</p>
+      <p className="flex-grow text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-3">
+        {exercise.description}
+      </p>
       <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 flex-wrap gap-2">
         <span>Équipement: {exercise.equipment}</span>
         <span>Difficulté: {exercise.difficulty}</span>
         <button
-          aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+          aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           onClick={() => onToggleFavorite(exercise.id)}
           className="p-1 text-red-500 hover:text-red-600 focus:outline-none"
         >
@@ -401,9 +435,9 @@ const FavoritesList: React.FC<{ favoriteIds: Set<string> }> = ({ favoriteIds }) 
       }
       const idsArr = Array.from(favoriteIds);
       const { data, error } = await supabase
-        .from<ExerciseLibrary>("exercises_library")
-        .select("*")
-        .in("id", idsArr);
+        .from<ExerciseLibrary>('exercises_library')
+        .select('*')
+        .in('id', idsArr);
 
       if (!error && data) setExercises(data);
     }
@@ -413,8 +447,11 @@ const FavoritesList: React.FC<{ favoriteIds: Set<string> }> = ({ favoriteIds }) 
   if (exercises.length === 0) return <p className="text-center p-4">Aucun favori ajouté.</p>;
 
   return (
-    <section aria-label="Liste des exercices favoris" className="max-w-4xl mx-auto p-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-      {exercises.map((ex) => (
+    <section
+      aria-label="Liste des exercices favoris"
+      className="max-w-4xl mx-auto p-2 grid grid-cols-1 md:grid-cols-3 gap-4"
+    >
+      {exercises.map(ex => (
         <ExerciseCard
           key={ex.id}
           exercise={ex}
@@ -431,7 +468,7 @@ const FavoritesList: React.FC<{ favoriteIds: Set<string> }> = ({ favoriteIds }) 
 const PAGE_SIZE = 20;
 
 const ExercisesPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     category: [] as string[],
     difficulty: [] as string[],
@@ -458,7 +495,7 @@ const ExercisesPage: React.FC = () => {
   const pageCount = Math.ceil(totalCount / PAGE_SIZE);
 
   const handleFilterChange = (field: keyof typeof filters, values: string[]) => {
-    setFilters((f) => ({ ...f, [field]: values }));
+    setFilters(f => ({ ...f, [field]: values }));
     setPage(0);
   };
 
@@ -483,9 +520,11 @@ const ExercisesPage: React.FC = () => {
         ) : isError ? (
           <div className="col-span-full text-center text-red-600">Erreur chargement exercices.</div>
         ) : exercises.length === 0 ? (
-          <div className="col-span-full text-center text-gray-600 dark:text-gray-400">Aucun exercice trouvé.</div>
+          <div className="col-span-full text-center text-gray-600 dark:text-gray-400">
+            Aucun exercice trouvé.
+          </div>
         ) : (
-          exercises.map((exercise) => (
+          exercises.map(exercise => (
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
@@ -497,7 +536,7 @@ const ExercisesPage: React.FC = () => {
       </div>
       <nav className="flex justify-center items-center mt-8 space-x-4">
         <button
-          onClick={() => canPrevPage && setPage((p) => p - 1)}
+          onClick={() => canPrevPage && setPage(p => p - 1)}
           disabled={!canPrevPage}
           className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-50"
           aria-label="Page précédente"
@@ -508,7 +547,7 @@ const ExercisesPage: React.FC = () => {
           Page {page + 1} / {pageCount}
         </span>
         <button
-          onClick={() => canNextPage && setPage((p) => p + 1)}
+          onClick={() => canNextPage && setPage(p => p + 1)}
           disabled={!canNextPage}
           className="px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-50"
           aria-label="Page suivante"

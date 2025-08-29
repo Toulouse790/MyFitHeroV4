@@ -12,36 +12,36 @@ import frOnboarding from './locales/fr/onboarding.json';
 const resources = {
   en: {
     common: enCommon,
-    onboarding: enOnboarding
+    onboarding: enOnboarding,
   },
   fr: {
     common: frCommon,
-    onboarding: frOnboarding
-  }
+    onboarding: frOnboarding,
+  },
 };
 
 // Configuration du système de détection
 const detectionOptions = {
   // Ordre de priorité pour détecter la langue
   order: ['navigator', 'localStorage', 'sessionStorage', 'htmlTag'],
-  
+
   // Langues supportées
   supportedLngs: ['en', 'fr'],
-  
+
   // Langue par défaut si non détectée
   fallbackLng: 'en',
-  
+
   // Clé de stockage local
   lookupLocalStorage: 'i18nextLng',
-  
+
   // Ne pas utiliser les sous-domaines
   lookupFromSubdomainIndex: 0,
-  
+
   // Cache dans localStorage
   caches: ['localStorage'],
-  
+
   // Exclure certaines routes de la détection
-  excludeCacheFor: ['cimode']
+  excludeCacheFor: ['cimode'],
 };
 
 // Initialisation d'i18next
@@ -50,27 +50,27 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    
+
     // Configuration de la détection
     detection: detectionOptions,
-    
+
     // Langue par défaut
     fallbackLng: 'en',
-    
+
     // Langues supportées
     supportedLngs: ['en', 'fr'],
-    
+
     // Namespace par défaut
     defaultNS: 'common',
-    
+
     // Debug en développement
     debug: process.env.NODE_ENV === 'development',
-    
+
     // Interpolation
     interpolation: {
-      escapeValue: false // React s'occupe déjà de l'échappement
+      escapeValue: false, // React s'occupe déjà de l'échappement
     },
-    
+
     // Gestion des clés manquantes
     saveMissing: true,
     missingKeyHandler: (lng, ns, key, fallbackValue) => {
@@ -78,7 +78,7 @@ i18n
         console.warn(`Missing translation key: ${key} in ${lng}:${ns}`);
       }
     },
-    
+
     // Réaction aux changements de langue
     react: {
       useSuspense: false,
@@ -86,8 +86,8 @@ i18n
       bindI18nStore: 'added removed',
       transEmptyNodeValue: '',
       transSupportBasicHtmlNodes: true,
-      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i']
-    }
+      transKeepBasicHtmlNodesFor: ['br', 'strong', 'i'],
+    },
   });
 
 export default i18n;

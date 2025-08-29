@@ -18,9 +18,12 @@ export const useAuthStatus = (): AuthStatus => {
     // Vérifier la session actuelle
     const checkUser = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
         if (error) throw error;
-        
+
         setSession(session);
         setUser(session?.user || null);
       } catch (error) {
@@ -34,12 +37,12 @@ export const useAuthStatus = (): AuthStatus => {
     checkUser();
 
     // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     return () => subscription.unsubscribe();
   }, []);
@@ -59,6 +62,6 @@ export const useAuthStatus = (): AuthStatus => {
     user,
     session,
     loading,
-    signOut
+    signOut,
   };
 };

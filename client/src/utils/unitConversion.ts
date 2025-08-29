@@ -13,7 +13,7 @@ export const convertUnits: UnitConversion = {
   // Conversion poids : kg <-> lbs
   weight: (value: number, from: UnitSystem, to: UnitSystem): number => {
     if (from === to) return value;
-    
+
     if (from === 'metric' && to === 'imperial') {
       return Number((value * 2.20462).toFixed(1)); // kg -> lbs
     } else {
@@ -24,7 +24,7 @@ export const convertUnits: UnitConversion = {
   // Conversion taille : cm <-> ft/in
   height: (value: number, from: UnitSystem, to: UnitSystem): number => {
     if (from === to) return value;
-    
+
     if (from === 'metric' && to === 'imperial') {
       return Number((value / 2.54).toFixed(1)); // cm -> inches
     } else {
@@ -35,7 +35,7 @@ export const convertUnits: UnitConversion = {
   // Conversion distance : km <-> miles
   distance: (value: number, from: UnitSystem, to: UnitSystem): number => {
     if (from === to) return value;
-    
+
     if (from === 'metric' && to === 'imperial') {
       return Number((value * 0.621371).toFixed(2)); // km -> miles
     } else {
@@ -46,7 +46,7 @@ export const convertUnits: UnitConversion = {
   // Conversion liquide : ml <-> fl oz
   liquid: (value: number, from: UnitSystem, to: UnitSystem): number => {
     if (from === to) return value;
-    
+
     if (from === 'metric' && to === 'imperial') {
       return Number((value * 0.033814).toFixed(1)); // ml -> fl oz
     } else {
@@ -57,13 +57,13 @@ export const convertUnits: UnitConversion = {
   // Conversion température : °C <-> °F
   temperature: (value: number, from: UnitSystem, to: UnitSystem): number => {
     if (from === to) return value;
-    
+
     if (from === 'metric' && to === 'imperial') {
-      return Number(((value * 9/5) + 32).toFixed(1)); // °C -> °F
+      return Number(((value * 9) / 5 + 32).toFixed(1)); // °C -> °F
     } else {
-      return Number(((value - 32) * 5/9).toFixed(1)); // °F -> °C
+      return Number((((value - 32) * 5) / 9).toFixed(1)); // °F -> °C
     }
-  }
+  },
 };
 
 // Formatage des unités selon le système
@@ -117,8 +117,17 @@ export const validateUnitRange = (value: number, unit: string, system: UnitSyste
 };
 
 // Conversion intelligente pour affichage
-export const displayValue = (value: number, unit: string, targetSystem: UnitSystem, sourceSystem: UnitSystem = 'metric'): string => {
-  const convertedValue = convertUnits[unit as keyof UnitConversion](value, sourceSystem, targetSystem);
+export const displayValue = (
+  value: number,
+  unit: string,
+  targetSystem: UnitSystem,
+  sourceSystem: UnitSystem = 'metric'
+): string => {
+  const convertedValue = convertUnits[unit as keyof UnitConversion](
+    value,
+    sourceSystem,
+    targetSystem
+  );
   return formatUnit(convertedValue, unit, targetSystem);
 };
 
@@ -150,5 +159,5 @@ export const getUnitPreferences = (system: UnitSystem): UnitPreferences => ({
   height: system === 'imperial' ? 'ft/in' : 'cm',
   distance: system === 'imperial' ? 'miles' : 'km',
   liquid: system === 'imperial' ? 'fl_oz' : 'ml',
-  temperature: system === 'imperial' ? 'fahrenheit' : 'celsius'
+  temperature: system === 'imperial' ? 'fahrenheit' : 'celsius',
 });

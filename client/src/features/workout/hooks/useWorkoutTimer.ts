@@ -56,6 +56,6 @@ export const useWorkoutTimer = (): UseWorkoutTimerReturn => {
     pause,
     resume,
     reset,
-    formatTime
+    formatTime,
   };
 };

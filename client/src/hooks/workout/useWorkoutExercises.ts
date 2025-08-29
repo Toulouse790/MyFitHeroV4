@@ -1,4 +1,4 @@
-hooks/workout/useWorkoutExercises.ts
+hooks / workout / useWorkoutExercises.ts;
 import { useCallback } from 'react';
 import { useToast } from '../use-toast';
 import { WorkoutSession, WorkoutExercise, ExerciseSet } from './useWorkoutSessionCore';
@@ -34,25 +34,21 @@ export const useWorkoutExercises = (
   );
 
   const updateExerciseSet = useCallback(
-    async (
-      exerciseId: string,
-      setIndex: number,
-      updates: Partial<ExerciseSet>
-    ) => {
+    async (exerciseId: string, setIndex: number, updates: Partial<ExerciseSet>) => {
       if (!currentSession) return;
 
       const updatedExercises = currentSession.exercises.map(ex => {
         if (ex.id !== exerciseId) return ex;
-        
+
         const updatedSets = ex.sets.map((set, index) => {
           if (index !== setIndex) return set;
-          
+
           // Ajouter timestamp si le set devient complété
           const setUpdates = { ...updates };
           if (updates.completed && !set.completed) {
             setUpdates.timestamp = new Date().toISOString();
           }
-          
+
           return { ...set, ...setUpdates };
         });
 
@@ -75,75 +71,82 @@ export const useWorkoutExercises = (
     [currentSession, updateSession, saveWeightHistory]
   );
 
-  const completeExercise = useCallback(async (exerciseId: string) => {
-    if (!currentSession) return;
-    
-    const updatedExercises = currentSession.exercises.map(ex => 
-      ex.id === exerciseId 
-        ? { 
-            ...ex, 
-            completed: true,
-            sets: ex.sets.map(set => ({ 
-              ...set, 
-              completed: true, 
-              timestamp: new Date().toISOString() 
-            }))
-          }
-        : ex
-    );
-    
-    updateSession({ exercises: updatedExercises });
+  const completeExercise = useCallback(
+    async (exerciseId: string) => {
+      if (!currentSession) return;
 
-    toast({
-      title: "Exercice terminé",
-      description: "Bravo ! Toutes les séries sont complétées",
-    });
-  }, [currentSession, updateSession, toast]);
+      const updatedExercises = currentSession.exercises.map(ex =>
+        ex.id === exerciseId
+          ? {
+              ...ex,
+              completed: true,
+              sets: ex.sets.map(set => ({
+                ...set,
+                completed: true,
+                timestamp: new Date().toISOString(),
+              })),
+            }
+          : ex
+      );
 
-  const addSetToExercise = useCallback(async (exerciseId: string, newSet?: Partial<ExerciseSet>) => {
-    if (!currentSession) return;
-    
-    const defaultSet: ExerciseSet = {
-      reps: 0,
-      weight: 0,
-      completed: false,
-      ...newSet
-    };
-    
-    const updatedExercises = currentSession.exercises.map(ex => 
-      ex.id === exerciseId 
-        ? { ...ex, sets: [...ex.sets, defaultSet] }
-        : ex
-    );
-    
-    updateSession({ exercises: updatedExercises });
+      updateSession({ exercises: updatedExercises });
 
-    toast({
-      title: "Série ajoutée",
-      description: "Nouvelle série ajoutée à l'exercice",
-    });
-  }, [currentSession, updateSession, toast]);
+      toast({
+        title: 'Exercice terminé',
+        description: 'Bravo ! Toutes les séries sont complétées',
+      });
+    },
+    [currentSession, updateSession, toast]
+  );
 
-  const removeSetFromExercise = useCallback(async (exerciseId: string, setIndex: number) => {
-    if (!currentSession) return;
-    
-    const updatedExercises = currentSession.exercises.map(ex => 
-      ex.id === exerciseId 
-        ? { 
-            ...ex, 
-            sets: ex.sets.filter((_, i) => i !== setIndex),
-            completed: false // Réinitialiser le statut de l'exercice
-          }
-        : ex
-    );
-    
-    updateSession({ exercises: updatedExercises });
+  const addSetToExercise = useCallback(
+    async (exerciseId: string, newSet?: Partial<ExerciseSet>) => {
+      if (!currentSession) return;
 
-    toast({
-      title: "Série supprimée",
-      description: "La série a été retirée de l'exercice",
-    });
-  }, [currentSession, updateSession, toast]);
+      const defaultSet: ExerciseSet = {
+        reps: 0,
+        weight: 0,
+        completed: false,
+        ...newSet,
+      };
+
+      const updatedExercises = currentSession.exercises.map(ex =>
+        ex.id === exerciseId ? { ...ex, sets: [...ex.sets, defaultSet] } : ex
+      );
+
+      updateSession({ exercises: updatedExercises });
+
+      toast({
+        title: 'Série ajoutée',
+        description: "Nouvelle série ajoutée à l'exercice",
+      });
+    },
+    [currentSession, updateSession, toast]
+  );
+
+  const removeSetFromExercise = useCallback(
+    async (exerciseId: string, setIndex: number) => {
+      if (!currentSession) return;
+
+      const updatedExercises = currentSession.exercises.map(ex =>
+        ex.id === exerciseId
+          ? {
+              ...ex,
+              sets: ex.sets.filter((_, i) => i !== setIndex),
+              completed: false, // Réinitialiser le statut de l'exercice
+            }
+          : ex
+      );
+
+      updateSession({ exercises: updatedExercises });
+
+      toast({
+        title: 'Série supprimée',
+        description: "La série a été retirée de l'exercice",
+      });
+    },
+    [currentSession, updateSession, toast]
+  );
 
   return {
     addExercise,

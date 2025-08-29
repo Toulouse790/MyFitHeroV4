@@ -1,13 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MuscleRecoveryService } from '@/services/muscleRecoveryService';
-import { WorkoutService, UserProfileService, SleepService, DailyStatsService } from '@/services/supabaseService';
+import {
+  WorkoutService,
+  UserProfileService,
+  SleepService,
+  DailyStatsService,
+} from '@/services/supabaseService';
 import { useAppStore } from '@/store/useAppStore';
-import type { 
-  MuscleRecoveryData, 
-  UserRecoveryProfile, 
+import type {
+  MuscleRecoveryData,
+  UserRecoveryProfile,
   RecoveryRecommendation,
   GlobalRecoveryMetrics,
-  MuscleGroup 
+  MuscleGroup,
 } from '@/types/muscleRecovery';
 
 interface UseMuscleRecoveryReturn {
@@ -27,7 +32,7 @@ interface UseMuscleRecoveryReturn {
   getRecoveryScore: () => number;
   isReadyForWorkout: (muscleGroups: MuscleGroup[]) => boolean;
   getOptimalWorkoutType: () => string;
-  
+
   // Utilitaires
   formatRecoveryStatus: (status: string) => string;
   getRecoveryColor: (percentage: number) => string;
@@ -36,7 +41,7 @@ interface UseMuscleRecoveryReturn {
 
 export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
   const { appStoreUser } = useAppStore();
-  
+
   // État local
   const [muscleRecoveryData, setMuscleRecoveryData] = useState<MuscleRecoveryData[]>([]);
   const [recoveryProfile, setRecoveryProfile] = useState<UserRecoveryProfile | null>(null);
@@ -59,7 +64,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
       // 1. Récupérer le profil de récupération
       let profile = await MuscleRecoveryService.getUserRecoveryProfile(appStoreUser.id);
-      
+
       if (!profile) {
         // Créer le profil s'il n'existe pas
         const userProfile = await UserProfileService.getCurrentUserProfile();
@@ -115,9 +120,9 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
       await MuscleRecoveryService.saveMuscleRecoveryData(appStoreUser.id, recoveryData);
 
       setLastUpdated(new Date().toISOString());
-
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du calcul de récupération';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors du calcul de récupération';
       setError(errorMessage);
       console.error('Error refreshing recovery data:', err);
     } finally {
@@ -131,7 +136,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
     try {
       setIsLoading(true);
-      
+
       const userProfile = await UserProfileService.getCurrentUserProfile();
       const sleepData = await SleepService.getRecentSleepSessions(7);
       const nutritionData = await DailyStatsService.getStatsForDateRange(
@@ -146,7 +151,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
           sleepData,
           nutritionData
         );
-        
+
         if (updatedProfile) {
           setRecoveryProfile(updatedProfile);
         }
@@ -166,20 +171,26 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
   }, [appStoreUser?.id, refreshRecoveryData]);
 
   // Fonctions utilitaires
-  const getMuscleRecovery = useCallback((muscleGroup: MuscleGroup): MuscleRecoveryData | null => {
-    return muscleRecoveryData.find(data => data.muscle_group === muscleGroup) || null;
-  }, [muscleRecoveryData]);
+  const getMuscleRecovery = useCallback(
+    (muscleGroup: MuscleGroup): MuscleRecoveryData | null => {
+      return muscleRecoveryData.find(data => data.muscle_group === muscleGroup) || null;
+    },
+    [muscleRecoveryData]
+  );
 
   const getRecoveryScore = useCallback((): number => {
     return globalMetrics?.overall_recovery_score || 0;
   }, [globalMetrics]);
 
-  const isReadyForWorkout = useCallback((muscleGroups: MuscleGroup[]): boolean => {
-    return muscleGroups.every(muscle => {
-      const recovery = getMuscleRecovery(muscle);
-      return recovery ? recovery.recovery_percentage > 70 : false;
-    });
-  }, [getMuscleRecovery]);
+  const isReadyForWorkout = useCallback(
+    (muscleGroups: MuscleGroup[]): boolean => {
+      return muscleGroups.every(muscle => {
+        const recovery = getMuscleRecovery(muscle);
+        return recovery ? recovery.recovery_percentage > 70 : false;
+      });
+    },
+    [getMuscleRecovery]
+  );
 
   const getOptimalWorkoutType = useCallback((): string => {
     return globalMetrics?.optimal_workout_type || 'rest';
@@ -187,11 +198,11 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
   const formatRecoveryStatus = useCallback((status: string): string => {
     const statusMap = {
-      'fully_recovered': 'Complètement récupéré',
-      'mostly_recovered': 'Bien récupéré',
-      'partially_recovered': 'Partiellement récupéré',
-      'needs_recovery': 'Besoin de récupération',
-      'overworked': 'Surmené'
+      fully_recovered: 'Complètement récupéré',
+      mostly_recovered: 'Bien récupéré',
+      partially_recovered: 'Partiellement récupéré',
+      needs_recovery: 'Besoin de récupération',
+      overworked: 'Surmené',
     };
     return statusMap[status as keyof typeof statusMap] || status;
   }, []);
@@ -245,6 +256,6 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
     // Utilitaires
     formatRecoveryStatus,
     getRecoveryColor,
-    getNextWorkoutRecommendation
+    getNextWorkoutRecommendation,
   };
 };

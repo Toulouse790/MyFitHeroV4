@@ -110,15 +110,18 @@ export function useDebounce<T>(
     setIsPending(true);
 
     // Créer le nouveau timeout
-    timeoutRef.current = setTimeout(() => {
-      if (trailing) {
-        setDebouncedValue(value);
-        lastInvokeTimeRef.current = Date.now();
-      }
-      setIsPending(false);
-      leadingRef.current = true;
-      timeoutRef.current = undefined;
-    }, remainingWait > 0 ? remainingWait : delay);
+    timeoutRef.current = setTimeout(
+      () => {
+        if (trailing) {
+          setDebouncedValue(value);
+          lastInvokeTimeRef.current = Date.now();
+        }
+        setIsPending(false);
+        leadingRef.current = true;
+        timeoutRef.current = undefined;
+      },
+      remainingWait > 0 ? remainingWait : delay
+    );
 
     // Cleanup
     return () => {
@@ -142,7 +145,7 @@ export function useDebounce<T>(
     debouncedValue,
     isPending,
     cancel,
-    flush
+    flush,
   };
 }
 

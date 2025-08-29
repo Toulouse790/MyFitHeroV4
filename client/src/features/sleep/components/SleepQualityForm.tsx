@@ -16,9 +16,9 @@ interface SleepQualityFormProps {
   className?: string;
 }
 
-export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({ 
-  onComplete, 
-  className = '' 
+export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
+  onComplete,
+  className = '',
 }) => {
   const { toast } = useToast();
   const { addEntry, isLoading } = useSleepStore();
@@ -29,7 +29,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
     quality: 5,
     notes: '',
   });
-  
+
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -62,70 +62,71 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!validateForm()) {
-      toast({
-        title: "Erreur de validation",
-        description: "Veuillez corriger les erreurs dans le formulaire",
-        variant: "destructive",
-      });
-      return;
-    }
+      if (!validateForm()) {
+        toast({
+          title: 'Erreur de validation',
+          description: 'Veuillez corriger les erreurs dans le formulaire',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-    try {
-      const duration = calculateSleepDuration(formData.bedtime, formData.wakeTime);
-      const factors = selectedFactors.map(factorId => 
-        defaultSleepFactors.find(f => f.id === factorId)!
-      );
+      try {
+        const duration = calculateSleepDuration(formData.bedtime, formData.wakeTime);
+        const factors = selectedFactors.map(
+          factorId => defaultSleepFactors.find(f => f.id === factorId)!
+        );
 
-      await addEntry({
-        bedtime: formData.bedtime,
-        wakeTime: formData.wakeTime,
-        duration,
-        quality: formData.quality,
-        factors,
-        notes: formData.notes || undefined,
-      });
+        await addEntry({
+          bedtime: formData.bedtime,
+          wakeTime: formData.wakeTime,
+          duration,
+          quality: formData.quality,
+          factors,
+          notes: formData.notes || undefined,
+        });
 
-      toast({
-        title: "Sommeil enregistré !",
-        description: `${Math.floor(duration / 60)}h${duration % 60}min de sommeil ajouté`,
-      });
+        toast({
+          title: 'Sommeil enregistré !',
+          description: `${Math.floor(duration / 60)}h${duration % 60}min de sommeil ajouté`,
+        });
 
-      // Reset form
-      setFormData({
-        bedtime: '',
-        wakeTime: '',
-        quality: 5,
-        notes: '',
-      });
-      setSelectedFactors([]);
-      setErrors({});
+        // Reset form
+        setFormData({
+          bedtime: '',
+          wakeTime: '',
+          quality: 5,
+          notes: '',
+        });
+        setSelectedFactors([]);
+        setErrors({});
 
-      onComplete?.();
-
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer le sommeil",
-        variant: "destructive",
-      });
-    }
-  }, [formData, selectedFactors, validateForm, addEntry, toast, onComplete]);
+        onComplete?.();
+      } catch (error) {
+        toast({
+          title: 'Erreur',
+          description: "Impossible d'enregistrer le sommeil",
+          variant: 'destructive',
+        });
+      }
+    },
+    [formData, selectedFactors, validateForm, addEntry, toast, onComplete]
+  );
 
   const toggleFactor = useCallback((factorId: string) => {
-    setSelectedFactors(prev => 
-      prev.includes(factorId) 
-        ? prev.filter(id => id !== factorId)
-        : [...prev, factorId]
+    setSelectedFactors(prev =>
+      prev.includes(factorId) ? prev.filter(id => id !== factorId) : [...prev, factorId]
     );
   }, []);
 
-  const duration = formData.bedtime && formData.wakeTime 
-    ? calculateSleepDuration(formData.bedtime, formData.wakeTime)
-    : 0;
+  const duration =
+    formData.bedtime && formData.wakeTime
+      ? calculateSleepDuration(formData.bedtime, formData.wakeTime)
+      : 0;
 
   return (
     <Card className={className}>
@@ -148,7 +149,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
                 id="bedtime"
                 type="time"
                 value={formData.bedtime}
-                onChange={(e) => setFormData(prev => ({ ...prev, bedtime: e.target.value }))}
+                onChange={e => setFormData(prev => ({ ...prev, bedtime: e.target.value }))}
                 className={errors.bedtime ? 'border-red-500' : ''}
                 required
               />
@@ -169,7 +170,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
                 id="wakeTime"
                 type="time"
                 value={formData.wakeTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, wakeTime: e.target.value }))}
+                onChange={e => setFormData(prev => ({ ...prev, wakeTime: e.target.value }))}
                 className={errors.wakeTime ? 'border-red-500' : ''}
                 required
               />
@@ -190,10 +191,14 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
                 Durée: {Math.floor(duration / 60)}h{duration % 60}min
               </span>
               {duration < 360 && (
-                <Badge variant="destructive" className="ml-2">Trop court</Badge>
+                <Badge variant="destructive" className="ml-2">
+                  Trop court
+                </Badge>
               )}
               {duration > 600 && (
-                <Badge variant="secondary" className="ml-2">Très long</Badge>
+                <Badge variant="secondary" className="ml-2">
+                  Très long
+                </Badge>
               )}
             </div>
           )}
@@ -214,14 +219,22 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
                 min="1"
                 max="10"
                 value={formData.quality}
-                onChange={(e) => setFormData(prev => ({ ...prev, quality: parseInt(e.target.value) }))}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, quality: parseInt(e.target.value) }))
+                }
                 className="flex-1"
               />
-              <div className={`w-12 text-center font-bold ${
-                formData.quality >= 8 ? 'text-green-600' :
-                formData.quality >= 6 ? 'text-blue-600' :
-                formData.quality >= 4 ? 'text-yellow-600' : 'text-red-600'
-              }`}>
+              <div
+                className={`w-12 text-center font-bold ${
+                  formData.quality >= 8
+                    ? 'text-green-600'
+                    : formData.quality >= 6
+                      ? 'text-blue-600'
+                      : formData.quality >= 4
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                }`}
+              >
                 {formData.quality}
               </div>
             </div>
@@ -235,7 +248,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
           <div className="space-y-3">
             <Label>Facteurs ayant influencé votre sommeil</Label>
             <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
-              {defaultSleepFactors.map((factor) => (
+              {defaultSleepFactors.map(factor => (
                 <button
                   key={factor.id}
                   type="button"
@@ -251,7 +264,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">{factor.name}</span>
                     <div className="flex items-center space-x-1">
-                      <Badge 
+                      <Badge
                         variant={factor.type === 'positive' ? 'default' : 'destructive'}
                         className="text-xs"
                       >
@@ -274,14 +287,14 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
               id="notes"
               placeholder="Détails sur votre nuit, rêves, ressenti..."
               value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               rows={3}
             />
           </div>
 
           {/* Submit */}
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full"
             disabled={isLoading || Object.keys(errors).length > 0}
           >

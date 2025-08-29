@@ -54,9 +54,9 @@ describe('Pages supplémentaires', () => {
       expect(screen.getByRole('button', { name: /en savoir plus/i })).toBeInTheDocument();
     });
 
-    it('navigue vers l\'inscription', async () => {
+    it("navigue vers l'inscription", async () => {
       const user = userEvent.setup();
-      
+
       render(<MockLandingPage />);
 
       const startButton = screen.getByRole('button', { name: /commencer/i });
@@ -66,9 +66,9 @@ describe('Pages supplémentaires', () => {
       expect(startButton).toBeInTheDocument();
     });
 
-    it('affiche plus d\'informations', async () => {
+    it("affiche plus d'informations", async () => {
       const user = userEvent.setup();
-      
+
       render(<MockLandingPage />);
 
       const learnMoreButton = screen.getByRole('button', { name: /en savoir plus/i });
@@ -80,7 +80,7 @@ describe('Pages supplémentaires', () => {
   });
 
   describe('NotFoundPage', () => {
-    it('affiche le message d\'erreur 404', () => {
+    it("affiche le message d'erreur 404", () => {
       render(<MockNotFoundPage />);
 
       expect(screen.getByText('Page non trouvée')).toBeInTheDocument();
@@ -88,9 +88,9 @@ describe('Pages supplémentaires', () => {
       expect(screen.getByRole('button', { name: /retour à l'accueil/i })).toBeInTheDocument();
     });
 
-    it('permet de retourner à l\'accueil', async () => {
+    it("permet de retourner à l'accueil", async () => {
       const user = userEvent.setup();
-      
+
       render(<MockNotFoundPage />);
 
       const homeButton = screen.getByRole('button', { name: /retour à l'accueil/i });
@@ -114,7 +114,7 @@ describe('Pages supplémentaires', () => {
 
     it('valide les champs du formulaire', async () => {
       const user = userEvent.setup();
-      
+
       render(<MockAuthPage />);
 
       const emailInput = screen.getByPlaceholderText('Email');
@@ -131,7 +131,7 @@ describe('Pages supplémentaires', () => {
 
     it('soumet le formulaire avec des données valides', async () => {
       const user = userEvent.setup();
-      
+
       server.use(
         http.post('*/auth/v1/token', () => {
           return HttpResponse.json({
@@ -159,13 +159,10 @@ describe('Pages supplémentaires', () => {
 
     it('gère les erreurs de connexion', async () => {
       const user = userEvent.setup();
-      
+
       server.use(
         http.post('*/auth/v1/token', () => {
-          return HttpResponse.json(
-            { error: 'Invalid credentials' },
-            { status: 401 }
-          );
+          return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         })
       );
 
@@ -188,7 +185,7 @@ describe('Pages supplémentaires', () => {
 
     it('bascule vers la création de compte', async () => {
       const user = userEvent.setup();
-      
+
       render(<MockAuthPage />);
 
       const createAccountButton = screen.getByRole('button', { name: /créer un compte/i });
@@ -210,7 +207,7 @@ describe('Pages supplémentaires', () => {
 
     it('supporte la navigation au clavier', async () => {
       const user = userEvent.setup();
-      
+
       render(<MockAuthPage />);
 
       // Navigation séquentielle
@@ -237,7 +234,7 @@ describe('Pages supplémentaires', () => {
   });
 
   describe('Responsive design', () => {
-    it('s\'adapte aux petits écrans', () => {
+    it("s'adapte aux petits écrans", () => {
       // Simuler un écran mobile
       Object.defineProperty(window, 'innerWidth', {
         writable: true,
@@ -252,7 +249,7 @@ describe('Pages supplémentaires', () => {
       expect(screen.getByRole('button', { name: /commencer/i })).toBeInTheDocument();
     });
 
-    it('s\'adapte aux grands écrans', () => {
+    it("s'adapte aux grands écrans", () => {
       // Simuler un écran desktop
       Object.defineProperty(window, 'innerWidth', {
         writable: true,

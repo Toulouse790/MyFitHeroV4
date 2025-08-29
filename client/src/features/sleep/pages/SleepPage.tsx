@@ -1,8 +1,14 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Plus, TrendingUp, Settings, Moon, Eye, EyeOff, 
-  Sparkles, ChevronRight
+import {
+  Plus,
+  TrendingUp,
+  Settings,
+  Moon,
+  Eye,
+  EyeOff,
+  Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,25 +20,20 @@ import { useAppStore } from '@/store/useAppStore';
 import { UniformHeader } from '@/components/UniformHeader';
 import AIIntelligence from '@/components/AIIntelligence';
 import { useSleepStore } from '../hooks/useSleepStore';
-import { 
-  SleepChart, 
-  SleepQualityForm, 
-  SleepGoals, 
-  SleepAnalytics 
-} from '../components';
-import { 
-  sportSleepConfigs, 
-  formatDuration, 
+import { SleepChart, SleepQualityForm, SleepGoals, SleepAnalytics } from '../components';
+import {
+  sportSleepConfigs,
+  formatDuration,
   getSleepQualityLabel,
   getPersonalizedSleepMessage,
-  getSleepDeficit
+  getSleepDeficit,
 } from '../utils/sleepConfig';
 
 const SleepPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const appStoreUser = useAppStore((state) => state.appStoreUser);
-  
+  const appStoreUser = useAppStore(state => state.appStoreUser);
+
   const {
     entries,
     currentEntry,
@@ -43,7 +44,7 @@ const SleepPage: React.FC = () => {
     loadEntries,
     loadGoals,
     loadStats,
-    clearError
+    clearError,
   } = useSleepStore();
 
   const [showDetailedView, setShowDetailedView] = useState(false);
@@ -77,11 +78,7 @@ const SleepPage: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        await Promise.all([
-          loadEntries(),
-          loadGoals(),
-          loadStats()
-        ]);
+        await Promise.all([loadEntries(), loadGoals(), loadStats()]);
       } catch (error) {
         console.error('Erreur lors du chargement des données sommeil:', error);
       }
@@ -93,9 +90,9 @@ const SleepPage: React.FC = () => {
   useEffect(() => {
     if (error) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: error,
-        variant: "destructive",
+        variant: 'destructive',
       });
       clearError();
     }
@@ -139,7 +136,6 @@ const SleepPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
-        
         {/* Header Uniforme */}
         <UniformHeader
           title="Sommeil"
@@ -173,7 +169,7 @@ const SleepPage: React.FC = () => {
                 </Badge>
               </div>
             </div>
-            
+
             {currentEntry ? (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -186,9 +182,7 @@ const SleepPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">
-                      {currentEntry.quality}/10
-                    </div>
+                    <div className="text-2xl font-bold">{currentEntry.quality}/10</div>
                     <div className="text-white/80 text-sm">
                       {getSleepQualityLabel(currentEntry.quality).label}
                     </div>
@@ -200,11 +194,11 @@ const SleepPage: React.FC = () => {
                     <div className="text-sm text-white/90 mb-2">Facteurs influents:</div>
                     <div className="flex flex-wrap gap-1">
                       {currentEntry.factors.slice(0, 3).map((factor, idx) => (
-                        <Badge 
+                        <Badge
                           key={idx}
                           variant="secondary"
                           className={`text-xs ${
-                            factor.type === 'positive' 
+                            factor.type === 'positive'
                               ? 'bg-green-100 text-green-800 border-green-300'
                               : 'bg-red-100 text-red-800 border-red-300'
                           }`}
@@ -224,8 +218,8 @@ const SleepPage: React.FC = () => {
             ) : (
               <div className="text-center py-4">
                 <div className="text-white/80 mb-2">Aucune nuit enregistrée</div>
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={() => setActiveTab('add')}
                   className="bg-white/20 text-white hover:bg-white/30 border-white/30"
                 >
@@ -241,14 +235,14 @@ const SleepPage: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="grid grid-cols-3 gap-3">
-              <Button 
+              <Button
                 onClick={() => setActiveTab('add')}
                 className="h-12 flex flex-col space-y-1 text-xs"
               >
                 <Plus size={16} />
                 <span>Ajouter</span>
               </Button>
-              <Button 
+              <Button
                 onClick={() => navigate('/sleep/history')}
                 variant="outline"
                 className="h-12 flex flex-col space-y-1 text-xs"
@@ -256,7 +250,7 @@ const SleepPage: React.FC = () => {
                 <TrendingUp size={16} />
                 <span>Historique</span>
               </Button>
-              <Button 
+              <Button
                 onClick={() => navigate('/sleep/settings')}
                 variant="outline"
                 className="h-12 flex flex-col space-y-1 text-xs"
@@ -280,13 +274,18 @@ const SleepPage: React.FC = () => {
                   Analyse pour {userSportCategory} {sportConfig?.emoji || '😴'}
                 </h3>
                 <p className="text-sm text-gray-600 mb-3">
-                  {sportConfig?.motivationalMessage || 'Votre sommeil est important pour vos performances'}
+                  {sportConfig?.motivationalMessage ||
+                    'Votre sommeil est important pour vos performances'}
                 </p>
 
                 <Tabs defaultValue="benefits" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-3">
-                    <TabsTrigger value="benefits" className="text-xs">Bénéfices</TabsTrigger>
-                    <TabsTrigger value="tips" className="text-xs">Conseils</TabsTrigger>
+                    <TabsTrigger value="benefits" className="text-xs">
+                      Bénéfices
+                    </TabsTrigger>
+                    <TabsTrigger value="tips" className="text-xs">
+                      Conseils
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="benefits" className="mt-0">
@@ -300,8 +299,12 @@ const SleepPage: React.FC = () => {
                                 <div className="flex items-center space-x-3">
                                   <BenefitIcon size={18} className={benefit.color} />
                                   <div>
-                                    <div className="font-medium text-gray-800 text-sm">{benefit.title}</div>
-                                    <div className={`text-xs font-bold ${benefit.color}`}>{benefit.value}</div>
+                                    <div className="font-medium text-gray-800 text-sm">
+                                      {benefit.title}
+                                    </div>
+                                    <div className={`text-xs font-bold ${benefit.color}`}>
+                                      {benefit.value}
+                                    </div>
                                   </div>
                                 </div>
                               </CardContent>
@@ -320,8 +323,12 @@ const SleepPage: React.FC = () => {
                                   <div className="flex items-center space-x-2">
                                     <BenefitIcon size={16} className={benefit.color} />
                                     <div>
-                                      <div className="font-medium text-gray-800 text-xs">{benefit.title}</div>
-                                      <div className={`text-xs font-bold ${benefit.color}`}>{benefit.value}</div>
+                                      <div className="font-medium text-gray-800 text-xs">
+                                        {benefit.title}
+                                      </div>
+                                      <div className={`text-xs font-bold ${benefit.color}`}>
+                                        {benefit.value}
+                                      </div>
                                     </div>
                                   </div>
                                 </CardContent>
@@ -346,20 +353,23 @@ const SleepPage: React.FC = () => {
 
                   <TabsContent value="tips" className="mt-0">
                     <div className="space-y-3">
-                      {(showDetailedView ? (sportConfig?.tips || []) : priorityTips).map((tip, index) => (
-                        <TipCard key={index} tip={tip} />
-                      ))}
-                      {!showDetailedView && (sportConfig?.tips?.length || 0) > priorityTips.length && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowDetailedView(true)}
-                          className="w-full text-xs text-purple-600 hover:text-purple-700"
-                        >
-                          Voir tous les conseils ({sportConfig?.tips?.length || 0})
-                          <ChevronRight size={12} className="ml-1" />
-                        </Button>
+                      {(showDetailedView ? sportConfig?.tips || [] : priorityTips).map(
+                        (tip, index) => (
+                          <TipCard key={index} tip={tip} />
+                        )
                       )}
+                      {!showDetailedView &&
+                        (sportConfig?.tips?.length || 0) > priorityTips.length && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowDetailedView(true)}
+                            className="w-full text-xs text-purple-600 hover:text-purple-700"
+                          >
+                            Voir tous les conseils ({sportConfig?.tips?.length || 0})
+                            <ChevronRight size={12} className="ml-1" />
+                          </Button>
+                        )}
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -397,7 +407,7 @@ const SleepPage: React.FC = () => {
         </Tabs>
 
         {/* IA Intelligence */}
-        <AIIntelligence 
+        <AIIntelligence
           pillar="sleep"
           showPredictions={true}
           showCoaching={true}

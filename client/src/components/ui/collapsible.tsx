@@ -1,4 +1,4 @@
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
+import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
 
 /**
  * Ce fichier réexporte les composants Collapsible de Radix UI.

@@ -22,29 +22,30 @@ export const useRealtimeSync = ({ pillar, onUpdate, onInsert, onDelete }: Realti
       hydration: 'hydration_logs',
       nutrition: 'meals',
       sleep: 'sleep_sessions',
-      workout: 'workout_sessions'
+      workout: 'workout_sessions',
     };
 
     const table = tableMap[pillar];
     const channelName = `${pillar}-${appStoreUser.id}`;
 
     // Create channel
-    channelRef.current = supabase.channel(channelName)
+    channelRef.current = supabase
+      .channel(channelName)
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
+        {
+          event: '*',
+          schema: 'public',
           table,
-          filter: `user_id=eq.${appStoreUser.id}`
+          filter: `user_id=eq.${appStoreUser.id}`,
         },
-        (payload) => {
+        payload => {
           console.log(`📡 Realtime update for ${pillar}:`, payload);
-          
+
           // Add userId to payload for identification
           const enrichedPayload = {
             ...payload,
-            userId: payload.new?.user_id || payload.old?.user_id
+            userId: payload.new?.user_id || payload.old?.user_id,
           };
 
           switch (payload.eventType) {
@@ -73,6 +74,6 @@ export const useRealtimeSync = ({ pillar, onUpdate, onInsert, onDelete }: Realti
   }, [appStoreUser?.id, pillar, onUpdate, onInsert, onDelete]);
 
   return {
-    isConnected: !!channelRef.current
+    isConnected: !!channelRef.current,
   };
 };

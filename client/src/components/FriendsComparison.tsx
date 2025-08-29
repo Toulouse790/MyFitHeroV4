@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, Trophy, TrendingUp, TrendingDown, ChevronRight,
-  Dumbbell, Apple, Droplets, Moon, Award, Star, Crown,
-  Calendar, BarChart3, Target
+import {
+  Users,
+  Trophy,
+  TrendingUp,
+  TrendingDown,
+  ChevronRight,
+  Dumbbell,
+  Apple,
+  Droplets,
+  Moon,
+  Award,
+  Star,
+  Crown,
+  Calendar,
+  BarChart3,
+  Target,
 } from 'lucide-react';
 import { socialService } from '@/services/socialService';
 import { useToast } from '@/hooks/use-toast';
@@ -13,10 +25,10 @@ interface FriendsComparisonProps {
   onPeriodChange: (period: 'week' | 'month') => void;
 }
 
-const FriendsComparison: React.FC<FriendsComparisonProps> = ({ 
-  userId, 
-  period, 
-  onPeriodChange 
+const FriendsComparison: React.FC<FriendsComparisonProps> = ({
+  userId,
+  period,
+  onPeriodChange,
 }) => {
   const { toast } = useToast();
   const [comparisonData, setComparisonData] = useState<any>(null);
@@ -36,7 +48,7 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les comparaisons',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -103,18 +115,22 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
     }
   };
 
-  const ComparisonCard = ({ metric, userValue, friends }: {
+  const ComparisonCard = ({
+    metric,
+    userValue,
+    friends,
+  }: {
     metric: string;
     userValue: number;
     friends: any[];
   }) => {
     const allUsers = [
       { username: 'Vous', value: userValue, isUser: true },
-      ...friends.map(friend => ({ 
-        username: friend.username, 
-        value: friend[metric], 
-        isUser: false 
-      }))
+      ...friends.map(friend => ({
+        username: friend.username,
+        value: friend[metric],
+        isUser: false,
+      })),
     ].sort((a, b) => b.value - a.value);
 
     const userRank = allUsers.findIndex(user => user.isUser) + 1;
@@ -144,19 +160,28 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
               }`}
             >
               <div className="flex items-center space-x-2">
-                <span className={`text-xs font-medium w-6 text-center ${
-                  index === 0 ? 'text-yellow-600' :
-                  index === 1 ? 'text-gray-600' :
-                  index === 2 ? 'text-orange-600' :
-                  'text-blue-600'
-                }`}>
+                <span
+                  className={`text-xs font-medium w-6 text-center ${
+                    index === 0
+                      ? 'text-yellow-600'
+                      : index === 1
+                        ? 'text-gray-600'
+                        : index === 2
+                          ? 'text-orange-600'
+                          : 'text-blue-600'
+                  }`}
+                >
                   #{index + 1}
                 </span>
-                <span className={`text-sm ${user.isUser ? 'font-bold text-blue-700' : 'text-gray-700'}`}>
+                <span
+                  className={`text-sm ${user.isUser ? 'font-bold text-blue-700' : 'text-gray-700'}`}
+                >
                   {user.username}
                 </span>
               </div>
-              <span className={`text-sm font-medium ${user.isUser ? 'text-blue-700' : 'text-gray-600'}`}>
+              <span
+                className={`text-sm font-medium ${user.isUser ? 'text-blue-700' : 'text-gray-600'}`}
+              >
                 {formatValue(metric, user.value)}
               </span>
             </div>
@@ -209,7 +234,7 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
               </p>
             </div>
           </div>
-          
+
           <div className="flex bg-white/20 rounded-lg p-1">
             <button
               onClick={() => onPeriodChange('week')}
@@ -262,7 +287,7 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
           <Target className="mr-2 text-blue-600" size={20} />
           Insights de Performance
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-green-50 rounded-lg">
             <div className="flex items-center space-x-2 mb-2">
@@ -270,23 +295,21 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
               <span className="text-sm font-medium text-green-700">Points forts</span>
             </div>
             <p className="text-sm text-green-600">
-              {user_rank <= 2 
-                ? "Excellent ! Vous êtes dans le top du groupe" 
-                : "Votre consistance en hydratation vous place bien"
-              }
+              {user_rank <= 2
+                ? 'Excellent ! Vous êtes dans le top du groupe'
+                : 'Votre consistance en hydratation vous place bien'}
             </p>
           </div>
-          
+
           <div className="p-4 bg-blue-50 rounded-lg">
             <div className="flex items-center space-x-2 mb-2">
               <Target className="text-blue-600" size={16} />
               <span className="text-sm font-medium text-blue-700">Améliorations</span>
             </div>
             <p className="text-sm text-blue-600">
-              {user_rank > 2 
-                ? "Augmentez vos entraînements pour rattraper le groupe"
-                : "Maintenez ce rythme pour garder votre avance"
-              }
+              {user_rank > 2
+                ? 'Augmentez vos entraînements pour rattraper le groupe'
+                : 'Maintenez ce rythme pour garder votre avance'}
             </p>
           </div>
         </div>

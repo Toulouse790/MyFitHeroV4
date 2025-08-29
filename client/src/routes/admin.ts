@@ -17,10 +17,10 @@ export const adminRoutes: RouteConfig[] = [
     requiredRoles: ['admin', 'moderator'],
     metadata: {
       title: 'Administration',
-      description: 'Panneau d\'administration',
+      description: "Panneau d'administration",
       icon: 'Shield',
-      category: 'admin'
-    }
+      category: 'admin',
+    },
   },
   {
     path: '/support',
@@ -28,11 +28,11 @@ export const adminRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Support',
-      description: 'Centre d\'aide et support',
+      description: "Centre d'aide et support",
       icon: 'HelpCircle',
-      category: 'settings'
-    }
-  }
+      category: 'settings',
+    },
+  },
 ];
 
 export const legalRoutes: RouteConfig[] = [
@@ -44,20 +44,20 @@ export const legalRoutes: RouteConfig[] = [
       title: 'Confidentialité',
       description: 'Politique de confidentialité',
       icon: 'Lock',
-      category: 'legal'
-    }
+      category: 'legal',
+    },
   },
   {
     path: '/terms',
     component: TermsPage,
     isProtected: false,
     metadata: {
-      title: 'Conditions d\'utilisation',
+      title: "Conditions d'utilisation",
       description: 'Termes et conditions',
       icon: 'FileText',
-      category: 'legal'
-    }
-  }
+      category: 'legal',
+    },
+  },
 ];
 
 export const specialRoutes: RouteConfig[] = [
@@ -67,8 +67,8 @@ export const specialRoutes: RouteConfig[] = [
     isProtected: false,
     metadata: {
       title: 'Page non trouvée',
-      description: 'La page demandée n\'existe pas',
-      category: 'auth'
-    }
-  }
+      description: "La page demandée n'existe pas",
+      category: 'auth',
+    },
+  },
 ];

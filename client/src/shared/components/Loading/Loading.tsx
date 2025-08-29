@@ -14,7 +14,7 @@ const loadingSizes = {
   sm: 'h-4 w-4',
   md: 'h-6 w-6',
   lg: 'h-8 w-8',
-  xl: 'h-12 w-12'
+  xl: 'h-12 w-12',
 };
 
 const Loading: React.FC<LoadingProps> = ({
@@ -22,19 +22,17 @@ const Loading: React.FC<LoadingProps> = ({
   variant = 'spinner',
   text,
   fullScreen = false,
-  className
+  className,
 }) => {
   const renderLoading = () => {
     switch (variant) {
       case 'spinner':
-        return (
-          <Loader2 className={cn('animate-spin text-blue-600', loadingSizes[size])} />
-        );
-      
+        return <Loader2 className={cn('animate-spin text-blue-600', loadingSizes[size])} />;
+
       case 'dots':
         return (
           <div className="flex space-x-1">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2].map(i => (
               <div
                 key={i}
                 className={cn(
@@ -46,21 +44,16 @@ const Loading: React.FC<LoadingProps> = ({
                 )}
                 style={{
                   animationDelay: `${i * 0.1}s`,
-                  animationDuration: '1.4s'
+                  animationDuration: '1.4s',
                 }}
               />
             ))}
           </div>
         );
-      
+
       case 'pulse':
-        return (
-          <div className={cn(
-            'bg-blue-600 rounded-full animate-pulse',
-            loadingSizes[size]
-          )} />
-        );
-      
+        return <div className={cn('bg-blue-600 rounded-full animate-pulse', loadingSizes[size])} />;
+
       case 'skeleton':
         return (
           <div className="space-y-3 animate-pulse">
@@ -69,25 +62,16 @@ const Loading: React.FC<LoadingProps> = ({
             <div className="h-4 bg-gray-300 rounded w-5/6"></div>
           </div>
         );
-      
+
       default:
-        return (
-          <Loader2 className={cn('animate-spin text-blue-600', loadingSizes[size])} />
-        );
+        return <Loader2 className={cn('animate-spin text-blue-600', loadingSizes[size])} />;
     }
   };
 
   const content = (
-    <div className={cn(
-      'flex flex-col items-center justify-center gap-3',
-      className
-    )}>
+    <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       {renderLoading()}
-      {text && (
-        <p className="text-sm text-gray-600 animate-pulse">
-          {text}
-        </p>
-      )}
+      {text && <p className="text-sm text-gray-600 animate-pulse">{text}</p>}
     </div>
   );
 

@@ -18,21 +18,21 @@ function getPageTitle(pathname: string): string {
     '/sleep': 'Sommeil',
     '/workout': 'Entraînement',
     '/profile': 'Profil',
-    '/social': 'Social'
+    '/social': 'Social',
   };
   return titles[pathname] || 'MyFitHero';
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [location] = useLocation();
-  
+
   // Hooks d'optimisation
   useIntelligentPreloading();
   useNetworkAdaptation();
-  
+
   const isHomePage = location === '/';
   const showBackButton = !isHomePage;
-  
+
   const quickActions = [
     { path: '/workout', icon: Dumbbell, label: 'Workout' },
     { path: '/profile', icon: User, label: 'Profil' },
@@ -63,18 +63,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <div className="h-6 w-px bg-gray-300" />
                   </>
                 )}
-                
+
                 <div>
                   <h1 className="text-xl font-bold text-gray-800">MyFitHero</h1>
-                  <p className="text-sm text-gray-500 hidden sm:block">
-                    {getPageTitle(location)}
-                  </p>
+                  <p className="text-sm text-gray-500 hidden sm:block">{getPageTitle(location)}</p>
                 </div>
               </div>
 
               {/* Actions rapides - desktop uniquement */}
               <div className="hidden md:flex items-center space-x-2">
-                {quickActions.map((action) => (
+                {quickActions.map(action => (
                   <Link
                     key={action.path}
                     to={action.path}
@@ -95,16 +93,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
 
       {/* Contenu principal */}
-      <main className="flex-1 pb-20 md:pb-0">
-        {children}
-      </main>
+      <main className="flex-1 pb-20 md:pb-0">{children}</main>
 
       {/* Indicateur de session active */}
       <ActiveSessionIndicator />
 
       {/* Navigation mobile */}
       <BottomNav />
-      
+
       {/* Bouton d'action flottant */}
       {/* <FloatingActionButton /> */}
     </div>

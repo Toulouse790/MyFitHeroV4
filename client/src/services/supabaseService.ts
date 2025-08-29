@@ -1,21 +1,35 @@
 // services/supabaseService.ts
 import { supabase } from '../config/supabaseClient';
 import type {
-  UserProfile, UserProfileInsert, UserProfileUpdate,
-  DailyStats, DailyStatsInsert, DailyStatsUpdate,
-  Workout, WorkoutInsert, WorkoutUpdate,
-  Meal, MealInsert,
-  SleepSession, SleepSessionInsert,
-  HydrationLog, HydrationLogInsert,
-  AiRecommendation, UserGoal, UserNotification,
-  UserRecoveryProfile, MuscleRecoveryData
+  UserProfile,
+  UserProfileInsert,
+  UserProfileUpdate,
+  DailyStats,
+  DailyStatsInsert,
+  DailyStatsUpdate,
+  Workout,
+  WorkoutInsert,
+  WorkoutUpdate,
+  Meal,
+  MealInsert,
+  SleepSession,
+  SleepSessionInsert,
+  HydrationLog,
+  HydrationLogInsert,
+  AiRecommendation,
+  UserGoal,
+  UserNotification,
+  UserRecoveryProfile,
+  MuscleRecoveryData,
 } from '../types/database';
 
 // ===== USER PROFILES =====
 export class UserProfileService {
   static async getCurrentUserProfile(): Promise<UserProfile | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const { data, error } = await supabase
@@ -34,7 +48,9 @@ export class UserProfileService {
 
   static async updateUserProfile(updates: UserProfileUpdate): Promise<UserProfile | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
@@ -54,7 +70,9 @@ export class UserProfileService {
 
   static async createUserProfile(profile: UserProfileInsert): Promise<UserProfile | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
@@ -76,11 +94,13 @@ export class UserProfileService {
 export class DailyStatsService {
   static async getTodayStats(): Promise<DailyStats | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const today = new Date().toISOString().split('T')[0];
-      
+
       const { data, error } = await supabase
         .from('daily_stats')
         .select('*')
@@ -98,7 +118,9 @@ export class DailyStatsService {
 
   static async getStatsForDateRange(startDate: string, endDate: string): Promise<DailyStats[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -119,20 +141,22 @@ export class DailyStatsService {
 
   static async upsertDailyStats(stats: DailyStatsInsert): Promise<DailyStats | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
         .from('daily_stats')
         .upsert(
-          { 
-            ...stats, 
+          {
+            ...stats,
             user_id: user.id,
-            updated_at: new Date().toISOString() 
+            updated_at: new Date().toISOString(),
           },
-          { 
+          {
             onConflict: 'user_id,stat_date',
-            ignoreDuplicates: false 
+            ignoreDuplicates: false,
           }
         )
         .select()
@@ -146,9 +170,15 @@ export class DailyStatsService {
     }
   }
 
-  static async incrementWorkoutStats(date: string, minutes: number, calories: number): Promise<void> {
+  static async incrementWorkoutStats(
+    date: string,
+    minutes: number,
+    calories: number
+  ): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       // Utiliser une fonction RPC pour l'incrémentation atomique
@@ -156,7 +186,7 @@ export class DailyStatsService {
         p_user_id: user.id,
         p_date: date,
         p_minutes: minutes,
-        p_calories: calories
+        p_calories: calories,
       });
 
       if (error) throw error;
@@ -171,7 +201,9 @@ export class DailyStatsService {
 export class WorkoutService {
   static async getUserWorkouts(limit: number = 20): Promise<Workout[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -191,7 +223,9 @@ export class WorkoutService {
 
   static async createWorkout(workout: WorkoutInsert): Promise<Workout | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
@@ -210,7 +244,9 @@ export class WorkoutService {
 
   static async updateWorkout(id: string, updates: WorkoutUpdate): Promise<Workout | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
@@ -232,7 +268,7 @@ export class WorkoutService {
   static async completeWorkout(id: string): Promise<Workout | null> {
     try {
       return await this.updateWorkout(id, {
-        completed_at: new Date().toISOString()
+        completed_at: new Date().toISOString(),
       });
     } catch (error) {
       console.error('Error completing workout:', error);
@@ -245,7 +281,9 @@ export class WorkoutService {
 export class MealService {
   static async getTodayMeals(): Promise<Meal[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const today = new Date().toISOString().split('T')[0];
@@ -267,7 +305,9 @@ export class MealService {
 
   static async createMeal(meal: MealInsert): Promise<Meal | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
@@ -286,7 +326,9 @@ export class MealService {
 
   static async getMealsByDateRange(startDate: string, endDate: string): Promise<Meal[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -311,7 +353,9 @@ export class MealService {
 export class SleepService {
   static async getRecentSleepSessions(days: number = 7): Promise<SleepSession[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const startDate = new Date();
@@ -334,7 +378,9 @@ export class SleepService {
 
   static async createSleepSession(session: SleepSessionInsert): Promise<SleepSession | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
@@ -353,7 +399,9 @@ export class SleepService {
 
   static async getLastNightSleep(): Promise<SleepSession | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return null;
 
       const yesterday = new Date();
@@ -380,7 +428,9 @@ export class SleepService {
 export class HydrationService {
   static async getTodayHydration(): Promise<HydrationLog[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const today = new Date().toISOString().split('T')[0];
@@ -402,15 +452,17 @@ export class HydrationService {
 
   static async logHydration(log: HydrationLogInsert): Promise<HydrationLog | null> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await (supabase as any)
         .from('hydration_logs')
-        .insert({ 
-          ...log, 
+        .insert({
+          ...log,
           user_id: user.id,
-          logged_at: new Date().toISOString()
+          logged_at: new Date().toISOString(),
         })
         .select()
         .single();
@@ -438,7 +490,9 @@ export class HydrationService {
 export class AiRecommendationService {
   static async getActiveRecommendations(): Promise<AiRecommendation[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -458,7 +512,9 @@ export class AiRecommendationService {
 
   static async markRecommendationAsApplied(id: string): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { error } = await (supabase as any)
@@ -466,7 +522,7 @@ export class AiRecommendationService {
         .update({
           is_applied: true,
           applied_at: new Date().toISOString(),
-          applied_by: 'user'
+          applied_by: 'user',
         })
         .eq('id', id)
         .eq('user_id', user.id);
@@ -483,7 +539,9 @@ export class AiRecommendationService {
 export class UserGoalService {
   static async getActiveGoals(): Promise<UserGoal[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -503,7 +561,9 @@ export class UserGoalService {
 
   static async updateGoalProgress(id: string, newValue: number): Promise<void> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       // Récupérer le goal actuel pour l'historique
@@ -518,22 +578,22 @@ export class UserGoalService {
       if (!currentGoal) throw new Error('Goal not found');
 
       const currentGoalData = currentGoal as any;
-      const progressHistory = Array.isArray(currentGoalData.progress_history) 
-        ? currentGoalData.progress_history 
+      const progressHistory = Array.isArray(currentGoalData.progress_history)
+        ? currentGoalData.progress_history
         : [];
 
       // Ajouter l'entrée à l'historique
       progressHistory.push({
         date: new Date().toISOString(),
         value: newValue,
-        previous_value: currentGoalData.current_value
+        previous_value: currentGoalData.current_value,
       });
 
       const { error } = await (supabase as any)
         .from('user_goals')
         .update({
           current_value: newValue,
-          progress_history: progressHistory
+          progress_history: progressHistory,
         })
         .eq('id', id)
         .eq('user_id', user.id);
@@ -550,7 +610,9 @@ export class UserGoalService {
 export class NotificationService {
   static async getUnreadNotifications(): Promise<UserNotification[]> {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -622,20 +684,15 @@ export class MuscleRecoveryDBService {
   static async saveMuscleRecoveryData(userId: string, recoveryData: any[]): Promise<boolean> {
     try {
       // Supprimer les anciennes données
-      await supabase
-        .from('muscle_recovery_data')
-        .delete()
-        .eq('user_id', userId);
+      await supabase.from('muscle_recovery_data').delete().eq('user_id', userId);
 
       // Insérer les nouvelles données
       const dataToInsert = recoveryData.map(data => ({
         user_id: userId,
-        ...data
+        ...data,
       }));
 
-      const { error } = await (supabase as any)
-        .from('muscle_recovery_data')
-        .insert(dataToInsert);
+      const { error } = await (supabase as any).from('muscle_recovery_data').insert(dataToInsert);
 
       if (error) throw error;
       return true;

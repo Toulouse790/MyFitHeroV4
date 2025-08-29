@@ -44,32 +44,32 @@ const routes: RouteConfig[] = [
     meta: {
       title: 'MyFitHero - Votre compagnon santé et bien-être',
       description: 'Suivez votre hydratation, sommeil, nutrition et activités physiques',
-      redirectIfAuth: true
-    }
+      redirectIfAuth: true,
+    },
   },
   {
     path: '/login',
     element: LoginPage,
     meta: {
       title: 'Connexion - MyFitHero',
-      redirectIfAuth: true
-    }
+      redirectIfAuth: true,
+    },
   },
   {
     path: '/register',
     element: RegisterPage,
     meta: {
       title: 'Inscription - MyFitHero',
-      redirectIfAuth: true
-    }
+      redirectIfAuth: true,
+    },
   },
   {
     path: '/forgot-password',
     element: ForgotPasswordPage,
     meta: {
       title: 'Mot de passe oublié - MyFitHero',
-      redirectIfAuth: true
-    }
+      redirectIfAuth: true,
+    },
   },
 
   // Routes protégées
@@ -78,18 +78,18 @@ const routes: RouteConfig[] = [
     element: Dashboard,
     meta: {
       title: 'Tableau de bord - MyFitHero',
-      description: 'Vue d\'ensemble de votre santé et bien-être',
-      requiresAuth: true
-    }
+      description: "Vue d'ensemble de votre santé et bien-être",
+      requiresAuth: true,
+    },
   },
   {
     path: '/hydration',
     element: HydrationPage,
     meta: {
       title: 'Hydratation - MyFitHero',
-      description: 'Suivez votre consommation d\'eau quotidienne',
-      requiresAuth: true
-    }
+      description: "Suivez votre consommation d'eau quotidienne",
+      requiresAuth: true,
+    },
   },
   {
     path: '/sleep',
@@ -97,26 +97,26 @@ const routes: RouteConfig[] = [
     meta: {
       title: 'Sommeil - MyFitHero',
       description: 'Analysez la qualité de votre sommeil',
-      requiresAuth: true
-    }
+      requiresAuth: true,
+    },
   },
   {
     path: '/social',
     element: SocialPage,
     meta: {
       title: 'Communauté - MyFitHero',
-      description: 'Connectez-vous avec d\'autres utilisateurs',
-      requiresAuth: true
-    }
+      description: "Connectez-vous avec d'autres utilisateurs",
+      requiresAuth: true,
+    },
   },
   {
     path: '/workout',
     element: WorkoutPage,
     meta: {
       title: 'Entraînements - MyFitHero',
-      description: 'Planifiez et suivez vos séances d\'entraînement',
-      requiresAuth: true
-    }
+      description: "Planifiez et suivez vos séances d'entraînement",
+      requiresAuth: true,
+    },
   },
   {
     path: '/nutrition',
@@ -124,8 +124,8 @@ const routes: RouteConfig[] = [
     meta: {
       title: 'Nutrition - MyFitHero',
       description: 'Suivez votre alimentation et vos calories',
-      requiresAuth: true
-    }
+      requiresAuth: true,
+    },
   },
   {
     path: '/profile',
@@ -133,8 +133,8 @@ const routes: RouteConfig[] = [
     meta: {
       title: 'Profil - MyFitHero',
       description: 'Gérez vos informations personnelles',
-      requiresAuth: true
-    }
+      requiresAuth: true,
+    },
   },
   {
     path: '/settings',
@@ -142,8 +142,8 @@ const routes: RouteConfig[] = [
     meta: {
       title: 'Paramètres - MyFitHero',
       description: 'Configurez votre application',
-      requiresAuth: true
-    }
+      requiresAuth: true,
+    },
   },
 
   // Pages d'erreur
@@ -151,16 +151,16 @@ const routes: RouteConfig[] = [
     path: '/error',
     element: ErrorPage,
     meta: {
-      title: 'Erreur - MyFitHero'
-    }
+      title: 'Erreur - MyFitHero',
+    },
   },
   {
     path: '*',
     element: NotFoundPage,
     meta: {
-      title: 'Page introuvable - MyFitHero'
-    }
-  }
+      title: 'Page introuvable - MyFitHero',
+    },
+  },
 ];
 
 // Créer les routes React Router
@@ -180,7 +180,7 @@ const router = createBrowserRouter(
         </Suspense>
       </ErrorBoundary>
     ),
-    errorElement: <ErrorPage />
+    errorElement: <ErrorPage />,
   }))
 );
 
@@ -193,11 +193,10 @@ export const useRouteMetadata = (pathname: string) => {
 // Hook pour navigation typée
 export const useTypedNavigation = () => {
   const routePaths = routes.map(r => r.path);
-  
+
   return {
     paths: routePaths as const,
-    isValidPath: (path: string): path is typeof routePaths[number] => 
-      routePaths.includes(path)
+    isValidPath: (path: string): path is (typeof routePaths)[number] => routePaths.includes(path),
   };
 };
 

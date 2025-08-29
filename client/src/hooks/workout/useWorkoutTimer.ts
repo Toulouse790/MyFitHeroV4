@@ -20,7 +20,7 @@ export const useWorkoutTimer = (isSessionActive: boolean): UseWorkoutTimerReturn
   const [restTime, setRestTime] = useState(0);
   const [isResting, setIsResting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const restTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -61,7 +61,7 @@ export const useWorkoutTimer = (isSessionActive: boolean): UseWorkoutTimerReturn
   const startRestTimer = useCallback((duration: number) => {
     setIsResting(true);
     setRestTime(duration);
-    
+
     restTimeoutRef.current = setTimeout(() => {
       setIsResting(false);
       setRestTime(0);
@@ -82,7 +82,7 @@ export const useWorkoutTimer = (isSessionActive: boolean): UseWorkoutTimerReturn
     setRestTime(0);
     setIsResting(false);
     setIsPaused(false);
-    
+
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -97,7 +97,7 @@ export const useWorkoutTimer = (isSessionActive: boolean): UseWorkoutTimerReturn
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }

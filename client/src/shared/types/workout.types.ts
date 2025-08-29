@@ -25,7 +25,7 @@ export enum ExerciseCategory {
   FLEXIBILITY = 'flexibility',
   BALANCE = 'balance',
   PLYOMETRIC = 'plyometric',
-  REHABILITATION = 'rehabilitation'
+  REHABILITATION = 'rehabilitation',
 }
 
 export enum MuscleGroup {
@@ -40,7 +40,7 @@ export enum MuscleGroup {
   HAMSTRINGS = 'hamstrings',
   GLUTES = 'glutes',
   CALVES = 'calves',
-  FULL_BODY = 'full_body'
+  FULL_BODY = 'full_body',
 }
 
 export enum Equipment {
@@ -53,14 +53,14 @@ export enum Equipment {
   MACHINE = 'machine',
   CABLE = 'cable',
   MEDICINE_BALL = 'medicine_ball',
-  FOAM_ROLLER = 'foam_roller'
+  FOAM_ROLLER = 'foam_roller',
 }
 
 export enum ExerciseDifficulty {
   BEGINNER = 'beginner',
   INTERMEDIATE = 'intermediate',
   ADVANCED = 'advanced',
-  EXPERT = 'expert'
+  EXPERT = 'expert',
 }
 
 // Types pour les séances d'entraînement
@@ -87,7 +87,7 @@ export enum WorkoutCategory {
   PILATES = 'pilates',
   STRETCHING = 'stretching',
   REHABILITATION = 'rehabilitation',
-  SPORTS_SPECIFIC = 'sports_specific'
+  SPORTS_SPECIFIC = 'sports_specific',
 }
 
 export interface WorkoutExercise {
@@ -123,7 +123,7 @@ export enum WorkoutSessionStatus {
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   CANCELLED = 'cancelled',
-  PAUSED = 'paused'
+  PAUSED = 'paused',
 }
 
 export interface SessionExercise {
@@ -204,7 +204,7 @@ export enum FitnessGoal {
   ENDURANCE = 'endurance',
   FLEXIBILITY = 'flexibility',
   GENERAL_FITNESS = 'general_fitness',
-  REHABILITATION = 'rehabilitation'
+  REHABILITATION = 'rehabilitation',
 }
 
 export interface PlanWorkout {

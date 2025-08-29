@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Image, 
-  Video, 
-  FileText, 
-  Upload, 
-  Search, 
+import {
+  Image,
+  Video,
+  FileText,
+  Upload,
+  Search,
   Filter,
   Eye,
   Download,
-  Trash2
+  Trash2,
 } from 'lucide-react';
 
 interface MediaFile {
@@ -31,7 +31,7 @@ const AdminMedia: React.FC = () => {
       type: 'image',
       size: '2.5 MB',
       uploadDate: '2024-01-15',
-      url: '/images/workout-banner.jpg'
+      url: '/images/workout-banner.jpg',
     },
     {
       id: '2',
@@ -39,7 +39,7 @@ const AdminMedia: React.FC = () => {
       type: 'video',
       size: '15.2 MB',
       uploadDate: '2024-01-20',
-      url: '/videos/exercise-demo.mp4'
+      url: '/videos/exercise-demo.mp4',
     },
     {
       id: '3',
@@ -47,8 +47,8 @@ const AdminMedia: React.FC = () => {
       type: 'document',
       size: '3.8 MB',
       uploadDate: '2024-01-25',
-      url: '/documents/nutrition-guide.pdf'
-    }
+      url: '/documents/nutrition-guide.pdf',
+    },
   ]);
 
   const getTypeIcon = (type: MediaFile['type']) => {
@@ -118,7 +118,7 @@ const AdminMedia: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {mediaFiles.map((file) => (
+                {mediaFiles.map(file => (
                   <tr key={file.id} className="border-b hover:bg-gray-50">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
@@ -127,9 +127,7 @@ const AdminMedia: React.FC = () => {
                       </div>
                     </td>
                     <td className="p-3">
-                      <Badge className={getTypeColor(file.type)}>
-                        {file.type}
-                      </Badge>
+                      <Badge className={getTypeColor(file.type)}>{file.type}</Badge>
                     </td>
                     <td className="p-3 text-gray-600">{file.size}</td>
                     <td className="p-3 text-gray-600">{file.uploadDate}</td>

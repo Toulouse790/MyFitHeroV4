@@ -61,9 +61,9 @@ const usePositions = (sportId: string) => {
               aiRecommendation: {
                 score: 85,
                 reasoning: 'Excellente position pour développer la coordination et les réflexes',
-                personalizedTips: ['Travaillez vos réflexes', 'Améliorez votre communication']
+                personalizedTips: ['Travaillez vos réflexes', 'Améliorez votre communication'],
               },
-              physicalDemands: { strength: 7, endurance: 6, flexibility: 8, coordination: 9 }
+              physicalDemands: { strength: 7, endurance: 6, flexibility: 8, coordination: 9 },
             },
             {
               id: 'striker',
@@ -72,8 +72,8 @@ const usePositions = (sportId: string) => {
               description: 'Marque des buts et crée des occasions',
               difficulty: 'advanced',
               popularity: 9,
-              physicalDemands: { strength: 8, endurance: 8, flexibility: 6, coordination: 7 }
-            }
+              physicalDemands: { strength: 8, endurance: 8, flexibility: 6, coordination: 7 },
+            },
           ],
           basketball: [
             {
@@ -83,9 +83,9 @@ const usePositions = (sportId: string) => {
               description: 'Organise le jeu et distribue les passes',
               difficulty: 'advanced',
               popularity: 8,
-              physicalDemands: { strength: 6, endurance: 8, flexibility: 7, coordination: 9 }
-            }
-          ]
+              physicalDemands: { strength: 6, endurance: 8, flexibility: 7, coordination: 9 },
+            },
+          ],
         };
 
         setTimeout(() => {
@@ -110,7 +110,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
   onPositionChange,
   maxSelections = 3,
   showAiRecommendations = true,
-  allowCustomPositions = true
+  allowCustomPositions = true,
 }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -122,9 +122,10 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
   // Recherche avec debounce
   const filteredPositions = useMemo(() => {
     if (!searchTerm) return positions;
-    return positions.filter(position =>
-      position.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      position.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    return positions.filter(
+      position =>
+        position.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        position.description?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [positions, searchTerm]);
 
@@ -187,7 +188,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
           type="text"
           placeholder="Rechercher une position..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
       </div>
@@ -200,7 +201,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
             <h3 className="font-semibold text-gray-900">Recommandations IA pour vous</h3>
           </div>
           <div className="space-y-2">
-            {aiRecommendations.map((position) => (
+            {aiRecommendations.map(position => (
               <div
                 key={position.id}
                 className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100"
@@ -233,7 +234,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
 
       {/* Liste des positions */}
       <div className="grid gap-3">
-        {filteredPositions.map((position) => {
+        {filteredPositions.map(position => {
           const isSelected = selectedPositions.includes(position.id);
           const isMaxReached = selectedPositions.length >= maxSelections && !isSelected;
 
@@ -244,8 +245,8 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
                 isSelected
                   ? 'border-blue-500 bg-blue-50'
                   : isMaxReached
-                  ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
               onClick={() => !isMaxReached && handlePositionToggle(position.id)}
             >
@@ -259,8 +260,8 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
                           position.difficulty === 'beginner'
                             ? 'bg-green-100 text-green-800'
                             : position.difficulty === 'intermediate'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
                         }`}
                       >
                         {position.difficulty}
@@ -270,7 +271,7 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
                   {position.description && (
                     <p className="text-sm text-gray-600 mt-1">{position.description}</p>
                   )}
-                  
+
                   {/* Demandes physiques */}
                   {position.physicalDemands && (
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
@@ -285,13 +286,11 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
                     </div>
                   )}
                 </div>
-                
+
                 <div className="ml-4">
                   <div
                     className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                      isSelected
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
+                      isSelected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'
                     }`}
                   >
                     {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
@@ -320,13 +319,15 @@ export const PositionSelector: React.FC<PositionSelectorProps> = ({
                 type="text"
                 placeholder="Nom de la position"
                 value={customPosition.name}
-                onChange={(e) => setCustomPosition(prev => ({ ...prev, name: e.target.value }))}
+                onChange={e => setCustomPosition(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
               <textarea
                 placeholder="Description (optionnel)"
                 value={customPosition.description}
-                onChange={(e) => setCustomPosition(prev => ({ ...prev, description: e.target.value }))}
+                onChange={e =>
+                  setCustomPosition(prev => ({ ...prev, description: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 rows={2}
               />

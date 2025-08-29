@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import { Link } from 'wouter';   // change en `react-router-dom` si tu utilises Router DOM
+import { Link } from 'wouter'; // change en `react-router-dom` si tu utilises Router DOM
 
 /**
  * Bouton flottant (mobile d’abord) qui amène vers une page d’actions rapides.

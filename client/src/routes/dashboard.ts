@@ -15,10 +15,10 @@ export const dashboardRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Tableau de bord',
-      description: 'Vue d\'ensemble de vos statistiques',
+      description: "Vue d'ensemble de vos statistiques",
       icon: 'BarChart3',
-      category: 'dashboard'
-    }
+      category: 'dashboard',
+    },
   },
   {
     path: '/analytics',
@@ -28,8 +28,8 @@ export const dashboardRoutes: RouteConfig[] = [
       title: 'Analytiques',
       description: 'Analyses détaillées de vos performances',
       icon: 'TrendingUp',
-      category: 'dashboard'
-    }
+      category: 'dashboard',
+    },
   },
   {
     path: '/profile',
@@ -39,8 +39,8 @@ export const dashboardRoutes: RouteConfig[] = [
       title: 'Profil',
       description: 'Gérer votre profil utilisateur',
       icon: 'User',
-      category: 'dashboard'
-    }
+      category: 'dashboard',
+    },
   },
   {
     path: '/profile/complete',
@@ -50,8 +50,8 @@ export const dashboardRoutes: RouteConfig[] = [
       title: 'Compléter le profil',
       description: 'Finaliser la configuration de votre profil',
       icon: 'UserCheck',
-      category: 'dashboard'
-    }
+      category: 'dashboard',
+    },
   },
   {
     path: '/settings',
@@ -59,9 +59,9 @@ export const dashboardRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Paramètres',
-      description: 'Configuration de l\'application',
+      description: "Configuration de l'application",
       icon: 'Settings',
-      category: 'settings'
-    }
-  }
+      category: 'settings',
+    },
+  },
 ];

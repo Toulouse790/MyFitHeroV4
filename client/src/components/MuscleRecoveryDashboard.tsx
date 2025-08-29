@@ -6,8 +6,8 @@ interface MuscleRecoveryDashboardProps {
   className?: string;
 }
 
-export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = ({ 
-  className = '' 
+export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = ({
+  className = '',
 }) => {
   const {
     muscleRecoveryData,
@@ -19,7 +19,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
     refreshRecoveryData,
     formatRecoveryStatus,
     getRecoveryColor,
-    getNextWorkoutRecommendation
+    getNextWorkoutRecommendation,
   } = useMuscleRecovery();
 
   const [selectedMuscle, setSelectedMuscle] = useState<MuscleGroup | null>(null);
@@ -45,8 +45,18 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
       <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
         <div className="text-center">
           <div className="text-red-500 mb-4">
-            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+            <svg
+              className="w-12 h-12 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Erreur de chargement</h3>
@@ -62,7 +72,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
     );
   }
 
-  const selectedMuscleData = selectedMuscle 
+  const selectedMuscleData = selectedMuscle
     ? muscleRecoveryData.find(data => data.muscle_group === selectedMuscle)
     : null;
 
@@ -74,7 +84,8 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Récupération Musculaire</h2>
             <p className="text-gray-600 mt-1">
-              Score global: <span className="font-semibold">{globalMetrics?.overall_recovery_score || 0}%</span>
+              Score global:{' '}
+              <span className="font-semibold">{globalMetrics?.overall_recovery_score || 0}%</span>
             </p>
           </div>
           <div className="flex items-center space-x-3">
@@ -93,7 +104,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
             </button>
           </div>
         </div>
-        
+
         {lastUpdated && (
           <p className="text-sm text-gray-500 mt-2">
             Dernière mise à jour: {new Date(lastUpdated).toLocaleString('fr-FR')}
@@ -110,20 +121,21 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
       {/* Grille des groupes musculaires */}
       <div className="p-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {muscleRecoveryData.map((muscle) => (
+          {muscleRecoveryData.map(muscle => (
             <div
               key={muscle.muscle_group}
               onClick={() => setSelectedMuscle(muscle.muscle_group)}
               className={`
                 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
-                ${selectedMuscle === muscle.muscle_group 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-gray-300'
+                ${
+                  selectedMuscle === muscle.muscle_group
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
                 }
               `}
             >
               <div className="text-center">
-                <div 
+                <div
                   className="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold"
                   style={{ backgroundColor: getRecoveryColor(muscle.recovery_percentage) }}
                 >
@@ -146,7 +158,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
             <h3 className="text-lg font-semibold text-gray-900 mb-4 capitalize">
               Détails - {selectedMuscleData.muscle_group.replace('_', ' ')}
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <h4 className="font-medium text-gray-700 mb-2">État de récupération</h4>
@@ -176,15 +188,16 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Date:</span>
                     <span className="font-medium">
-                      {selectedMuscleData.last_workout_date 
+                      {selectedMuscleData.last_workout_date
                         ? new Date(selectedMuscleData.last_workout_date).toLocaleDateString('fr-FR')
-                        : 'Aucun'
-                      }
+                        : 'Aucun'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Intensité:</span>
-                    <span className="font-medium capitalize">{selectedMuscleData.workout_intensity}</span>
+                    <span className="font-medium capitalize">
+                      {selectedMuscleData.workout_intensity}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Volume:</span>
@@ -192,7 +205,9 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600">Durée:</span>
-                    <span className="font-medium">{selectedMuscleData.workout_duration_minutes} min</span>
+                    <span className="font-medium">
+                      {selectedMuscleData.workout_duration_minutes} min
+                    </span>
                   </div>
                 </div>
               </div>
@@ -205,10 +220,9 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                     {new Date(selectedMuscleData.estimated_full_recovery).toLocaleString('fr-FR')}
                   </div>
                   <div className="text-xs text-gray-500 mt-2">
-                    {selectedMuscleData.recovery_percentage >= 100 
+                    {selectedMuscleData.recovery_percentage >= 100
                       ? 'Récupération terminée ✅'
-                      : `${Math.ceil((new Date(selectedMuscleData.estimated_full_recovery).getTime() - Date.now()) / (1000 * 60 * 60))}h restantes`
-                    }
+                      : `${Math.ceil((new Date(selectedMuscleData.estimated_full_recovery).getTime() - Date.now()) / (1000 * 60 * 60))}h restantes`}
                   </div>
                 </div>
               </div>
@@ -222,44 +236,51 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
             <h3 className="text-lg font-semibold text-green-900 mb-4">
               Recommandations personnalisées ({recommendations.length})
             </h3>
-            
+
             <div className="space-y-4">
               {recommendations.slice(0, 5).map((rec, index) => (
                 <div key={index} className="bg-white rounded-lg p-4 border border-green-200">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <h4 className="font-medium text-gray-900 capitalize">
-                        {rec.muscle_group.replace('_', ' ')} - {rec.recommendation_type.replace('_', ' ')}
+                        {rec.muscle_group.replace('_', ' ')} -{' '}
+                        {rec.recommendation_type.replace('_', ' ')}
                       </h4>
-                      <span className={`
+                      <span
+                        className={`
                         inline-block px-2 py-1 rounded-full text-xs font-medium mt-1
-                        ${rec.priority === 'critical' ? 'bg-red-100 text-red-800' :
-                          rec.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                          rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                        ${
+                          rec.priority === 'critical'
+                            ? 'bg-red-100 text-red-800'
+                            : rec.priority === 'high'
+                              ? 'bg-orange-100 text-orange-800'
+                              : rec.priority === 'medium'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800'
                         }
-                      `}>
+                      `}
+                      >
                         Priorité {rec.priority}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      Bénéfice: {rec.estimated_benefit}%
-                    </div>
+                    <div className="text-sm text-gray-500">Bénéfice: {rec.estimated_benefit}%</div>
                   </div>
-                  
+
                   <p className="text-gray-700 mb-3">{rec.message}</p>
-                  
+
                   {rec.specific_actions.length > 0 && (
                     <div>
                       <h5 className="font-medium text-gray-800 mb-2">Actions recommandées:</h5>
                       <ul className="list-disc list-inside space-y-1">
                         {rec.specific_actions.map((action, actionIndex) => (
-                          <li key={actionIndex} className="text-sm text-gray-600">{action}</li>
+                          <li key={actionIndex} className="text-sm text-gray-600">
+                            {action}
+                          </li>
                         ))}
                       </ul>
                     </div>
                   )}
-                  
+
                   {rec.duration_minutes && (
                     <div className="mt-2 text-sm text-gray-500">
                       Durée recommandée: {rec.duration_minutes} minutes
@@ -268,7 +289,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                 </div>
               ))}
             </div>
-            
+
             {recommendations.length > 5 && (
               <div className="text-center mt-4">
                 <button className="text-green-600 hover:text-green-700 font-medium">
@@ -288,9 +309,9 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                 {globalMetrics.ready_for_training.length}
               </div>
               <div className="text-sm text-blue-600">
-                {globalMetrics.ready_for_training.map(muscle => 
-                  muscle.replace('_', ' ')
-                ).join(', ') || 'Aucun'}
+                {globalMetrics.ready_for_training
+                  .map(muscle => muscle.replace('_', ' '))
+                  .join(', ') || 'Aucun'}
               </div>
             </div>
 
@@ -300,9 +321,8 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                 {globalMetrics.needs_rest.length}
               </div>
               <div className="text-sm text-red-600">
-                {globalMetrics.needs_rest.map(muscle => 
-                  muscle.replace('_', ' ')
-                ).join(', ') || 'Aucun'}
+                {globalMetrics.needs_rest.map(muscle => muscle.replace('_', ' ')).join(', ') ||
+                  'Aucun'}
               </div>
             </div>
 
@@ -311,9 +331,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
               <div className="text-lg font-bold text-green-700 mb-1 capitalize">
                 {globalMetrics.optimal_workout_type.replace('_', ' ')}
               </div>
-              <div className="text-sm text-green-600">
-                Basé sur votre récupération actuelle
-              </div>
+              <div className="text-sm text-green-600">Basé sur votre récupération actuelle</div>
             </div>
           </div>
         )}

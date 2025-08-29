@@ -74,7 +74,10 @@ export interface DetailedInsight {
 
 class AnalyticsService {
   // Récupération des données multi-piliers sur une période
-  async getMultiPillarData(userId: string, period: '7d' | '30d' | '90d' = '30d'): Promise<AnalyticsData> {
+  async getMultiPillarData(
+    userId: string,
+    period: '7d' | '30d' | '90d' = '30d'
+  ): Promise<AnalyticsData> {
     const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
     const startDate = subDays(new Date(), days);
 
@@ -84,7 +87,7 @@ class AnalyticsService {
         this.getHydrationData(userId, startDate),
         this.getNutritionData(userId, startDate),
         this.getSleepData(userId, startDate),
-        this.getWorkoutData(userId, startDate)
+        this.getWorkoutData(userId, startDate),
       ]);
 
       // Génération des labels de dates
@@ -99,27 +102,27 @@ class AnalyticsService {
             label: 'Hydratation',
             data: hydrationData,
             color: '#06b6d4',
-            pillar: 'hydration'
+            pillar: 'hydration',
           },
           {
             label: 'Nutrition',
             data: nutritionData,
             color: '#10b981',
-            pillar: 'nutrition'
+            pillar: 'nutrition',
           },
           {
             label: 'Sommeil',
             data: sleepData,
             color: '#8b5cf6',
-            pillar: 'sleep'
+            pillar: 'sleep',
           },
           {
             label: 'Entraînement',
             data: workoutData,
             color: '#ef4444',
-            pillar: 'workout'
-          }
-        ]
+            pillar: 'workout',
+          },
+        ],
       };
     } catch (error) {
       console.error('Error fetching multi-pillar data:', error);
@@ -151,7 +154,7 @@ class AnalyticsService {
       const [consistency, activities, streaks] = await Promise.all([
         this.calculateConsistencyScore(userId),
         this.getTotalActivities(userId),
-        this.getStreakData(userId)
+        this.getStreakData(userId),
       ]);
 
       return {
@@ -162,7 +165,7 @@ class AnalyticsService {
         weekly_average: activities.weekly_average,
         best_day: streaks.best_day,
         challenges_completed: activities.challenges,
-        level_progress: consistency.level_progress
+        level_progress: consistency.level_progress,
       };
     } catch (error) {
       console.error('Error fetching performance metrics:', error);
@@ -171,7 +174,10 @@ class AnalyticsService {
   }
 
   // Comparaison entre périodes
-  async getComparisonData(userId: string, currentPeriod: 'week' | 'month' = 'week'): Promise<ComparisonData> {
+  async getComparisonData(
+    userId: string,
+    currentPeriod: 'week' | 'month' = 'week'
+  ): Promise<ComparisonData> {
     try {
       const now = new Date();
       let currentStart: Date, currentEnd: Date, previousStart: Date, previousEnd: Date;
@@ -190,26 +196,28 @@ class AnalyticsService {
 
       const [currentData, previousData] = await Promise.all([
         this.getPeriodAverages(userId, currentStart, currentEnd),
-        this.getPeriodAverages(userId, previousStart, previousEnd)
+        this.getPeriodAverages(userId, previousStart, previousEnd),
       ]);
 
       const improvement = {
-        hydration: ((currentData.hydration - previousData.hydration) / previousData.hydration) * 100,
-        nutrition: ((currentData.nutrition - previousData.nutrition) / previousData.nutrition) * 100,
+        hydration:
+          ((currentData.hydration - previousData.hydration) / previousData.hydration) * 100,
+        nutrition:
+          ((currentData.nutrition - previousData.nutrition) / previousData.nutrition) * 100,
         sleep: ((currentData.sleep - previousData.sleep) / previousData.sleep) * 100,
-        workout: ((currentData.workout - previousData.workout) / previousData.workout) * 100
+        workout: ((currentData.workout - previousData.workout) / previousData.workout) * 100,
       };
 
       return {
         current_period: {
           label: currentPeriod === 'week' ? 'Cette semaine' : 'Ce mois',
-          ...currentData
+          ...currentData,
         },
         previous_period: {
           label: currentPeriod === 'week' ? 'Semaine dernière' : 'Mois dernier',
-          ...previousData
+          ...previousData,
         },
-        improvement
+        improvement,
       };
     } catch (error) {
       console.error('Error fetching comparison data:', error);
@@ -223,7 +231,7 @@ class AnalyticsService {
       const [progress, metrics, comparison] = await Promise.all([
         this.getPillarProgress(userId),
         this.getPerformanceMetrics(userId),
-        this.getComparisonData(userId)
+        this.getComparisonData(userId),
       ]);
 
       const insights: DetailedInsight[] = [];
@@ -241,7 +249,7 @@ class AnalyticsService {
             priority: 'low',
             icon: '🏆',
             color: '#10b981',
-            action_needed: false
+            action_needed: false,
           });
         } else if (pillar.progress_percentage < 50) {
           insights.push({
@@ -254,7 +262,7 @@ class AnalyticsService {
             priority: 'high',
             icon: '⚠️',
             color: '#ef4444',
-            action_needed: true
+            action_needed: true,
           });
         }
       });
@@ -269,7 +277,7 @@ class AnalyticsService {
           priority: 'low',
           icon: '🔥',
           color: '#f59e0b',
-          action_needed: false
+          action_needed: false,
         });
       }
 
@@ -284,7 +292,7 @@ class AnalyticsService {
             priority: 'medium',
             icon: '📈',
             color: '#06b6d4',
-            action_needed: false
+            action_needed: false,
           });
         }
       });
@@ -295,11 +303,12 @@ class AnalyticsService {
           type: 'suggestion',
           pillar: 'general',
           title: 'Construisez votre streak',
-          description: 'Maintenez vos habitudes 3 jours de suite pour créer une dynamique positive.',
+          description:
+            'Maintenez vos habitudes 3 jours de suite pour créer une dynamique positive.',
           priority: 'medium',
           icon: '🎯',
           color: '#8b5cf6',
-          action_needed: true
+          action_needed: true,
         });
       }
 
@@ -361,16 +370,16 @@ class AnalyticsService {
 
   private aggregateDataByDay(data: any[], field: string, divisor: number = 1): number[] {
     const dailyData: { [key: string]: number } = {};
-    
+
     data.forEach(item => {
       const day = format(new Date(item.created_at), 'yyyy-MM-dd');
-      dailyData[day] = (dailyData[day] || 0) + (item[field] / divisor);
+      dailyData[day] = (dailyData[day] || 0) + item[field] / divisor;
     });
 
     // Remplir les jours manquants avec 0
     const result: number[] = [];
     const days = Math.max(Object.keys(dailyData).length, 7);
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const day = format(subDays(new Date(), i), 'yyyy-MM-dd');
       result.push(Math.round(dailyData[day] || 0));
@@ -391,7 +400,7 @@ class AnalyticsService {
         trend_percentage: 12,
         last_7_days: [1.8, 2.0, 2.3, 2.1, 2.4, 2.2, 2.1],
         color: '#06b6d4',
-        icon: '💧'
+        icon: '💧',
       },
       nutrition: {
         pillar: 'Nutrition',
@@ -402,7 +411,7 @@ class AnalyticsService {
         trend_percentage: 2,
         last_7_days: [1800, 1900, 1850, 1950, 1880, 1870, 1850],
         color: '#10b981',
-        icon: '🍎'
+        icon: '🍎',
       },
       sleep: {
         pillar: 'Sommeil',
@@ -413,7 +422,7 @@ class AnalyticsService {
         trend_percentage: 8,
         last_7_days: [7.0, 7.5, 6.8, 7.2, 7.8, 7.1, 7.2],
         color: '#8b5cf6',
-        icon: '😴'
+        icon: '😴',
       },
       workout: {
         pillar: 'Entraînement',
@@ -424,8 +433,8 @@ class AnalyticsService {
         trend_percentage: -5,
         last_7_days: [60, 45, 30, 50, 40, 35, 45],
         color: '#ef4444',
-        icon: '💪'
-      }
+        icon: '💪',
+      },
     };
 
     return mockData[pillar] || mockData.hydration;
@@ -440,7 +449,7 @@ class AnalyticsService {
     return {
       score: 78,
       improvement_rate: 15,
-      level_progress: 65
+      level_progress: 65,
     };
   }
 
@@ -453,7 +462,7 @@ class AnalyticsService {
     return {
       total: 156,
       weekly_average: 22,
-      challenges: 8
+      challenges: 8,
     };
   }
 
@@ -464,11 +473,15 @@ class AnalyticsService {
     // Simulation - À remplacer par de vrais calculs
     return {
       current_streak: 12,
-      best_day: 'Mercredi'
+      best_day: 'Mercredi',
     };
   }
 
-  private async getPeriodAverages(userId: string, startDate: Date, endDate: Date): Promise<{
+  private async getPeriodAverages(
+    userId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     hydration: number;
     nutrition: number;
     sleep: number;
@@ -479,7 +492,7 @@ class AnalyticsService {
       hydration: 2.1,
       nutrition: 1850,
       sleep: 7.2,
-      workout: 45
+      workout: 45,
     };
   }
 }

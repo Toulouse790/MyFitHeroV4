@@ -2,17 +2,17 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Users, 
-  Image, 
-  BarChart3, 
-  CreditCard, 
-  Bell, 
-  MessageSquare, 
+import {
+  Users,
+  Image,
+  BarChart3,
+  CreditCard,
+  Bell,
+  MessageSquare,
   Settings,
   Shield,
   Activity,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react';
 
 import AdminUsers from './AdminUsers';
@@ -32,50 +32,50 @@ const AdminDashboard: React.FC = () => {
       id: 'overview',
       label: t('admin.overview'),
       icon: BarChart3,
-      description: 'Vue d\'ensemble des statistiques'
+      description: "Vue d'ensemble des statistiques",
     },
     {
       id: 'users',
       label: t('admin.users'),
       icon: Users,
-      description: 'Gestion des utilisateurs'
+      description: 'Gestion des utilisateurs',
     },
     {
       id: 'media',
       label: t('admin.media'),
       icon: Image,
-      description: 'Gestion des médias'
+      description: 'Gestion des médias',
     },
     {
       id: 'analytics',
       label: t('admin.analytics'),
       icon: Activity,
-      description: 'Analyses et rapports'
+      description: 'Analyses et rapports',
     },
     {
       id: 'payments',
       label: t('admin.payments'),
       icon: CreditCard,
-      description: 'Gestion des paiements'
+      description: 'Gestion des paiements',
     },
     {
       id: 'notifications',
       label: t('admin.notifications'),
       icon: Bell,
-      description: 'Système de notifications'
+      description: 'Système de notifications',
     },
     {
       id: 'support',
       label: t('admin.support'),
       icon: MessageSquare,
-      description: 'Support client'
+      description: 'Support client',
     },
     {
       id: 'settings',
       label: t('admin.settings'),
       icon: Settings,
-      description: 'Configuration'
-    }
+      description: 'Configuration',
+    },
   ];
 
   const OverviewTab = () => (
@@ -138,9 +138,7 @@ const AdminDashboard: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">3</div>
-            <p className="text-xs text-red-600">
-              Alertes actives
-            </p>
+            <p className="text-xs text-red-600">Alertes actives</p>
           </CardContent>
         </Card>
       </div>
@@ -185,21 +183,30 @@ const AdminDashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
                   <span className="text-sm">Répondre aux tickets urgents</span>
                 </div>
                 <span className="text-xs text-red-500">Urgent</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
                   <span className="text-sm">Analyser les métriques mensuelles</span>
                 </div>
                 <span className="text-xs text-yellow-500">Moyen</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <input type="checkbox" className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
                   <span className="text-sm">Nettoyer les médias inutilisés</span>
                 </div>
                 <span className="text-xs text-green-500">Faible</span>
@@ -239,18 +246,14 @@ const AdminDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {t('admin.dashboard')}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            {t('admin.dashboardDescription')}
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.dashboard')}</h1>
+          <p className="mt-2 text-gray-600">{t('admin.dashboardDescription')}</p>
         </div>
 
         {/* Navigation */}
         <div className="mb-8">
           <nav className="flex space-x-1 bg-white p-1 rounded-lg border border-gray-200">
-            {tabs.map((tab) => {
+            {tabs.map(tab => {
               const Icon = tab.icon;
               return (
                 <button

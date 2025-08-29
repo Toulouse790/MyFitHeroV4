@@ -3,18 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Activity, 
-  Heart, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Activity,
+  Heart,
+  TrendingUp,
+  TrendingDown,
   Minus,
   Target,
   Clock,
   Award,
   AlertTriangle,
   CheckCircle,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { useWearableSync } from '@/hooks/useWearableSync';
 import { WearableAnalyzer } from '@/lib/wearableUtils';
@@ -38,7 +38,7 @@ const SmartHealthDashboard: React.FC = () => {
       const score = WearableAnalyzer.calculateFitnessScore(data);
       const trend = WearableAnalyzer.getHealthTrend(data);
       const healthInsights = WearableAnalyzer.generateHealthInsights(data);
-      
+
       setFitnessScore(score);
       setHealthTrend(trend);
       setInsights(healthInsights);
@@ -51,15 +51,15 @@ const SmartHealthDashboard: React.FC = () => {
       await syncAll();
       updateDashboard();
       toast({
-        title: "Données synchronisées",
-        description: "Vos données wearables ont été mises à jour",
-        variant: "default"
+        title: 'Données synchronisées',
+        description: 'Vos données wearables ont été mises à jour',
+        variant: 'default',
       });
     } catch (error) {
       toast({
-        title: "Erreur de synchronisation",
-        description: "Impossible de synchroniser les données",
-        variant: "destructive"
+        title: 'Erreur de synchronisation',
+        description: 'Impossible de synchroniser les données',
+        variant: 'destructive',
       });
     } finally {
       setRefreshing(false);
@@ -147,8 +147,11 @@ const SmartHealthDashboard: React.FC = () => {
               <div className="flex items-center justify-center mt-2">
                 {getTrendIcon()}
                 <span className={`ml-1 text-sm ${getTrendColor()}`}>
-                  {healthTrend === 'up' ? 'En progression' : 
-                   healthTrend === 'down' ? 'En baisse' : 'Stable'}
+                  {healthTrend === 'up'
+                    ? 'En progression'
+                    : healthTrend === 'down'
+                      ? 'En baisse'
+                      : 'Stable'}
                 </span>
               </div>
             </div>
@@ -196,21 +199,30 @@ const SmartHealthDashboard: React.FC = () => {
                     <span>Pas</span>
                     <span>{Math.round(((metrics?.steps || 0) / 10000) * 100)}%</span>
                   </div>
-                  <Progress value={Math.min(((metrics?.steps || 0) / 10000) * 100, 100)} className="h-2" />
+                  <Progress
+                    value={Math.min(((metrics?.steps || 0) / 10000) * 100, 100)}
+                    className="h-2"
+                  />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Calories</span>
                     <span>{Math.round(((metrics?.calories || 0) / 400) * 100)}%</span>
                   </div>
-                  <Progress value={Math.min(((metrics?.calories || 0) / 400) * 100, 100)} className="h-2" />
+                  <Progress
+                    value={Math.min(((metrics?.calories || 0) / 400) * 100, 100)}
+                    className="h-2"
+                  />
                 </div>
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span>Activité</span>
                     <span>{Math.round(((metrics?.activeMinutes || 0) / 30) * 100)}%</span>
                   </div>
-                  <Progress value={Math.min(((metrics?.activeMinutes || 0) / 30) * 100, 100)} className="h-2" />
+                  <Progress
+                    value={Math.min(((metrics?.activeMinutes || 0) / 30) * 100, 100)}
+                    className="h-2"
+                  />
                 </div>
               </div>
             </div>
@@ -241,9 +253,7 @@ const SmartHealthDashboard: React.FC = () => {
                     <h4 className="font-medium text-gray-900">{insight.title}</h4>
                     <p className="text-sm text-gray-600 mt-1">{insight.description}</p>
                     {insight.recommendation && (
-                      <p className="text-sm text-blue-600 mt-2">
-                        💡 {insight.recommendation}
-                      </p>
+                      <p className="text-sm text-blue-600 mt-2">💡 {insight.recommendation}</p>
                     )}
                   </div>
                   {insight.score && (

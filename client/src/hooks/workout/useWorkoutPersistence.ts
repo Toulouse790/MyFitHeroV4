@@ -14,45 +14,50 @@ export interface UseWorkoutPersistenceReturn {
 export const useWorkoutPersistence = (): UseWorkoutPersistenceReturn => {
   const { supabase } = useSupabaseQuery();
 
-  const saveSession = useCallback(async (session: WorkoutSession) => {
-    const { error } = await supabase
-      .from('workout_sessions')
-      .upsert(session);
-    
-    if (error) throw error;
-  }, [supabase]);
+  const saveSession = useCallback(
+    async (session: WorkoutSession) => {
+      const { error } = await supabase.from('workout_sessions').upsert(session);
 
-  const saveSet = useCallback(async (sessionId: string, exerciseId: string, set: Set) => {
-    const { error } = await supabase
-      .from('workout_sets')
-      .insert({
+      if (error) throw error;
+    },
+    [supabase]
+  );
+
+  const saveSet = useCallback(
+    async (sessionId: string, exerciseId: string, set: Set) => {
+      const { error } = await supabase.from('workout_sets').insert({
         session_id: sessionId,
         exercise_id: exerciseId,
         ...set,
       });
-    
-    if (error) throw error;
-  }, [supabase]);
 
-  const loadSession = useCallback(async (sessionId: string): Promise<WorkoutSession | null> => {
-    const { data, error } = await supabase
-      .from('workout_sessions')
-      .select('*, workout_sets(*)')
-      .eq('id', sessionId)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  }, [supabase]);
+      if (error) throw error;
+    },
+    [supabase]
+  );
 
-  const deleteSession = useCallback(async (sessionId: string) => {
-    const { error } = await supabase
-      .from('workout_sessions')
-      .delete()
-      .eq('id', sessionId);
-    
-    if (error) throw error;
-  }, [supabase]);
+  const loadSession = useCallback(
+    async (sessionId: string): Promise<WorkoutSession | null> => {
+      const { data, error } = await supabase
+        .from('workout_sessions')
+        .select('*, workout_sets(*)')
+        .eq('id', sessionId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    [supabase]
+  );
+
+  const deleteSession = useCallback(
+    async (sessionId: string) => {
+      const { error } = await supabase.from('workout_sessions').delete().eq('id', sessionId);
+
+      if (error) throw error;
+    },
+    [supabase]
+  );
 
   const syncOfflineData = useCallback(async () => {
     // Logique de synchronisation des données offline

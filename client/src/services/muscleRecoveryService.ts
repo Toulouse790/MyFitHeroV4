@@ -1,18 +1,17 @@
 import { supabase } from '@/lib/supabase';
-import type { 
-  MuscleRecoveryData, 
-  UserRecoveryProfile, 
-  WorkoutImpact, 
+import type {
+  MuscleRecoveryData,
+  UserRecoveryProfile,
+  WorkoutImpact,
   RecoveryRecommendation,
   GlobalRecoveryMetrics,
   MuscleGroup,
   RecoveryStatus,
-  WorkoutIntensity
+  WorkoutIntensity,
 } from '@/types/muscleRecovery';
 import type { UserProfile, Workout, SleepSession, DailyStats } from '@/types/database';
 
 export class MuscleRecoveryService {
-  
   // === CONSTANTES DE RÉCUPÉRATION ===
   private static readonly BASE_RECOVERY_HOURS: Record<MuscleGroup, number> = {
     chest: 48,
@@ -28,25 +27,25 @@ export class MuscleRecoveryService {
     core: 24,
     traps: 36,
     lats: 48,
-    delts: 36
+    delts: 36,
   };
 
   private static readonly INTENSITY_MULTIPLIERS: Record<WorkoutIntensity, number> = {
     light: 0.7,
     moderate: 1.0,
     high: 1.4,
-    extreme: 1.8
+    extreme: 1.8,
   };
 
   private static readonly MUSCLE_GROUP_MAPPINGS: Record<string, MuscleGroup[]> = {
-    'chest': ['chest', 'triceps', 'delts'],
-    'back': ['back', 'lats', 'biceps', 'traps'],
-    'shoulders': ['delts', 'traps'],
-    'arms': ['biceps', 'triceps', 'forearms'],
-    'legs': ['quadriceps', 'hamstrings', 'glutes', 'calves'],
-    'core': ['core'],
-    'cardio': [], // pas d'impact musculaire spécifique
-    'flexibility': []
+    chest: ['chest', 'triceps', 'delts'],
+    back: ['back', 'lats', 'biceps', 'traps'],
+    shoulders: ['delts', 'traps'],
+    arms: ['biceps', 'triceps', 'forearms'],
+    legs: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
+    core: ['core'],
+    cardio: [], // pas d'impact musculaire spécifique
+    flexibility: [],
   };
 
   // === PROFIL DE RÉCUPÉRATION UTILISATEUR ===
@@ -67,14 +66,19 @@ export class MuscleRecoveryService {
   }
 
   static async createOrUpdateRecoveryProfile(
-    userId: string, 
+    userId: string,
     userProfile: UserProfile,
     sleepData?: SleepSession[],
     nutritionData?: DailyStats[]
   ): Promise<UserRecoveryProfile | null> {
     try {
-      const profile = await this.calculateRecoveryProfile(userId, userProfile, sleepData, nutritionData);
-      
+      const profile = await this.calculateRecoveryProfile(
+        userId,
+        userProfile,
+        sleepData,
+        nutritionData
+      );
+
       const { data, error } = await supabase
         .from('user_recovery_profiles')
         .upsert(profile, { onConflict: 'user_id' })
@@ -101,12 +105,13 @@ export class MuscleRecoveryService {
 
     // Facteur de niveau de fitness
     const fitnessLevelFactors = {
-      'beginner': 0.8,
-      'intermediate': 1.0,
-      'advanced': 1.2,
-      'expert': 1.3
+      beginner: 0.8,
+      intermediate: 1.0,
+      advanced: 1.2,
+      expert: 1.3,
     };
-    const fitnessLevelFactor = fitnessLevelFactors[userProfile.fitness_experience || 'intermediate'];
+    const fitnessLevelFactor =
+      fitnessLevelFactors[userProfile.fitness_experience || 'intermediate'];
 
     // Facteur de récupération de base (génétique + lifestyle)
     let baseRecoveryRate = 1.0;
@@ -117,23 +122,28 @@ export class MuscleRecoveryService {
     // Impact du sommeil (moyenne des 7 derniers jours)
     let sleepQualityImpact = 1.0;
     if (sleepData && sleepData.length > 0) {
-      const avgSleepQuality = sleepData.reduce((sum, session) => 
-        sum + (session.quality_rating || 7), 0) / sleepData.length;
-      const avgSleepDuration = sleepData.reduce((sum, session) => 
-        sum + (session.duration_minutes || 480), 0) / sleepData.length / 60;
-      
-      sleepQualityImpact = Math.max(0.7, Math.min(1.3, 
-        (avgSleepQuality / 10) * (Math.min(avgSleepDuration / 8, 1.2))
-      ));
+      const avgSleepQuality =
+        sleepData.reduce((sum, session) => sum + (session.quality_rating || 7), 0) /
+        sleepData.length;
+      const avgSleepDuration =
+        sleepData.reduce((sum, session) => sum + (session.duration_minutes || 480), 0) /
+        sleepData.length /
+        60;
+
+      sleepQualityImpact = Math.max(
+        0.7,
+        Math.min(1.3, (avgSleepQuality / 10) * Math.min(avgSleepDuration / 8, 1.2))
+      );
     }
 
     // Impact de la nutrition (moyenne des 7 derniers jours)
     let nutritionQualityImpact = 1.0;
     if (nutritionData && nutritionData.length > 0) {
-      const avgProtein = nutritionData.reduce((sum, day) => 
-        sum + (day.total_protein || 0), 0) / nutritionData.length;
+      const avgProtein =
+        nutritionData.reduce((sum, day) => sum + (day.total_protein || 0), 0) /
+        nutritionData.length;
       const targetProtein = (userProfile.weight_kg || 70) * 1.6; // 1.6g/kg pour récupération
-      
+
       nutritionQualityImpact = Math.max(0.8, Math.min(1.2, avgProtein / targetProtein));
     }
 
@@ -162,7 +172,7 @@ export class MuscleRecoveryService {
       injury_history: injuryHistory,
       supplements: [], // À remplir selon les préférences utilisateur
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
   }
 
@@ -198,7 +208,7 @@ export class MuscleRecoveryService {
           fatigue_level: 1,
           soreness_level: 1,
           readiness_score: 100,
-          last_updated: now.toISOString()
+          last_updated: now.toISOString(),
         });
       });
 
@@ -212,7 +222,7 @@ export class MuscleRecoveryService {
       // Calculer l'impact de chaque workout
       for (const workout of recentWorkouts) {
         const workoutImpacts = this.analyzeWorkoutImpact(workout);
-        
+
         for (const impact of workoutImpacts) {
           const currentData = muscleRecoveryMap.get(impact.muscle_group);
           if (!currentData) continue;
@@ -224,10 +234,11 @@ export class MuscleRecoveryService {
           const baseRecoveryHours = this.BASE_RECOVERY_HOURS[impact.muscle_group];
           const intensityMultiplier = this.INTENSITY_MULTIPLIERS[impact.intensity];
           const volumeMultiplier = Math.max(0.8, Math.min(1.5, impact.volume / 12)); // 12 séries = référence
-          
-          const totalRecoveryHours = baseRecoveryHours * 
-            intensityMultiplier * 
-            volumeMultiplier * 
+
+          const totalRecoveryHours =
+            baseRecoveryHours *
+            intensityMultiplier *
+            volumeMultiplier *
             (1 / recoveryProfile.recovery_rate_multiplier) *
             (1 / recoveryProfile.sleep_quality_impact) *
             (1 / recoveryProfile.nutrition_quality_impact) *
@@ -236,11 +247,13 @@ export class MuscleRecoveryService {
 
           // Calculer le pourcentage de récupération
           const recoveryPercentage = Math.min(100, (hoursElapsed / totalRecoveryHours) * 100);
-          
+
           // Mettre à jour si ce workout est plus récent ou plus impactant
           if (workoutDate.getTime() > new Date(currentData.last_workout_date || 0).getTime()) {
-            const estimatedFullRecovery = new Date(workoutDate.getTime() + totalRecoveryHours * 60 * 60 * 1000);
-            
+            const estimatedFullRecovery = new Date(
+              workoutDate.getTime() + totalRecoveryHours * 60 * 60 * 1000
+            );
+
             muscleRecoveryMap.set(impact.muscle_group, {
               ...currentData,
               last_workout_date: workoutDate.toISOString(),
@@ -251,9 +264,17 @@ export class MuscleRecoveryService {
               estimated_full_recovery: estimatedFullRecovery.toISOString(),
               recovery_status: this.calculateRecoveryStatus(recoveryPercentage),
               fatigue_level: this.calculateFatigueLevel(recoveryPercentage, impact.intensity),
-              soreness_level: this.calculateSorenessLevel(hoursElapsed, totalRecoveryHours, impact.intensity),
-              readiness_score: this.calculateReadinessScore(recoveryPercentage, impact.muscle_group, recoveryProfile),
-              last_updated: now.toISOString()
+              soreness_level: this.calculateSorenessLevel(
+                hoursElapsed,
+                totalRecoveryHours,
+                impact.intensity
+              ),
+              readiness_score: this.calculateReadinessScore(
+                recoveryPercentage,
+                impact.muscle_group,
+                recoveryProfile
+              ),
+              last_updated: now.toISOString(),
             });
           }
         }
@@ -268,15 +289,15 @@ export class MuscleRecoveryService {
 
   private static analyzeWorkoutImpact(workout: Workout): WorkoutImpact[] {
     const impacts: WorkoutImpact[] = [];
-    
+
     // Analyser les exercices du workout
-    const exercises = workout.exercises as any[] || [];
+    const exercises = (workout.exercises as any[]) || [];
     const workoutType = workout.workout_type || 'strength';
     const duration = workout.duration_minutes || 60;
 
     // Mapper le type de workout aux groupes musculaires
     const affectedMuscles = this.MUSCLE_GROUP_MAPPINGS[workoutType] || [];
-    
+
     if (affectedMuscles.length === 0) {
       // Si pas de mapping spécifique, analyser les exercices individuellement
       exercises.forEach(exercise => {
@@ -289,7 +310,7 @@ export class MuscleRecoveryService {
             duration_minutes: duration / exercises.length,
             exercise_types: [exercise.name || 'unknown'],
             compound_movements: this.isCompoundMovement(exercise.name || ''),
-            eccentric_focus: this.hasEccentricFocus(exercise.name || '')
+            eccentric_focus: this.hasEccentricFocus(exercise.name || ''),
           });
         });
       });
@@ -303,7 +324,7 @@ export class MuscleRecoveryService {
           duration_minutes: duration / affectedMuscles.length,
           exercise_types: exercises.map(ex => ex.name || 'unknown'),
           compound_movements: true, // Assumé pour les workouts typés
-          eccentric_focus: false
+          eccentric_focus: false,
         });
       });
     }
@@ -368,12 +389,21 @@ export class MuscleRecoveryService {
   }
 
   private static estimateVolumeFromWorkout(workout: Workout): number {
-    const exercises = workout.exercises as any[] || [];
+    const exercises = (workout.exercises as any[]) || [];
     return exercises.reduce((total, ex) => total + (ex.sets || 3), 0);
   }
 
   private static isCompoundMovement(exerciseName: string): boolean {
-    const compoundKeywords = ['squat', 'deadlift', 'bench', 'press', 'pull', 'row', 'clean', 'snatch'];
+    const compoundKeywords = [
+      'squat',
+      'deadlift',
+      'bench',
+      'press',
+      'pull',
+      'row',
+      'clean',
+      'snatch',
+    ];
     return compoundKeywords.some(keyword => exerciseName.toLowerCase().includes(keyword));
   }
 
@@ -390,34 +420,41 @@ export class MuscleRecoveryService {
     return 'overworked';
   }
 
-  private static calculateFatigueLevel(recoveryPercentage: number, intensity: WorkoutIntensity): number {
+  private static calculateFatigueLevel(
+    recoveryPercentage: number,
+    intensity: WorkoutIntensity
+  ): number {
     const baseIntensityFatigue = {
-      'light': 2,
-      'moderate': 4,
-      'high': 6,
-      'extreme': 8
+      light: 2,
+      moderate: 4,
+      high: 6,
+      extreme: 8,
     };
 
     const baseFatigue = baseIntensityFatigue[intensity];
     const recoveryFactor = (100 - recoveryPercentage) / 100;
-    
+
     return Math.max(1, Math.min(10, Math.round(baseFatigue * recoveryFactor)));
   }
 
-  private static calculateSorenessLevel(hoursElapsed: number, totalRecoveryHours: number, intensity: WorkoutIntensity): number {
+  private static calculateSorenessLevel(
+    hoursElapsed: number,
+    totalRecoveryHours: number,
+    intensity: WorkoutIntensity
+  ): number {
     const peakSorenessHours = {
-      'light': 12,
-      'moderate': 24,
-      'high': 36,
-      'extreme': 48
+      light: 12,
+      moderate: 24,
+      high: 36,
+      extreme: 48,
     };
 
     const peakHours = peakSorenessHours[intensity];
     const maxSoreness = {
-      'light': 3,
-      'moderate': 5,
-      'high': 7,
-      'extreme': 9
+      light: 3,
+      moderate: 5,
+      high: 7,
+      extreme: 9,
     };
 
     if (hoursElapsed <= peakHours) {
@@ -433,8 +470,8 @@ export class MuscleRecoveryService {
   }
 
   private static calculateReadinessScore(
-    recoveryPercentage: number, 
-    muscleGroup: MuscleGroup, 
+    recoveryPercentage: number,
+    muscleGroup: MuscleGroup,
     profile: UserRecoveryProfile
   ): number {
     let baseScore = recoveryPercentage;
@@ -479,8 +516,8 @@ export class MuscleRecoveryService {
               'Éviter tout exercice sollicitant ce groupe musculaire',
               'Appliquer de la glace si inflammation',
               'Massage léger ou auto-massage',
-              'Étirements très doux uniquement'
-            ]
+              'Étirements très doux uniquement',
+            ],
           });
         } else if (muscle.recovery_percentage < 50) {
           recommendations.push({
@@ -494,8 +531,8 @@ export class MuscleRecoveryService {
               'Exercices de mobilité douce',
               'Marche légère',
               'Étirements dynamiques légers',
-              'Échauffement prolongé avant exercice'
-            ]
+              'Échauffement prolongé avant exercice',
+            ],
           });
         } else {
           recommendations.push({
@@ -508,8 +545,8 @@ export class MuscleRecoveryService {
             specific_actions: [
               'Étirements statiques 30 secondes',
               'Rouleau de massage (foam rolling)',
-              'Exercices de mobilité articulaire'
-            ]
+              'Exercices de mobilité articulaire',
+            ],
           });
         }
       }
@@ -520,14 +557,14 @@ export class MuscleRecoveryService {
           muscle_group: muscle.muscle_group,
           recommendation_type: 'nutrition',
           priority: 'medium',
-          message: 'Optimiser la nutrition pour réduire l\'inflammation.',
+          message: "Optimiser la nutrition pour réduire l'inflammation.",
           estimated_benefit: 60,
           specific_actions: [
             'Consommer des protéines dans les 2h post-entraînement',
             'Aliments anti-inflammatoires (curcuma, gingembre)',
             'Hydratation accrue',
-            'Oméga-3 (poisson, noix)'
-          ]
+            'Oméga-3 (poisson, noix)',
+          ],
         });
       }
 
@@ -544,15 +581,15 @@ export class MuscleRecoveryService {
             'Viser 8-9h de sommeil de qualité',
             'Éviter les écrans 1h avant le coucher',
             'Température fraîche dans la chambre',
-            'Routine de relaxation avant le coucher'
-          ]
+            'Routine de relaxation avant le coucher',
+          ],
         });
       }
     }
 
     // Trier par priorité et bénéfice estimé
     return recommendations.sort((a, b) => {
-      const priorityOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 };
+      const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
       const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
       if (priorityDiff !== 0) return priorityDiff;
       return b.estimated_benefit - a.estimated_benefit;
@@ -560,7 +597,9 @@ export class MuscleRecoveryService {
   }
 
   // === MÉTRIQUES GLOBALES ===
-  static calculateGlobalRecoveryMetrics(muscleRecoveryData: MuscleRecoveryData[]): GlobalRecoveryMetrics {
+  static calculateGlobalRecoveryMetrics(
+    muscleRecoveryData: MuscleRecoveryData[]
+  ): GlobalRecoveryMetrics {
     if (muscleRecoveryData.length === 0) {
       return {
         overall_recovery_score: 100,
@@ -570,16 +609,21 @@ export class MuscleRecoveryService {
         needs_rest: [],
         optimal_workout_type: 'light_cardio',
         recovery_trend: 'stable',
-        last_calculated: new Date().toISOString()
+        last_calculated: new Date().toISOString(),
       };
     }
 
     // Score global de récupération (moyenne pondérée)
-    const totalScore = muscleRecoveryData.reduce((sum, muscle) => sum + muscle.recovery_percentage, 0);
+    const totalScore = muscleRecoveryData.reduce(
+      (sum, muscle) => sum + muscle.recovery_percentage,
+      0
+    );
     const overallScore = Math.round(totalScore / muscleRecoveryData.length);
 
     // Muscle le plus et le moins récupéré
-    const sortedByRecovery = [...muscleRecoveryData].sort((a, b) => b.recovery_percentage - a.recovery_percentage);
+    const sortedByRecovery = [...muscleRecoveryData].sort(
+      (a, b) => b.recovery_percentage - a.recovery_percentage
+    );
     const mostRecovered = sortedByRecovery[0].muscle_group;
     const leastRecovered = sortedByRecovery[sortedByRecovery.length - 1].muscle_group;
 
@@ -613,28 +657,26 @@ export class MuscleRecoveryService {
       needs_rest: needsRest,
       optimal_workout_type: optimalWorkoutType,
       recovery_trend: 'stable', // À calculer avec l'historique
-      last_calculated: new Date().toISOString()
+      last_calculated: new Date().toISOString(),
     };
   }
 
   // === SAUVEGARDE EN BASE ===
-  static async saveMuscleRecoveryData(userId: string, recoveryData: MuscleRecoveryData[]): Promise<boolean> {
+  static async saveMuscleRecoveryData(
+    userId: string,
+    recoveryData: MuscleRecoveryData[]
+  ): Promise<boolean> {
     try {
       // Supprimer les anciennes données
-      await supabase
-        .from('muscle_recovery_data')
-        .delete()
-        .eq('user_id', userId);
+      await supabase.from('muscle_recovery_data').delete().eq('user_id', userId);
 
       // Insérer les nouvelles données
       const dataToInsert = recoveryData.map(data => ({
         user_id: userId,
-        ...data
+        ...data,
       }));
 
-      const { error } = await supabase
-        .from('muscle_recovery_data')
-        .insert(dataToInsert);
+      const { error } = await supabase.from('muscle_recovery_data').insert(dataToInsert);
 
       if (error) throw error;
       return true;

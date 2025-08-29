@@ -5,17 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Search, 
-  Plus, 
-  Check, 
-  X, 
-  Star, 
-  TrendingUp, 
+import {
+  Search,
+  Plus,
+  Check,
+  X,
+  Star,
+  TrendingUp,
   Globe,
   AlertCircle,
   Sparkles,
-  Filter
+  Filter,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSports } from '@/services/sportsService';
@@ -68,23 +68,22 @@ interface SearchState {
 export default function SportSelector({
   onSelect,
   selectedSport = null,
-  placeholder = "Recherchez votre sport...",
+  placeholder = 'Recherchez votre sport...',
   allowCustom = true,
   showPopular = true,
   showCategories = false,
   maxResults = 20,
   disabled = false,
-  className = "",
+  className = '',
   variant = 'default',
-  locale = 'fr'
+  locale = 'fr',
 }: SportSelectorProps) {
-  
   /* ========================== HOOKS ET STATE ========================= */
-  
+
   const { toast } = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const [searchState, setSearchState] = useState<SearchState>({
     query: '',
     results: [],
@@ -92,18 +91,18 @@ export default function SportSelector({
     error: null,
     hasSearched: false,
     showSuggestion: false,
-    customSportName: ''
+    customSportName: '',
   });
 
   // Hook personnalisé pour récupérer les sports depuis Supabase
-  const { 
+  const {
     sports: allSports,
     popularSports,
     searchSports,
     suggestSport,
     loading: sportsLoading,
     error: sportsError,
-    refresh: refreshSports
+    refresh: refreshSports,
   } = useSports();
 
   // Debounce de la recherche pour optimiser les performances
@@ -116,30 +115,33 @@ export default function SportSelector({
     if (searchState.query.length >= 2) {
       return searchState.results.slice(0, maxResults);
     }
-    
+
     if (showPopular && popularSports.length > 0) {
       return popularSports.slice(0, 8).map(sport => ({
         ...sport,
-        isRecommended: true
+        isRecommended: true,
       }));
     }
 
     return allSports.slice(0, 12).map(sport => ({
       ...sport,
-      popularity: Math.random() * 100 // Simulation pour la démo
+      popularity: Math.random() * 100, // Simulation pour la démo
     }));
   }, [searchState.query, searchState.results, popularSports, allSports, showPopular, maxResults]);
 
   // Catégories de sports si activées
   const sportCategories = useMemo(() => {
     if (!showCategories) return {};
-    
-    return displaySports.reduce((acc, sport) => {
-      const category = sport.category || 'Autres';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(sport);
-      return acc;
-    }, {} as Record<string, SportWithMetadata[]>);
+
+    return displaySports.reduce(
+      (acc, sport) => {
+        const category = sport.category || 'Autres';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(sport);
+        return acc;
+      },
+      {} as Record<string, SportWithMetadata[]>
+    );
   }, [displaySports, showCategories]);
 
   /* ========================== EFFECTS ========================== */
@@ -152,7 +154,7 @@ export default function SportSelector({
         results: [],
         loading: false,
         hasSearched: false,
-        showSuggestion: false
+        showSuggestion: false,
       }));
       return;
     }
@@ -174,62 +176,67 @@ export default function SportSelector({
 
   /* ========================= FONCTIONS ========================= */
 
-  const performSearch = useCallback(async (query: string) => {
-    setSearchState(prev => ({ ...prev, loading: true, error: null }));
+  const performSearch = useCallback(
+    async (query: string) => {
+      setSearchState(prev => ({ ...prev, loading: true, error: null }));
 
-    try {
-      const results = await searchSports(query);
-      
-      // Enrichir les résultats avec des métadonnées
-      const enrichedResults: SportWithMetadata[] = results.map((sport, index) => ({
-        ...sport,
-        searchScore: (results.length - index) / results.length * 100,
-        isRecommended: index < 3, // Top 3 recommandés
-        isTrending: Math.random() > 0.7 // Simulation trending
-      }));
+      try {
+        const results = await searchSports(query);
 
-      setSearchState(prev => ({
-        ...prev,
-        results: enrichedResults,
-        loading: false,
-        hasSearched: true,
-        showSuggestion: enrichedResults.length === 0 && allowCustom,
-        customSportName: enrichedResults.length === 0 ? query : ''
-      }));
+        // Enrichir les résultats avec des métadonnées
+        const enrichedResults: SportWithMetadata[] = results.map((sport, index) => ({
+          ...sport,
+          searchScore: ((results.length - index) / results.length) * 100,
+          isRecommended: index < 3, // Top 3 recommandés
+          isTrending: Math.random() > 0.7, // Simulation trending
+        }));
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la recherche';
-      
-      setSearchState(prev => ({
-        ...prev,
-        loading: false,
-        error: errorMessage,
-        results: []
-      }));
+        setSearchState(prev => ({
+          ...prev,
+          results: enrichedResults,
+          loading: false,
+          hasSearched: true,
+          showSuggestion: enrichedResults.length === 0 && allowCustom,
+          customSportName: enrichedResults.length === 0 ? query : '',
+        }));
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la recherche';
 
-      toast({
-        title: "Erreur de recherche",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    }
-  }, [searchSports, allowCustom, toast]);
+        setSearchState(prev => ({
+          ...prev,
+          loading: false,
+          error: errorMessage,
+          results: [],
+        }));
 
-  const handleSelectSport = useCallback((sport: SportWithMetadata) => {
-    onSelect(sport);
-    setIsOpen(false);
-    setSearchState(prev => ({ ...prev, query: '' }));
-    
-    // Analytics - track sport selection
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'sport_selected', {
-        sport_id: sport.id,
-        sport_name: sport.name,
-        search_query: searchState.query,
-        is_popular: sport.isRecommended
-      });
-    }
-  }, [onSelect, searchState.query]);
+        toast({
+          title: 'Erreur de recherche',
+          description: errorMessage,
+          variant: 'destructive',
+        });
+      }
+    },
+    [searchSports, allowCustom, toast]
+  );
+
+  const handleSelectSport = useCallback(
+    (sport: SportWithMetadata) => {
+      onSelect(sport);
+      setIsOpen(false);
+      setSearchState(prev => ({ ...prev, query: '' }));
+
+      // Analytics - track sport selection
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'sport_selected', {
+          sport_id: sport.id,
+          sport_name: sport.name,
+          search_query: searchState.query,
+          is_popular: sport.isRecommended,
+        });
+      }
+    },
+    [onSelect, searchState.query]
+  );
 
   const handleSuggestCustomSport = useCallback(async () => {
     if (!searchState.customSportName.trim()) return;
@@ -239,8 +246,8 @@ export default function SportSelector({
         userContext: {
           searchQuery: searchState.query,
           timestamp: new Date(),
-          locale
-        }
+          locale,
+        },
       });
 
       if (success) {
@@ -252,35 +259,45 @@ export default function SportSelector({
           category: 'custom',
           positions: [],
           isRecommended: false,
-          popularity: 0
+          popularity: 0,
         };
 
         handleSelectSport(customSport);
-        
+
         toast({
-          title: "Sport suggéré !",
-          description: "Votre suggestion a été envoyée à notre équipe. Merci !",
+          title: 'Sport suggéré !',
+          description: 'Votre suggestion a été envoyée à notre équipe. Merci !',
         });
 
-        setSearchState(prev => ({ 
-          ...prev, 
+        setSearchState(prev => ({
+          ...prev,
           showSuggestion: false,
-          customSportName: ''
+          customSportName: '',
         }));
       }
     } catch (error) {
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible d'envoyer votre suggestion. Réessayez plus tard.",
-        variant: "destructive",
+        variant: 'destructive',
       });
     }
-  }, [searchState.customSportName, searchState.query, suggestSport, handleSelectSport, toast, locale]);
+  }, [
+    searchState.customSportName,
+    searchState.query,
+    suggestSport,
+    handleSelectSport,
+    toast,
+    locale,
+  ]);
 
-  const handleInputChange = useCallback((value: string) => {
-    setSearchState(prev => ({ ...prev, query: value }));
-    if (!isOpen) setIsOpen(true);
-  }, [isOpen]);
+  const handleInputChange = useCallback(
+    (value: string) => {
+      setSearchState(prev => ({ ...prev, query: value }));
+      if (!isOpen) setIsOpen(true);
+    },
+    [isOpen]
+  );
 
   const handleClearSelection = useCallback(() => {
     setIsOpen(true);
@@ -289,79 +306,78 @@ export default function SportSelector({
 
   /* ========================= RENDER HELPERS ========================= */
 
-  const renderSportItem = useCallback((sport: SportWithMetadata, index: number) => (
-    <button
-      key={sport.id}
-      onClick={() => handleSelectSport(sport)}
-      disabled={disabled}
-      className={cn(
-        "group flex items-center space-x-3 p-3 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-        selectedSport?.id === sport.id
-          ? "border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md"
-          : "border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50",
-        disabled && "opacity-50 cursor-not-allowed hover:scale-100",
-        variant === 'compact' && "p-2 space-x-2"
-      )}
-      aria-label={`Sélectionner ${sport.name}`}
-    >
-      <div className="relative">
-        <span className="text-2xl group-hover:scale-110 transition-transform">
-          {sport.emoji}
-        </span>
-        {sport.isRecommended && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+  const renderSportItem = useCallback(
+    (sport: SportWithMetadata, index: number) => (
+      <button
+        key={sport.id}
+        onClick={() => handleSelectSport(sport)}
+        disabled={disabled}
+        className={cn(
+          'group flex items-center space-x-3 p-3 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+          selectedSport?.id === sport.id
+            ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md'
+            : 'border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50',
+          disabled && 'opacity-50 cursor-not-allowed hover:scale-100',
+          variant === 'compact' && 'p-2 space-x-2'
         )}
-      </div>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-2">
-          <span className="font-semibold text-gray-900 truncate">
-            {sport.name}
-          </span>
+        aria-label={`Sélectionner ${sport.name}`}
+      >
+        <div className="relative">
+          <span className="text-2xl group-hover:scale-110 transition-transform">{sport.emoji}</span>
           {sport.isRecommended && (
-            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Recommandé
-            </Badge>
-          )}
-          {sport.isTrending && (
-            <Badge variant="outline" className="text-xs border-orange-200 text-orange-700">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              Tendance
-            </Badge>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
           )}
         </div>
-        
-        {variant !== 'compact' && (
-          <div className="flex items-center space-x-4 mt-1">
-            {sport.positions && sport.positions.length > 0 && (
-              <span className="text-sm text-gray-500">
-                {sport.positions.length} position{sport.positions.length !== 1 ? 's' : ''}
-              </span>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2">
+            <span className="font-semibold text-gray-900 truncate">{sport.name}</span>
+            {sport.isRecommended && (
+              <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Recommandé
+              </Badge>
             )}
-            {sport.userCount && (
-              <span className="text-sm text-gray-500 flex items-center">
-                <Globe className="w-3 h-3 mr-1" />
-                {sport.userCount.toLocaleString()} utilisateurs
-              </span>
-            )}
-            {sport.popularity && sport.popularity > 80 && (
-              <span className="text-sm text-amber-600 flex items-center">
-                <Star className="w-3 h-3 mr-1" />
-                Populaire
-              </span>
+            {sport.isTrending && (
+              <Badge variant="outline" className="text-xs border-orange-200 text-orange-700">
+                <TrendingUp className="w-3 h-3 mr-1" />
+                Tendance
+              </Badge>
             )}
           </div>
-        )}
-      </div>
-      
-      <div className="flex-shrink-0">
-        {selectedSport?.id === sport.id && (
-          <Check className="h-5 w-5 text-blue-600 animate-in zoom-in-50" />
-        )}
-      </div>
-    </button>
-  ), [handleSelectSport, selectedSport, disabled, variant]);
+
+          {variant !== 'compact' && (
+            <div className="flex items-center space-x-4 mt-1">
+              {sport.positions && sport.positions.length > 0 && (
+                <span className="text-sm text-gray-500">
+                  {sport.positions.length} position{sport.positions.length !== 1 ? 's' : ''}
+                </span>
+              )}
+              {sport.userCount && (
+                <span className="text-sm text-gray-500 flex items-center">
+                  <Globe className="w-3 h-3 mr-1" />
+                  {sport.userCount.toLocaleString()} utilisateurs
+                </span>
+              )}
+              {sport.popularity && sport.popularity > 80 && (
+                <span className="text-sm text-amber-600 flex items-center">
+                  <Star className="w-3 h-3 mr-1" />
+                  Populaire
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="flex-shrink-0">
+          {selectedSport?.id === sport.id && (
+            <Check className="h-5 w-5 text-blue-600 animate-in zoom-in-50" />
+          )}
+        </div>
+      </button>
+    ),
+    [handleSelectSport, selectedSport, disabled, variant]
+  );
 
   const renderSelectedSport = () => {
     if (!selectedSport || isOpen) return null;
@@ -415,25 +431,23 @@ export default function SportSelector({
             type="text"
             placeholder={placeholder}
             value={searchState.query}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={e => handleInputChange(e.target.value)}
             disabled={disabled || sportsLoading}
             className={cn(
-              "pl-10 pr-12 py-3 text-lg border-2 focus:border-blue-500 transition-colors",
-              searchState.error && "border-red-300 focus:border-red-500"
+              'pl-10 pr-12 py-3 text-lg border-2 focus:border-blue-500 transition-colors',
+              searchState.error && 'border-red-300 focus:border-red-500'
             )}
             onFocus={() => setIsOpen(true)}
             aria-label="Rechercher un sport"
             autoComplete="off"
           />
-          
+
           {/* Indicateurs de chargement/erreur */}
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
             {searchState.loading && (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent" />
             )}
-            {searchState.error && (
-              <AlertCircle className="h-4 w-4 text-red-500" />
-            )}
+            {searchState.error && <AlertCircle className="h-4 w-4 text-red-500" />}
           </div>
         </div>
 
@@ -471,9 +485,9 @@ export default function SportSelector({
             <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
             <p className="text-red-700 font-medium">Erreur de chargement</p>
             <p className="text-red-600 text-sm mb-3">{sportsError}</p>
-            <Button 
-              onClick={refreshSports} 
-              variant="outline" 
+            <Button
+              onClick={refreshSports}
+              variant="outline"
               size="sm"
               className="border-red-300 text-red-700 hover:bg-red-100"
             >
@@ -488,7 +502,7 @@ export default function SportSelector({
       <>
         {/* En-tête des résultats */}
         {renderResultsHeader()}
-        
+
         {/* Liste des sports */}
         {displaySports.length > 0 ? (
           <div className="space-y-2 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
@@ -508,11 +522,11 @@ export default function SportSelector({
   };
 
   const renderResultsHeader = () => {
-    const title = searchState.hasSearched 
+    const title = searchState.hasSearched
       ? `Résultats pour "${searchState.query}"`
       : showPopular && popularSports.length > 0
-        ? "Sports populaires"
-        : "Tous les sports";
+        ? 'Sports populaires'
+        : 'Tous les sports';
 
     const count = displaySports.length;
 
@@ -563,19 +577,17 @@ export default function SportSelector({
     return (
       <div className="text-center py-12 px-4">
         <Search className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-        <h3 className="font-medium text-gray-900 mb-2">
-          Aucun sport trouvé
-        </h3>
-        <p className="text-gray-500 mb-4">
-          Aucun résultat pour "{searchState.query}"
-        </p>
+        <h3 className="font-medium text-gray-900 mb-2">Aucun sport trouvé</h3>
+        <p className="text-gray-500 mb-4">Aucun résultat pour "{searchState.query}"</p>
         {allowCustom && (
           <Button
-            onClick={() => setSearchState(prev => ({ 
-              ...prev, 
-              showSuggestion: true, 
-              customSportName: prev.query 
-            }))}
+            onClick={() =>
+              setSearchState(prev => ({
+                ...prev,
+                showSuggestion: true,
+                customSportName: prev.query,
+              }))
+            }
             variant="outline"
             size="sm"
           >
@@ -602,15 +614,18 @@ export default function SportSelector({
                 Sport non trouvé ? Aidez-nous à l'ajouter !
               </h4>
               <p className="text-sm text-amber-700 mb-3">
-                Votre suggestion sera examinée par notre équipe et pourra être ajoutée pour tous les utilisateurs.
+                Votre suggestion sera examinée par notre équipe et pourra être ajoutée pour tous les
+                utilisateurs.
               </p>
               <div className="flex space-x-2">
                 <Input
                   value={searchState.customSportName}
-                  onChange={(e) => setSearchState(prev => ({ 
-                    ...prev, 
-                    customSportName: e.target.value 
-                  }))}
+                  onChange={e =>
+                    setSearchState(prev => ({
+                      ...prev,
+                      customSportName: e.target.value,
+                    }))
+                  }
                   placeholder="Nom du sport"
                   className="flex-1 border-amber-200 focus:border-amber-400"
                   disabled={disabled}
@@ -653,7 +668,7 @@ export default function SportSelector({
   /* ========================== RENDER PRINCIPAL ======================= */
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       {renderSelectedSport()}
       {renderSearchInterface()}
     </div>
@@ -665,11 +680,11 @@ export default function SportSelector({
 /* ================================================================== */
 
 // Variant compact pour utilisation dans des formulaires
-export const CompactSportSelector: React.FC<Omit<SportSelectorProps, 'variant'>> = (props) => (
+export const CompactSportSelector: React.FC<Omit<SportSelectorProps, 'variant'>> = props => (
   <SportSelector {...props} variant="compact" showPopular={false} />
 );
 
 // Variant avec catégories pour une interface plus riche
-export const CategorizedSportSelector: React.FC<Omit<SportSelectorProps, 'variant' | 'showCategories'>> = (props) => (
-  <SportSelector {...props} variant="default" showCategories={true} />
-);
+export const CategorizedSportSelector: React.FC<
+  Omit<SportSelectorProps, 'variant' | 'showCategories'>
+> = props => <SportSelector {...props} variant="default" showCategories={true} />;

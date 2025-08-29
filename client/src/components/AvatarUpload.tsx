@@ -15,7 +15,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   currentAvatar,
   onAvatarChange,
   size = 'md',
-  editable = true
+  editable = true,
 }) => {
   const { toast } = useToast();
   const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
@@ -26,13 +26,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const sizeClasses = {
     sm: 'w-16 h-16',
     md: 'w-24 h-24',
-    lg: 'w-32 h-32'
+    lg: 'w-32 h-32',
   };
 
   const iconSizes = {
     sm: 16,
     md: 20,
-    lg: 24
+    lg: 24,
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,7 +44,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       toast({
         title: 'Erreur',
         description: 'Veuillez sélectionner une image valide.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -53,15 +53,15 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: 'Erreur',
-        description: 'L\'image ne doit pas dépasser 5MB.',
-        variant: 'destructive'
+        description: "L'image ne doit pas dépasser 5MB.",
+        variant: 'destructive',
       });
       return;
     }
 
     // Créer un aperçu
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       setPreviewUrl(e.target?.result as string);
     };
     reader.readAsDataURL(file);
@@ -85,7 +85,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         .from('user-avatars')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true
+          upsert: true,
         });
 
       if (uploadError) {
@@ -93,9 +93,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       }
 
       // Obtenir l'URL publique
-      const { data: publicUrlData } = supabase.storage
-        .from('user-avatars')
-        .getPublicUrl(filePath);
+      const { data: publicUrlData } = supabase.storage.from('user-avatars').getPublicUrl(filePath);
 
       const avatarUrl = publicUrlData.publicUrl;
 
@@ -104,7 +102,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         .from('user_profiles')
         .update({
           avatar_url: avatarUrl,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', appStoreUser.id);
 
@@ -115,7 +113,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       // Mettre à jour le store local
       updateAppStoreUserProfile({
         ...appStoreUser,
-        avatar_url: avatarUrl
+        avatar_url: avatarUrl,
       });
 
       // Callback pour le parent
@@ -126,14 +124,13 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         title: 'Photo mise à jour',
         description: 'Votre photo de profil a été mise à jour avec succès.',
       });
-
     } catch (error) {
       console.error('Erreur upload avatar:', error);
       setPreviewUrl(null);
       toast({
         title: 'Erreur',
         description: 'Impossible de mettre à jour votre photo.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsUploading(false);
@@ -150,7 +147,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         .from('user_profiles')
         .update({
           avatar_url: null,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', appStoreUser.id);
 
@@ -161,7 +158,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       // Mettre à jour le store local
       updateAppStoreUserProfile({
         ...appStoreUser,
-        avatar_url: null
+        avatar_url: null,
       });
 
       onAvatarChange?.('');
@@ -171,13 +168,12 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         title: 'Photo supprimée',
         description: 'Votre photo de profil a été supprimée.',
       });
-
     } catch (error) {
       console.error('Erreur suppression avatar:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer votre photo.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsUploading(false);
@@ -192,13 +188,11 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
   return (
     <div className="relative group">
-      <div className={`${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative`}>
+      <div
+        className={`${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center relative`}
+      >
         {displayAvatar ? (
-          <img
-            src={displayAvatar}
-            alt="Avatar"
-            className="w-full h-full object-cover"
-          />
+          <img src={displayAvatar} alt="Avatar" className="w-full h-full object-cover" />
         ) : (
           <User className="text-white" size={iconSizes[size]} />
         )}
@@ -221,7 +215,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
             >
               <Camera size={16} />
             </button>
-            
+
             {displayAvatar && (
               <button
                 onClick={removeAvatar}

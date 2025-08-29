@@ -45,12 +45,11 @@ export interface DailyCheckin {
 }
 
 export class UserDataService {
-  
   /**
    * Récupère les données d'un pilier pour un utilisateur
    */
   static async getPillarData(
-    userId: string, 
+    userId: string,
     pillarType: 'workout' | 'nutrition' | 'sleep' | 'hydration',
     startDate?: string,
     endDate?: string
@@ -87,15 +86,17 @@ export class UserDataService {
   /**
    * Sauvegarde les données d'un pilier
    */
-  static async savePillarData(pillarData: Omit<UserPillarData, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> {
+  static async savePillarData(
+    pillarData: Omit<UserPillarData, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_pillar_data')
-        .insert([{
+      const { error } = await supabase.from('user_pillar_data').insert([
+        {
           ...pillarData,
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }]);
+          updated_at: new Date().toISOString(),
+        },
+      ]);
 
       if (error) {
         console.error('Erreur lors de la sauvegarde des données du pilier:', error);
@@ -118,7 +119,7 @@ export class UserDataService {
         .from('user_pillar_data')
         .update({
           ...updates,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id);
 
@@ -162,13 +163,11 @@ export class UserDataService {
    */
   static async updateUserStats(userId: string, updates: Partial<UserStats>): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_stats')
-        .upsert({
-          user_id: userId,
-          ...updates,
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('user_stats').upsert({
+        user_id: userId,
+        ...updates,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('Erreur lors de la mise à jour des statistiques:', error);
@@ -209,15 +208,15 @@ export class UserDataService {
   /**
    * Sauvegarde ou met à jour le check-in quotidien
    */
-  static async saveOrUpdateDailyCheckin(checkinData: Omit<DailyCheckin, 'id' | 'created_at' | 'updated_at'>): Promise<boolean> {
+  static async saveOrUpdateDailyCheckin(
+    checkinData: Omit<DailyCheckin, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('daily_checkins')
-        .upsert({
-          ...checkinData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await supabase.from('daily_checkins').upsert({
+        ...checkinData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('Erreur lors de la sauvegarde du check-in:', error);
@@ -244,13 +243,13 @@ export class UserDataService {
         .limit(limit);
 
       if (error) {
-        console.error('Erreur lors de la récupération de l\'historique des check-ins:', error);
+        console.error("Erreur lors de la récupération de l'historique des check-ins:", error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Erreur lors de la récupération de l\'historique des check-ins:', error);
+      console.error("Erreur lors de la récupération de l'historique des check-ins:", error);
       return [];
     }
   }
@@ -261,16 +260,18 @@ export class UserDataService {
   static async calculateCurrentStreak(userId: string): Promise<number> {
     try {
       const checkins = await this.getCheckinHistory(userId, 365);
-      
+
       if (checkins.length === 0) return 0;
 
       let streak = 0;
       const today = new Date();
-      
+
       for (let i = 0; i < checkins.length; i++) {
         const checkinDate = new Date(checkins[i].date);
-        const dayDiff = Math.floor((today.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24));
-        
+        const dayDiff = Math.floor(
+          (today.getTime() - checkinDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
         if (dayDiff === i && this.isCheckinComplete(checkins[i])) {
           streak++;
         } else {
@@ -289,10 +290,12 @@ export class UserDataService {
    * Vérifie si un check-in est complet
    */
   private static isCheckinComplete(checkin: DailyCheckin): boolean {
-    return checkin.workout_completed && 
-           checkin.nutrition_logged && 
-           checkin.sleep_tracked && 
-           checkin.hydration_logged;
+    return (
+      checkin.workout_completed &&
+      checkin.nutrition_logged &&
+      checkin.sleep_tracked &&
+      checkin.hydration_logged
+    );
   }
 
   /**
@@ -312,14 +315,14 @@ export class UserDataService {
         this.getUserStats(userId),
         this.getDailyCheckin(userId, today),
         this.getPillarData(userId, 'workout', weekAgo), // Exemple avec workout
-        this.calculateCurrentStreak(userId)
+        this.calculateCurrentStreak(userId),
       ]);
 
       return {
         stats,
         todayCheckin,
         weeklyData,
-        currentStreak
+        currentStreak,
       };
     } catch (error) {
       console.error('Erreur lors de la récupération des données du dashboard:', error);
@@ -327,7 +330,7 @@ export class UserDataService {
         stats: null,
         todayCheckin: null,
         weeklyData: [],
-        currentStreak: 0
+        currentStreak: 0,
       };
     }
   }

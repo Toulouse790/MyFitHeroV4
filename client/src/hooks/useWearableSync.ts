@@ -66,7 +66,9 @@ export const useWearableSync = () => {
   const isAppleHealthAvailable = useCallback((): boolean => {
     // Dans un environnement réel, cela vérifierait la disponibilité d'Apple Health
     // @ts-ignore
-    return typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers?.healthKit;
+    return (
+      typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers?.healthKit
+    );
   }, []);
 
   // Vérifier si Google Fit est disponible
@@ -79,7 +81,7 @@ export const useWearableSync = () => {
   // Synchroniser avec Apple Health
   const syncAppleHealth = useCallback(async (): Promise<WearableData | null> => {
     if (!isAppleHealthAvailable()) {
-      setSyncError('Apple Health n\'est pas disponible sur cet appareil');
+      setSyncError("Apple Health n'est pas disponible sur cet appareil");
       return null;
     }
 
@@ -103,34 +105,35 @@ export const useWearableSync = () => {
             quality: 'good',
             deepSleepDuration: 120,
             remSleepDuration: 90,
-            awakenings: 2
-          }
+            awakenings: 2,
+          },
         ],
         lastSync: new Date(),
         caloriesBurned: Math.floor(Math.random() * 500) + 200,
         distance: Math.floor(Math.random() * 5000) + 2000,
-        activeMinutes: Math.floor(Math.random() * 120) + 30
+        activeMinutes: Math.floor(Math.random() * 120) + 30,
       };
 
       setLastSyncTime(new Date());
-      
+
       toast({
-        title: "Synchronisation réussie",
-        description: "Données Apple Health synchronisées avec succès",
-        variant: "default"
+        title: 'Synchronisation réussie',
+        description: 'Données Apple Health synchronisées avec succès',
+        variant: 'default',
       });
 
       return mockHealthData;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur de synchronisation Apple Health';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erreur de synchronisation Apple Health';
       setSyncError(errorMessage);
-      
+
       toast({
-        title: "Erreur de synchronisation",
+        title: 'Erreur de synchronisation',
         description: errorMessage,
-        variant: "destructive"
+        variant: 'destructive',
       });
-      
+
       return null;
     } finally {
       setIsLoading(false);
@@ -140,7 +143,7 @@ export const useWearableSync = () => {
   // Synchroniser avec Google Fit
   const syncGoogleFit = useCallback(async (): Promise<WearableData | null> => {
     if (!isGoogleFitAvailable()) {
-      setSyncError('Google Fit n\'est pas disponible sur cet appareil');
+      setSyncError("Google Fit n'est pas disponible sur cet appareil");
       return null;
     }
 
@@ -164,34 +167,35 @@ export const useWearableSync = () => {
             quality: 'excellent',
             deepSleepDuration: 150,
             remSleepDuration: 110,
-            awakenings: 1
-          }
+            awakenings: 1,
+          },
         ],
         lastSync: new Date(),
         caloriesBurned: Math.floor(Math.random() * 600) + 300,
         distance: Math.floor(Math.random() * 6000) + 3000,
-        activeMinutes: Math.floor(Math.random() * 150) + 45
+        activeMinutes: Math.floor(Math.random() * 150) + 45,
       };
 
       setLastSyncTime(new Date());
-      
+
       toast({
-        title: "Synchronisation réussie",
-        description: "Données Google Fit synchronisées avec succès",
-        variant: "default"
+        title: 'Synchronisation réussie',
+        description: 'Données Google Fit synchronisées avec succès',
+        variant: 'default',
       });
 
       return mockFitData;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Erreur de synchronisation Google Fit';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erreur de synchronisation Google Fit';
       setSyncError(errorMessage);
-      
+
       toast({
-        title: "Erreur de synchronisation",
+        title: 'Erreur de synchronisation',
         description: errorMessage,
-        variant: "destructive"
+        variant: 'destructive',
       });
-      
+
       return null;
     } finally {
       setIsLoading(false);
@@ -200,10 +204,7 @@ export const useWearableSync = () => {
 
   // Synchroniser automatiquement les deux sources
   const syncAll = useCallback(async (): Promise<WearableData | null> => {
-    const results = await Promise.allSettled([
-      syncAppleHealth(),
-      syncGoogleFit()
-    ]);
+    const results = await Promise.allSettled([syncAppleHealth(), syncGoogleFit()]);
 
     const appleResult = results[0];
     const googleResult = results[1];
@@ -222,7 +223,7 @@ export const useWearableSync = () => {
           lastSync: new Date(),
           caloriesBurned: Math.max(appleData.caloriesBurned || 0, googleData.caloriesBurned || 0),
           distance: Math.max(appleData.distance || 0, googleData.distance || 0),
-          activeMinutes: Math.max(appleData.activeMinutes || 0, googleData.activeMinutes || 0)
+          activeMinutes: Math.max(appleData.activeMinutes || 0, googleData.activeMinutes || 0),
         };
 
         return combinedData;
@@ -241,17 +242,23 @@ export const useWearableSync = () => {
   }, [syncAppleHealth, syncGoogleFit]);
 
   // Programmer une synchronisation automatique
-  const scheduleSync = useCallback((intervalMinutes: number = 30) => {
-    const interval = setInterval(async () => {
-      try {
-        await syncAll();
-      } catch (error) {
-        console.error('Erreur lors de la synchronisation programmée:', error);
-      }
-    }, intervalMinutes * 60 * 1000);
+  const scheduleSync = useCallback(
+    (intervalMinutes: number = 30) => {
+      const interval = setInterval(
+        async () => {
+          try {
+            await syncAll();
+          } catch (error) {
+            console.error('Erreur lors de la synchronisation programmée:', error);
+          }
+        },
+        intervalMinutes * 60 * 1000
+      );
 
-    return () => clearInterval(interval);
-  }, [syncAll]);
+      return () => clearInterval(interval);
+    },
+    [syncAll]
+  );
 
   // Obtenir les données mises en cache
   const getCachedData = useCallback((): WearableData | null => {
@@ -265,8 +272,8 @@ export const useWearableSync = () => {
           sleepSessions: parsed.sleepSessions.map((session: any) => ({
             ...session,
             startTime: new Date(session.startTime),
-            endTime: new Date(session.endTime)
-          }))
+            endTime: new Date(session.endTime),
+          })),
         };
       }
     } catch (error) {
@@ -295,6 +302,6 @@ export const useWearableSync = () => {
     syncAll,
     scheduleSync,
     getCachedData,
-    cacheData
+    cacheData,
   };
 };

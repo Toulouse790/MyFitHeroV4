@@ -10,7 +10,7 @@ const PWAControls: React.FC = () => {
     updateAvailable,
     installApp,
     checkForUpdates,
-    enableNotifications
+    enableNotifications,
   } = usePWA();
 
   return (

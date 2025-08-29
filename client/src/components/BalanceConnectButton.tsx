@@ -17,9 +17,9 @@ interface BalanceConnectButtonProps {
   className?: string;
 }
 
-const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({ 
-  onDeviceConnected, 
-  className = '' 
+const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
+  onDeviceConnected,
+  className = '',
 }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [availableDevices, setAvailableDevices] = useState<BalanceDevice[]>([]);
@@ -30,11 +30,11 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
   const handleScanDevices = async () => {
     setIsScanning(true);
     setShowDeviceList(true);
-    
+
     try {
       // Simuler la recherche Bluetooth/WiFi
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       // Simuler des appareils trouvés
       const mockDevices: BalanceDevice[] = [
         {
@@ -44,7 +44,7 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
           model: 'XMTZC05HM',
           connectionType: 'bluetooth',
           signalStrength: 85,
-          batteryLevel: 78
+          batteryLevel: 78,
         },
         {
           id: 'withings-001',
@@ -52,7 +52,7 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
           brand: 'Withings',
           model: 'WBS05',
           connectionType: 'wifi',
-          signalStrength: 92
+          signalStrength: 92,
         },
         {
           id: 'fitbit-001',
@@ -61,10 +61,10 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
           model: 'FB203BK',
           connectionType: 'bluetooth',
           signalStrength: 67,
-          batteryLevel: 45
-        }
+          batteryLevel: 45,
+        },
       ];
-      
+
       setAvailableDevices(mockDevices);
       toast.success(`${mockDevices.length} balance(s) trouvée(s)`);
     } catch (error) {
@@ -77,11 +77,11 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
   // Connecter un appareil
   const handleConnectDevice = async (device: BalanceDevice) => {
     setConnectingDevice(device.id);
-    
+
     try {
       // Simuler la connexion
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       onDeviceConnected(device);
       setShowDeviceList(false);
       setAvailableDevices([]);
@@ -119,16 +119,18 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
           <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
             <h3 className="font-medium text-gray-900">Balances disponibles</h3>
           </div>
-          
+
           {availableDevices.length === 0 && !isScanning ? (
             <div className="p-4 text-center text-gray-500">
               <AlertCircle className="mx-auto mb-2" size={24} />
               <p>Aucune balance trouvée</p>
-              <p className="text-sm">Assurez-vous que votre balance est allumée et en mode appairage</p>
+              <p className="text-sm">
+                Assurez-vous que votre balance est allumée et en mode appairage
+              </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
-              {availableDevices.map((device) => (
+              {availableDevices.map(device => (
                 <div key={device.id} className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -139,11 +141,13 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
                           <Wifi className="text-blue-600" size={16} />
                         )}
                       </div>
-                      
+
                       <div>
                         <h4 className="font-medium text-gray-900">{device.name}</h4>
-                        <p className="text-sm text-gray-500">{device.brand} • {device.model}</p>
-                        
+                        <p className="text-sm text-gray-500">
+                          {device.brand} • {device.model}
+                        </p>
+
                         <div className="flex items-center gap-4 mt-1">
                           <div className="flex items-center gap-1 text-xs text-gray-500">
                             📶 {device.signalStrength}%
@@ -156,7 +160,7 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
                         </div>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={() => handleConnectDevice(device)}
                       disabled={connectingDevice === device.id}

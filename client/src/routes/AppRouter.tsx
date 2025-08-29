@@ -13,7 +13,7 @@ export const AppRouter: React.FC<AppRouterProps> = ({ currentPath }) => {
   return (
     <Suspense fallback={<AppLoadingSpinner />}>
       <Router>
-        {allRoutes.map((routeConfig) => (
+        {allRoutes.map(routeConfig => (
           <Route key={routeConfig.path} path={routeConfig.path}>
             {routeConfig.isProtected ? (
               <ProtectedRoute>
@@ -24,7 +24,7 @@ export const AppRouter: React.FC<AppRouterProps> = ({ currentPath }) => {
             )}
           </Route>
         ))}
-        
+
         {/* Route catch-all pour 404 */}
         <Route path="*">
           {() => {

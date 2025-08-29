@@ -11,7 +11,7 @@ import {
   Calendar,
   User,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,7 +38,7 @@ const WearableNotificationCenter: React.FC = () => {
     steps: 10000,
     calories: 500,
     activeMinutes: 30,
-    heartRateZone: 120 // BPM minimum pour zone active
+    heartRateZone: 120, // BPM minimum pour zone active
   });
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const WearableNotificationCenter: React.FC = () => {
         timestamp: new Date(),
         icon: Target,
         priority: 'medium',
-        read: false
+        read: false,
       });
     }
 
@@ -76,14 +76,14 @@ const WearableNotificationCenter: React.FC = () => {
         timestamp: new Date(),
         icon: Zap,
         priority: 'medium',
-        read: false
+        read: false,
       });
     }
 
     // Vérifier les zones de fréquence cardiaque
     if (wearableData.heartRate && wearableData.heartRate.length > 0) {
       const maxHeartRate = Math.max(...wearableData.heartRate);
-      
+
       if (maxHeartRate > 180) {
         newNotifications.push({
           id: 'heart-rate-high-' + Date.now(),
@@ -93,7 +93,7 @@ const WearableNotificationCenter: React.FC = () => {
           timestamp: new Date(),
           icon: AlertTriangle,
           priority: 'high',
-          read: false
+          read: false,
         });
       }
     }
@@ -108,7 +108,7 @@ const WearableNotificationCenter: React.FC = () => {
         timestamp: new Date(),
         icon: Award,
         priority: 'low',
-        read: false
+        read: false,
       });
     }
 
@@ -116,17 +116,18 @@ const WearableNotificationCenter: React.FC = () => {
     const now = new Date();
     const lastActivity = wearableData.lastSync || new Date();
     const hoursSinceLastActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
-    
+
     if (hoursSinceLastActivity > 2) {
       newNotifications.push({
         id: 'activity-reminder-' + Date.now(),
         type: 'reminder',
         title: '💪 Temps de bouger !',
-        message: 'Cela fait un moment que vous n\'avez pas été actif. Que diriez-vous d\'une petite marche ?',
+        message:
+          "Cela fait un moment que vous n'avez pas été actif. Que diriez-vous d'une petite marche ?",
         timestamp: new Date(),
         icon: Activity,
         priority: 'low',
-        read: false
+        read: false,
       });
     }
 
@@ -143,16 +144,14 @@ const WearableNotificationCenter: React.FC = () => {
         toast({
           title: notification.title,
           description: notification.message,
-          variant: "destructive"
+          variant: 'destructive',
         });
       }
     });
   };
 
   const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const clearAllNotifications = () => {
@@ -161,21 +160,31 @@ const WearableNotificationCenter: React.FC = () => {
 
   const getNotificationColor = (type: WearableNotification['type']) => {
     switch (type) {
-      case 'goal': return 'bg-green-50 border-green-200';
-      case 'achievement': return 'bg-yellow-50 border-yellow-200';
-      case 'reminder': return 'bg-blue-50 border-blue-200';
-      case 'health': return 'bg-red-50 border-red-200';
-      default: return 'bg-gray-50 border-gray-200';
+      case 'goal':
+        return 'bg-green-50 border-green-200';
+      case 'achievement':
+        return 'bg-yellow-50 border-yellow-200';
+      case 'reminder':
+        return 'bg-blue-50 border-blue-200';
+      case 'health':
+        return 'bg-red-50 border-red-200';
+      default:
+        return 'bg-gray-50 border-gray-200';
     }
   };
 
   const getNotificationIcon = (type: WearableNotification['type']) => {
     switch (type) {
-      case 'goal': return Target;
-      case 'achievement': return Award;
-      case 'reminder': return Bell;
-      case 'health': return Heart;
-      default: return Activity;
+      case 'goal':
+        return Target;
+      case 'achievement':
+        return Award;
+      case 'reminder':
+        return Bell;
+      case 'health':
+        return Heart;
+      default:
+        return Activity;
     }
   };
 
@@ -190,8 +199,8 @@ const WearableNotificationCenter: React.FC = () => {
           <div className="relative">
             <Bell className="text-gray-600" size={24} />
             {unreadCount > 0 && (
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs"
               >
                 {unreadCount}
@@ -201,27 +210,20 @@ const WearableNotificationCenter: React.FC = () => {
           <div>
             <h2 className="text-xl font-bold text-gray-900">Centre de notifications</h2>
             <p className="text-sm text-gray-600">
-              {unreadCount > 0 ? `${unreadCount} nouvelle(s) notification(s)` : 'Aucune nouvelle notification'}
+              {unreadCount > 0
+                ? `${unreadCount} nouvelle(s) notification(s)`
+                : 'Aucune nouvelle notification'}
             </p>
           </div>
         </div>
-        
+
         <div className="flex space-x-2">
-          <Button
-            onClick={() => syncAll()}
-            disabled={isLoading}
-            size="sm"
-            variant="outline"
-          >
+          <Button onClick={() => syncAll()} disabled={isLoading} size="sm" variant="outline">
             <Activity className="mr-2" size={16} />
             Synchroniser
           </Button>
           {notifications.length > 0 && (
-            <Button
-              onClick={clearAllNotifications}
-              size="sm"
-              variant="ghost"
-            >
+            <Button onClick={clearAllNotifications} size="sm" variant="ghost">
               Tout effacer
             </Button>
           )}
@@ -248,9 +250,11 @@ const WearableNotificationCenter: React.FC = () => {
                 {(wearableData?.steps || 0).toLocaleString()} / {dailyGoals.steps.toLocaleString()}
               </div>
               <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(((wearableData?.steps || 0) / dailyGoals.steps) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min(((wearableData?.steps || 0) / dailyGoals.steps) * 100, 100)}%`,
+                  }}
                 />
               </div>
             </div>
@@ -265,9 +269,11 @@ const WearableNotificationCenter: React.FC = () => {
                 {wearableData?.caloriesBurned || 0} / {dailyGoals.calories}
               </div>
               <div className="w-full bg-red-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className="bg-red-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(((wearableData?.caloriesBurned || 0) / dailyGoals.calories) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min(((wearableData?.caloriesBurned || 0) / dailyGoals.calories) * 100, 100)}%`,
+                  }}
                 />
               </div>
             </div>
@@ -282,9 +288,11 @@ const WearableNotificationCenter: React.FC = () => {
                 {wearableData?.activeMinutes || 0} / {dailyGoals.activeMinutes}
               </div>
               <div className="w-full bg-green-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className="bg-green-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(((wearableData?.activeMinutes || 0) / dailyGoals.activeMinutes) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min(((wearableData?.activeMinutes || 0) / dailyGoals.activeMinutes) * 100, 100)}%`,
+                  }}
                 />
               </div>
             </div>
@@ -292,16 +300,27 @@ const WearableNotificationCenter: React.FC = () => {
             {/* Fréquence cardiaque */}
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600">
-                {wearableData?.heartRate ? Math.round(wearableData.heartRate.reduce((a, b) => a + b, 0) / wearableData.heartRate.length) : 0}
+                {wearableData?.heartRate
+                  ? Math.round(
+                      wearableData.heartRate.reduce((a, b) => a + b, 0) /
+                        wearableData.heartRate.length
+                    )
+                  : 0}
               </div>
               <div className="text-sm text-gray-600">BPM moyen</div>
               <div className="text-xs text-gray-500">
-                Zone: {wearableData?.heartRate && wearableData.heartRate.some(hr => hr > dailyGoals.heartRateZone) ? 'Active' : 'Repos'}
+                Zone:{' '}
+                {wearableData?.heartRate &&
+                wearableData.heartRate.some(hr => hr > dailyGoals.heartRateZone)
+                  ? 'Active'
+                  : 'Repos'}
               </div>
               <div className="w-full bg-purple-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className="bg-purple-600 h-2 rounded-full"
-                  style={{ width: `${Math.min(((wearableData?.heartRate ? Math.max(...wearableData.heartRate) : 0) / 200) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min(((wearableData?.heartRate ? Math.max(...wearableData.heartRate) : 0) / 200) * 100, 100)}%`,
+                  }}
                 />
               </div>
             </div>
@@ -328,7 +347,7 @@ const WearableNotificationCenter: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {notifications.slice(0, 10).map((notification) => {
+              {notifications.slice(0, 10).map(notification => {
                 const IconComponent = getNotificationIcon(notification.type);
                 return (
                   <div
@@ -339,17 +358,23 @@ const WearableNotificationCenter: React.FC = () => {
                     onClick={() => markAsRead(notification.id)}
                   >
                     <div className="flex items-start space-x-3">
-                      <div className={`p-2 rounded-full ${
-                        notification.priority === 'high' ? 'bg-red-100' : 
-                        notification.priority === 'medium' ? 'bg-yellow-100' : 
-                        'bg-blue-100'
-                      }`}>
-                        <IconComponent 
-                          size={16} 
+                      <div
+                        className={`p-2 rounded-full ${
+                          notification.priority === 'high'
+                            ? 'bg-red-100'
+                            : notification.priority === 'medium'
+                              ? 'bg-yellow-100'
+                              : 'bg-blue-100'
+                        }`}
+                      >
+                        <IconComponent
+                          size={16}
                           className={
-                            notification.priority === 'high' ? 'text-red-600' : 
-                            notification.priority === 'medium' ? 'text-yellow-600' : 
-                            'text-blue-600'
+                            notification.priority === 'high'
+                              ? 'text-red-600'
+                              : notification.priority === 'medium'
+                                ? 'text-yellow-600'
+                                : 'text-blue-600'
                           }
                         />
                       </div>
@@ -401,7 +426,7 @@ const WearableNotificationCenter: React.FC = () => {
                 Votre activité est en hausse de 15% par rapport à la semaine dernière !
               </p>
             </div>
-            
+
             <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
                 <User className="text-green-600" size={16} />

@@ -49,9 +49,9 @@ class AIService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          Authorization: `Bearer ${this.getAuthToken()}`,
         },
-        body: JSON.stringify({ pillar, timeframe })
+        body: JSON.stringify({ pillar, timeframe }),
       });
 
       if (!response.ok) {
@@ -66,15 +66,19 @@ class AIService {
   }
 
   // Coaching adaptatif en temps réel
-  async getAdaptiveCoaching(userContext: any, currentState: any, goal: string): Promise<CoachingResponse> {
+  async getAdaptiveCoaching(
+    userContext: any,
+    currentState: any,
+    goal: string
+  ): Promise<CoachingResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/adaptive-coaching`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          Authorization: `Bearer ${this.getAuthToken()}`,
         },
-        body: JSON.stringify({ user_context: userContext, current_state: currentState, goal })
+        body: JSON.stringify({ user_context: userContext, current_state: currentState, goal }),
       });
 
       if (!response.ok) {
@@ -95,9 +99,9 @@ class AIService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          Authorization: `Bearer ${this.getAuthToken()}`,
         },
-        body: JSON.stringify({ data_points: dataPoints, pillar })
+        body: JSON.stringify({ data_points: dataPoints, pillar }),
       });
 
       if (!response.ok) {
@@ -118,9 +122,9 @@ class AIService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          Authorization: `Bearer ${this.getAuthToken()}`,
         },
-        body: JSON.stringify({ horizon })
+        body: JSON.stringify({ horizon }),
       });
 
       if (!response.ok) {
@@ -135,19 +139,22 @@ class AIService {
   }
 
   // Recommandations contextuelles (n8n style)
-  async getContextualRecommendations(context: any, userProfile: any): Promise<{ recommendations: ContextualRecommendation[] }> {
+  async getContextualRecommendations(
+    context: any,
+    userProfile: any
+  ): Promise<{ recommendations: ContextualRecommendation[] }> {
     try {
       const response = await fetch(`${this.baseUrl}/contextual-recommendations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`
+          Authorization: `Bearer ${this.getAuthToken()}`,
         },
-        body: JSON.stringify({ 
-          context, 
-          user_profile: userProfile, 
-          current_time: new Date().toISOString() 
-        })
+        body: JSON.stringify({
+          context,
+          user_profile: userProfile,
+          current_time: new Date().toISOString(),
+        }),
       });
 
       if (!response.ok) {
@@ -176,13 +183,13 @@ class AIService {
 
       // Analyse des patterns localement
       const insights = this.analyzeHabitsLocally(logs);
-      
+
       return {
         pillar,
         insights,
         data_points: logs.length,
         analysis_period: '30d',
-        generated_at: new Date().toISOString()
+        generated_at: new Date().toISOString(),
       };
     } catch (error) {
       console.error('Habits insights error:', error);
@@ -197,7 +204,7 @@ class AIService {
       const [patterns, predictions, anomalies] = await Promise.all([
         this.analyzePatterns('general'),
         this.getPredictions('3d'),
-        this.detectAnomalies([])
+        this.detectAnomalies([]),
       ]);
 
       const proactiveAdvice = this.generateProactiveAdvice(patterns, predictions, anomalies);
@@ -206,7 +213,7 @@ class AIService {
         advice: proactiveAdvice,
         confidence: 0.85,
         next_action: this.getNextRecommendedAction(proactiveAdvice),
-        generated_at: new Date().toISOString()
+        generated_at: new Date().toISOString(),
       };
     } catch (error) {
       console.error('Proactive coaching error:', error);
@@ -235,11 +242,15 @@ class AIService {
     }, {});
 
     return {
-      best_days: Object.entries(dayStats).sort(([,a], [,b]) => (b as number) - (a as number)).slice(0, 3),
-      best_hours: Object.entries(hourStats).sort(([,a], [,b]) => (b as number) - (a as number)).slice(0, 3),
+      best_days: Object.entries(dayStats)
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+        .slice(0, 3),
+      best_hours: Object.entries(hourStats)
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+        .slice(0, 3),
       consistency_score: this.calculateConsistency(logs),
       total_actions: logs.length,
-      avg_per_day: logs.length / 30
+      avg_per_day: logs.length / 30,
     };
   }
 
@@ -259,13 +270,13 @@ class AIService {
   private generateProactiveAdvice(patterns: any, predictions: any, anomalies: any): any {
     // Génération de conseils proactifs basés sur l'analyse croisée
     const advice: {
-      immediate: Array<{type: string, message: string, action: string}>;
-      short_term: Array<{type: string, message: string, action: string}>;
-      long_term: Array<{type: string, message: string, action: string}>;
+      immediate: Array<{ type: string; message: string; action: string }>;
+      short_term: Array<{ type: string; message: string; action: string }>;
+      long_term: Array<{ type: string; message: string; action: string }>;
     } = {
       immediate: [],
       short_term: [],
-      long_term: []
+      long_term: [],
     };
 
     // Conseils immédiats basés sur les anomalies
@@ -273,7 +284,7 @@ class AIService {
       advice.immediate.push({
         type: 'correction',
         message: 'Anomalie détectée dans vos habitudes',
-        action: anomalies.anomalies[0].suggestion
+        action: anomalies.anomalies[0].suggestion,
       });
     }
 
@@ -281,8 +292,8 @@ class AIService {
     if (predictions.predictions?.performance?.expected_improvement > 10) {
       advice.short_term.push({
         type: 'optimization',
-        message: 'Potentiel d\'amélioration élevé détecté',
-        action: 'Intensifiez vos efforts cette semaine'
+        message: "Potentiel d'amélioration élevé détecté",
+        action: 'Intensifiez vos efforts cette semaine',
       });
     }
 
@@ -291,7 +302,7 @@ class AIService {
       advice.long_term.push({
         type: 'habit_building',
         message: 'Travaillons sur la consistance',
-        action: 'Établissez une routine quotidienne fixe'
+        action: 'Établissez une routine quotidienne fixe',
       });
     }
 

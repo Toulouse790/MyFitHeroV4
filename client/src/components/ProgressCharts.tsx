@@ -5,9 +5,7 @@ const ProgressCharts: React.FC = () => {
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Graphiques de Progrès</h2>
       <div className="bg-white rounded-lg shadow p-6">
-        <p className="text-gray-600">
-          Les graphiques de progrès seront bientôt disponibles.
-        </p>
+        <p className="text-gray-600">Les graphiques de progrès seront bientôt disponibles.</p>
       </div>
     </div>
   );

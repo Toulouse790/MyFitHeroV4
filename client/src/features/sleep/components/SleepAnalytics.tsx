@@ -33,19 +33,21 @@ export const SleepAnalytics: React.FC<SleepAnalyticsProps> = ({ className = '' }
   }
 
   const qualityInfo = getSleepQualityLabel(stats.averageQuality);
-  const goalProgress = currentGoal 
-    ? (stats.averageDuration / currentGoal.targetDuration) * 100 
-    : 0;
+  const goalProgress = currentGoal ? (stats.averageDuration / currentGoal.targetDuration) * 100 : 0;
 
   // Calcul des métriques avancées
   const recentEntries = entries.slice(0, 7);
-  const weeklyImprovement = recentEntries.length > 3 
-    ? ((recentEntries.slice(0, 3).reduce((sum, e) => sum + e.quality, 0) / 3) - 
-       (recentEntries.slice(-3).reduce((sum, e) => sum + e.quality, 0) / 3))
-    : 0;
+  const weeklyImprovement =
+    recentEntries.length > 3
+      ? recentEntries.slice(0, 3).reduce((sum, e) => sum + e.quality, 0) / 3 -
+        recentEntries.slice(-3).reduce((sum, e) => sum + e.quality, 0) / 3
+      : 0;
 
   const consistencyScore = Math.round(stats.bedtimeConsistency);
-  const sleepEfficiency = Math.min(100, Math.round((stats.averageDuration / (currentGoal?.targetDuration || 480)) * 100));
+  const sleepEfficiency = Math.min(
+    100,
+    Math.round((stats.averageDuration / (currentGoal?.targetDuration || 480)) * 100)
+  );
 
   return (
     <Card className={className}>
@@ -79,18 +81,14 @@ export const SleepAnalytics: React.FC<SleepAnalyticsProps> = ({ className = '' }
           {/* Consistance */}
           <div className="text-center p-3 bg-purple-50 rounded-lg">
             <Target size={24} className="mx-auto mb-2 text-purple-600" />
-            <div className="font-bold text-lg text-purple-800">
-              {consistencyScore}%
-            </div>
+            <div className="font-bold text-lg text-purple-800">{consistencyScore}%</div>
             <div className="text-xs text-purple-600">Régularité</div>
           </div>
 
           {/* Efficacité */}
           <div className="text-center p-3 bg-yellow-50 rounded-lg">
             <TrendingUp size={24} className="mx-auto mb-2 text-yellow-600" />
-            <div className="font-bold text-lg text-yellow-800">
-              {sleepEfficiency}%
-            </div>
+            <div className="font-bold text-lg text-yellow-800">{sleepEfficiency}%</div>
             <div className="text-xs text-yellow-600">Efficacité</div>
           </div>
         </div>
@@ -101,15 +99,20 @@ export const SleepAnalytics: React.FC<SleepAnalyticsProps> = ({ className = '' }
             <div className="flex justify-between items-center">
               <span className="font-medium">Progression vers l'objectif</span>
               <span className="text-sm text-gray-600">
-                {formatDuration(stats.averageDuration)} / {formatDuration(currentGoal.targetDuration)}
+                {formatDuration(stats.averageDuration)} /{' '}
+                {formatDuration(currentGoal.targetDuration)}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
+              <div
                 className={`h-full rounded-full transition-all duration-300 ${
-                  goalProgress >= 100 ? 'bg-green-500' :
-                  goalProgress >= 80 ? 'bg-blue-500' :
-                  goalProgress >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                  goalProgress >= 100
+                    ? 'bg-green-500'
+                    : goalProgress >= 80
+                      ? 'bg-blue-500'
+                      : goalProgress >= 60
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
                 }`}
                 style={{ width: `${Math.min(100, goalProgress)}%` }}
               />
@@ -127,13 +130,11 @@ export const SleepAnalytics: React.FC<SleepAnalyticsProps> = ({ className = '' }
           <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="font-medium text-red-800">Dette de sommeil</span>
-              <Badge variant="destructive">
-                {formatDuration(stats.sleepDebt)}
-              </Badge>
+              <Badge variant="destructive">{formatDuration(stats.sleepDebt)}</Badge>
             </div>
             <p className="text-sm text-red-700">
-              Vous avez accumulé {formatDuration(stats.sleepDebt)} de dette de sommeil cette semaine.
-              Essayez de vous coucher plus tôt ou de faire une sieste.
+              Vous avez accumulé {formatDuration(stats.sleepDebt)} de dette de sommeil cette
+              semaine. Essayez de vous coucher plus tôt ou de faire une sieste.
             </p>
           </div>
         )}
@@ -150,23 +151,33 @@ export const SleepAnalytics: React.FC<SleepAnalyticsProps> = ({ className = '' }
               ) : (
                 <div className="w-4 h-0.5 bg-gray-400"></div>
               )}
-              <span className={`text-sm ${
-                stats.trend === 'improving' ? 'text-green-600' :
-                stats.trend === 'declining' ? 'text-red-600' : 'text-gray-600'
-              }`}>
-                {stats.trend === 'improving' ? 'En amélioration' :
-                 stats.trend === 'declining' ? 'En baisse' : 'Stable'}
+              <span
+                className={`text-sm ${
+                  stats.trend === 'improving'
+                    ? 'text-green-600'
+                    : stats.trend === 'declining'
+                      ? 'text-red-600'
+                      : 'text-gray-600'
+                }`}
+              >
+                {stats.trend === 'improving'
+                  ? 'En amélioration'
+                  : stats.trend === 'declining'
+                    ? 'En baisse'
+                    : 'Stable'}
               </span>
             </div>
           </div>
-          
+
           {weeklyImprovement !== 0 && (
-            <div className={`text-sm p-3 rounded-lg ${
-              weeklyImprovement > 0 
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}>
-              {weeklyImprovement > 0 ? '📈' : '📉'} Votre qualité de sommeil a 
+            <div
+              className={`text-sm p-3 rounded-lg ${
+                weeklyImprovement > 0
+                  ? 'bg-green-50 text-green-700 border border-green-200'
+                  : 'bg-red-50 text-red-700 border border-red-200'
+              }`}
+            >
+              {weeklyImprovement > 0 ? '📈' : '📉'} Votre qualité de sommeil a
               {weeklyImprovement > 0 ? ' progressé' : ' diminué'} de{' '}
               <strong>{Math.abs(weeklyImprovement).toFixed(1)} points</strong> cette semaine.
             </div>
@@ -182,7 +193,10 @@ export const SleepAnalytics: React.FC<SleepAnalyticsProps> = ({ className = '' }
               <div className="flex items-start space-x-2 text-sm">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
                 <span className="text-gray-700">
-                  Ajoutez {formatDuration(Math.max(0, (currentGoal?.targetDuration || 480) - stats.averageDuration))} 
+                  Ajoutez{' '}
+                  {formatDuration(
+                    Math.max(0, (currentGoal?.targetDuration || 480) - stats.averageDuration)
+                  )}
                   à votre sommeil pour atteindre votre objectif
                 </span>
               </div>

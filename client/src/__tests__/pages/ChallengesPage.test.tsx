@@ -50,7 +50,7 @@ describe('ChallengesPage', () => {
       });
     });
 
-    it('affiche les détails d\'un défi', async () => {
+    it("affiche les détails d'un défi", async () => {
       const mockChallenge = createMockChallenge({
         title: '30-Day Push-up Challenge',
         description: 'Build your upper body strength with daily push-up goals',
@@ -70,7 +70,9 @@ describe('ChallengesPage', () => {
       await waitFor(() => {
         const challengeCard = screen.getByTestId('challenge-card');
         expect(within(challengeCard).getByText('30-Day Push-up Challenge')).toBeInTheDocument();
-        expect(within(challengeCard).getByText(/Build your upper body strength/)).toBeInTheDocument();
+        expect(
+          within(challengeCard).getByText(/Build your upper body strength/)
+        ).toBeInTheDocument();
         expect(within(challengeCard).getByText(/medium|moyen/i)).toBeInTheDocument();
         expect(within(challengeCard).getByText(/1.*jan.*31.*jan/i)).toBeInTheDocument();
       });
@@ -78,7 +80,7 @@ describe('ChallengesPage', () => {
 
     it('filtre les défis par catégorie', async () => {
       const user = userEvent.setup();
-      
+
       const mockChallenges = [
         createMockChallenge({ id: '1', category: 'cardio', title: 'Running Challenge' }),
         createMockChallenge({ id: '2', category: 'strength', title: 'Strength Challenge' }),
@@ -104,7 +106,7 @@ describe('ChallengesPage', () => {
 
     it('filtre les défis par niveau de difficulté', async () => {
       const user = userEvent.setup();
-      
+
       render(<ChallengesPage />);
 
       const difficultyFilter = screen.getByLabelText(/difficulté/i);
@@ -122,7 +124,7 @@ describe('ChallengesPage', () => {
   describe('Participation aux défis', () => {
     it('permet de rejoindre un défi', async () => {
       const user = userEvent.setup();
-      
+
       const mockChallenge = createMockChallenge({
         title: 'Test Challenge',
         completed: false,
@@ -133,12 +135,17 @@ describe('ChallengesPage', () => {
           return HttpResponse.json([mockChallenge]);
         }),
         http.post('*/rest/v1/user_challenges*', () => {
-          return HttpResponse.json([{
-            id: 'user-challenge-1',
-            challenge_id: mockChallenge.id,
-            user_id: 'user-123',
-            joined_at: '2024-01-01T00:00:00Z',
-          }], { status: 201 });
+          return HttpResponse.json(
+            [
+              {
+                id: 'user-challenge-1',
+                challenge_id: mockChallenge.id,
+                user_id: 'user-123',
+                joined_at: '2024-01-01T00:00:00Z',
+              },
+            ],
+            { status: 201 }
+          );
         })
       );
 
@@ -175,7 +182,7 @@ describe('ChallengesPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Active Challenge')).toBeInTheDocument();
         expect(screen.getByText(/45%/)).toBeInTheDocument();
-        
+
         // Vérifier la barre de progression
         const progressBar = screen.getByRole('progressbar');
         expect(progressBar).toHaveAttribute('aria-valuenow', '45');
@@ -208,7 +215,7 @@ describe('ChallengesPage', () => {
   describe('Interaction avec les défis', () => {
     it('ouvre la modal de détails lors du clic sur un défi', async () => {
       const user = userEvent.setup();
-      
+
       const mockChallenge = createMockChallenge({
         title: 'Detailed Challenge',
         description: 'This is a detailed description of the challenge',
@@ -238,12 +245,12 @@ describe('ChallengesPage', () => {
 
     it('ferme la modal de détails', async () => {
       const user = userEvent.setup();
-      
+
       render(<ChallengesPage />);
 
       // Ouvrir la modal (supposons qu'un défi soit déjà présent)
       await waitFor(() => screen.findByTestId('challenge-card'));
-      
+
       const challengeCard = screen.getByTestId('challenge-card');
       await user.click(challengeCard);
 
@@ -257,14 +264,16 @@ describe('ChallengesPage', () => {
     });
   });
 
-  describe('États de chargement et d\'erreur', () => {
+  describe("États de chargement et d'erreur", () => {
     it('affiche un état de chargement', () => {
       render(<ChallengesPage />);
-      
-      expect(screen.getByTestId('challenges-loading') || screen.getByText(/chargement/i)).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId('challenges-loading') || screen.getByText(/chargement/i)
+      ).toBeInTheDocument();
     });
 
-    it('affiche un message quand aucun défi n\'est disponible', async () => {
+    it("affiche un message quand aucun défi n'est disponible", async () => {
       server.use(
         http.get('*/rest/v1/challenges*', () => {
           return HttpResponse.json([]);
@@ -281,10 +290,7 @@ describe('ChallengesPage', () => {
     it('gère les erreurs de chargement', async () => {
       server.use(
         http.get('*/rest/v1/challenges*', () => {
-          return HttpResponse.json(
-            { error: 'Server Error' },
-            { status: 500 }
-          );
+          return HttpResponse.json({ error: 'Server Error' }, { status: 500 });
         })
       );
 
@@ -297,7 +303,7 @@ describe('ChallengesPage', () => {
 
     it('permet de réessayer après une erreur', async () => {
       const user = userEvent.setup();
-      
+
       // D'abord une erreur
       server.use(
         http.get('*/rest/v1/challenges*', () => {
@@ -330,7 +336,7 @@ describe('ChallengesPage', () => {
   describe('Fonctionnalités sociales', () => {
     it('affiche le classement des participants', async () => {
       const user = userEvent.setup();
-      
+
       render(<ChallengesPage />);
 
       const leaderboardButton = screen.getByRole('button', { name: /classement/i });
@@ -341,7 +347,7 @@ describe('ChallengesPage', () => {
 
     it('permet de partager un défi', async () => {
       const user = userEvent.setup();
-      
+
       // Mock de l'API de partage du navigateur
       const mockShare = jest.fn();
       Object.assign(navigator, {
@@ -367,7 +373,7 @@ describe('ChallengesPage', () => {
   describe('Recherche et tri', () => {
     it('recherche des défis par nom', async () => {
       const user = userEvent.setup();
-      
+
       const mockChallenges = [
         createMockChallenge({ id: '1', title: 'Running Challenge' }),
         createMockChallenge({ id: '2', title: 'Strength Challenge' }),
@@ -392,7 +398,7 @@ describe('ChallengesPage', () => {
 
     it('trie les défis par popularité', async () => {
       const user = userEvent.setup();
-      
+
       render(<ChallengesPage />);
 
       const sortSelect = screen.getByLabelText(/trier par/i);
@@ -412,7 +418,7 @@ describe('ChallengesPage', () => {
 
       expect(screen.getByRole('main')).toBeInTheDocument();
       expect(screen.getByRole('search')).toBeInTheDocument();
-      
+
       // Vérifier les labels appropriés
       expect(screen.getByLabelText(/rechercher/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/catégorie/i)).toBeInTheDocument();
@@ -420,7 +426,7 @@ describe('ChallengesPage', () => {
 
     it('supporte la navigation au clavier', async () => {
       const user = userEvent.setup();
-      
+
       render(<ChallengesPage />);
 
       await user.tab();
@@ -432,11 +438,11 @@ describe('ChallengesPage', () => {
 
     it('annonce les changements de statut', async () => {
       const user = userEvent.setup();
-      
+
       render(<ChallengesPage />);
 
       await waitFor(() => screen.findByRole('button', { name: /rejoindre/i }));
-      
+
       const joinButton = screen.getByRole('button', { name: /rejoindre/i });
       await user.click(joinButton);
 

@@ -8,11 +8,11 @@ interface VirtualizedListProps {
   overscan?: number;
 }
 
-export const useVirtualizedList = ({ 
-  items, 
-  itemHeight, 
-  containerHeight, 
-  overscan = 5 
+export const useVirtualizedList = ({
+  items,
+  itemHeight,
+  containerHeight,
+  overscan = 5,
 }: VirtualizedListProps) => {
   const [scrollTop, setScrollTop] = useState(0);
 
@@ -30,8 +30,8 @@ export const useVirtualizedList = ({
         position: 'absolute' as const,
         top: (startIndex + index) * itemHeight,
         height: itemHeight,
-        width: '100%'
-      }
+        width: '100%',
+      },
     }));
   }, [items, startIndex, endIndex, itemHeight]);
 
@@ -42,7 +42,7 @@ export const useVirtualizedList = ({
     totalHeight,
     onScroll: (e: React.UIEvent<HTMLDivElement>) => {
       setScrollTop(e.currentTarget.scrollTop);
-    }
+    },
   };
 };
 
@@ -71,10 +71,13 @@ export const useSmartCache = <T>(key: string, fetcher: () => Promise<T>, ttl = 3
     fetcher()
       .then(result => {
         setData(result);
-        localStorage.setItem(`cache_${key}`, JSON.stringify({
-          data: result,
-          timestamp: Date.now()
-        }));
+        localStorage.setItem(
+          `cache_${key}`,
+          JSON.stringify({
+            data: result,
+            timestamp: Date.now(),
+          })
+        );
       })
       .catch(setError)
       .finally(() => setLoading(false));
@@ -88,18 +91,18 @@ export const usePerformanceMonitor = () => {
   const [metrics, setMetrics] = useState({
     renderTime: 0,
     memoryUsage: 0,
-    frameRate: 0
+    frameRate: 0,
   });
 
   useEffect(() => {
     if ('performance' in window) {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        entries.forEach((entry) => {
+        entries.forEach(entry => {
           if (entry.entryType === 'measure') {
             setMetrics(prev => ({
               ...prev,
-              renderTime: entry.duration
+              renderTime: entry.duration,
             }));
           }
         });
@@ -113,7 +116,7 @@ export const usePerformanceMonitor = () => {
           const memory = (performance as any).memory;
           setMetrics(prev => ({
             ...prev,
-            memoryUsage: memory.usedJSHeapSize / 1024 / 1024 // En MB
+            memoryUsage: memory.usedJSHeapSize / 1024 / 1024, // En MB
           }));
         };
 
@@ -161,6 +164,7 @@ export const useOptimizedImage = (src: string) => {
     shouldLoad: isInView,
     isLoaded,
     onLoad: handleLoad,
-    placeholder: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDEzVjE3TTEyIDEzSDgiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo='
+    placeholder:
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMiA5VjEzTTEyIDEzVjE3TTEyIDEzSDgiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPgo=',
   };
 };

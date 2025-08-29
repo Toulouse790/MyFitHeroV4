@@ -12,32 +12,38 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const buttonVariants = {
-  primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200',
+  primary:
+    'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200',
   secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 transition-colors duration-200',
-  danger: 'bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg transition-all duration-200',
+  danger:
+    'bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg transition-all duration-200',
   ghost: 'hover:bg-gray-100 text-gray-700 transition-colors duration-200',
-  outline: 'border-2 border-gray-300 hover:border-gray-400 bg-transparent text-gray-700 transition-colors duration-200'
+  outline:
+    'border-2 border-gray-300 hover:border-gray-400 bg-transparent text-gray-700 transition-colors duration-200',
 };
 
 const buttonSizes = {
   sm: 'px-3 py-1.5 text-sm',
   md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg'
+  lg: 'px-6 py-3 text-lg',
 };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    className,
-    variant = 'primary',
-    size = 'md',
-    isLoading = false,
-    leftIcon,
-    rightIcon,
-    fullWidth = false,
-    children,
-    disabled,
-    ...props 
-  }, ref) => {
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      isLoading = false,
+      leftIcon,
+      rightIcon,
+      fullWidth = false,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const isDisabled = disabled || isLoading;
 
     return (
@@ -53,14 +59,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : leftIcon ? (
-          leftIcon
-        ) : null}
-        
+        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : leftIcon ? leftIcon : null}
+
         {children}
-        
+
         {!isLoading && rightIcon && rightIcon}
       </button>
     );

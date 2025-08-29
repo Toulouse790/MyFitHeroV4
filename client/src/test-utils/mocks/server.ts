@@ -5,11 +5,11 @@
 
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { 
-  createMockUser, 
-  createMockWorkout, 
-  createMockExercise, 
-  createMockChallenge 
+import {
+  createMockUser,
+  createMockWorkout,
+  createMockExercise,
+  createMockChallenge,
 } from '../test-utils';
 
 // Base URL pour l'API Supabase (à adapter selon votre config)
@@ -62,7 +62,7 @@ const workoutHandlers = [
   http.get(`${SUPABASE_URL}/rest/v1/workouts`, ({ request }) => {
     const url = new URL(request.url);
     const select = url.searchParams.get('select');
-    
+
     const mockWorkouts = [
       createMockWorkout({ id: '1', name: 'Upper Body Strength' }),
       createMockWorkout({ id: '2', name: 'Lower Body Power' }),
@@ -76,20 +76,20 @@ const workoutHandlers = [
   http.get(`${SUPABASE_URL}/rest/v1/workouts`, ({ request }) => {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
-    
+
     if (id) {
       return HttpResponse.json([createMockWorkout({ id })]);
     }
-    
+
     return HttpResponse.json([]);
   }),
 
   // Create workout
   http.post(`${SUPABASE_URL}/rest/v1/workouts`, async ({ request }) => {
     const body = await request.json();
-    const newWorkout = createMockWorkout({ 
+    const newWorkout = createMockWorkout({
       id: 'new-workout-id',
-      ...body 
+      ...body,
     });
     return HttpResponse.json([newWorkout], { status: 201 });
   }),
@@ -99,10 +99,10 @@ const workoutHandlers = [
     const body = await request.json();
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
-    
-    const updatedWorkout = createMockWorkout({ 
+
+    const updatedWorkout = createMockWorkout({
       id,
-      ...body 
+      ...body,
     });
     return HttpResponse.json([updatedWorkout]);
   }),
@@ -120,22 +120,22 @@ const exerciseHandlers = [
     const url = new URL(request.url);
     const search = url.searchParams.get('name');
     const muscleGroup = url.searchParams.get('muscle_groups');
-    
+
     let mockExercises = [
-      createMockExercise({ 
-        id: '1', 
-        name: 'Push-ups', 
-        muscle_groups: ['chest', 'triceps'] 
+      createMockExercise({
+        id: '1',
+        name: 'Push-ups',
+        muscle_groups: ['chest', 'triceps'],
       }),
-      createMockExercise({ 
-        id: '2', 
-        name: 'Squats', 
-        muscle_groups: ['quadriceps', 'glutes'] 
+      createMockExercise({
+        id: '2',
+        name: 'Squats',
+        muscle_groups: ['quadriceps', 'glutes'],
       }),
-      createMockExercise({ 
-        id: '3', 
-        name: 'Pull-ups', 
-        muscle_groups: ['back', 'biceps'] 
+      createMockExercise({
+        id: '3',
+        name: 'Pull-ups',
+        muscle_groups: ['back', 'biceps'],
       }),
     ];
 
@@ -160,11 +160,11 @@ const exerciseHandlers = [
   http.get(`${SUPABASE_URL}/rest/v1/exercises`, ({ request }) => {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
-    
+
     if (id) {
       return HttpResponse.json([createMockExercise({ id })]);
     }
-    
+
     return HttpResponse.json([]);
   }),
 ];
@@ -174,20 +174,20 @@ const challengeHandlers = [
   // Get challenges
   http.get(`${SUPABASE_URL}/rest/v1/challenges`, ({ request }) => {
     const mockChallenges = [
-      createMockChallenge({ 
-        id: '1', 
+      createMockChallenge({
+        id: '1',
         title: '30-Day Push-up Challenge',
-        category: 'strength' 
+        category: 'strength',
       }),
-      createMockChallenge({ 
-        id: '2', 
+      createMockChallenge({
+        id: '2',
         title: 'Marathon Training',
-        category: 'cardio' 
+        category: 'cardio',
       }),
-      createMockChallenge({ 
-        id: '3', 
+      createMockChallenge({
+        id: '3',
         title: 'Flexibility Focus',
-        category: 'flexibility' 
+        category: 'flexibility',
       }),
     ];
 
@@ -197,14 +197,19 @@ const challengeHandlers = [
   // Join challenge
   http.post(`${SUPABASE_URL}/rest/v1/user_challenges`, async ({ request }) => {
     const body = await request.json();
-    return HttpResponse.json([{
-      id: 'new-user-challenge',
-      user_id: body.user_id,
-      challenge_id: body.challenge_id,
-      joined_at: new Date().toISOString(),
-      completed: false,
-      progress: 0,
-    }], { status: 201 });
+    return HttpResponse.json(
+      [
+        {
+          id: 'new-user-challenge',
+          user_id: body.user_id,
+          challenge_id: body.challenge_id,
+          joined_at: new Date().toISOString(),
+          completed: false,
+          progress: 0,
+        },
+      ],
+      { status: 201 }
+    );
   }),
 ];
 
@@ -212,30 +217,34 @@ const challengeHandlers = [
 const userDataHandlers = [
   // Get user profile
   http.get(`${SUPABASE_URL}/rest/v1/user_profiles`, ({ request }) => {
-    return HttpResponse.json([{
-      id: 'profile-123',
-      user_id: 'user-123',
-      first_name: 'Test',
-      last_name: 'User',
-      date_of_birth: '1990-01-01',
-      height: 175,
-      weight: 70,
-      fitness_level: 'intermediate',
-      goals: ['weight_loss', 'muscle_gain'],
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z',
-    }]);
+    return HttpResponse.json([
+      {
+        id: 'profile-123',
+        user_id: 'user-123',
+        first_name: 'Test',
+        last_name: 'User',
+        date_of_birth: '1990-01-01',
+        height: 175,
+        weight: 70,
+        fitness_level: 'intermediate',
+        goals: ['weight_loss', 'muscle_gain'],
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      },
+    ]);
   }),
 
   // Update user profile
   http.patch(`${SUPABASE_URL}/rest/v1/user_profiles`, async ({ request }) => {
     const body = await request.json();
-    return HttpResponse.json([{
-      id: 'profile-123',
-      user_id: 'user-123',
-      ...body,
-      updated_at: new Date().toISOString(),
-    }]);
+    return HttpResponse.json([
+      {
+        id: 'profile-123',
+        user_id: 'user-123',
+        ...body,
+        updated_at: new Date().toISOString(),
+      },
+    ]);
   }),
 ];
 
@@ -260,13 +269,13 @@ const errorHandlers = [
   // Erreur de validation
   http.post(`${SUPABASE_URL}/rest/v1/validation-error`, ({ request }) => {
     return HttpResponse.json(
-      { 
-        error: 'Validation Error', 
+      {
+        error: 'Validation Error',
         message: 'Invalid input data',
         details: [
           { field: 'name', message: 'Name is required' },
           { field: 'email', message: 'Invalid email format' },
-        ]
+        ],
       },
       { status: 400 }
     );

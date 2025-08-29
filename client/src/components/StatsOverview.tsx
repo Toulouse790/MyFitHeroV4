@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { 
-  TrendingUp, 
-  Flame, 
-  Target, 
+import {
+  TrendingUp,
+  Flame,
+  Target,
   Calendar,
   Dumbbell,
   Apple,
@@ -13,7 +13,7 @@ import {
   Droplets,
   Trophy,
   Star,
-  Zap
+  Zap,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { UserDataService, UserStats } from '@/services/userDataService';
@@ -25,9 +25,9 @@ interface StatsOverviewProps {
   showDetailed?: boolean;
 }
 
-export const StatsOverview: React.FC<StatsOverviewProps> = ({ 
+export const StatsOverview: React.FC<StatsOverviewProps> = ({
   className = '',
-  showDetailed = false
+  showDetailed = false,
 }) => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [badgeStats, setBadgeStats] = useState<any>(null);
@@ -37,7 +37,9 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
 
   useEffect(() => {
     const initialize = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       setUserId(user.id);
@@ -50,10 +52,10 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
   const loadStats = async (uid: string) => {
     try {
       setLoading(true);
-      
+
       const [userStats, badgeStatsData] = await Promise.all([
         UserDataService.getUserStats(uid),
-        BadgeService.getBadgeStats(uid)
+        BadgeService.getBadgeStats(uid),
       ]);
 
       setStats(userStats);
@@ -61,9 +63,9 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les statistiques",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de charger les statistiques',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -117,9 +119,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
           <CardTitle>Statistiques</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-gray-600">
-            Aucune statistique disponible
-          </p>
+          <p className="text-center text-gray-600">Aucune statistique disponible</p>
         </CardContent>
       </Card>
     );
@@ -144,11 +144,9 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
               </div>
               <p className="text-sm font-medium mb-1">Streak actuelle</p>
               <p className="text-2xl font-bold">{stats.current_streak}</p>
-              <p className="text-xs opacity-75">
-                Record: {stats.longest_streak} jours
-              </p>
+              <p className="text-xs opacity-75">Record: {stats.longest_streak} jours</p>
             </div>
-            
+
             <div className="p-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <Star className="w-6 h-6 text-purple-600" />
@@ -159,15 +157,16 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
               <p className="text-sm font-medium mb-1 text-purple-700">Expérience</p>
               <p className="text-2xl font-bold text-purple-800">{stats.experience_points}</p>
               <div className="w-full bg-purple-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${((stats.experience_points % 1000) / 1000) * 100}%` 
+                  style={{
+                    width: `${((stats.experience_points % 1000) / 1000) * 100}%`,
                   }}
                 />
               </div>
               <p className="text-xs text-purple-600 mt-1">
-                {getExperienceForNextLevel(stats.experience_points)} XP pour le niveau {getLevel(stats.experience_points) + 1}
+                {getExperienceForNextLevel(stats.experience_points)} XP pour le niveau{' '}
+                {getLevel(stats.experience_points) + 1}
               </p>
             </div>
           </div>
@@ -181,7 +180,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
               </div>
               <p className="text-xl font-bold text-orange-600">{stats.total_workouts}</p>
             </div>
-            
+
             <div className="p-3 bg-green-50 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
                 <Apple className="w-5 h-5 text-green-600" />
@@ -189,7 +188,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
               </div>
               <p className="text-xl font-bold text-green-600">{stats.total_nutrition_logs}</p>
             </div>
-            
+
             <div className="p-3 bg-indigo-50 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
                 <Moon className="w-5 h-5 text-indigo-600" />
@@ -197,7 +196,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
               </div>
               <p className="text-xl font-bold text-indigo-600">{stats.total_sleep_hours}h</p>
             </div>
-            
+
             <div className="p-3 bg-cyan-50 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
                 <Droplets className="w-5 h-5 text-cyan-600" />
@@ -219,7 +218,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
                   {badgeStats.earnedBadges}/{badgeStats.totalBadges}
                 </Badge>
               </div>
-              
+
               <div className="grid grid-cols-4 gap-2 text-center">
                 <div>
                   <p className="text-lg font-bold text-gray-600">{badgeStats.commonBadges}</p>
@@ -238,7 +237,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
                   <p className="text-xs text-yellow-500">Légendaires</p>
                 </div>
               </div>
-              
+
               <div className="mt-3 pt-3 border-t border-yellow-200">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-yellow-700">Points totaux</span>

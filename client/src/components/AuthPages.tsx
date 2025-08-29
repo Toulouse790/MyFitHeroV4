@@ -31,24 +31,24 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     email: '',
     username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
 
   const [signInForm, setSignInForm] = useState<SignInForm>({
     email: '',
     password: '',
-    rememberMe: false
+    rememberMe: false,
   });
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // ✅ Validation des champs
     if (signUpForm.password !== signUpForm.confirmPassword) {
       toast({
         title: 'Erreur',
         description: 'Les mots de passe ne correspondent pas',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -57,7 +57,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
       toast({
         title: 'Erreur',
         description: 'Le mot de passe doit contenir au moins 6 caractères',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -68,7 +68,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
       toast({
         title: 'Erreur',
         description: 'Veuillez entrer une adresse email valide',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -77,58 +77,61 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
     if (signUpForm.username.length < 3) {
       toast({
         title: 'Erreur',
-        description: 'Le nom d\'utilisateur doit contenir au moins 3 caractères',
-        variant: 'destructive'
+        description: "Le nom d'utilisateur doit contenir au moins 3 caractères",
+        variant: 'destructive',
       });
       return;
     }
 
     setLoading(true);
     console.log('🚀 Début inscription pour:', signUpForm.email);
-    
+
     try {
-      const result = await authClient.register(signUpForm.email, signUpForm.username, signUpForm.password);
+      const result = await authClient.register(
+        signUpForm.email,
+        signUpForm.username,
+        signUpForm.password
+      );
       console.log('📦 Résultat inscription:', result);
-      
+
       if (result.error) {
         console.error('❌ Erreur lors inscription:', result.error);
         toast({
-          title: 'Erreur d\'inscription',
+          title: "Erreur d'inscription",
           description: result.error,
-          variant: 'destructive'
+          variant: 'destructive',
         });
       } else if (result.user) {
         console.log('✅ Inscription réussie - Appel onAuthSuccess avec isNewUser=true');
         console.log('👤 Utilisateur créé:', result.user.id);
-        
+
         // ✅ APPEL CRITIQUE - Marquer comme nouvel utilisateur
         onAuthSuccess(result.user, true);
-        
+
         // ✅ FALLBACK DE SÉCURITÉ - Redirection directe si le callback échoue
         setTimeout(() => {
           const currentPath = window.location.pathname;
           console.log('🔍 Vérification path après inscription:', currentPath);
-          
+
           if (currentPath === '/auth') {
             console.log('⚠️ Toujours sur /auth - Force redirection vers /onboarding');
             window.location.href = '/onboarding';
           }
         }, 1500);
-        
       } else {
         console.error('❌ Résultat inscription invalide:', result);
         toast({
           title: 'Erreur',
           description: 'Réponse invalide du serveur',
-          variant: 'destructive'
+          variant: 'destructive',
         });
       }
     } catch (error) {
       console.error('🔥 Exception lors inscription:', error);
       toast({
         title: 'Erreur',
-        description: 'Une erreur est survenue lors de l\'inscription',
-        variant: 'destructive'
+        description: "Une erreur est survenue lors de l'inscription",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -137,35 +140,35 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // ✅ Validation des champs
     if (!signInForm.email || !signInForm.password) {
       toast({
         title: 'Erreur',
         description: 'Veuillez remplir tous les champs',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
 
     setLoading(true);
     console.log('🔑 Début connexion pour:', signInForm.email);
-    
+
     try {
       const result = await authClient.signIn(signInForm.email, signInForm.password);
       console.log('📦 Résultat connexion:', result);
-      
+
       if (result.error) {
         console.error('❌ Erreur lors connexion:', result.error);
         toast({
           title: 'Erreur de connexion',
           description: result.error,
-          variant: 'destructive'
+          variant: 'destructive',
         });
       } else if (result.user) {
         console.log('✅ Connexion réussie - Appel onAuthSuccess avec isNewUser=false');
         console.log('👤 Utilisateur connecté:', result.user.id);
-        
+
         // ✅ Pas de toast ici - App.tsx gérera le message de bienvenue
         onAuthSuccess(result.user, false);
       } else {
@@ -173,7 +176,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         toast({
           title: 'Erreur',
           description: 'Réponse invalide du serveur',
-          variant: 'destructive'
+          variant: 'destructive',
         });
       }
     } catch (error) {
@@ -181,7 +184,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
       toast({
         title: 'Erreur',
         description: 'Une erreur est survenue lors de la connexion',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -196,12 +199,12 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
       email: '',
       username: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     });
     setSignInForm({
       email: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
     });
     setShowPassword(false);
   };
@@ -242,16 +245,17 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
           {isSignUp ? (
             <form onSubmit={handleSignUp} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Mail
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type="email"
                     required
                     value={signUpForm.email}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, email: e.target.value.trim() })}
+                    onChange={e => setSignUpForm({ ...signUpForm, email: e.target.value.trim() })}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="votre@email.com"
                     disabled={loading}
@@ -264,12 +268,17 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                   Nom d'utilisateur *
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <User
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type="text"
                     required
                     value={signUpForm.username}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, username: e.target.value.trim() })}
+                    onChange={e =>
+                      setSignUpForm({ ...signUpForm, username: e.target.value.trim() })
+                    }
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="nom_utilisateur"
                     disabled={loading}
@@ -283,12 +292,15 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                   Mot de passe *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={signUpForm.password}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })}
+                    onChange={e => setSignUpForm({ ...signUpForm, password: e.target.value })}
                     className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="••••••••"
                     disabled={loading}
@@ -311,12 +323,17 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                   Confirmer le mot de passe *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={signUpForm.confirmPassword}
-                    onChange={(e) => setSignUpForm({ ...signUpForm, confirmPassword: e.target.value })}
+                    onChange={e =>
+                      setSignUpForm({ ...signUpForm, confirmPassword: e.target.value })
+                    }
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="••••••••"
                     disabled={loading}
@@ -342,16 +359,17 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
           ) : (
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Mail
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type="email"
                     required
                     value={signInForm.email}
-                    onChange={(e) => setSignInForm({ ...signInForm, email: e.target.value.trim() })}
+                    onChange={e => setSignInForm({ ...signInForm, email: e.target.value.trim() })}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="votre@email.com"
                     disabled={loading}
@@ -364,12 +382,15 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                   Mot de passe *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <Lock
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                    size={20}
+                  />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={signInForm.password}
-                    onChange={(e) => setSignInForm({ ...signInForm, password: e.target.value })}
+                    onChange={e => setSignInForm({ ...signInForm, password: e.target.value })}
                     className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="••••••••"
                     disabled={loading}
@@ -391,7 +412,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
                     type="checkbox"
                     id="remember"
                     checked={signInForm.rememberMe}
-                    onChange={(e) => setSignInForm({ ...signInForm, rememberMe: e.target.checked })}
+                    onChange={e => setSignInForm({ ...signInForm, rememberMe: e.target.checked })}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     disabled={loading}
                   />
@@ -425,9 +446,13 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         <div className="text-center text-sm text-gray-600">
           <p>En vous connectant, vous acceptez nos</p>
           <p>
-            <a href="#" className="text-blue-600 hover:text-blue-500">Conditions d'utilisation</a>
+            <a href="#" className="text-blue-600 hover:text-blue-500">
+              Conditions d'utilisation
+            </a>
             {' et '}
-            <a href="#" className="text-blue-600 hover:text-blue-500">Politique de confidentialité</a>
+            <a href="#" className="text-blue-600 hover:text-blue-500">
+              Politique de confidentialité
+            </a>
           </p>
         </div>
       </div>

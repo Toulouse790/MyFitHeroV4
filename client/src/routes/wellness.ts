@@ -17,8 +17,8 @@ export const wellnessRoutes: RouteConfig[] = [
       title: 'Nutrition',
       description: 'Suivi nutritionnel et calories',
       icon: 'Apple',
-      category: 'wellness'
-    }
+      category: 'wellness',
+    },
   },
   {
     path: '/hydration',
@@ -26,10 +26,10 @@ export const wellnessRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Hydratation',
-      description: 'Suivi de votre consommation d\'eau',
+      description: "Suivi de votre consommation d'eau",
       icon: 'Droplets',
-      category: 'wellness'
-    }
+      category: 'wellness',
+    },
   },
   {
     path: '/hydration/history',
@@ -37,10 +37,10 @@ export const wellnessRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Historique hydratation',
-      description: 'Historique de votre consommation d\'eau',
+      description: "Historique de votre consommation d'eau",
       icon: 'Calendar',
-      category: 'wellness'
-    }
+      category: 'wellness',
+    },
   },
   {
     path: '/sleep',
@@ -50,8 +50,8 @@ export const wellnessRoutes: RouteConfig[] = [
       title: 'Sommeil',
       description: 'Suivi de votre qualité de sommeil',
       icon: 'Moon',
-      category: 'wellness'
-    }
+      category: 'wellness',
+    },
   },
   {
     path: '/wearables',
@@ -61,7 +61,7 @@ export const wellnessRoutes: RouteConfig[] = [
       title: 'Objets connectés',
       description: 'Connexion avec vos appareils wearables',
       icon: 'Watch',
-      category: 'wellness'
-    }
-  }
+      category: 'wellness',
+    },
+  },
 ];

@@ -12,7 +12,7 @@ export const WorkoutProgressCard: React.FC<WorkoutProgressCardProps> = ({
   currentExercise,
   totalExercises,
   timeElapsed,
-  estimatedTimeRemaining
+  estimatedTimeRemaining,
 }) => {
   const progress = (currentExercise / totalExercises) * 100;
 
@@ -28,21 +28,23 @@ export const WorkoutProgressCard: React.FC<WorkoutProgressCardProps> = ({
         <h3 className="text-lg font-semibold text-gray-900">Progression</h3>
         <TrendingUp className="text-blue-500" size={20} />
       </div>
-      
+
       {/* Progress Bar */}
       <div className="mb-4">
         <div className="flex justify-between text-sm text-gray-600 mb-1">
-          <span>Exercice {currentExercise} de {totalExercises}</span>
+          <span>
+            Exercice {currentExercise} de {totalExercises}
+          </span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
+          <div
             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
       </div>
-      
+
       {/* Time Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
@@ -52,7 +54,7 @@ export const WorkoutProgressCard: React.FC<WorkoutProgressCardProps> = ({
             <p className="text-sm font-medium">{formatTime(timeElapsed)}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Target className="text-gray-500" size={16} />
           <div>

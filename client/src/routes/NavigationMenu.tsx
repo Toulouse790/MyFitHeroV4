@@ -3,13 +3,13 @@ import React from 'react';
 import { useCurrentRoute, useAppNavigation, useNavigationRoutes } from './hooks';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Menu } from 'lucide-react';
 
@@ -20,17 +20,17 @@ interface NavigationMenuProps {
 export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => {
   const { currentRoute } = useCurrentRoute();
   const { navigateTo } = useAppNavigation();
-  
+
   // Routes organisées par catégories
   const dashboardRoutes = useNavigationRoutes('dashboard');
   const fitnessRoutes = useNavigationRoutes('fitness');
   const wellnessRoutes = useNavigationRoutes('wellness');
   const socialRoutes = useNavigationRoutes('social');
-  
+
   const handleNavigation = (path: string) => {
     navigateTo(path);
   };
-  
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,7 +39,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
           Navigation
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent className="w-56" align="end">
         {/* Dashboard */}
         <DropdownMenuLabel className="flex items-center justify-between">
@@ -48,7 +48,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             {dashboardRoutes.length}
           </Badge>
         </DropdownMenuLabel>
-        {dashboardRoutes.map((route) => (
+        {dashboardRoutes.map(route => (
           <DropdownMenuItem
             key={route.path}
             onClick={() => handleNavigation(route.path)}
@@ -57,9 +57,9 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             <span>{route.metadata?.title || route.path}</span>
           </DropdownMenuItem>
         ))}
-        
+
         <DropdownMenuSeparator />
-        
+
         {/* Fitness */}
         <DropdownMenuLabel className="flex items-center justify-between">
           Fitness
@@ -67,7 +67,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             {fitnessRoutes.length}
           </Badge>
         </DropdownMenuLabel>
-        {fitnessRoutes.slice(0, 4).map((route) => (
+        {fitnessRoutes.slice(0, 4).map(route => (
           <DropdownMenuItem
             key={route.path}
             onClick={() => handleNavigation(route.path)}
@@ -76,9 +76,9 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             <span>{route.metadata?.title || route.path}</span>
           </DropdownMenuItem>
         ))}
-        
+
         <DropdownMenuSeparator />
-        
+
         {/* Wellness */}
         <DropdownMenuLabel className="flex items-center justify-between">
           Bien-être
@@ -86,7 +86,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             {wellnessRoutes.length}
           </Badge>
         </DropdownMenuLabel>
-        {wellnessRoutes.map((route) => (
+        {wellnessRoutes.map(route => (
           <DropdownMenuItem
             key={route.path}
             onClick={() => handleNavigation(route.path)}
@@ -95,9 +95,9 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             <span>{route.metadata?.title || route.path}</span>
           </DropdownMenuItem>
         ))}
-        
+
         <DropdownMenuSeparator />
-        
+
         {/* Social */}
         <DropdownMenuLabel className="flex items-center justify-between">
           Social
@@ -105,7 +105,7 @@ export const NavigationMenu: React.FC<NavigationMenuProps> = ({ className }) => 
             {socialRoutes.length}
           </Badge>
         </DropdownMenuLabel>
-        {socialRoutes.slice(0, 2).map((route) => (
+        {socialRoutes.slice(0, 2).map(route => (
           <DropdownMenuItem
             key={route.path}
             onClick={() => handleNavigation(route.path)}

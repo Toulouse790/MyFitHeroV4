@@ -30,24 +30,24 @@ const initialState: AppState = {
 
 export const useAppStore = create<AppStore>()(
   persist(
-    (set) => ({
+    set => ({
       ...initialState,
 
-      setTheme: (theme) => set({ theme }),
-      
-      setLanguage: (language) => set({ language }),
-      
-      setOnlineStatus: (isOnline) => set({ isOnline }),
-      
+      setTheme: theme => set({ theme }),
+
+      setLanguage: language => set({ language }),
+
+      setOnlineStatus: isOnline => set({ isOnline }),
+
       updateLastSync: () => set({ lastSync: new Date() }),
-      
-      toggleDebugMode: () => set((state) => ({ debugMode: !state.debugMode })),
-      
+
+      toggleDebugMode: () => set(state => ({ debugMode: !state.debugMode })),
+
       reset: () => set(initialState),
     }),
     {
       name: 'app-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         theme: state.theme,
         language: state.language,
         debugMode: state.debugMode,

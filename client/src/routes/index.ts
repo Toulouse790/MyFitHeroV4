@@ -16,7 +16,7 @@ export const allRoutes: RouteConfig[] = [
   ...socialRoutes,
   ...adminRoutes,
   ...legalRoutes,
-  ...specialRoutes
+  ...specialRoutes,
 ];
 
 // Routes organisées par catégorie
@@ -27,8 +27,11 @@ export const routeGroups: RouteGroup[] = [
   { category: 'wellness', routes: wellnessRoutes },
   { category: 'social', routes: socialRoutes },
   { category: 'admin', routes: adminRoutes },
-  { category: 'settings', routes: dashboardRoutes.filter(r => r.metadata?.category === 'settings') },
-  { category: 'legal', routes: legalRoutes }
+  {
+    category: 'settings',
+    routes: dashboardRoutes.filter(r => r.metadata?.category === 'settings'),
+  },
+  { category: 'legal', routes: legalRoutes },
 ];
 
 // Routes protégées
@@ -61,7 +64,7 @@ export {
   socialRoutes,
   adminRoutes,
   legalRoutes,
-  specialRoutes
+  specialRoutes,
 };
 
 // Export des types

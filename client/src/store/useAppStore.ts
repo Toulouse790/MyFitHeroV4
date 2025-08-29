@@ -2,8 +2,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
-import { 
-  UserProfile, 
+import {
+  UserProfile,
   AppStoreState,
   UserWorkout,
   UserNutrition,
@@ -14,7 +14,7 @@ import {
   WearableData,
   ConnectedScale,
   WeightEntry,
-  ApiResponse
+  ApiResponse,
 } from '@/types/supabase';
 
 // Types spécifiques au store étendu
@@ -77,58 +77,62 @@ interface ExtendedAppStore extends AppStoreState {
   dailyGoals: DailyGoals;
   currentStats: DailyStats | null;
   recommendations: AiRecommendation[];
-  
+
   // Données des modules
   workouts: UserWorkout[];
   nutritionEntries: UserNutrition[];
   hydrationEntries: UserHydration[];
   sleepEntries: UserSleep[];
   analyticsData: UserAnalytics[];
-  
+
   // États UI
   activeModule: string | null;
   syncStatus: 'idle' | 'syncing' | 'success' | 'error';
   lastSyncTime: string | null;
-  
+
   // Données wearables
   wearableData: WearableData | null;
   connectedScales: ConnectedScale[];
   weightHistory: WeightEntry[];
-  
+
   // Actions étendues
   updateAppStoreUserProfile: (updates: Partial<AppUser>) => void;
   setUser: (user: AppUser) => void;
   clearUser: () => void;
   updateDailyGoals: (goals: Partial<DailyGoals>) => void;
   calculateAndSetDailyGoals: () => void;
-  
+
   // Actions données
   fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
-  fetchAiRecommendations: (userId: string, pillarType: string, limit?: number) => Promise<AiRecommendation[]>;
+  fetchAiRecommendations: (
+    userId: string,
+    pillarType: string,
+    limit?: number
+  ) => Promise<AiRecommendation[]>;
   markRecommendationAsRead: (recommendationId: string) => Promise<boolean>;
-  
+
   // Actions modules
   addHydration: (amount: number, type?: string) => Promise<boolean>;
   addMeal: (meal: Partial<UserNutrition>) => Promise<boolean>;
   addSleepSession: (sleepData: Partial<UserSleep>) => Promise<boolean>;
   addWorkout: (workout: Partial<UserWorkout>) => Promise<boolean>;
-  
+
   // Gestion modules
   activateModule: (moduleId: string) => Promise<boolean>;
   deactivateModule: (moduleId: string) => Promise<boolean>;
   isModuleActive: (moduleId: string) => boolean;
   setActiveModule: (moduleId: string | null) => void;
-  
+
   // Actions wearables
   syncWearableData: () => Promise<WearableData | null>;
   addConnectedScale: (scale: Partial<ConnectedScale>) => Promise<boolean>;
   addWeightEntry: (entry: Partial<WeightEntry>) => Promise<boolean>;
-  
+
   // Actions analytics
   updateUserPoints: (points: number) => void;
   incrementLevel: () => void;
   calculateProgress: (date: string) => Promise<{ [key: string]: number }>;
-  
+
   // Utilitaires
   getTodayProgress: () => { [key: string]: number };
   getWeeklyStats: () => Promise<{ [key: string]: number[] }>;
@@ -138,53 +142,54 @@ interface ExtendedAppStore extends AppStoreState {
 // Calcul des objectifs personnalisés
 const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
   let baseCalories = user.daily_calories || 2000;
-  
+
   // Calcul BMR si données disponibles
   if (!user.daily_calories && user.age && user.gender && user.weight && user.height) {
     const weight = user.weight;
     const height = user.height;
-    const bmr = user.gender === 'male'
-      ? 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * user.age)
-      : 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * user.age);
-    
+    const bmr =
+      user.gender === 'male'
+        ? 88.362 + 13.397 * weight + 4.799 * height - 5.677 * user.age
+        : 447.593 + 9.247 * weight + 3.098 * height - 4.33 * user.age;
+
     const activityFactors: Record<string, number> = {
-      'student': 1.4,
-      'office_worker': 1.3,
-      'physical_job': 1.6,
-      'retired': 1.2
+      student: 1.4,
+      office_worker: 1.3,
+      physical_job: 1.6,
+      retired: 1.2,
     };
-    
+
     const activityFactor = activityFactors[user.lifestyle || ''] || 1.4;
     baseCalories = Math.round(bmr * activityFactor);
   }
-  
+
   // Ajustements selon objectifs
   let calorieAdjustment = 0;
   if (user.primary_goals?.includes('weight_loss')) calorieAdjustment -= 300;
   if (user.primary_goals?.includes('muscle_gain')) calorieAdjustment += 400;
   if (user.primary_goals?.includes('performance')) calorieAdjustment += 200;
-  
+
   // Ajustements sport
   const sportAdjustments: Record<string, number> = {
-    'basketball': 250,
-    'american_football': 500,
-    'football': 200,
-    'tennis': 150,
-    'running': 400,
-    'cycling': 400,
-    'swimming': 400,
-    'musculation': 300,
-    'powerlifting': 300,
-    'crossfit': 350
+    basketball: 250,
+    american_football: 500,
+    football: 200,
+    tennis: 150,
+    running: 400,
+    cycling: 400,
+    swimming: 400,
+    musculation: 300,
+    powerlifting: 300,
+    crossfit: 350,
   };
-  
+
   const sportAdjustment = sportAdjustments[user.sport?.toLowerCase() || ''] || 0;
   const finalCalories = baseCalories + calorieAdjustment + sportAdjustment;
-  
+
   // Calcul macros
   let proteinMultiplier = 1.2;
   let carbMultiplier = 1.0;
-  
+
   if (user.sport?.toLowerCase().includes('strength') || user.sport === 'musculation') {
     proteinMultiplier = 1.5;
     carbMultiplier = 1.0;
@@ -192,11 +197,11 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
     proteinMultiplier = 1.2;
     carbMultiplier = 1.5;
   }
-  
-  const protein = Math.round((finalCalories * 0.20 / 4) * proteinMultiplier);
-  const carbs = Math.round((finalCalories * 0.45 / 4) * carbMultiplier);
-  const fat = Math.round((finalCalories * 0.35 / 9));
-  
+
+  const protein = Math.round(((finalCalories * 0.2) / 4) * proteinMultiplier);
+  const carbs = Math.round(((finalCalories * 0.45) / 4) * carbMultiplier);
+  const fat = Math.round((finalCalories * 0.35) / 9);
+
   // Calcul sommeil
   let sleepHours = 8;
   if (user.sport?.includes('american_football') || user.sport?.includes('rugby')) {
@@ -204,15 +209,15 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
   } else if (user.sport?.includes('endurance') || user.sport === 'running') {
     sleepHours = 8.5;
   }
-  
+
   if (user.age && user.age > 45) sleepHours += 0.5;
   if (user.training_frequency && user.training_frequency > 5) sleepHours += 0.5;
-  
+
   // Calcul hydratation
   let waterGoal = 2.5;
   if (user.sport?.includes('endurance') || user.sport === 'running') waterGoal = 3.0;
   if (user.sport?.includes('american_football') || user.sport === 'rugby') waterGoal = 3.5;
-  
+
   return {
     calories: finalCalories,
     protein,
@@ -220,7 +225,7 @@ const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
     fat,
     sleep: sleepHours,
     water: waterGoal,
-    workouts: user.training_frequency || 3
+    workouts: user.training_frequency || 3,
   };
 };
 
@@ -256,7 +261,7 @@ const defaultUser: AppUser = {
   lifestyle: null,
   training_frequency: null,
   primary_goals: null,
-  fitness_experience: null
+  fitness_experience: null,
 };
 
 // Objectifs par défaut
@@ -267,7 +272,7 @@ const defaultGoals: DailyGoals = {
   carbs: 250,
   fat: 70,
   sleep: 8,
-  workouts: 3
+  workouts: 3,
 };
 
 // Création du store
@@ -278,24 +283,24 @@ export const useAppStore = create<ExtendedAppStore>()(
       appStoreUser: defaultUser,
       isLoading: false,
       error: null,
-      
+
       // États étendus
       dailyGoals: defaultGoals,
       currentStats: null,
       recommendations: [],
-      
+
       // Données modules
       workouts: [],
       nutritionEntries: [],
       hydrationEntries: [],
       sleepEntries: [],
       analyticsData: [],
-      
+
       // États UI
       activeModule: null,
       syncStatus: 'idle',
       lastSyncTime: null,
-      
+
       // Données wearables
       wearableData: null,
       connectedScales: [],
@@ -361,7 +366,7 @@ export const useAppStore = create<ExtendedAppStore>()(
           }
           return { appStoreUser: updatedUser };
         });
-        
+
         setTimeout(() => {
           get().calculateAndSetDailyGoals();
         }, 100);
@@ -384,7 +389,7 @@ export const useAppStore = create<ExtendedAppStore>()(
 
       updateDailyGoals: (goals: Partial<DailyGoals>) => {
         set(state => ({
-          dailyGoals: { ...state.dailyGoals, ...goals }
+          dailyGoals: { ...state.dailyGoals, ...goals },
         }));
       },
 
@@ -407,12 +412,12 @@ export const useAppStore = create<ExtendedAppStore>()(
             .eq('user_id', userId)
             .eq('stat_date', date)
             .single();
-          
+
           if (error && error.code !== 'PGRST116') {
             console.error('Erreur fetch daily stats:', error);
             return null;
           }
-          
+
           const stats = data as DailyStats;
           set({ currentStats: stats });
           return stats;
@@ -425,7 +430,11 @@ export const useAppStore = create<ExtendedAppStore>()(
         }
       },
 
-      fetchAiRecommendations: async (userId: string, pillarType: string, limit: number = 5): Promise<AiRecommendation[]> => {
+      fetchAiRecommendations: async (
+        userId: string,
+        pillarType: string,
+        limit: number = 5
+      ): Promise<AiRecommendation[]> => {
         try {
           const { data, error } = await supabase
             .from('ai_recommendations')
@@ -434,12 +443,12 @@ export const useAppStore = create<ExtendedAppStore>()(
             .eq('pillar_type', pillarType)
             .order('created_at', { ascending: false })
             .limit(limit);
-          
+
           if (error) {
             console.error('Erreur fetch AI recommendations:', error);
             return [];
           }
-          
+
           const recommendations = data as AiRecommendation[];
           set({ recommendations });
           return recommendations;
@@ -455,19 +464,19 @@ export const useAppStore = create<ExtendedAppStore>()(
             .from('ai_recommendations')
             .update({ is_read: true } as any)
             .eq('id', recommendationId);
-          
+
           if (error) {
             console.error('Erreur mark recommendation as read:', error);
             return false;
           }
-          
+
           // Mettre à jour le state local
           set(state => ({
-            recommendations: state.recommendations.map(rec => 
+            recommendations: state.recommendations.map(rec =>
               rec.id === recommendationId ? { ...rec, is_read: true } : rec
-            )
+            ),
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur markRecommendationAsRead:', error);
@@ -480,31 +489,31 @@ export const useAppStore = create<ExtendedAppStore>()(
         try {
           const { appStoreUser } = get();
           const today = new Date().toISOString().split('T')[0];
-          
+
           const hydrationEntry: Partial<UserHydration> = {
             user_id: appStoreUser.id,
             amount_ml: amount,
             beverage_type: type as UserHydration['beverage_type'],
             logged_at: new Date().toISOString(),
-            notes: null
+            notes: null,
           };
-          
+
           const { data, error } = await (supabase as any)
             .from('user_hydration')
             .insert(hydrationEntry)
             .select()
             .single();
-          
+
           if (error) {
             console.error('Erreur ajout hydratation:', error);
             return false;
           }
-          
+
           // Mettre à jour le state local
           set(state => ({
-            hydrationEntries: [...state.hydrationEntries, data as UserHydration]
+            hydrationEntries: [...state.hydrationEntries, data as UserHydration],
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur addHydration:', error);
@@ -516,7 +525,7 @@ export const useAppStore = create<ExtendedAppStore>()(
         try {
           const { appStoreUser } = get();
           const today = new Date().toISOString().split('T')[0];
-          
+
           const mealEntry: Partial<UserNutrition> = {
             user_id: appStoreUser.id,
             meal_type: meal.meal_type || 'snack',
@@ -526,25 +535,25 @@ export const useAppStore = create<ExtendedAppStore>()(
             total_carbs: meal.total_carbs || 0,
             total_fat: meal.total_fat || 0,
             logged_at: new Date().toISOString(),
-            notes: meal.notes || null
+            notes: meal.notes || null,
           };
-          
+
           const { data, error } = await (supabase as any)
             .from('user_nutrition')
             .insert(mealEntry)
             .select()
             .single();
-          
+
           if (error) {
             console.error('Erreur ajout repas:', error);
             return false;
           }
-          
+
           // Mettre à jour le state local
           set(state => ({
-            nutritionEntries: [...state.nutritionEntries, data as UserNutrition]
+            nutritionEntries: [...state.nutritionEntries, data as UserNutrition],
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur addMeal:', error);
@@ -555,7 +564,7 @@ export const useAppStore = create<ExtendedAppStore>()(
       addSleepSession: async (sleepData: Partial<UserSleep>): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          
+
           const sleepEntry: Partial<UserSleep> = {
             user_id: appStoreUser.id,
             bedtime: sleepData.bedtime || '',
@@ -563,25 +572,25 @@ export const useAppStore = create<ExtendedAppStore>()(
             duration_hours: sleepData.duration_hours || 0,
             quality_rating: sleepData.quality_rating || 3,
             date: sleepData.date || new Date().toISOString().split('T')[0],
-            notes: sleepData.notes || null
+            notes: sleepData.notes || null,
           };
-          
+
           const { data, error } = await (supabase as any)
             .from('user_sleep')
             .insert(sleepEntry)
             .select()
             .single();
-          
+
           if (error) {
             console.error('Erreur ajout sommeil:', error);
             return false;
           }
-          
+
           // Mettre à jour le state local
           set(state => ({
-            sleepEntries: [...state.sleepEntries, data as UserSleep]
+            sleepEntries: [...state.sleepEntries, data as UserSleep],
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur addSleepSession:', error);
@@ -592,7 +601,7 @@ export const useAppStore = create<ExtendedAppStore>()(
       addWorkout: async (workout: Partial<UserWorkout>): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          
+
           const workoutEntry: Partial<UserWorkout> = {
             user_id: appStoreUser.id,
             name: workout.name || 'Entraînement',
@@ -603,25 +612,25 @@ export const useAppStore = create<ExtendedAppStore>()(
             workout_type: workout.workout_type || 'other',
             intensity: workout.intensity || 'moderate',
             notes: workout.notes || null,
-            completed_at: new Date().toISOString()
+            completed_at: new Date().toISOString(),
           };
-          
+
           const { data, error } = await (supabase as any)
             .from('user_workouts')
             .insert(workoutEntry)
             .select()
             .single();
-          
+
           if (error) {
             console.error('Erreur ajout workout:', error);
             return false;
           }
-          
+
           // Mettre à jour le state local
           set(state => ({
-            workouts: [...state.workouts, data as UserWorkout]
+            workouts: [...state.workouts, data as UserWorkout],
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur addWorkout:', error);
@@ -634,27 +643,27 @@ export const useAppStore = create<ExtendedAppStore>()(
         try {
           const { appStoreUser } = get();
           const currentActiveModules = (appStoreUser as any).active_modules || [];
-          
+
           if (currentActiveModules.includes(moduleId)) {
             console.log(`Module ${moduleId} déjà activé`);
             return true;
           }
-          
+
           const newActiveModules = [...currentActiveModules, moduleId];
-          
+
           const { error } = await (supabase as any)
             .from('user_profiles')
-            .update({ 
+            .update({
               active_modules: newActiveModules,
-              updated_at: new Date().toISOString()
+              updated_at: new Date().toISOString(),
             } as any)
             .eq('id', appStoreUser.id);
-          
+
           if (error) {
             console.error('Erreur activation module:', error);
             return false;
           }
-          
+
           get().updateAppStoreUserProfile({ active_modules: newActiveModules } as any);
           console.log(`✅ Module ${moduleId} activé avec succès`);
           return true;
@@ -668,27 +677,27 @@ export const useAppStore = create<ExtendedAppStore>()(
         try {
           const { appStoreUser } = get();
           const currentActiveModules = (appStoreUser as any).active_modules || [];
-          
+
           if (!currentActiveModules.includes(moduleId)) {
             console.log(`Module ${moduleId} déjà inactif`);
             return true;
           }
-          
+
           const newActiveModules = currentActiveModules.filter(module => module !== moduleId);
-          
+
           const { error } = await (supabase as any)
             .from('user_profiles')
-            .update({ 
+            .update({
               active_modules: newActiveModules,
-              updated_at: new Date().toISOString()
+              updated_at: new Date().toISOString(),
             } as any)
             .eq('id', appStoreUser.id);
-          
+
           if (error) {
             console.error('Erreur désactivation module:', error);
             return false;
           }
-          
+
           get().updateAppStoreUserProfile({ active_modules: newActiveModules } as any);
           console.log(`✅ Module ${moduleId} désactivé avec succès`);
           return true;
@@ -711,7 +720,7 @@ export const useAppStore = create<ExtendedAppStore>()(
       syncWearableData: async (): Promise<WearableData | null> => {
         try {
           set({ syncStatus: 'syncing' });
-          
+
           // Logique de sync wearable (à implémenter selon tes besoins)
           // Exemple basique
           const mockData: WearableData = {
@@ -723,15 +732,15 @@ export const useAppStore = create<ExtendedAppStore>()(
             avgHeartRate: 72,
             maxHeartRate: 145,
             restingHeartRate: 65,
-            sleepData: null
+            sleepData: null,
           };
-          
-          set({ 
-            wearableData: mockData, 
+
+          set({
+            wearableData: mockData,
             syncStatus: 'success',
-            lastSyncTime: new Date().toISOString()
+            lastSyncTime: new Date().toISOString(),
           });
-          
+
           return mockData;
         } catch (error) {
           console.error('Erreur sync wearable:', error);
@@ -743,30 +752,30 @@ export const useAppStore = create<ExtendedAppStore>()(
       addConnectedScale: async (scale: Partial<ConnectedScale>): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          
+
           const scaleEntry: Partial<ConnectedScale> = {
             user_id: appStoreUser.id,
             brand: scale.brand || '',
             model: scale.model || '',
             mac_address: scale.mac_address || null,
-            is_active: scale.is_active ?? true
+            is_active: scale.is_active ?? true,
           };
-          
+
           const { data, error } = await (supabase as any)
             .from('connected_scales')
             .insert(scaleEntry)
             .select()
             .single();
-          
+
           if (error) {
             console.error('Erreur ajout balance:', error);
             return false;
           }
-          
+
           set(state => ({
-            connectedScales: [...state.connectedScales, data as ConnectedScale]
+            connectedScales: [...state.connectedScales, data as ConnectedScale],
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur addConnectedScale:', error);
@@ -777,31 +786,31 @@ export const useAppStore = create<ExtendedAppStore>()(
       addWeightEntry: async (entry: Partial<WeightEntry>): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          
+
           const weightEntry: Partial<WeightEntry> = {
             user_id: appStoreUser.id,
             weight: entry.weight || 0,
             body_fat_percentage: entry.body_fat_percentage || null,
             muscle_mass: entry.muscle_mass || null,
             source: entry.source || 'manual',
-            recorded_at: entry.recorded_at || new Date().toISOString()
+            recorded_at: entry.recorded_at || new Date().toISOString(),
           };
-          
+
           const { data, error } = await (supabase as any)
             .from('weight_entries')
             .insert(weightEntry)
             .select()
             .single();
-          
+
           if (error) {
             console.error('Erreur ajout poids:', error);
             return false;
           }
-          
+
           set(state => ({
-            weightHistory: [...state.weightHistory, data as WeightEntry]
+            weightHistory: [...state.weightHistory, data as WeightEntry],
           }));
-          
+
           return true;
         } catch (error) {
           console.error('Erreur addWeightEntry:', error);
@@ -814,8 +823,8 @@ export const useAppStore = create<ExtendedAppStore>()(
         set(state => ({
           appStoreUser: {
             ...state.appStoreUser,
-            totalPoints: (state.appStoreUser.totalPoints || 0) + points
-          }
+            totalPoints: (state.appStoreUser.totalPoints || 0) + points,
+          },
         }));
       },
 
@@ -823,8 +832,8 @@ export const useAppStore = create<ExtendedAppStore>()(
         set(state => ({
           appStoreUser: {
             ...state.appStoreUser,
-            level: (state.appStoreUser.level || 1) + 1
-          }
+            level: (state.appStoreUser.level || 1) + 1,
+          },
         }));
       },
 
@@ -832,15 +841,15 @@ export const useAppStore = create<ExtendedAppStore>()(
         try {
           const { appStoreUser, dailyGoals } = get();
           const stats = await get().fetchDailyStats(appStoreUser.id, date);
-          
+
           if (!stats) return {};
-          
+
           return {
             calories: Math.min((stats.total_calories_consumed / dailyGoals.calories) * 100, 100),
             protein: Math.min((stats.total_protein / dailyGoals.protein) * 100, 100),
             water: Math.min((stats.total_water_ml / (dailyGoals.water * 1000)) * 100, 100),
             sleep: Math.min((stats.sleep_hours / dailyGoals.sleep) * 100, 100),
-            workouts: Math.min((stats.workouts_completed / dailyGoals.workouts) * 100, 100)
+            workouts: Math.min((stats.workouts_completed / dailyGoals.workouts) * 100, 100),
           };
         } catch (error) {
           console.error('Erreur calculateProgress:', error);
@@ -851,15 +860,18 @@ export const useAppStore = create<ExtendedAppStore>()(
       // Utilitaires
       getTodayProgress: (): { [key: string]: number } => {
         const { currentStats, dailyGoals } = get();
-        
+
         if (!currentStats) return {};
-        
+
         return {
-          calories: Math.min((currentStats.total_calories_consumed / dailyGoals.calories) * 100, 100),
+          calories: Math.min(
+            (currentStats.total_calories_consumed / dailyGoals.calories) * 100,
+            100
+          ),
           protein: Math.min((currentStats.total_protein / dailyGoals.protein) * 100, 100),
           water: Math.min((currentStats.total_water_ml / (dailyGoals.water * 1000)) * 100, 100),
           sleep: Math.min((currentStats.sleep_hours / dailyGoals.sleep) * 100, 100),
-          workouts: Math.min((currentStats.workouts_completed / dailyGoals.workouts) * 100, 100)
+          workouts: Math.min((currentStats.workouts_completed / dailyGoals.workouts) * 100, 100),
         };
       },
 
@@ -869,7 +881,7 @@ export const useAppStore = create<ExtendedAppStore>()(
           const endDate = new Date();
           const startDate = new Date();
           startDate.setDate(endDate.getDate() - 6);
-          
+
           const { data, error } = await supabase
             .from('daily_stats')
             .select('*')
@@ -877,20 +889,20 @@ export const useAppStore = create<ExtendedAppStore>()(
             .gte('stat_date', startDate.toISOString().split('T')[0])
             .lte('stat_date', endDate.toISOString().split('T')[0])
             .order('stat_date', { ascending: true });
-          
+
           if (error) {
             console.error('Erreur getWeeklyStats:', error);
             return {};
           }
-          
+
           const stats = data as DailyStats[];
-          
+
           return {
             calories: stats.map(s => s.total_calories_consumed),
             protein: stats.map(s => s.total_protein),
             water: stats.map(s => s.total_water_ml),
             sleep: stats.map(s => s.sleep_hours),
-            workouts: stats.map(s => s.workouts_completed)
+            workouts: stats.map(s => s.workouts_completed),
           };
         } catch (error) {
           console.error('Erreur getWeeklyStats:', error);
@@ -901,16 +913,16 @@ export const useAppStore = create<ExtendedAppStore>()(
       exportUserData: async (): Promise<any> => {
         try {
           const { appStoreUser } = get();
-          
+
           // Récupérer toutes les données utilisateur
           const [workouts, nutrition, hydration, sleep, analytics] = await Promise.all([
             supabase.from('user_workouts').select('*').eq('user_id', appStoreUser.id),
             supabase.from('user_nutrition').select('*').eq('user_id', appStoreUser.id),
             supabase.from('user_hydration').select('*').eq('user_id', appStoreUser.id),
             supabase.from('user_sleep').select('*').eq('user_id', appStoreUser.id),
-            supabase.from('user_analytics').select('*').eq('user_id', appStoreUser.id)
+            supabase.from('user_analytics').select('*').eq('user_id', appStoreUser.id),
           ]);
-          
+
           return {
             profile: appStoreUser,
             workouts: workouts.data || [],
@@ -918,22 +930,22 @@ export const useAppStore = create<ExtendedAppStore>()(
             hydration: hydration.data || [],
             sleep: sleep.data || [],
             analytics: analytics.data || [],
-            exportDate: new Date().toISOString()
+            exportDate: new Date().toISOString(),
           };
         } catch (error) {
           console.error('Erreur exportUserData:', error);
           return null;
         }
-      }
+      },
     }),
     {
       name: 'myfithero-app-store',
-      partialize: (state) => ({
+      partialize: state => ({
         appStoreUser: state.appStoreUser,
         dailyGoals: state.dailyGoals,
         activeModule: state.activeModule,
-        lastSyncTime: state.lastSyncTime
-      })
+        lastSyncTime: state.lastSyncTime,
+      }),
     }
   )
 );

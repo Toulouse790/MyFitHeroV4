@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Activity,
-  Heart,
-  Moon,
-  TrendingUp,
-  Clock,
-  Zap
-} from 'lucide-react';
+import { Activity, Heart, Moon, TrendingUp, Clock, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,13 +25,13 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
   const loadWearableData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Charger les données mises en cache
       const cachedData = getCachedData();
       if (cachedData) {
         setWearableData(cachedData);
       }
-      
+
       // Charger les statistiques depuis Supabase
       const wearableStats = await AnalyticsService.getWearableStats(userId, selectedPeriod);
       setStats(wearableStats);
@@ -107,7 +100,7 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
             <Button
               key={period}
               onClick={() => setSelectedPeriod(period as 7 | 30 | 90)}
-              variant={selectedPeriod === period ? "default" : "outline"}
+              variant={selectedPeriod === period ? 'default' : 'outline'}
               size="sm"
             >
               {period}j
@@ -130,14 +123,14 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
             </div>
             <div className="mt-2">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${getStepsProgress(wearableData?.steps || stats?.totalSteps || 0)}%` }}
+                  style={{
+                    width: `${getStepsProgress(wearableData?.steps || stats?.totalSteps || 0)}%`,
+                  }}
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Objectif: 10,000 pas
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Objectif: 10,000 pas</p>
             </div>
           </CardContent>
         </Card>
@@ -149,13 +142,11 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
             <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.round(stats?.avgHeartRate || 0)} BPM
-            </div>
+            <div className="text-2xl font-bold">{Math.round(stats?.avgHeartRate || 0)} BPM</div>
             <div className="mt-2">
               {stats?.avgHeartRate && (
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className={`${getHeartRateZone(stats.avgHeartRate).color} text-white`}
                 >
                   {getHeartRateZone(stats.avgHeartRate).zone}
@@ -175,21 +166,17 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
             <Moon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {formatDuration(stats?.avgSleepDuration || 0)}
-            </div>
+            <div className="text-2xl font-bold">{formatDuration(stats?.avgSleepDuration || 0)}</div>
             <div className="mt-2">
               {stats?.avgSleepQuality && (
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   className={formatSleepQuality(stats.avgSleepQuality).color}
                 >
                   {formatSleepQuality(stats.avgSleepQuality).text}
                 </Badge>
               )}
-              <p className="text-xs text-muted-foreground mt-1">
-                Qualité moyenne
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Qualité moyenne</p>
             </div>
           </CardContent>
         </Card>
@@ -201,9 +188,7 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
             <Zap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {wearableData?.caloriesBurned || 0}
-            </div>
+            <div className="text-2xl font-bold">{wearableData?.caloriesBurned || 0}</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-green-600">+12%</span> vs hier
             </p>
@@ -226,21 +211,29 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium">
-                      {session.startTime.toLocaleTimeString()} - {session.endTime.toLocaleTimeString()}
+                      {session.startTime.toLocaleTimeString()} -{' '}
+                      {session.endTime.toLocaleTimeString()}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {formatDuration(session.duration)}
-                    </p>
+                    <p className="text-xs text-gray-500">{formatDuration(session.duration)}</p>
                   </div>
-                  <Badge variant="secondary" className={formatSleepQuality(
-                    session.quality === 'excellent' ? 4 :
-                    session.quality === 'good' ? 3 :
-                    session.quality === 'fair' ? 2 : 1
-                  ).color}>
+                  <Badge
+                    variant="secondary"
+                    className={
+                      formatSleepQuality(
+                        session.quality === 'excellent'
+                          ? 4
+                          : session.quality === 'good'
+                            ? 3
+                            : session.quality === 'fair'
+                              ? 2
+                              : 1
+                      ).color
+                    }
+                  >
                     {session.quality}
                   </Badge>
                 </div>
-                
+
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center p-3 bg-blue-50 rounded-lg">
                     <div className="text-lg font-semibold text-blue-600">
@@ -318,9 +311,7 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
                   Dernière synchronisation: {wearableData.lastSync.toLocaleString()}
                 </span>
               </div>
-              <Badge variant="outline">
-                Synchronisé
-              </Badge>
+              <Badge variant="outline">Synchronisé</Badge>
             </div>
           </CardContent>
         </Card>

@@ -1,10 +1,6 @@
 // client/src/types/onboarding-types.ts
 
-import {
-  AVAILABLE_MODULES,
-  MAIN_OBJECTIVES,
-  AVAILABLE_SPORTS,
-} from '@/data/onboardingData';
+import { AVAILABLE_MODULES, MAIN_OBJECTIVES, AVAILABLE_SPORTS } from '@/data/onboardingData';
 
 // Type dynamique pour les IDs de module
 // Il extrait les 'id' de chaque objet dans AVAILABLE_MODULES

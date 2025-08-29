@@ -39,17 +39,17 @@ export const SMART_PACKS: SmartPack[] = [
       'nutrition_setup',
       'nutrition_objective',
       'final_questions',
-      'privacy_consent'
+      'privacy_consent',
     ],
     questionsToSkip: [
       'sleep_setup',
       'sleep_difficulties',
       'hydration_setup',
       'hydration_reminders',
-      'wellness_assessment'
+      'wellness_assessment',
     ],
     order: 1,
-    popular: true
+    popular: true,
   },
   {
     id: 'wellness_balance',
@@ -70,7 +70,7 @@ export const SMART_PACKS: SmartPack[] = [
       'hydration_setup',
       'hydration_reminders',
       'final_questions',
-      'privacy_consent'
+      'privacy_consent',
     ],
     questionsToSkip: [
       'sport_selection',
@@ -80,10 +80,10 @@ export const SMART_PACKS: SmartPack[] = [
       'training_frequency',
       'equipment_level',
       'strength_setup',
-      'strength_experience'
+      'strength_experience',
     ],
     order: 2,
-    popular: true
+    popular: true,
   },
   {
     id: 'complete_transformation',
@@ -95,12 +95,12 @@ export const SMART_PACKS: SmartPack[] = [
     questionsToAsk: 'all', // Toutes les questions
     questionsToSkip: [],
     order: 3,
-    popular: false
+    popular: false,
   },
   {
     id: 'daily_health',
     name: 'Santé Quotidienne',
-    description: 'Focus sur l\'hydratation et le sommeil pour une meilleure santé',
+    description: "Focus sur l'hydratation et le sommeil pour une meilleure santé",
     icon: '💧',
     modules: ['hydration', 'sleep'],
     recommendedFor: ['beginners', 'health_basics', 'simple_approach'],
@@ -114,7 +114,7 @@ export const SMART_PACKS: SmartPack[] = [
       'hydration_setup',
       'hydration_reminders',
       'final_questions',
-      'privacy_consent'
+      'privacy_consent',
     ],
     questionsToSkip: [
       'sport_selection',
@@ -127,10 +127,10 @@ export const SMART_PACKS: SmartPack[] = [
       'strength_experience',
       'nutrition_setup',
       'nutrition_objective',
-      'wellness_assessment'
+      'wellness_assessment',
     ],
     order: 4,
-    popular: false
+    popular: false,
   },
   {
     id: 'muscle_building',
@@ -151,7 +151,7 @@ export const SMART_PACKS: SmartPack[] = [
       'nutrition_objective',
       'nutrition_allergies',
       'final_questions',
-      'privacy_consent'
+      'privacy_consent',
     ],
     questionsToSkip: [
       'sport_selection',
@@ -163,10 +163,10 @@ export const SMART_PACKS: SmartPack[] = [
       'sleep_difficulties',
       'hydration_setup',
       'hydration_reminders',
-      'wellness_assessment'
+      'wellness_assessment',
     ],
     order: 5,
-    popular: true
+    popular: true,
   },
   {
     id: 'custom',
@@ -178,14 +178,14 @@ export const SMART_PACKS: SmartPack[] = [
     questionsToAsk: [], // Sera défini dynamiquement
     questionsToSkip: [], // Sera défini dynamiquement
     order: 6,
-    popular: false
-  }
+    popular: false,
+  },
 ];
 
 // Fonction pour obtenir les questions selon le pack choisi
 export function getQuestionsForPack(packId: string, customModules?: ModuleId[]): string[] {
   const pack = SMART_PACKS.find(p => p.id === packId);
-  
+
   if (!pack) {
     console.error(`Pack ${packId} non trouvé`);
     return [];
@@ -208,11 +208,11 @@ export function getQuestionsForPack(packId: string, customModules?: ModuleId[]):
 function generateQuestionsForModules(modules: ModuleId[]): string[] {
   const baseQuestions = [
     'welcome',
-    'get_name', 
+    'get_name',
     'main_objective',
     'personal_info',
     'final_questions',
-    'privacy_consent'
+    'privacy_consent',
   ];
 
   const moduleQuestions: Record<ModuleId, string[]> = {
@@ -221,33 +221,17 @@ function generateQuestionsForModules(modules: ModuleId[]): string[] {
       'sport_position',
       'sport_level',
       'season_period',
-      'training_frequency'
+      'training_frequency',
     ],
-    strength: [
-      'equipment_level',
-      'strength_setup',
-      'strength_experience'
-    ],
-    nutrition: [
-      'nutrition_setup',
-      'nutrition_objective',
-      'nutrition_allergies'
-    ],
-    sleep: [
-      'sleep_setup',
-      'sleep_difficulties'
-    ],
-    hydration: [
-      'hydration_setup',
-      'hydration_reminders'
-    ],
-    wellness: [
-      'wellness_assessment'
-    ]
+    strength: ['equipment_level', 'strength_setup', 'strength_experience'],
+    nutrition: ['nutrition_setup', 'nutrition_objective', 'nutrition_allergies'],
+    sleep: ['sleep_setup', 'sleep_difficulties'],
+    hydration: ['hydration_setup', 'hydration_reminders'],
+    wellness: ['wellness_assessment'],
   };
 
   let questions = [...baseQuestions];
-  
+
   // Ajouter les questions spécifiques à chaque module
   modules.forEach(module => {
     if (moduleQuestions[module]) {
@@ -284,14 +268,14 @@ function getAllQuestions(): string[] {
     'hydration_reminders',
     'wellness_assessment',
     'final_questions',
-    'privacy_consent'
+    'privacy_consent',
   ];
 }
 
 // Fonction pour vérifier si une question doit être posée
 export function shouldAskQuestion(
-  questionId: string, 
-  selectedPack: string, 
+  questionId: string,
+  selectedPack: string,
   customModules?: ModuleId[]
 ): boolean {
   const questionsToAsk = getQuestionsForPack(selectedPack, customModules);
@@ -301,14 +285,14 @@ export function shouldAskQuestion(
 // Obtenir les packs recommandés selon l'objectif principal
 export function getRecommendedPacks(mainObjective: string): string[] {
   const recommendations: Record<string, string[]> = {
-    'performance': ['performance_athlete', 'complete_transformation'],
-    'health_wellness': ['wellness_balance', 'daily_health'],
-    'body_composition': ['muscle_building', 'performance_athlete'],
-    'energy_sleep': ['wellness_balance', 'daily_health'],
-    'strength_building': ['muscle_building', 'performance_athlete'],
-    'weight_loss': ['wellness_balance', 'muscle_building'],
-    'muscle_gain': ['muscle_building', 'performance_athlete'],
-    'holistic': ['complete_transformation']
+    performance: ['performance_athlete', 'complete_transformation'],
+    health_wellness: ['wellness_balance', 'daily_health'],
+    body_composition: ['muscle_building', 'performance_athlete'],
+    energy_sleep: ['wellness_balance', 'daily_health'],
+    strength_building: ['muscle_building', 'performance_athlete'],
+    weight_loss: ['wellness_balance', 'muscle_building'],
+    muscle_gain: ['muscle_building', 'performance_athlete'],
+    holistic: ['complete_transformation'],
   };
 
   return recommendations[mainObjective] || ['custom'];
@@ -320,9 +304,10 @@ export function getEstimatedTimeForPack(packId: string): number {
   if (!pack) return 15;
 
   const timePerQuestion = 0.5; // 30 secondes par question en moyenne
-  const questionsCount = pack.questionsToAsk === 'all' 
-    ? getAllQuestions().length 
-    : (pack.questionsToAsk as string[]).length;
+  const questionsCount =
+    pack.questionsToAsk === 'all'
+      ? getAllQuestions().length
+      : (pack.questionsToAsk as string[]).length;
 
   return Math.ceil(questionsCount * timePerQuestion);
 }

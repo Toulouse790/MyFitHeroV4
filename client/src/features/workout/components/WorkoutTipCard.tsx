@@ -36,10 +36,8 @@ export const WorkoutTipCard: React.FC<WorkoutTipCardProps> = ({ tip }) => {
   return (
     <div className={`rounded-lg border p-4 ${getImportanceColor(tip.importance)}`}>
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 mt-1">
-          {getImportanceIcon(tip.importance)}
-        </div>
-        
+        <div className="flex-shrink-0 mt-1">{getImportanceIcon(tip.importance)}</div>
+
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h4 className="font-medium text-gray-900">{tip.title}</h4>
@@ -47,9 +45,9 @@ export const WorkoutTipCard: React.FC<WorkoutTipCardProps> = ({ tip }) => {
               {tip.category}
             </span>
           </div>
-          
+
           <p className="text-sm text-gray-700 mb-2">{tip.description}</p>
-          
+
           <button className="text-xs text-gray-600 hover:text-gray-800 flex items-center gap-1">
             En savoir plus
             <ArrowRight size={12} />

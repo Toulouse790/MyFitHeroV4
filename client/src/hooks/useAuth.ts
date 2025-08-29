@@ -28,7 +28,9 @@ export function useAuth(): UseAuthResult {
   // Récupère la session et le profil utilisateur
   const fetchUser = useCallback(async () => {
     setIsLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (session?.user) {
       // Récupère le profil dans Supabase
       const { data: profile } = await supabase
@@ -55,13 +57,16 @@ export function useAuth(): UseAuthResult {
   }, [fetchUser]);
 
   // Login
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    await fetchUser();
-    setIsLoading(false);
-    return { error: error?.message };
-  }, [fetchUser]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      await fetchUser();
+      setIsLoading(false);
+      return { error: error?.message };
+    },
+    [fetchUser]
+  );
 
   // Logout
   const logout = useCallback(async () => {

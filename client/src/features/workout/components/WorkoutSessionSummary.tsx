@@ -23,12 +23,12 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
   onRate,
   onShare,
   onSave,
-  onClose
+  onClose,
 }) => {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     }
@@ -47,7 +47,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
         <h2 className="text-xl font-bold text-gray-900 mb-1">Séance terminée !</h2>
         <p className="text-gray-600">{summary.workoutName}</p>
       </div>
-      
+
       {/* Stats */}
       <div className="space-y-4 mb-6">
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -57,7 +57,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           </div>
           <span className="font-medium">{formatTime(summary.duration)}</span>
         </div>
-        
+
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <div className="flex items-center gap-2">
             <CheckCircle className="text-green-500" size={20} />
@@ -67,7 +67,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
             {summary.exercisesCompleted}/{summary.totalExercises} ({Math.round(completionRate)}%)
           </span>
         </div>
-        
+
         {summary.caloriesBurned && (
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           </div>
         )}
       </div>
-      
+
       {/* Personal Records */}
       {summary.personalRecords && summary.personalRecords.length > 0 && (
         <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -90,12 +90,14 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           </ul>
         </div>
       )}
-      
+
       {/* Rating */}
       <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Comment s'est passée votre séance ?</h3>
+        <h3 className="text-sm font-medium text-gray-700 mb-2">
+          Comment s'est passée votre séance ?
+        </h3>
         <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((rating) => (
+          {[1, 2, 3, 4, 5].map(rating => (
             <button
               key={rating}
               onClick={() => onRate?.(rating)}
@@ -110,7 +112,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           ))}
         </div>
       </div>
-      
+
       {/* Notes */}
       {summary.notes && (
         <div className="mb-6 p-3 bg-gray-50 rounded-lg">
@@ -118,7 +120,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           <p className="text-sm text-gray-600">{summary.notes}</p>
         </div>
       )}
-      
+
       {/* Actions */}
       <div className="flex gap-2 mb-4">
         <button
@@ -128,7 +130,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           <Share size={16} />
           Partager
         </button>
-        
+
         <button
           onClick={onSave}
           className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
@@ -137,7 +139,7 @@ export const WorkoutSessionSummary: React.FC<WorkoutSessionSummaryProps> = ({
           Sauvegarder
         </button>
       </div>
-      
+
       <button
         onClick={onClose}
         className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"

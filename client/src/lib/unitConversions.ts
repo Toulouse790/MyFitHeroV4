@@ -11,8 +11,8 @@ export interface UnitPreferences {
 export const getPreferencesForLocale = (locale: string): UnitPreferences => {
   // Locales qui utilisent le système impérial (principalement US)
   const imperialLocales = ['en-US', 'en', 'us'];
-  
-  const isImperial = imperialLocales.some(imperialLocale => 
+
+  const isImperial = imperialLocales.some(imperialLocale =>
     locale.toLowerCase().includes(imperialLocale.toLowerCase())
   );
 
@@ -21,7 +21,7 @@ export const getPreferencesForLocale = (locale: string): UnitPreferences => {
       weight: 'lbs',
       height: 'ft/in',
       liquid: 'fl_oz',
-      temperature: 'fahrenheit'
+      temperature: 'fahrenheit',
     };
   }
 
@@ -30,67 +30,71 @@ export const getPreferencesForLocale = (locale: string): UnitPreferences => {
     weight: 'kg',
     height: 'cm',
     liquid: 'ml',
-    temperature: 'celsius'
+    temperature: 'celsius',
   };
 };
 
 // Conversions de poids
 export const convertWeight = (value: number, from: 'kg' | 'lbs', to: 'kg' | 'lbs'): number => {
   if (from === to) return value;
-  
+
   if (from === 'kg' && to === 'lbs') {
     return value * 2.20462;
   }
-  
+
   if (from === 'lbs' && to === 'kg') {
     return value / 2.20462;
   }
-  
+
   return value;
 };
 
 // Conversions de taille
 export const convertHeight = (value: number, from: 'cm' | 'ft/in', to: 'cm' | 'ft/in'): number => {
   if (from === to) return value;
-  
+
   if (from === 'cm' && to === 'ft/in') {
     return value / 30.48; // Convertir cm en pieds (avec décimales)
   }
-  
+
   if (from === 'ft/in' && to === 'cm') {
     return value * 30.48; // Convertir pieds en cm
   }
-  
+
   return value;
 };
 
 // Conversions de liquides
 export const convertLiquid = (value: number, from: 'ml' | 'fl_oz', to: 'ml' | 'fl_oz'): number => {
   if (from === to) return value;
-  
+
   if (from === 'ml' && to === 'fl_oz') {
     return value * 0.033814;
   }
-  
+
   if (from === 'fl_oz' && to === 'ml') {
     return value / 0.033814;
   }
-  
+
   return value;
 };
 
 // Conversions de température
-export const convertTemperature = (value: number, from: 'celsius' | 'fahrenheit', to: 'celsius' | 'fahrenheit'): number => {
+export const convertTemperature = (
+  value: number,
+  from: 'celsius' | 'fahrenheit',
+  to: 'celsius' | 'fahrenheit'
+): number => {
   if (from === to) return value;
-  
+
   if (from === 'celsius' && to === 'fahrenheit') {
-    return (value * 9/5) + 32;
+    return (value * 9) / 5 + 32;
   }
-  
+
   if (from === 'fahrenheit' && to === 'celsius') {
-    return (value - 32) * 5/9;
+    return ((value - 32) * 5) / 9;
   }
-  
+
   return value;
 };
 
@@ -99,7 +103,11 @@ export const formatWeight = (value: number, unit: 'kg' | 'lbs', precision: numbe
   return `${value.toFixed(precision)} ${unit}`;
 };
 
-export const formatHeight = (value: number, unit: 'cm' | 'ft/in', precision: number = 1): string => {
+export const formatHeight = (
+  value: number,
+  unit: 'cm' | 'ft/in',
+  precision: number = 1
+): string => {
   if (unit === 'ft/in') {
     const feet = Math.floor(value);
     const inches = Math.round((value % 1) * 12);
@@ -108,11 +116,19 @@ export const formatHeight = (value: number, unit: 'cm' | 'ft/in', precision: num
   return `${value.toFixed(precision)} ${unit}`;
 };
 
-export const formatLiquid = (value: number, unit: 'ml' | 'fl_oz', precision: number = 0): string => {
+export const formatLiquid = (
+  value: number,
+  unit: 'ml' | 'fl_oz',
+  precision: number = 0
+): string => {
   return `${value.toFixed(precision)} ${unit === 'fl_oz' ? 'fl oz' : unit}`;
 };
 
-export const formatTemperature = (value: number, unit: 'celsius' | 'fahrenheit', precision: number = 1): string => {
+export const formatTemperature = (
+  value: number,
+  unit: 'celsius' | 'fahrenheit',
+  precision: number = 1
+): string => {
   return `${value.toFixed(precision)}°${unit === 'celsius' ? 'C' : 'F'}`;
 };
 
@@ -123,15 +139,17 @@ export const cmToFeet = (cm: number): number => convertHeight(cm, 'cm', 'ft/in')
 export const feetToCm = (feet: number): number => convertHeight(feet, 'ft/in', 'cm');
 export const mlToFlOz = (ml: number): number => convertLiquid(ml, 'ml', 'fl_oz');
 export const flOzToMl = (flOz: number): number => convertLiquid(flOz, 'fl_oz', 'ml');
-export const celsiusToFahrenheit = (celsius: number): number => convertTemperature(celsius, 'celsius', 'fahrenheit');
-export const fahrenheitToCelsius = (fahrenheit: number): number => convertTemperature(fahrenheit, 'fahrenheit', 'celsius');
+export const celsiusToFahrenheit = (celsius: number): number =>
+  convertTemperature(celsius, 'celsius', 'fahrenheit');
+export const fahrenheitToCelsius = (fahrenheit: number): number =>
+  convertTemperature(fahrenheit, 'fahrenheit', 'celsius');
 
 // Constantes utiles
 export const CONVERSION_FACTORS = {
   KG_TO_LBS: 2.20462,
   CM_TO_FEET: 0.0328084,
   ML_TO_FL_OZ: 0.033814,
-  CELSIUS_TO_FAHRENHEIT: (c: number) => (c * 9/5) + 32
+  CELSIUS_TO_FAHRENHEIT: (c: number) => (c * 9) / 5 + 32,
 };
 
 // Validation des valeurs

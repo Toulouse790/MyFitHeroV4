@@ -22,7 +22,7 @@ import {
   HydrationPage,
   SleepPage,
   WearableHubPage,
-  AICoachPage
+  AICoachPage,
 } from './lazy-imports';
 
 // Page de dashboard temporaire

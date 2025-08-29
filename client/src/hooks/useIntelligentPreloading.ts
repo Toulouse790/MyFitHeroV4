@@ -5,7 +5,7 @@ export const useIntelligentPreloading = () => {
   useEffect(() => {
     const currentPath = window.location.pathname;
     const preloadTargets: string[] = [];
-    
+
     // Logique de preloading basée sur la route actuelle
     switch (currentPath) {
       case '/':
@@ -25,10 +25,10 @@ export const useIntelligentPreloading = () => {
         preloadTargets.push('/');
         break;
     }
-    
+
     // Preload des imports avec requestIdleCallback si disponible
     const preload = () => {
-      preloadTargets.forEach(async (route) => {
+      preloadTargets.forEach(async route => {
         try {
           switch (route) {
             case '/workout':
@@ -47,7 +47,7 @@ export const useIntelligentPreloading = () => {
               await import('@/pages/ProfileComplete'); // ✅ Corrigé: ProfileComplete au lieu de Profile
               break;
             case '/':
-              await import('@/pages/index'); // ✅ Corrigé: 
+              await import('@/pages/index'); // ✅ Corrigé:
               break;
           }
         } catch (error) {
@@ -55,7 +55,7 @@ export const useIntelligentPreloading = () => {
         }
       });
     };
-    
+
     if ('requestIdleCallback' in window) {
       requestIdleCallback(preload, { timeout: 2000 });
     } else {
@@ -69,17 +69,18 @@ export const useNetworkAdaptation = () => {
   useEffect(() => {
     if ('connection' in navigator) {
       const connection = (navigator as any).connection;
-      
+
       const updatePerformanceMode = () => {
-        const isSlowConnection = connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g';
+        const isSlowConnection =
+          connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g';
         const isLowData = connection.saveData;
-        
+
         // Configuration du mode performance
         document.documentElement.style.setProperty(
           '--performance-mode',
           isSlowConnection || isLowData ? 'low' : 'high'
         );
-        
+
         // Désactiver les animations coûteuses en mode dégradé
         if (isSlowConnection || isLowData) {
           document.documentElement.classList.add('reduce-motion');
@@ -87,10 +88,10 @@ export const useNetworkAdaptation = () => {
           document.documentElement.classList.remove('reduce-motion');
         }
       };
-      
+
       updatePerformanceMode();
       connection.addEventListener('change', updatePerformanceMode);
-      
+
       return () => connection.removeEventListener('change', updatePerformanceMode);
     }
   }, []);

@@ -2,7 +2,8 @@
 
 ## Vue d'ensemble
 
-Ce dossier contient un système de routage complet et modulaire pour l'application MyFitHero V4, basé sur **Wouter** pour la navigation.
+Ce dossier contient un système de routage complet et modulaire pour
+l'application MyFitHero V4, basé sur **Wouter** pour la navigation.
 
 ## Structure des fichiers
 
@@ -25,6 +26,7 @@ routes/
 ## Fonctionnalités
 
 ### ✅ Routes organisées par catégories
+
 - **Auth** : Authentification, inscription, connexion
 - **Dashboard** : Tableau de bord, profil, paramètres
 - **Fitness** : Entraînements, exercices, défis, récupération
@@ -34,15 +36,20 @@ routes/
 - **Legal** : Confidentialité, termes d'utilisation
 
 ### ✅ Lazy Loading
-Toutes les pages sont chargées de manière asynchrone pour optimiser les performances.
+
+Toutes les pages sont chargées de manière asynchrone pour optimiser les
+performances.
 
 ### ✅ Routes protégées
+
 - Système de protection des routes avec authentification
 - Support des rôles utilisateur (admin, moderator, etc.)
 - Redirection automatique vers la page de connexion
 
 ### ✅ Métadonnées enrichies
+
 Chaque route contient :
+
 - Titre et description
 - Icône suggérée
 - Catégorie
@@ -50,6 +57,7 @@ Chaque route contient :
 - Rôles requis
 
 ### ✅ Hooks utilitaires
+
 - `useCurrentRoute()` : Informations sur la route actuelle
 - `useAppNavigation()` : Navigation programmée avec métadonnées
 - `useNavigationRoutes()` : Routes filtrées par catégorie
@@ -58,6 +66,7 @@ Chaque route contient :
 ## Utilisation
 
 ### Import du Router principal
+
 ```tsx
 import { AppRouter } from '@/routes/AppRouter';
 
@@ -67,31 +76,29 @@ function App() {
 ```
 
 ### Navigation programmée
+
 ```tsx
 import { useAppNavigation } from '@/routes/hooks';
 
 function MyComponent() {
   const { navigateTo, goBack, goHome } = useAppNavigation();
-  
+
   const handleClick = () => {
     navigateTo('/hydration');
   };
-  
-  return (
-    <button onClick={handleClick}>
-      Aller à l'hydratation
-    </button>
-  );
+
+  return <button onClick={handleClick}>Aller à l'hydratation</button>;
 }
 ```
 
 ### Informations sur la route actuelle
+
 ```tsx
 import { useCurrentRoute } from '@/routes/hooks';
 
 function Header() {
   const { currentRoute, isProtectedRoute } = useCurrentRoute();
-  
+
   return (
     <header>
       <h1>{currentRoute?.metadata?.title || 'MyFitHero'}</h1>
@@ -102,6 +109,7 @@ function Header() {
 ```
 
 ### Menu de navigation
+
 ```tsx
 import { NavigationMenu } from '@/routes/NavigationMenu';
 
@@ -118,6 +126,7 @@ function TopBar() {
 ## Routes disponibles
 
 ### Authentification
+
 - `/` - Page d'accueil
 - `/login` - Connexion
 - `/register` - Inscription
@@ -125,6 +134,7 @@ function TopBar() {
 - `/landing` - Page de présentation
 
 ### Dashboard
+
 - `/dashboard` - Tableau de bord principal
 - `/analytics` - Analytiques détaillées
 - `/profile` - Profil utilisateur
@@ -132,6 +142,7 @@ function TopBar() {
 - `/settings` - Paramètres
 
 ### Fitness
+
 - `/workout` - Sessions d'entraînement
 - `/workout/:id` - Détail d'une session
 - `/exercises` - Bibliothèque d'exercices
@@ -141,6 +152,7 @@ function TopBar() {
 - `/ai-coach` - Coach IA
 
 ### Bien-être
+
 - `/nutrition` - Suivi nutritionnel
 - `/hydration` - Suivi d'hydratation
 - `/hydration/history` - Historique hydratation
@@ -148,27 +160,32 @@ function TopBar() {
 - `/wearables` - Objets connectés
 
 ### Social
+
 - `/social` - Hub social principal
 - `/social/feed` - Fil d'actualité
 - `/social/challenges` - Défis communautaires
 - `/social/friends` - Gestion des amis
 
 ### Administration
+
 - `/admin` - Panneau d'administration (rôles requis)
 - `/support` - Centre d'aide
 
 ### Légal
+
 - `/privacy` - Politique de confidentialité
 - `/terms` - Conditions d'utilisation
 
 ## Ajout de nouvelles routes
 
 1. **Créer le composant de page** dans `/pages/`
-2. **Ajouter la route** dans le fichier de catégorie approprié (`fitness.ts`, `wellness.ts`, etc.)
+2. **Ajouter la route** dans le fichier de catégorie approprié (`fitness.ts`,
+   `wellness.ts`, etc.)
 3. **Définir les métadonnées** (titre, description, icône, protection)
 4. **Tester la navigation**
 
 Exemple :
+
 ```tsx
 // Dans wellness.ts
 {
@@ -189,7 +206,8 @@ Exemple :
 - **Lazy Loading** : Chargement à la demande des composants
 - **Code Splitting** : Division automatique du bundle
 - **Cache de routes** : Mise en cache des composants chargés
-- **Préchargement intelligent** : Compatible avec le hook `useIntelligentPreloading`
+- **Préchargement intelligent** : Compatible avec le hook
+  `useIntelligentPreloading`
 
 ## Sécurité
 
@@ -199,4 +217,4 @@ Exemple :
 
 ---
 
-*Système créé pour MyFitHero V4 - Votre compagnon fitness intelligent*
+_Système créé pour MyFitHero V4 - Votre compagnon fitness intelligent_

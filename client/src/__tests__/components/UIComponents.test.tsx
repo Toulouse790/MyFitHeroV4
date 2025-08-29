@@ -14,7 +14,7 @@ describe('Composants UI de base', () => {
   describe('Button', () => {
     it('rend un bouton basique', () => {
       render(<Button>Click me</Button>);
-      
+
       const button = screen.getByRole('button', { name: 'Click me' });
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent('Click me');
@@ -22,7 +22,7 @@ describe('Composants UI de base', () => {
 
     it('applique les variantes de style', () => {
       const { rerender } = render(<Button variant="default">Default</Button>);
-      
+
       const button = screen.getByRole('button');
       expect(button).toHaveClass(/bg-primary/); // ou la classe appropriée
 
@@ -44,9 +44,9 @@ describe('Composants UI de base', () => {
 
     it('applique les tailles', () => {
       const { rerender } = render(<Button size="default">Default</Button>);
-      
+
       const button = screen.getByRole('button');
-      
+
       rerender(<Button size="sm">Small</Button>);
       expect(button).toHaveClass(/h-9/);
 
@@ -57,9 +57,9 @@ describe('Composants UI de base', () => {
       expect(button).toHaveClass(/h-10.*w-10/);
     });
 
-    it('gère l\'état disabled', () => {
+    it("gère l'état disabled", () => {
       render(<Button disabled>Disabled</Button>);
-      
+
       const button = screen.getByRole('button');
       expect(button).toBeDisabled();
       expect(button).toHaveClass(/disabled:pointer-events-none/);
@@ -68,32 +68,36 @@ describe('Composants UI de base', () => {
     it('gère les événements de clic', async () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
-      
+
       render(<Button onClick={handleClick}>Click me</Button>);
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
-    it('ne déclenche pas d\'événement quand disabled', async () => {
+    it("ne déclenche pas d'événement quand disabled", async () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
-      
-      render(<Button disabled onClick={handleClick}>Disabled</Button>);
-      
+
+      render(
+        <Button disabled onClick={handleClick}>
+          Disabled
+        </Button>
+      );
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       expect(handleClick).not.toHaveBeenCalled();
     });
 
     it('supporte les refs', () => {
       const ref = React.createRef<HTMLButtonElement>();
-      
+
       render(<Button ref={ref}>Button</Button>);
-      
+
       expect(ref.current).toBeInstanceOf(HTMLButtonElement);
     });
 
@@ -103,7 +107,7 @@ describe('Composants UI de base', () => {
           <a href="/test">Link Button</a>
         </Button>
       );
-      
+
       const link = screen.getByRole('link');
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/test');
@@ -113,15 +117,15 @@ describe('Composants UI de base', () => {
   describe('Input', () => {
     it('rend un input basique', () => {
       render(<Input placeholder="Enter text" />);
-      
+
       const input = screen.getByPlaceholderText('Enter text');
       expect(input).toBeInTheDocument();
       expect(input).toHaveAttribute('type', 'text');
     });
 
-    it('gère différents types d\'input', () => {
+    it("gère différents types d'input", () => {
       const { rerender } = render(<Input type="text" />);
-      
+
       let input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('type', 'text');
 
@@ -130,7 +134,8 @@ describe('Composants UI de base', () => {
       expect(input).toHaveAttribute('type', 'email');
 
       rerender(<Input type="password" />);
-      input = screen.getByLabelText('Password') || screen.getByDisplayValue('') as HTMLInputElement;
+      input =
+        screen.getByLabelText('Password') || (screen.getByDisplayValue('') as HTMLInputElement);
       expect(input).toHaveAttribute('type', 'password');
 
       rerender(<Input type="number" />);
@@ -141,43 +146,35 @@ describe('Composants UI de base', () => {
     it('gère la valeur et les changements', async () => {
       const user = userEvent.setup();
       const handleChange = jest.fn();
-      
+
       render(<Input value="initial" onChange={handleChange} />);
-      
+
       const input = screen.getByDisplayValue('initial');
       expect(input).toHaveValue('initial');
 
       await user.clear(input);
       await user.type(input, 'new value');
-      
+
       expect(handleChange).toHaveBeenCalled();
     });
 
-    it('gère l\'état disabled', () => {
+    it("gère l'état disabled", () => {
       render(<Input disabled placeholder="Disabled input" />);
-      
+
       const input = screen.getByPlaceholderText('Disabled input');
       expect(input).toBeDisabled();
     });
 
     it('applique les classes CSS personnalisées', () => {
       render(<Input className="custom-class" />);
-      
+
       const input = screen.getByRole('textbox');
       expect(input).toHaveClass('custom-class');
     });
 
     it('supporte les attributs HTML standard', () => {
-      render(
-        <Input 
-          id="test-input"
-          name="testName"
-          required
-          maxLength={10}
-          minLength={2}
-        />
-      );
-      
+      render(<Input id="test-input" name="testName" required maxLength={10} minLength={2} />);
+
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('id', 'test-input');
       expect(input).toHaveAttribute('name', 'testName');
@@ -188,9 +185,9 @@ describe('Composants UI de base', () => {
 
     it('supporte les refs', () => {
       const ref = React.createRef<HTMLInputElement>();
-      
+
       render(<Input ref={ref} />);
-      
+
       expect(ref.current).toBeInstanceOf(HTMLInputElement);
     });
   });
@@ -198,13 +195,13 @@ describe('Composants UI de base', () => {
   describe('Badge', () => {
     it('rend un badge basique', () => {
       render(<Badge>Default Badge</Badge>);
-      
+
       expect(screen.getByText('Default Badge')).toBeInTheDocument();
     });
 
     it('applique les variantes de style', () => {
       const { rerender } = render(<Badge variant="default">Default</Badge>);
-      
+
       let badge = screen.getByText('Default');
       expect(badge).toHaveClass(/bg-primary/);
 
@@ -223,7 +220,7 @@ describe('Composants UI de base', () => {
 
     it('applique les classes CSS personnalisées', () => {
       render(<Badge className="custom-badge">Custom</Badge>);
-      
+
       const badge = screen.getByText('Custom');
       expect(badge).toHaveClass('custom-badge');
     });
@@ -234,7 +231,7 @@ describe('Composants UI de base', () => {
           <a href="/badge">Badge Link</a>
         </Badge>
       );
-      
+
       const link = screen.getByRole('link');
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute('href', '/badge');
@@ -248,7 +245,7 @@ describe('Composants UI de base', () => {
           Action <Badge variant="secondary">New</Badge>
         </Button>
       );
-      
+
       const button = screen.getByRole('button');
       expect(button).toHaveTextContent('Action New');
       expect(screen.getByText('New')).toBeInTheDocument();
@@ -256,21 +253,21 @@ describe('Composants UI de base', () => {
 
     it('utilise Input dans un formulaire', async () => {
       const user = userEvent.setup();
-      const handleSubmit = jest.fn((e) => e.preventDefault());
-      
+      const handleSubmit = jest.fn(e => e.preventDefault());
+
       render(
         <form onSubmit={handleSubmit}>
           <Input name="username" placeholder="Username" required />
           <Button type="submit">Submit</Button>
         </form>
       );
-      
+
       const input = screen.getByPlaceholderText('Username');
       const button = screen.getByRole('button', { name: 'Submit' });
-      
+
       await user.type(input, 'testuser');
       await user.click(button);
-      
+
       expect(handleSubmit).toHaveBeenCalled();
     });
   });
@@ -282,7 +279,7 @@ describe('Composants UI de base', () => {
           <Button>Dark Button</Button>
         </div>
       );
-      
+
       const button = screen.getByRole('button');
       // Vérifier que les classes de thème sombre sont appliquées
       expect(button.closest('.dark')).toBeInTheDocument();
@@ -290,14 +287,14 @@ describe('Composants UI de base', () => {
 
     it('applique les animations CSS', async () => {
       const user = userEvent.setup();
-      
+
       render(<Button>Animated Button</Button>);
-      
+
       const button = screen.getByRole('button');
-      
+
       // Simuler le hover pour tester les animations
       await user.hover(button);
-      
+
       // Vérifier que les classes d'animation sont présentes
       expect(button).toHaveClass(/transition/);
     });
@@ -311,7 +308,7 @@ describe('Composants UI de base', () => {
           <Input id="test-input" />
         </div>
       );
-      
+
       const input = screen.getByLabelText('Test Label');
       expect(input).toBeInTheDocument();
     });
@@ -323,14 +320,14 @@ describe('Composants UI de base', () => {
           <div id="help-text">Help text</div>
         </div>
       );
-      
+
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-describedby', 'help-text');
     });
 
     it('indique les erreurs de validation', () => {
       render(<Input aria-invalid="true" aria-describedby="error-message" />);
-      
+
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-invalid', 'true');
     });
@@ -338,15 +335,15 @@ describe('Composants UI de base', () => {
     it('supporte les raccourcis clavier', async () => {
       const user = userEvent.setup();
       const handleClick = jest.fn();
-      
+
       render(<Button onClick={handleClick}>Space to click</Button>);
-      
+
       const button = screen.getByRole('button');
       button.focus();
-      
+
       await user.keyboard(' ');
       expect(handleClick).toHaveBeenCalled();
-      
+
       await user.keyboard('{Enter}');
       expect(handleClick).toHaveBeenCalledTimes(2);
     });

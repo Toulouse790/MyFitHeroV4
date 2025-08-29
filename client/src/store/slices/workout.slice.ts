@@ -5,18 +5,18 @@ export interface WorkoutState {
   // Session actuelle
   currentSession: WorkoutSession | null;
   isSessionActive: boolean;
-  
+
   // Historique des sessions
   sessionHistory: WorkoutSession[];
-  
+
   // Exercices favoris
   favoriteExercises: WorkoutExercise[];
-  
+
   // Statistiques
   totalWorkouts: number;
   totalTimeSpent: number;
   totalCaloriesBurned: number;
-  
+
   // Préférences
   defaultRestTime: number;
   quickModeEnabled: boolean;
@@ -30,23 +30,23 @@ export interface WorkoutActions {
   resumeWorkoutSession: () => void;
   completeWorkoutSession: () => void;
   cancelWorkoutSession: () => void;
-  
+
   // Exercise actions
   updateSessionExercise: (exerciseId: string, updates: Partial<WorkoutExercise>) => void;
   updateExerciseSet: (exerciseId: string, setIndex: number, updates: any) => void;
   completeExercise: (exerciseId: string) => void;
   addSetToExercise: (exerciseId: string) => void;
   removeSetFromExercise: (exerciseId: string, setIndex: number) => void;
-  
+
   // Favorites
   addFavoriteExercise: (exercise: WorkoutExercise) => void;
   removeFavoriteExercise: (exerciseId: string) => void;
-  
+
   // Settings
   setQuickMode: (enabled: boolean) => void;
   setDefaultRestTime: (seconds: number) => void;
   setNotifications: (enabled: boolean) => void;
-  
+
   // Stats
   incrementTotalWorkouts: () => void;
   addTimeSpent: (seconds: number) => void;
@@ -55,12 +55,7 @@ export interface WorkoutActions {
 
 export type WorkoutSlice = WorkoutState & WorkoutActions;
 
-export const createWorkoutSlice: StateCreator<
-  WorkoutSlice,
-  [],
-  [],
-  WorkoutSlice
-> = (set, get) => ({
+export const createWorkoutSlice: StateCreator<WorkoutSlice, [], [], WorkoutSlice> = (set, get) => ({
   // État initial
   currentSession: null,
   isSessionActive: false,
@@ -82,32 +77,36 @@ export const createWorkoutSlice: StateCreator<
       startTime: new Date(),
       status: 'active',
       totalTime: 0,
-      estimatedCalories: 0
+      estimatedCalories: 0,
     };
 
     set({
       currentSession: newSession,
-      isSessionActive: true
+      isSessionActive: true,
     });
   },
 
   pauseWorkoutSession: () => {
     set(state => ({
       isSessionActive: false,
-      currentSession: state.currentSession ? {
-        ...state.currentSession,
-        status: 'paused'
-      } : null
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            status: 'paused',
+          }
+        : null,
     }));
   },
 
   resumeWorkoutSession: () => {
     set(state => ({
       isSessionActive: true,
-      currentSession: state.currentSession ? {
-        ...state.currentSession,
-        status: 'active'
-      } : null
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            status: 'active',
+          }
+        : null,
     }));
   },
 
@@ -118,7 +117,7 @@ export const createWorkoutSlice: StateCreator<
         ...state.currentSession,
         status: 'completed' as const,
         endTime: new Date(),
-        totalTime: state.currentSession.totalTime || 0
+        totalTime: state.currentSession.totalTime || 0,
       };
 
       set({
@@ -127,7 +126,7 @@ export const createWorkoutSlice: StateCreator<
         sessionHistory: [completedSession, ...state.sessionHistory].slice(0, 50), // Garder les 50 dernières
         totalWorkouts: state.totalWorkouts + 1,
         totalTimeSpent: state.totalTimeSpent + (completedSession.totalTime || 0),
-        totalCaloriesBurned: state.totalCaloriesBurned + (completedSession.estimatedCalories || 0)
+        totalCaloriesBurned: state.totalCaloriesBurned + (completedSession.estimatedCalories || 0),
       });
     }
   },
@@ -135,35 +134,39 @@ export const createWorkoutSlice: StateCreator<
   cancelWorkoutSession: () => {
     set({
       currentSession: null,
-      isSessionActive: false
+      isSessionActive: false,
     });
   },
 
   // Exercise actions
   updateSessionExercise: (exerciseId: string, updates: Partial<WorkoutExercise>) => {
     set(state => ({
-      currentSession: state.currentSession ? {
-        ...state.currentSession,
-        exercises: state.currentSession.exercises.map(exercise =>
-          exercise.id === exerciseId ? { ...exercise, ...updates } : exercise
-        )
-      } : null
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            exercises: state.currentSession.exercises.map(exercise =>
+              exercise.id === exerciseId ? { ...exercise, ...updates } : exercise
+            ),
+          }
+        : null,
     }));
   },
 
   updateExerciseSet: (exerciseId: string, setIndex: number, updates: any) => {
     set(state => ({
-      currentSession: state.currentSession ? {
-        ...state.currentSession,
-        exercises: state.currentSession.exercises.map(exercise => {
-          if (exercise.id === exerciseId && exercise.sets) {
-            const updatedSets = [...exercise.sets];
-            updatedSets[setIndex] = { ...updatedSets[setIndex], ...updates };
-            return { ...exercise, sets: updatedSets };
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            exercises: state.currentSession.exercises.map(exercise => {
+              if (exercise.id === exerciseId && exercise.sets) {
+                const updatedSets = [...exercise.sets];
+                updatedSets[setIndex] = { ...updatedSets[setIndex], ...updates };
+                return { ...exercise, sets: updatedSets };
+              }
+              return exercise;
+            }),
           }
-          return exercise;
-        })
-      } : null
+        : null,
     }));
   },
 
@@ -173,53 +176,57 @@ export const createWorkoutSlice: StateCreator<
 
   addSetToExercise: (exerciseId: string) => {
     set(state => ({
-      currentSession: state.currentSession ? {
-        ...state.currentSession,
-        exercises: state.currentSession.exercises.map(exercise => {
-          if (exercise.id === exerciseId && exercise.sets) {
-            const lastSet = exercise.sets[exercise.sets.length - 1];
-            const newSet = {
-              reps: lastSet?.reps || 10,
-              weight: lastSet?.weight,
-              duration: lastSet?.duration,
-              completed: false
-            };
-            return {
-              ...exercise,
-              sets: [...exercise.sets, newSet]
-            };
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            exercises: state.currentSession.exercises.map(exercise => {
+              if (exercise.id === exerciseId && exercise.sets) {
+                const lastSet = exercise.sets[exercise.sets.length - 1];
+                const newSet = {
+                  reps: lastSet?.reps || 10,
+                  weight: lastSet?.weight,
+                  duration: lastSet?.duration,
+                  completed: false,
+                };
+                return {
+                  ...exercise,
+                  sets: [...exercise.sets, newSet],
+                };
+              }
+              return exercise;
+            }),
           }
-          return exercise;
-        })
-      } : null
+        : null,
     }));
   },
 
   removeSetFromExercise: (exerciseId: string, setIndex: number) => {
     set(state => ({
-      currentSession: state.currentSession ? {
-        ...state.currentSession,
-        exercises: state.currentSession.exercises.map(exercise => {
-          if (exercise.id === exerciseId && exercise.sets && exercise.sets.length > 1) {
-            const updatedSets = exercise.sets.filter((_, index) => index !== setIndex);
-            return { ...exercise, sets: updatedSets };
+      currentSession: state.currentSession
+        ? {
+            ...state.currentSession,
+            exercises: state.currentSession.exercises.map(exercise => {
+              if (exercise.id === exerciseId && exercise.sets && exercise.sets.length > 1) {
+                const updatedSets = exercise.sets.filter((_, index) => index !== setIndex);
+                return { ...exercise, sets: updatedSets };
+              }
+              return exercise;
+            }),
           }
-          return exercise;
-        })
-      } : null
+        : null,
     }));
   },
 
   // Favorites
   addFavoriteExercise: (exercise: WorkoutExercise) => {
     set(state => ({
-      favoriteExercises: [...state.favoriteExercises.filter(e => e.id !== exercise.id), exercise]
+      favoriteExercises: [...state.favoriteExercises.filter(e => e.id !== exercise.id), exercise],
     }));
   },
 
   removeFavoriteExercise: (exerciseId: string) => {
     set(state => ({
-      favoriteExercises: state.favoriteExercises.filter(e => e.id !== exerciseId)
+      favoriteExercises: state.favoriteExercises.filter(e => e.id !== exerciseId),
     }));
   },
 
@@ -247,5 +254,5 @@ export const createWorkoutSlice: StateCreator<
 
   addCaloriesBurned: (calories: number) => {
     set(state => ({ totalCaloriesBurned: state.totalCaloriesBurned + calories }));
-  }
+  },
 });

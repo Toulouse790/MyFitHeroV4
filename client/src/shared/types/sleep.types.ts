@@ -26,7 +26,7 @@ export enum SleepQuality {
   POOR = 2,
   FAIR = 3,
   GOOD = 4,
-  EXCELLENT = 5
+  EXCELLENT = 5,
 }
 
 export enum SleepMood {
@@ -34,7 +34,7 @@ export enum SleepMood {
   BAD = 2,
   OKAY = 3,
   GOOD = 4,
-  GREAT = 5
+  GREAT = 5,
 }
 
 export interface SleepStages {
@@ -54,7 +54,7 @@ export enum SleepFactor {
   TEMPERATURE = 'temperature',
   NOISE = 'noise',
   LATE_MEAL = 'late_meal',
-  NAPPING = 'napping'
+  NAPPING = 'napping',
 }
 
 // Types pour les objectifs de sommeil
@@ -88,7 +88,7 @@ export enum SleepReminderType {
   BEDTIME = 'bedtime',
   WIND_DOWN = 'wind_down',
   WAKE_UP = 'wake_up',
-  NAP_LIMIT = 'nap_limit'
+  NAP_LIMIT = 'nap_limit',
 }
 
 // Types pour les statistiques de sommeil
@@ -117,7 +117,7 @@ export interface WeeklySleepProgress {
 export enum SleepTrend {
   IMPROVING = 'improving',
   STABLE = 'stable',
-  DECLINING = 'declining'
+  DECLINING = 'declining',
 }
 
 // Types pour l'analyse du sommeil
@@ -137,7 +137,7 @@ export enum AnalysisPeriod {
   WEEK = 'week',
   MONTH = 'month',
   QUARTER = 'quarter',
-  YEAR = 'year'
+  YEAR = 'year',
 }
 
 export interface SleepInsight {
@@ -154,13 +154,13 @@ export enum InsightType {
   BEDTIME_CONSISTENCY = 'bedtime_consistency',
   WAKE_TIME_CONSISTENCY = 'wake_time_consistency',
   FACTOR_CORRELATION = 'factor_correlation',
-  SLEEP_DEBT = 'sleep_debt'
+  SLEEP_DEBT = 'sleep_debt',
 }
 
 export enum InsightSeverity {
   INFO = 'info',
   WARNING = 'warning',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface SleepRecommendation {
@@ -174,7 +174,7 @@ export interface SleepRecommendation {
 export enum RecommendationPriority {
   LOW = 'low',
   MEDIUM = 'medium',
-  HIGH = 'high'
+  HIGH = 'high',
 }
 
 export enum RecommendationCategory {
@@ -182,7 +182,7 @@ export enum RecommendationCategory {
   BEDTIME_ROUTINE = 'bedtime_routine',
   ENVIRONMENT = 'environment',
   LIFESTYLE = 'lifestyle',
-  TIMING = 'timing'
+  TIMING = 'timing',
 }
 
 export interface SleepPattern {
@@ -196,7 +196,7 @@ export enum PatternType {
   WEEKLY_CYCLE = 'weekly_cycle',
   MONTHLY_CYCLE = 'monthly_cycle',
   SEASONAL_PATTERN = 'seasonal_pattern',
-  FACTOR_IMPACT = 'factor_impact'
+  FACTOR_IMPACT = 'factor_impact',
 }
 
 // Types pour la configuration du sommeil par sport
@@ -240,5 +240,5 @@ export enum ActivityCategory {
   MEDITATION = 'meditation',
   READING = 'reading',
   PREPARATION = 'preparation',
-  ENVIRONMENT = 'environment'
+  ENVIRONMENT = 'environment',
 }

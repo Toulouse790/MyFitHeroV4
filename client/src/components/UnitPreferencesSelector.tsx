@@ -123,18 +123,11 @@ export const UnitPreferencesSelector: React.FC<UnitPreferencesSelectorProps> = (
 
         {/* Actions */}
         <div className="flex gap-2 pt-4">
-          <Button 
-            variant="outline" 
-            onClick={resetToDefault}
-            className="flex-1"
-          >
+          <Button variant="outline" onClick={resetToDefault} className="flex-1">
             Reset to Default
           </Button>
           {onClose && (
-            <Button 
-              onClick={onClose}
-              className="flex-1"
-            >
+            <Button onClick={onClose} className="flex-1">
               Done
             </Button>
           )}

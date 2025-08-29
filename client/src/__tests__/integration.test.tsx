@@ -20,15 +20,15 @@ const MockApp = () => (
   </div>
 );
 
-describe('Tests d\'intégration', () => {
+describe("Tests d'intégration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('Flux d\'authentification', () => {
+  describe("Flux d'authentification", () => {
     it('permet à un utilisateur de se connecter et accéder aux fonctionnalités', async () => {
       const user = userEvent.setup();
-      
+
       server.use(
         http.post('*/auth/v1/token', () => {
           return HttpResponse.json({
@@ -46,10 +46,10 @@ describe('Tests d\'intégration', () => {
     });
   });
 
-  describe('Flux d\'entraînement complet', () => {
+  describe("Flux d'entraînement complet", () => {
     it('permet de démarrer et terminer un entraînement', async () => {
       const user = userEvent.setup();
-      
+
       const mockWorkout = createMockWorkout({
         exercises: [
           createMockExercise({ name: 'Push-ups' }),
@@ -84,11 +84,14 @@ describe('Tests d\'intégration', () => {
 
       // Vérifier que l'application se charge rapidement
       expect(screen.getByText('MyFitHero Application')).toBeInTheDocument();
-      
+
       // Les composants lazy devraient être chargés à la demande
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /view exercises/i })).toBeInTheDocument();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(screen.getByRole('button', { name: /view exercises/i })).toBeInTheDocument();
+        },
+        { timeout: 1000 }
+      );
     });
 
     it('gère les erreurs réseau gracieusement', async () => {
@@ -106,12 +109,12 @@ describe('Tests d\'intégration', () => {
   });
 
   describe('Accessibilité globale', () => {
-    it('respecte les standards d\'accessibilité', () => {
+    it("respecte les standards d'accessibilité", () => {
       render(<MockApp />);
 
       // Vérifier la structure globale
       expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
-      
+
       // Vérifier que tous les boutons sont accessibles
       const buttons = screen.getAllByRole('button');
       buttons.forEach(button => {
@@ -122,7 +125,7 @@ describe('Tests d\'intégration', () => {
 
     it('supporte la navigation au clavier globale', async () => {
       const user = userEvent.setup();
-      
+
       render(<MockApp />);
 
       // Navigation séquentielle avec Tab
@@ -137,22 +140,25 @@ describe('Tests d\'intégration', () => {
     });
   });
 
-  describe('Gestion des états de l\'application', () => {
-    it('synchronise l\'état entre les composants', async () => {
+  describe("Gestion des états de l'application", () => {
+    it("synchronise l'état entre les composants", async () => {
       const user = userEvent.setup();
-      
+
       render(<MockApp />);
 
       // Tester la synchronisation d'état entre différentes parties de l'app
       expect(screen.getByText('MyFitHero Application')).toBeInTheDocument();
     });
 
-    it('persiste l\'état lors des rechargements', () => {
+    it("persiste l'état lors des rechargements", () => {
       // Simuler des données persistées
-      localStorage.setItem('myfithero-store', JSON.stringify({
-        user: createMockUser(),
-        preferences: { theme: 'dark', units: 'metric' },
-      }));
+      localStorage.setItem(
+        'myfithero-store',
+        JSON.stringify({
+          user: createMockUser(),
+          preferences: { theme: 'dark', units: 'metric' },
+        })
+      );
 
       render(<MockApp />);
 
@@ -164,7 +170,7 @@ describe('Tests d\'intégration', () => {
   describe('Tests de régression', () => {
     it('ne régresse pas sur les fonctionnalités critiques', async () => {
       const user = userEvent.setup();
-      
+
       render(<MockApp />);
 
       // Tester les fonctionnalités critiques

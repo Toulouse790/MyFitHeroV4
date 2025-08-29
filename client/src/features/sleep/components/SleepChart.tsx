@@ -42,19 +42,30 @@ export const SleepChart: React.FC<SleepChartProps> = ({ stats, className = '' })
             Analyse hebdomadaire
           </div>
           <div className="flex items-center space-x-2 text-sm">
-            <TrendingUp 
-              size={16} 
+            <TrendingUp
+              size={16}
               className={
-                stats.trend === 'improving' ? 'text-green-500' :
-                stats.trend === 'declining' ? 'text-red-500' : 'text-gray-500'
+                stats.trend === 'improving'
+                  ? 'text-green-500'
+                  : stats.trend === 'declining'
+                    ? 'text-red-500'
+                    : 'text-gray-500'
               }
             />
-            <span className={
-              stats.trend === 'improving' ? 'text-green-600' :
-              stats.trend === 'declining' ? 'text-red-600' : 'text-gray-600'
-            }>
-              {stats.trend === 'improving' ? 'En amélioration' :
-               stats.trend === 'declining' ? 'En baisse' : 'Stable'}
+            <span
+              className={
+                stats.trend === 'improving'
+                  ? 'text-green-600'
+                  : stats.trend === 'declining'
+                    ? 'text-red-600'
+                    : 'text-gray-600'
+              }
+            >
+              {stats.trend === 'improving'
+                ? 'En amélioration'
+                : stats.trend === 'declining'
+                  ? 'En baisse'
+                  : 'Stable'}
             </span>
           </div>
         </CardTitle>
@@ -75,27 +86,28 @@ export const SleepChart: React.FC<SleepChartProps> = ({ stats, className = '' })
                     <span className="font-medium">{dayName}</span>
                     <div className="flex items-center space-x-4">
                       <span>{formatDuration(day.duration)}</span>
-                      <span className={`${qualityInfo.color} text-xs`}>
-                        {day.quality}/10
-                      </span>
+                      <span className={`${qualityInfo.color} text-xs`}>{day.quality}/10</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-2">
                     {/* Barre durée */}
                     <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-blue-500 transition-all duration-300"
                         style={{ width: `${durationPercent}%` }}
                       />
                     </div>
-                    
+
                     {/* Barre qualité */}
                     <div className="w-16 bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full transition-all duration-300 ${
-                          day.quality >= 7 ? 'bg-green-500' :
-                          day.quality >= 5 ? 'bg-yellow-500' : 'bg-red-500'
+                          day.quality >= 7
+                            ? 'bg-green-500'
+                            : day.quality >= 5
+                              ? 'bg-yellow-500'
+                              : 'bg-red-500'
                         }`}
                         style={{ width: `${qualityPercent}%` }}
                       />

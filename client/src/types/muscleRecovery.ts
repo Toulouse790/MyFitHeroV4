@@ -1,20 +1,25 @@
-export type MuscleGroup = 
-  | 'chest' 
-  | 'back' 
-  | 'shoulders' 
-  | 'biceps' 
-  | 'triceps' 
+export type MuscleGroup =
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'biceps'
+  | 'triceps'
   | 'forearms'
-  | 'quadriceps' 
-  | 'hamstrings' 
-  | 'glutes' 
+  | 'quadriceps'
+  | 'hamstrings'
+  | 'glutes'
   | 'calves'
-  | 'core' 
+  | 'core'
   | 'traps'
   | 'lats'
   | 'delts';
 
-export type RecoveryStatus = 'fully_recovered' | 'mostly_recovered' | 'partially_recovered' | 'needs_recovery' | 'overworked';
+export type RecoveryStatus =
+  | 'fully_recovered'
+  | 'mostly_recovered'
+  | 'partially_recovered'
+  | 'needs_recovery'
+  | 'overworked';
 
 export type WorkoutIntensity = 'light' | 'moderate' | 'high' | 'extreme';
 

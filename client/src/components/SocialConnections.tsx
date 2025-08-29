@@ -1,8 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, Search, UserPlus, UserCheck, UserX, MessageSquare,
-  Trophy, Target, Calendar, Star, Crown, Medal, Activity,
-  ChevronRight, Filter, MoreHorizontal, Mail, Phone, MapPin
+import {
+  Users,
+  Search,
+  UserPlus,
+  UserCheck,
+  UserX,
+  MessageSquare,
+  Trophy,
+  Target,
+  Calendar,
+  Star,
+  Crown,
+  Medal,
+  Activity,
+  ChevronRight,
+  Filter,
+  MoreHorizontal,
+  Mail,
+  Phone,
+  MapPin,
 } from 'lucide-react';
 import { socialService, UserConnection, SocialStats } from '@/services/socialService';
 import { useAppStore } from '@/store/useAppStore';
@@ -15,11 +31,13 @@ interface SocialConnectionsProps {
 const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
   const { appStoreUser } = useAppStore();
   const { toast } = useToast();
-  
-  const [activeTab, setActiveTab] = useState<'friends' | 'search' | 'requests' | 'suggestions'>('friends');
+
+  const [activeTab, setActiveTab] = useState<'friends' | 'search' | 'requests' | 'suggestions'>(
+    'friends'
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [friends, setFriends] = useState<UserConnection[]>([]);
   const [searchResults, setSearchResults] = useState<UserConnection[]>([]);
   const [friendRequests, setFriendRequests] = useState<UserConnection[]>([]);
@@ -39,8 +57,8 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       console.error('Error loading friends:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible de charger la liste d\'amis',
-        variant: 'destructive'
+        description: "Impossible de charger la liste d'amis",
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -58,7 +76,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    
+
     try {
       setIsLoading(true);
       const results = await socialService.searchUsers(searchQuery, userId);
@@ -67,7 +85,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       toast({
         title: 'Erreur',
         description: 'Erreur lors de la recherche',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -80,7 +98,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       if (success) {
         toast({
           title: 'Demande envoyée',
-          description: 'Votre demande d\'ami a été envoyée',
+          description: "Votre demande d'ami a été envoyée",
         });
         // Mettre à jour l'état local
         setSearchResults(prev => prev.filter(user => user.friend_id !== friendId));
@@ -88,8 +106,8 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
     } catch (error) {
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'envoyer la demande',
-        variant: 'destructive'
+        description: "Impossible d'envoyer la demande",
+        variant: 'destructive',
       });
     }
   };
@@ -108,8 +126,8 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
     } catch (error) {
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'accepter la demande',
-        variant: 'destructive'
+        description: "Impossible d'accepter la demande",
+        variant: 'destructive',
       });
     }
   };
@@ -126,7 +144,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
           <div className="text-blue-200 text-sm">amis connectés</div>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-4 gap-4 mt-6">
         <div className="text-center">
           <div className="text-xl font-bold">{socialStats?.followers_count || 0}</div>
@@ -148,7 +166,12 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
     </div>
   );
 
-  const TabButton = ({ tab, icon: Icon, label, count }: {
+  const TabButton = ({
+    tab,
+    icon: Icon,
+    label,
+    count,
+  }: {
     tab: string;
     icon: any;
     label: string;
@@ -157,25 +180,28 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
     <button
       onClick={() => setActiveTab(tab as any)}
       className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-        activeTab === tab
-          ? 'bg-blue-600 text-white'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        activeTab === tab ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       }`}
     >
       <Icon size={16} />
       <span>{label}</span>
       {count !== undefined && count > 0 && (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          activeTab === tab ? 'bg-blue-500' : 'bg-red-500 text-white'
-        }`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs ${
+            activeTab === tab ? 'bg-blue-500' : 'bg-red-500 text-white'
+          }`}
+        >
           {count}
         </span>
       )}
     </button>
   );
 
-  const FriendCard = ({ friend, showActions = false }: { 
-    friend: UserConnection; 
+  const FriendCard = ({
+    friend,
+    showActions = false,
+  }: {
+    friend: UserConnection;
     showActions?: boolean;
   }) => (
     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
@@ -185,7 +211,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
             {friend.friend_profile.username.charAt(0).toUpperCase()}
           </span>
         </div>
-        
+
         <div className="flex-1">
           <div className="flex items-center space-x-2">
             <h3 className="font-semibold text-gray-800">{friend.friend_profile.username}</h3>
@@ -196,7 +222,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
               <span className="text-xs text-gray-500">Niv. {friend.friend_profile.level}</span>
             )}
           </div>
-          
+
           <div className="text-sm text-gray-500">
             {friend.friend_profile.sport && (
               <span className="inline-block bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs mr-2">
@@ -207,14 +233,14 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
               <span>{friend.friend_profile.sport_position}</span>
             )}
           </div>
-          
+
           {!friend.friend_profile.is_online && friend.friend_profile.last_seen && (
             <div className="text-xs text-gray-400 mt-1">
               Vu {new Date(friend.friend_profile.last_seen).toLocaleDateString('fr-FR')}
             </div>
           )}
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {showActions ? (
             <>
@@ -251,7 +277,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
             {user.friend_profile.username.charAt(0).toUpperCase()}
           </span>
         </div>
-        
+
         <div className="flex-1">
           <div className="flex items-center space-x-2">
             <h3 className="font-semibold text-gray-800">{user.friend_profile.username}</h3>
@@ -259,7 +285,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
               <span className="text-xs text-gray-500">Niv. {user.friend_profile.level}</span>
             )}
           </div>
-          
+
           <div className="text-sm text-gray-500">
             {user.friend_profile.sport && (
               <span className="inline-block bg-green-100 text-green-600 px-2 py-1 rounded-full text-xs mr-2">
@@ -271,7 +297,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
             )}
           </div>
         </div>
-        
+
         <button
           onClick={() => handleSendFriendRequest(user.friend_id)}
           className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -298,8 +324,8 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
           sport: 'rugby',
           sport_position: 'demi de mêlée',
           level: 12,
-          is_online: true
-        }
+          is_online: true,
+        },
       },
       {
         id: 'sug2',
@@ -313,9 +339,9 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
           sport: 'rugby',
           sport_position: 'pilier',
           level: 15,
-          is_online: false
-        }
-      }
+          is_online: false,
+        },
+      },
     ];
 
     return (
@@ -324,7 +350,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
           <h2 className="text-lg font-bold text-gray-800">Suggestions pour vous</h2>
           <span className="text-sm text-gray-500">Basé sur vos intérêts</span>
         </div>
-        
+
         {suggestions.map(user => (
           <SearchCard key={user.id} user={user} />
         ))}
@@ -335,7 +361,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
   return (
     <div className="space-y-6">
       <SocialStatsHeader />
-      
+
       {/* Navigation */}
       <div className="flex flex-wrap gap-2">
         <TabButton tab="friends" icon={Users} label="Amis" count={friends.length} />
@@ -349,12 +375,15 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
           <div className="flex space-x-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyPress={e => e.key === 'Enter' && handleSearch()}
                 placeholder="Rechercher des utilisateurs par nom d'utilisateur..."
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -379,14 +408,14 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         {activeTab === 'friends' && (
           <>
             {friends.length > 0 ? (
-              friends.map(friend => (
-                <FriendCard key={friend.id} friend={friend} />
-              ))
+              friends.map(friend => <FriendCard key={friend.id} friend={friend} />)
             ) : (
               <div className="text-center py-12 text-gray-500">
                 <Users size={48} className="mx-auto mb-4 text-gray-300" />
                 <p>Vous n'avez pas encore d'amis</p>
-                <p className="text-sm">Utilisez la recherche pour trouver des personnes à ajouter</p>
+                <p className="text-sm">
+                  Utilisez la recherche pour trouver des personnes à ajouter
+                </p>
               </div>
             )}
           </>
@@ -395,9 +424,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         {activeTab === 'search' && (
           <>
             {searchResults.length > 0 ? (
-              searchResults.map(user => (
-                <SearchCard key={user.friend_id} user={user} />
-              ))
+              searchResults.map(user => <SearchCard key={user.friend_id} user={user} />)
             ) : searchQuery.trim() ? (
               <div className="text-center py-12 text-gray-500">
                 <Search size={48} className="mx-auto mb-4 text-gray-300" />

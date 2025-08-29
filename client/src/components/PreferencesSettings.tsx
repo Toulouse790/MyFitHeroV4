@@ -12,44 +12,44 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' }
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
   ];
 
   const unitSystems = [
-    { 
-      system: 'imperial' as UnitSystem, 
-      name: 'Imperial (US)', 
-      description: 'Pounds, feet, Fahrenheit' 
+    {
+      system: 'imperial' as UnitSystem,
+      name: 'Imperial (US)',
+      description: 'Pounds, feet, Fahrenheit',
     },
-    { 
-      system: 'metric' as UnitSystem, 
-      name: 'Metric', 
-      description: 'Kilograms, centimeters, Celsius' 
-    }
+    {
+      system: 'metric' as UnitSystem,
+      name: 'Metric',
+      description: 'Kilograms, centimeters, Celsius',
+    },
   ];
 
   const dateFormats = [
     { format: 'MM/DD/YYYY' as const, name: 'MM/DD/YYYY', example: '12/25/2024' },
     { format: 'DD/MM/YYYY' as const, name: 'DD/MM/YYYY', example: '25/12/2024' },
-    { format: 'YYYY-MM-DD' as const, name: 'YYYY-MM-DD', example: '2024-12-25' }
+    { format: 'YYYY-MM-DD' as const, name: 'YYYY-MM-DD', example: '2024-12-25' },
   ];
 
   const timeFormats = [
     { format: '12h' as const, name: '12-hour', example: '2:30 PM' },
-    { format: '24h' as const, name: '24-hour', example: '14:30' }
+    { format: '24h' as const, name: '24-hour', example: '14:30' },
   ];
 
   const currencies = [
     { code: 'USD', name: 'US Dollar', symbol: '$' },
     { code: 'EUR', name: 'Euro', symbol: '€' },
     { code: 'GBP', name: 'British Pound', symbol: '£' },
-    { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' }
+    { code: 'CAD', name: 'Canadian Dollar', symbol: 'C$' },
   ];
 
   const themes = [
     { theme: 'light' as const, name: 'Light', icon: Sun },
     { theme: 'dark' as const, name: 'Dark', icon: Moon },
-    { theme: 'system' as const, name: 'System', icon: Monitor }
+    { theme: 'system' as const, name: 'System', icon: Monitor },
   ];
 
   return (
@@ -60,10 +60,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
           Preferences
         </h2>
         {onClose && (
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             ✕
           </button>
         )}
@@ -76,7 +73,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
           Language
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          {languages.map((lang) => (
+          {languages.map(lang => (
             <button
               key={lang.code}
               onClick={() => changeLanguage(lang.code)}
@@ -99,7 +96,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Unit System</h3>
         <div className="space-y-3">
-          {unitSystems.map((system) => (
+          {unitSystems.map(system => (
             <button
               key={system.system}
               onClick={() => changeUnitSystem(system.system)}
@@ -123,7 +120,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
           Date Format
         </h3>
         <div className="grid grid-cols-3 gap-3">
-          {dateFormats.map((format) => (
+          {dateFormats.map(format => (
             <button
               key={format.format}
               onClick={() => savePreferences({ dateFormat: format.format })}
@@ -147,7 +144,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
           Time Format
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          {timeFormats.map((format) => (
+          {timeFormats.map(format => (
             <button
               key={format.format}
               onClick={() => savePreferences({ timeFormat: format.format })}
@@ -171,7 +168,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
           Currency
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          {currencies.map((currency) => (
+          {currencies.map(currency => (
             <button
               key={currency.code}
               onClick={() => savePreferences({ currency: currency.code })}
@@ -194,7 +191,7 @@ export const PreferencesSettings: React.FC<PreferencesSettingsProps> = ({ onClos
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Theme</h3>
         <div className="grid grid-cols-3 gap-3">
-          {themes.map((theme) => {
+          {themes.map(theme => {
             const Icon = theme.icon;
             return (
               <button

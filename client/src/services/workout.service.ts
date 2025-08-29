@@ -3,13 +3,15 @@ import { WorkoutSession, WorkoutTemplate, WorkoutStats } from '@/types/workout.t
 
 export class WorkoutService {
   // Sessions
-  static async createSession(session: Omit<WorkoutSession, 'id' | 'createdAt' | 'updatedAt'>): Promise<WorkoutSession> {
+  static async createSession(
+    session: Omit<WorkoutSession, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<WorkoutSession> {
     const { data, error } = await supabase
       .from('workout_sessions')
       .insert({
         ...session,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       })
       .select()
       .single();
@@ -18,12 +20,15 @@ export class WorkoutService {
     return this.transformSessionFromDB(data);
   }
 
-  static async updateSession(id: string, updates: Partial<WorkoutSession>): Promise<WorkoutSession> {
+  static async updateSession(
+    id: string,
+    updates: Partial<WorkoutSession>
+  ): Promise<WorkoutSession> {
     const { data, error } = await supabase
       .from('workout_sessions')
       .update({
         ...updates,
-        updated_at: new Date()
+        updated_at: new Date(),
       })
       .eq('id', id)
       .select()
@@ -57,23 +62,22 @@ export class WorkoutService {
   }
 
   static async deleteSession(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('workout_sessions')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('workout_sessions').delete().eq('id', id);
 
     if (error) throw error;
   }
 
   // Templates
-  static async createTemplate(template: Omit<WorkoutTemplate, 'id' | 'createdAt' | 'updatedAt' | 'timesUsed'>): Promise<WorkoutTemplate> {
+  static async createTemplate(
+    template: Omit<WorkoutTemplate, 'id' | 'createdAt' | 'updatedAt' | 'timesUsed'>
+  ): Promise<WorkoutTemplate> {
     const { data, error } = await supabase
       .from('workout_templates')
       .insert({
         ...template,
         times_used: 0,
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       })
       .select()
       .single();
@@ -83,9 +87,7 @@ export class WorkoutService {
   }
 
   static async getTemplates(userId?: string, isPublic = false): Promise<WorkoutTemplate[]> {
-    let query = supabase
-      .from('workout_templates')
-      .select('*');
+    let query = supabase.from('workout_templates').select('*');
 
     if (isPublic) {
       query = query.eq('is_public', true);
@@ -113,7 +115,7 @@ export class WorkoutService {
 
   static async incrementTemplateUsage(templateId: string): Promise<void> {
     const { error } = await supabase.rpc('increment_template_usage', {
-      template_id: templateId
+      template_id: templateId,
     });
 
     if (error) throw error;
@@ -125,7 +127,7 @@ export class WorkoutService {
     const [sessionsData, personalRecordsData, monthlyData] = await Promise.all([
       this.getUserBasicStats(userId),
       this.getPersonalRecords(userId),
-      this.getMonthlyStats(userId)
+      this.getMonthlyStats(userId),
     ]);
 
     return {
@@ -133,13 +135,13 @@ export class WorkoutService {
       personalRecords: personalRecordsData,
       monthlyStats: monthlyData,
       weeklyGoal: 4, // TODO: récupérer depuis les préférences utilisateur
-      weeklyProgress: await this.getWeeklyProgress(userId)
+      weeklyProgress: await this.getWeeklyProgress(userId),
     };
   }
 
   private static async getUserBasicStats(userId: string) {
     const { data, error } = await supabase.rpc('get_user_workout_stats', {
-      user_id: userId
+      user_id: userId,
     });
 
     if (error) throw error;
@@ -149,13 +151,13 @@ export class WorkoutService {
       totalTimeSpent: data.total_time_spent || 0,
       totalCaloriesBurned: data.total_calories_burned || 0,
       averageWorkoutDuration: data.average_duration || 0,
-      mostUsedExercises: data.most_used_exercises || []
+      mostUsedExercises: data.most_used_exercises || [],
     };
   }
 
   private static async getPersonalRecords(userId: string) {
     const { data, error } = await supabase.rpc('get_personal_records', {
-      user_id: userId
+      user_id: userId,
     });
 
     if (error) throw error;
@@ -165,7 +167,7 @@ export class WorkoutService {
   private static async getMonthlyStats(userId: string) {
     const { data, error } = await supabase.rpc('get_monthly_workout_stats', {
       user_id: userId,
-      months_back: 12
+      months_back: 12,
     });
 
     if (error) throw error;
@@ -205,7 +207,7 @@ export class WorkoutService {
       rating: data.rating,
       tags: data.tags || [],
       createdAt: new Date(data.created_at),
-      updatedAt: new Date(data.updated_at)
+      updatedAt: new Date(data.updated_at),
     };
   }
 
@@ -223,7 +225,7 @@ export class WorkoutService {
       createdBy: data.created_by,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
-      timesUsed: data.times_used
+      timesUsed: data.times_used,
     };
   }
 
@@ -234,25 +236,25 @@ export class WorkoutService {
       strength: 8,
       cardio: 12,
       mixed: 10,
-      flexibility: 4
+      flexibility: 4,
     };
 
     const minutes = (session.totalTime || 0) / 60;
     const rate = baseCaloriesPerMinute[session.type] || 8;
-    
+
     return Math.round(minutes * rate);
   }
 
   static estimateSessionDuration(exercises: any[]): number {
     // Estimation basée sur le nombre d'exercices et de sets
     let totalMinutes = 0;
-    
+
     exercises.forEach(exercise => {
       const sets = exercise.sets?.length || 3;
       const restTime = 1; // minute de repos entre sets
       const exerciseTime = 2; // minutes par set
-      
-      totalMinutes += (sets * exerciseTime) + ((sets - 1) * restTime);
+
+      totalMinutes += sets * exerciseTime + (sets - 1) * restTime;
     });
 
     return Math.max(totalMinutes, 15); // Minimum 15 minutes

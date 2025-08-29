@@ -24,7 +24,7 @@ import {
   PlusCircle,
   Filter,
   Download,
-  Share2
+  Share2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -88,7 +88,7 @@ interface WorkoutPlan {
 
 export default function WorkoutDashboard() {
   /* ========================== HOOKS ET STATE ========================= */
-  
+
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
@@ -101,44 +101,47 @@ export default function WorkoutDashboard() {
 
   /* ========================= COMPUTED VALUES ========================== */
 
-  const tabs = useMemo(() => [
-    { 
-      id: 'overview', 
-      label: 'Vue d\'ensemble', 
-      icon: BarChart3,
-      description: 'Statistiques et résumé'
-    },
-    { 
-      id: 'session', 
-      label: 'Entraînement', 
-      icon: Dumbbell,
-      description: 'Session en cours'
-    },
-    { 
-      id: 'plans', 
-      label: 'Plans', 
-      icon: Calendar,
-      description: 'Programmes d\'entraînement'
-    },
-    { 
-      id: 'progress', 
-      label: 'Progrès', 
-      icon: TrendingUp,
-      description: 'Suivi des performances'
-    },
-    { 
-      id: 'history', 
-      label: 'Historique', 
-      icon: Clock,
-      description: 'Séances passées'
-    },
-    { 
-      id: 'settings', 
-      label: 'Réglages', 
-      icon: Settings,
-      description: 'Configuration'
-    }
-  ], []);
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'overview',
+        label: "Vue d'ensemble",
+        icon: BarChart3,
+        description: 'Statistiques et résumé',
+      },
+      {
+        id: 'session',
+        label: 'Entraînement',
+        icon: Dumbbell,
+        description: 'Session en cours',
+      },
+      {
+        id: 'plans',
+        label: 'Plans',
+        icon: Calendar,
+        description: "Programmes d'entraînement",
+      },
+      {
+        id: 'progress',
+        label: 'Progrès',
+        icon: TrendingUp,
+        description: 'Suivi des performances',
+      },
+      {
+        id: 'history',
+        label: 'Historique',
+        icon: Clock,
+        description: 'Séances passées',
+      },
+      {
+        id: 'settings',
+        label: 'Réglages',
+        icon: Settings,
+        description: 'Configuration',
+      },
+    ],
+    []
+  );
 
   const progressPercentage = useMemo(() => {
     if (!workoutStats) return 0;
@@ -167,27 +170,28 @@ export default function WorkoutDashboard() {
   const loadDashboardData = useCallback(async () => {
     try {
       setIsLoading(true);
-      
-      const { data: { user } } = await supabase.auth.getUser();
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       // Charger les statistiques avec SQL optimisé
       const [statsResult, workoutsResult, plansResult] = await Promise.all([
         loadWorkoutStats(user.id),
         loadRecentWorkouts(user.id),
-        loadWorkoutPlans(user.id)
+        loadWorkoutPlans(user.id),
       ]);
 
       setWorkoutStats(statsResult);
       setRecentWorkouts(workoutsResult);
       setWorkoutPlans(plansResult);
-
     } catch (error) {
       console.error('Erreur chargement dashboard:', error);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible de charger les données d'entraînement",
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -197,13 +201,15 @@ export default function WorkoutDashboard() {
   const loadWorkoutStats = async (userId: string): Promise<WorkoutStats> => {
     const { data, error } = await supabase
       .from('workouts')
-      .select(`
+      .select(
+        `
         id,
         duration_minutes,
         calories_burned,
         completed_at,
         exercises
-      `)
+      `
+      )
       .eq('user_id', userId)
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
@@ -216,13 +222,11 @@ export default function WorkoutDashboard() {
     const totalMinutes = data.reduce((sum, w) => sum + (w.duration_minutes || 0), 0);
     const totalCalories = data.reduce((sum, w) => sum + (w.calories_burned || 0), 0);
     const avgDuration = totalWorkouts > 0 ? totalMinutes / totalWorkouts : 0;
-    
+
     // Progression hebdomadaire
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const weeklyProgress = data.filter(w => 
-      new Date(w.completed_at) >= weekAgo
-    ).length;
+    const weeklyProgress = data.filter(w => new Date(w.completed_at) >= weekAgo).length;
 
     return {
       totalWorkouts,
@@ -232,7 +236,7 @@ export default function WorkoutDashboard() {
       weeklyProgress,
       currentStreak: calculateStreak(data),
       favoriteExercise: 'Développé couché', // À calculer depuis exercises
-      strongestLift: { exercise: 'Squat', weight: 120 } // À calculer
+      strongestLift: { exercise: 'Squat', weight: 120 }, // À calculer
     };
   };
 
@@ -260,8 +264,8 @@ export default function WorkoutDashboard() {
         workouts_per_week: 4,
         target_muscles: ['chest', 'back', 'legs'],
         created_at: new Date(),
-        is_active: true
-      }
+        is_active: true,
+      },
     ];
   };
 
@@ -269,69 +273,73 @@ export default function WorkoutDashboard() {
     // Logique de calcul de série
     let streak = 0;
     const today = new Date();
-    
+
     for (let i = 0; i < 30; i++) {
       const checkDate = new Date(today);
       checkDate.setDate(today.getDate() - i);
-      
+
       const hasWorkout = workouts.some(w => {
         const workoutDate = new Date(w.completed_at);
         return workoutDate.toDateString() === checkDate.toDateString();
       });
-      
+
       if (hasWorkout) {
         streak++;
       } else if (i > 0) {
         break;
       }
     }
-    
+
     return streak;
   };
 
-  const startWorkoutSession = useCallback(async (workout: WorkoutSession) => {
-    setCurrentSession(workout);
-    setIsSessionActive(true);
-    setSessionTimer(0);
-    setActiveTab('session');
-    
-    toast({
-      title: "Entraînement démarré",
-      description: `${workout.name} - Bon entraînement !`,
-    });
-  }, [toast]);
+  const startWorkoutSession = useCallback(
+    async (workout: WorkoutSession) => {
+      setCurrentSession(workout);
+      setIsSessionActive(true);
+      setSessionTimer(0);
+      setActiveTab('session');
+
+      toast({
+        title: 'Entraînement démarré',
+        description: `${workout.name} - Bon entraînement !`,
+      });
+    },
+    [toast]
+  );
 
   const endWorkoutSession = useCallback(async () => {
     if (!currentSession) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       await supabase
         .from('workouts')
         .update({
           completed_at: new Date().toISOString(),
-          duration_minutes: Math.floor(sessionTimer / 60)
+          duration_minutes: Math.floor(sessionTimer / 60),
         })
         .eq('id', currentSession.id);
 
       setIsSessionActive(false);
       setCurrentSession(null);
       setSessionTimer(0);
-      
+
       await loadDashboardData(); // Recharger les stats
-      
+
       toast({
-        title: "Entraînement terminé !",
+        title: 'Entraînement terminé !',
         description: `Bien joué ! ${Math.floor(sessionTimer / 60)} minutes d'effort.`,
       });
-
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder la session",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder la session',
+        variant: 'destructive',
       });
     }
   }, [currentSession, sessionTimer, loadDashboardData, toast]);
@@ -407,7 +415,9 @@ export default function WorkoutDashboard() {
             </div>
             <Progress value={progressPercentage} className="h-2" />
             <p className="text-sm text-gray-600">
-              {progressPercentage >= 100 ? '🎉 Objectif atteint !' : `Plus que ${4 - (workoutStats?.weeklyProgress || 0)} séances`}
+              {progressPercentage >= 100
+                ? '🎉 Objectif atteint !'
+                : `Plus que ${4 - (workoutStats?.weeklyProgress || 0)} séances`}
             </p>
           </div>
         </CardContent>
@@ -420,8 +430,11 @@ export default function WorkoutDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {recentWorkouts.slice(0, 5).map((workout) => (
-              <div key={workout.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            {recentWorkouts.slice(0, 5).map(workout => (
+              <div
+                key={workout.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div>
                   <p className="font-medium">{workout.name}</p>
                   <p className="text-sm text-gray-600">
@@ -453,8 +466,10 @@ export default function WorkoutDashboard() {
               <div className="flex items-center space-x-2">
                 <Timer className="h-4 w-4" />
                 <span className="font-mono text-lg">
-                  {Math.floor(sessionTimer / 60).toString().padStart(2, '0')}:
-                  {(sessionTimer % 60).toString().padStart(2, '0')}
+                  {Math.floor(sessionTimer / 60)
+                    .toString()
+                    .padStart(2, '0')}
+                  :{(sessionTimer % 60).toString().padStart(2, '0')}
                 </span>
               </div>
             </CardTitle>
@@ -466,7 +481,7 @@ export default function WorkoutDashboard() {
                 <span>3/8 exercices</span>
               </div>
               <Progress value={37.5} className="h-2" />
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                 <Button onClick={endWorkoutSession} className="bg-green-600 hover:bg-green-700">
                   <CheckCircle className="h-4 w-4 mr-2" />
@@ -488,7 +503,7 @@ export default function WorkoutDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recentWorkouts.slice(0, 4).map((workout) => (
+              {recentWorkouts.slice(0, 4).map(workout => (
                 <Button
                   key={workout.id}
                   variant="outline"
@@ -519,7 +534,7 @@ export default function WorkoutDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {workoutPlans.map((plan) => (
+        {workoutPlans.map(plan => (
           <Card key={plan.id} className={plan.is_active ? 'border-blue-200 bg-blue-50' : ''}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -535,7 +550,7 @@ export default function WorkoutDashboard() {
                   <span>{plan.workouts_per_week}x/semaine</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {plan.target_muscles.map((muscle) => (
+                  {plan.target_muscles.map(muscle => (
                     <Badge key={muscle} variant="outline" className="text-xs">
                       {muscle}
                     </Badge>
@@ -552,7 +567,7 @@ export default function WorkoutDashboard() {
   const renderProgressTab = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Suivi des progrès</h2>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -608,7 +623,7 @@ export default function WorkoutDashboard() {
       </div>
 
       <div className="space-y-3">
-        {recentWorkouts.map((workout) => (
+        {recentWorkouts.map(workout => (
           <Card key={workout.id}>
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
@@ -626,10 +641,9 @@ export default function WorkoutDashboard() {
                     {workout.completed_at ? 'Terminé' : 'En cours'}
                   </Badge>
                   <p className="text-xs text-gray-500 mt-1">
-                    {workout.completed_at ? 
-                      new Date(workout.completed_at).toLocaleDateString() : 
-                      'En cours'
-                    }
+                    {workout.completed_at
+                      ? new Date(workout.completed_at).toLocaleDateString()
+                      : 'En cours'}
                   </p>
                 </div>
               </div>
@@ -643,7 +657,7 @@ export default function WorkoutDashboard() {
   const renderSettingsTab = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Réglages</h2>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -713,25 +727,17 @@ export default function WorkoutDashboard() {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Tableau de bord Entraînement
-          </h1>
-          <p className="text-gray-600">
-            Suivez vos progrès et gérez vos séances d'entraînement
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Tableau de bord Entraînement</h1>
+          <p className="text-gray-600">Suivez vos progrès et gérez vos séances d'entraînement</p>
         </div>
 
         {/* Navigation par onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
-            {tabs.map((tab) => {
+            {tabs.map(tab => {
               const IconComponent = tab.icon;
               return (
-                <TabsTrigger 
-                  key={tab.id} 
-                  value={tab.id}
-                  className="flex items-center space-x-2"
-                >
+                <TabsTrigger key={tab.id} value={tab.id} className="flex items-center space-x-2">
                   <IconComponent className="h-4 w-4" />
                   <span className="hidden sm:inline">{tab.label}</span>
                 </TabsTrigger>

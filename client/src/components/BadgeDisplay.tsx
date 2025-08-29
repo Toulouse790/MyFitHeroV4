@@ -15,10 +15,10 @@ interface BadgeDisplayProps {
   maxDisplay?: number;
 }
 
-export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({ 
+export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
   className = '',
   showProgress = false,
-  maxDisplay = 10
+  maxDisplay = 10,
 }) => {
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
   const [badgeProgress, setBadgeProgress] = useState<BadgeProgress[]>([]);
@@ -28,7 +28,9 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
 
   useEffect(() => {
     const initialize = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       await loadBadges(user.id);
@@ -40,7 +42,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
   const loadBadges = async (uid: string) => {
     try {
       setLoading(true);
-      
+
       if (showProgress) {
         const progress = await BadgeService.getBadgeProgress(uid);
         setBadgeProgress(progress);
@@ -51,9 +53,9 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
     } catch (error) {
       console.error('Erreur lors du chargement des badges:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les badges",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de charger les badges',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -88,7 +90,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
     return date.toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -100,9 +102,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle>
-            {showProgress ? 'Progrès des Badges' : 'Mes Badges'}
-          </CardTitle>
+          <CardTitle>{showProgress ? 'Progrès des Badges' : 'Mes Badges'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-32">
@@ -115,7 +115,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
 
   if (showProgress) {
     const displayProgress = badgeProgress.slice(0, currentMaxDisplay);
-    
+
     return (
       <Card className={className}>
         <CardHeader>
@@ -124,26 +124,26 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
         <CardContent>
           <div className="space-y-4">
             {displayProgress.length === 0 ? (
-              <p className="text-center text-gray-600">
-                Aucun badge disponible pour le moment
-              </p>
+              <p className="text-center text-gray-600">Aucun badge disponible pour le moment</p>
             ) : (
-              displayProgress.map((item) => (
-                <div 
+              displayProgress.map(item => (
+                <div
                   key={item.badge.id}
                   className={`p-4 border-2 rounded-lg ${
-                    item.isEarned 
-                      ? `${getRarityClasses(item.badge.rarity)} bg-opacity-20` 
+                    item.isEarned
+                      ? `${getRarityClasses(item.badge.rarity)} bg-opacity-20`
                       : 'bg-gray-50 border-gray-200'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${
-                        item.isEarned 
-                          ? getRarityClasses(item.badge.rarity)
-                          : 'bg-gray-200 text-gray-600'
-                      }`}>
+                      <div
+                        className={`p-2 rounded-lg ${
+                          item.isEarned
+                            ? getRarityClasses(item.badge.rarity)
+                            : 'bg-gray-200 text-gray-600'
+                        }`}
+                      >
                         {getBadgeIcon(item.badge.category)}
                       </div>
                       <div>
@@ -151,19 +151,14 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
                         <p className="text-xs text-gray-600">{item.badge.description}</p>
                       </div>
                     </div>
-                    <Badge 
-                      variant={item.isEarned ? "default" : "secondary"}
-                      className="text-xs"
-                    >
+                    <Badge variant={item.isEarned ? 'default' : 'secondary'} className="text-xs">
                       {item.badge.rarity}
                     </Badge>
                   </div>
-                  
+
                   {item.isEarned ? (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-green-600">
-                        ✅ Obtenu
-                      </span>
+                      <span className="text-sm font-medium text-green-600">✅ Obtenu</span>
                       <span className="text-xs text-gray-500">
                         {item.earnedAt && formatDate(item.earnedAt)}
                       </span>
@@ -177,10 +172,10 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
                         </span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ 
-                            width: `${getProgressPercentage(item.progress, item.badge.condition_value)}%` 
+                          style={{
+                            width: `${getProgressPercentage(item.progress, item.badge.condition_value)}%`,
                           }}
                         />
                       </div>
@@ -206,9 +201,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Mes Badges</span>
-          <Badge variant="outline">
-            {userBadges.length}
-          </Badge>
+          <Badge variant="outline">{userBadges.length}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -216,23 +209,23 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
           {displayBadges.length === 0 ? (
             <div className="text-center py-8">
               <Trophy className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-              <p className="text-gray-600">
-                Aucun badge obtenu pour le moment
-              </p>
+              <p className="text-gray-600">Aucun badge obtenu pour le moment</p>
               <p className="text-sm text-gray-500 mt-1">
                 Complétez vos objectifs pour gagner des badges !
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3">
-              {displayBadges.map((userBadge) => (
-                <div 
+              {displayBadges.map(userBadge => (
+                <div
                   key={userBadge.id}
                   className={`p-4 border-2 rounded-lg ${getRarityClasses(userBadge.badge?.rarity || 'common')} bg-opacity-20`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${getRarityClasses(userBadge.badge?.rarity || 'common')}`}>
+                      <div
+                        className={`p-2 rounded-lg ${getRarityClasses(userBadge.badge?.rarity || 'common')}`}
+                      >
                         {getBadgeIcon(userBadge.badge?.category || 'workout')}
                       </div>
                       <div>
@@ -248,10 +241,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
                       </div>
                     </div>
                     <div className="text-right">
-                      <Badge 
-                        variant="default"
-                        className="text-xs mb-1"
-                      >
+                      <Badge variant="default" className="text-xs mb-1">
                         {userBadge.badge?.rarity || 'common'}
                       </Badge>
                       <p className="text-xs text-gray-600">
@@ -263,11 +253,11 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
               ))}
             </div>
           )}
-          
+
           {userBadges.length > currentMaxDisplay && (
             <div className="text-center pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setCurrentMaxDisplay(prev => prev + 10)}
                 size="sm"
               >

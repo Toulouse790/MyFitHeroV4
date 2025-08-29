@@ -4,15 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Droplets, 
-  Dumbbell, 
-  Target, 
-  Flame, 
-  Trophy,
-  TrendingUp,
-  Flag
-} from 'lucide-react';
+import { Droplets, Dumbbell, Target, Flame, Trophy, TrendingUp, Flag } from 'lucide-react';
 import { UnitDisplay } from '@/components/UnitDisplay';
 
 interface USMarketDashboardProps {
@@ -20,7 +12,6 @@ interface USMarketDashboardProps {
 }
 
 export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className = '' }) => {
-
   // Données d'exemple pour la démonstration
   const mockStats = {
     weight: 155, // lbs (convertible)
@@ -32,17 +23,17 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
     workoutsThisWeek: 3,
     workoutGoal: 5,
     avgWorkoutTime: 45, // minutes
-    streakDays: 7
+    streakDays: 7,
   };
 
   const getMotivationalMessage = () => {
     const messages = [
       "You're crushing it! 🇺🇸",
-      "Keep up the great work, champion!",
-      "American strong! 💪",
-      "On track to dominate your goals!",
+      'Keep up the great work, champion!',
+      'American strong! 💪',
+      'On track to dominate your goals!',
       "Consistency is key - you've got this!",
-      "Making America fitter, one workout at a time!"
+      'Making America fitter, one workout at a time!',
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   };
@@ -70,7 +61,6 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
 
       {/* Stats Grid - US Units */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        
         {/* Weight Card */}
         <Card>
           <CardHeader className="pb-3">
@@ -101,9 +91,7 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
             <div className="text-2xl font-bold text-green-600">
               <UnitDisplay value={175} type="height" />
             </div>
-            <p className="text-xs text-gray-500">
-              BMI: 22.9 (Normal)
-            </p>
+            <p className="text-xs text-gray-500">BMI: 22.9 (Normal)</p>
           </CardContent>
         </Card>
 
@@ -122,10 +110,7 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
             <p className="text-xs text-gray-500">
               Goal: <UnitDisplay value={1900} type="liquid" />
             </p>
-            <Progress 
-              value={(1420 / 1900) * 100} 
-              className="mt-2 h-1" 
-            />
+            <Progress value={(1420 / 1900) * 100} className="mt-2 h-1" />
           </CardContent>
         </Card>
 
@@ -141,12 +126,10 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
             <div className="text-2xl font-bold text-purple-600">
               {mockStats.workoutsThisWeek}/{mockStats.workoutGoal}
             </div>
-            <p className="text-xs text-gray-500">
-              Avg: {mockStats.avgWorkoutTime} min
-            </p>
-            <Progress 
-              value={(mockStats.workoutsThisWeek / mockStats.workoutGoal) * 100} 
-              className="mt-2 h-1" 
+            <p className="text-xs text-gray-500">Avg: {mockStats.avgWorkoutTime} min</p>
+            <Progress
+              value={(mockStats.workoutsThisWeek / mockStats.workoutGoal) * 100}
+              className="mt-2 h-1"
             />
           </CardContent>
         </Card>
@@ -162,19 +145,31 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+            >
               <Droplets className="h-5 w-5" />
               <span className="text-xs">Add 8 fl oz</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+            >
               <Droplets className="h-5 w-5" />
               <span className="text-xs">Add 16 fl oz</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+            >
               <Dumbbell className="h-5 w-5" />
               <span className="text-xs">Log Workout</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center space-y-2">
+            <Button
+              variant="outline"
+              className="h-20 flex flex-col items-center justify-center space-y-2"
+            >
               <Target className="h-5 w-5" />
               <span className="text-xs">Update Weight</span>
             </Button>
@@ -184,7 +179,6 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
 
       {/* Progress Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
         {/* Weekly Progress */}
         <Card>
           <CardHeader>
@@ -270,13 +264,15 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
             <div className="bg-blue-50 p-4 rounded-lg">
               <h4 className="font-medium text-blue-800 mb-2">💧 Stay Hydrated</h4>
               <p className="text-sm text-blue-700">
-                Aim for 8-10 glasses (64-80 fl oz) of water daily. More if you're active or in hot weather.
+                Aim for 8-10 glasses (64-80 fl oz) of water daily. More if you're active or in hot
+                weather.
               </p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
               <h4 className="font-medium text-green-800 mb-2">🏃‍♂️ Move More</h4>
               <p className="text-sm text-green-700">
-                The CDC recommends 150 minutes of moderate exercise per week. That's just 21 minutes a day!
+                The CDC recommends 150 minutes of moderate exercise per week. That's just 21 minutes
+                a day!
               </p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
@@ -288,7 +284,8 @@ export const USMarketDashboard: React.FC<USMarketDashboardProps> = ({ className 
             <div className="bg-orange-50 p-4 rounded-lg">
               <h4 className="font-medium text-orange-800 mb-2">😴 Rest & Recovery</h4>
               <p className="text-sm text-orange-700">
-                Aim for 7-9 hours of sleep nightly. Your body repairs and grows stronger during rest.
+                Aim for 7-9 hours of sleep nightly. Your body repairs and grows stronger during
+                rest.
               </p>
             </div>
           </div>

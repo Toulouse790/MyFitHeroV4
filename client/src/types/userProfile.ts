@@ -1,7 +1,24 @@
 // Types de base pour MyFitHero
-export type ActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active' | 'extremely_active';
-export type FitnessGoals = 'weight_loss' | 'muscle_gain' | 'endurance' | 'strength' | 'flexibility' | 'general_health';
-export type ModuleType = 'nutrition' | 'workout' | 'sleep' | 'hydration' | 'recovery' | 'mental_health';
+export type ActivityLevel =
+  | 'sedentary'
+  | 'lightly_active'
+  | 'moderately_active'
+  | 'very_active'
+  | 'extremely_active';
+export type FitnessGoals =
+  | 'weight_loss'
+  | 'muscle_gain'
+  | 'endurance'
+  | 'strength'
+  | 'flexibility'
+  | 'general_health';
+export type ModuleType =
+  | 'nutrition'
+  | 'workout'
+  | 'sleep'
+  | 'hydration'
+  | 'recovery'
+  | 'mental_health';
 
 // Interface principale UserProfile (version complète)
 export interface UserProfile {
@@ -19,7 +36,12 @@ export interface UserProfile {
   sport?: string | null;
   sport_name?: string | null;
   sport_position?: string | null;
-  sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
+  sport_level?:
+    | 'recreational'
+    | 'amateur_competitive'
+    | 'semi_professional'
+    | 'professional'
+    | null;
   lifestyle?: 'student' | 'office_worker' | 'physical_job' | 'retired' | null;
   fitness_experience?: 'beginner' | 'intermediate' | 'advanced' | 'expert' | null;
   primary_goals?: string[];
@@ -61,7 +83,12 @@ export interface UserProfile {
 export interface SportProfileData {
   sport?: string | null;
   sport_position?: string | null;
-  sport_level?: 'recreational' | 'amateur_competitive' | 'semi_professional' | 'professional' | null;
+  sport_level?:
+    | 'recreational'
+    | 'amateur_competitive'
+    | 'semi_professional'
+    | 'professional'
+    | null;
   season_period?: 'off_season' | 'pre_season' | 'in_season' | 'recovery' | null;
   training_frequency?: number | null;
   available_time_per_day?: number | null;

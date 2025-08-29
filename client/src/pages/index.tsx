@@ -2,17 +2,17 @@
 // MyFitHero - Index Principal - Architecturé pour le Marché US
 // ====================================================================
 
-import React, { 
-  useState, 
-  useCallback, 
-  useMemo, 
-  useEffect, 
-  useRef, 
-  lazy, 
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  lazy,
   Suspense,
   ErrorInfo,
   Component,
-  ReactNode
+  ReactNode,
 } from 'react';
 import { Router, Route, useLocation, useRouter } from 'wouter';
 import { createClient } from '@supabase/supabase-js';
@@ -34,18 +34,18 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storageKey: 'myfithero-auth',
     storage: window.localStorage,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
   },
   realtime: {
     params: {
-      eventsPerSecond: 10
-    }
+      eventsPerSecond: 10,
+    },
   },
   global: {
     headers: {
-      'X-Client-Info': 'myfithero@1.0.0'
-    }
-  }
+      'X-Client-Info': 'myfithero@1.0.0',
+    },
+  },
 });
 
 // Types TypeScript complets pour l'application
@@ -77,45 +77,45 @@ interface FitnessProfile {
   age: number;
   gender: 'male' | 'female' | 'null';
   body_fat_percentage?: number;
-  
+
   // Sports US populaires
   primary_sport: USMainSports;
   secondary_sports: USMainSports[];
   position?: string;
   experience_level: 'beginner' | 'intermediate' | 'advanced' | 'professional';
-  
+
   // Objectifs fitness
   fitness_goals: FitnessGoal[];
   target_weight_lbs?: number;
   weekly_workout_frequency: number;
-  
+
   // Équipements disponibles
   available_equipment: Equipment[];
   gym_membership: boolean;
   home_gym_setup: boolean;
-  
+
   // Préférences nutritionnelles US
   dietary_restrictions: DietaryRestriction[];
   calorie_goal_daily: number;
   protein_goal_grams: number;
-  
+
   // Objectifs d'hydratation (fl oz)
   daily_water_goal_floz: number;
-  
+
   // Préférences de sommeil
   target_sleep_hours: number;
   sleep_schedule: {
     bedtime: string; // Format HH:MM
     wake_time: string; // Format HH:MM
   };
-  
+
   // Préférences sociales
   privacy_level: 'public' | 'friends' | 'private';
   share_workouts: boolean;
   join_challenges: boolean;
 }
 
-type USMainSports = 
+type USMainSports =
   | 'basketball'
   | 'football'
   | 'baseball'
@@ -137,7 +137,7 @@ type USMainSports =
   | 'volleyball'
   | 'gymnastics';
 
-type FitnessGoal = 
+type FitnessGoal =
   | 'weight_loss'
   | 'muscle_gain'
   | 'strength_building'
@@ -149,7 +149,7 @@ type FitnessGoal =
   | 'stress_relief'
   | 'better_sleep';
 
-type Equipment = 
+type Equipment =
   | 'dumbbells'
   | 'barbell'
   | 'kettlebells'
@@ -166,7 +166,7 @@ type Equipment =
   | 'foam_roller'
   | 'jump_rope';
 
-type DietaryRestriction = 
+type DietaryRestriction =
   | 'vegetarian'
   | 'vegan'
   | 'pescatarian'
@@ -270,7 +270,7 @@ interface ExerciseSet {
   is_failure: boolean;
 }
 
-type WorkoutType = 
+type WorkoutType =
   | 'strength'
   | 'cardio'
   | 'hiit'
@@ -282,7 +282,7 @@ type WorkoutType =
   | 'circuit'
   | 'crossfit';
 
-type ExerciseCategory = 
+type ExerciseCategory =
   | 'compound'
   | 'isolation'
   | 'cardio'
@@ -292,7 +292,7 @@ type ExerciseCategory =
   | 'core'
   | 'functional';
 
-type MuscleGroup = 
+type MuscleGroup =
   | 'chest'
   | 'back'
   | 'shoulders'
@@ -374,7 +374,7 @@ interface Supplement {
   notes?: string;
 }
 
-type USFoodUnit = 
+type USFoodUnit =
   | 'oz'
   | 'lb'
   | 'cup'
@@ -419,7 +419,7 @@ interface SleepEnvironment {
   comfort_rating: number; // 1-10
 }
 
-type SleepFactor = 
+type SleepFactor =
   | 'caffeine'
   | 'alcohol'
   | 'exercise'
@@ -454,7 +454,7 @@ interface WaterIntake {
   notes?: string;
 }
 
-type HydrationSource = 
+type HydrationSource =
   | 'water'
   | 'sports_drink'
   | 'tea'
@@ -488,7 +488,7 @@ interface MentalWellnessEntry {
   notes?: string;
 }
 
-type MoodFactor = 
+type MoodFactor =
   | 'work_stress'
   | 'relationship'
   | 'finances'
@@ -510,7 +510,7 @@ interface WellnessActivity {
   notes?: string;
 }
 
-type WellnessActivityType = 
+type WellnessActivityType =
   | 'meditation'
   | 'breathing_exercise'
   | 'journaling'
@@ -567,7 +567,7 @@ interface Badge {
   rarity: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 }
 
-type BadgeCategory = 
+type BadgeCategory =
   | 'workout_consistency'
   | 'weight_loss'
   | 'strength_gain'
@@ -604,7 +604,7 @@ interface Group {
   us_region?: string; // Pour les groupes régionaux US
 }
 
-type GroupCategory = 
+type GroupCategory =
   | 'sport_specific'
   | 'location_based'
   | 'goal_oriented'
@@ -630,7 +630,7 @@ interface Challenge {
   difficulty: 'easy' | 'medium' | 'hard' | 'extreme';
 }
 
-type ChallengeType = 
+type ChallengeType =
   | 'step_count'
   | 'workout_frequency'
   | 'calories_burned'
@@ -763,7 +763,7 @@ const pwaConfig: PWAConfig = {
   enableOfflineMode: true,
   enablePushNotifications: true,
   enableBackgroundSync: true,
-  cacheStrategy: 'staleWhileRevalidate'
+  cacheStrategy: 'staleWhileRevalidate',
 };
 
 // ====================================================================
@@ -775,10 +775,10 @@ interface AppState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  
+
   // État d'onboarding
   onboarding: OnboardingState;
-  
+
   // Préférences utilisateur
   preferences: {
     theme: 'light' | 'dark' | 'system';
@@ -787,7 +787,7 @@ interface AppState {
     notifications: NotificationSettings;
     privacy: PrivacySettings;
   };
-  
+
   // Cache des données
   cache: {
     workouts: Workout[];
@@ -799,7 +799,7 @@ interface AppState {
     socialData: SocialProfile | null;
     analytics: UserAnalytics | null;
   };
-  
+
   // État de l'interface
   ui: {
     currentPage: string;
@@ -807,7 +807,7 @@ interface AppState {
     lastSyncTime: string | null;
     pendingSyncs: PendingSync[];
   };
-  
+
   // Actions
   setUser: (user: User | null) => void;
   updateOnboarding: (state: Partial<OnboardingState>) => void;
@@ -846,7 +846,7 @@ const useAppStore = create<AppState>()(
         user: null,
         isAuthenticated: false,
         isLoading: true,
-        
+
         onboarding: {
           currentStep: 0,
           totalSteps: 6,
@@ -854,9 +854,9 @@ const useAppStore = create<AppState>()(
           userData: {},
           conversationHistory: [],
           aiRecommendations: [],
-          isCompleted: false
+          isCompleted: false,
         },
-        
+
         preferences: {
           theme: 'system',
           language: 'en',
@@ -870,17 +870,17 @@ const useAppStore = create<AppState>()(
             challengeUpdates: true,
             systemUpdates: true,
             pushNotifications: true,
-            emailNotifications: false
+            emailNotifications: false,
           },
           privacy: {
             profile_visibility: 'friends',
             workout_sharing: true,
             progress_sharing: true,
             location_sharing: false,
-            challenge_participation: true
-          }
+            challenge_participation: true,
+          },
         },
-        
+
         cache: {
           workouts: [],
           exercises: [],
@@ -889,65 +889,71 @@ const useAppStore = create<AppState>()(
           hydrationEntries: [],
           wellnessEntries: [],
           socialData: null,
-          analytics: null
+          analytics: null,
         },
-        
+
         ui: {
           currentPage: '/',
           isOffline: false,
           lastSyncTime: null,
-          pendingSyncs: []
+          pendingSyncs: [],
         },
-        
+
         // Actions
-        setUser: (user) => set({ user, isAuthenticated: !!user }),
-        
-        updateOnboarding: (newState) => set(state => ({
-          onboarding: { ...state.onboarding, ...newState }
-        })),
-        
-        updatePreferences: (newPreferences) => set(state => ({
-          preferences: { ...state.preferences, ...newPreferences }
-        })),
-        
-        updateCache: (cacheKey, data) => set(state => ({
-          cache: { ...state.cache, [cacheKey]: data }
-        })),
-        
-        clearCache: () => set(state => ({
-          cache: {
-            workouts: [],
-            exercises: [],
-            nutritionEntries: [],
-            sleepEntries: [],
-            hydrationEntries: [],
-            wellnessEntries: [],
-            socialData: null,
-            analytics: null
-          }
-        })),
-        
-        addPendingSync: (sync) => set(state => ({
-          ui: {
-            ...state.ui,
-            pendingSyncs: [...state.ui.pendingSyncs, sync]
-          }
-        })),
-        
-        removePendingSync: (syncId) => set(state => ({
-          ui: {
-            ...state.ui,
-            pendingSyncs: state.ui.pendingSyncs.filter(sync => sync.id !== syncId)
-          }
-        }))
+        setUser: user => set({ user, isAuthenticated: !!user }),
+
+        updateOnboarding: newState =>
+          set(state => ({
+            onboarding: { ...state.onboarding, ...newState },
+          })),
+
+        updatePreferences: newPreferences =>
+          set(state => ({
+            preferences: { ...state.preferences, ...newPreferences },
+          })),
+
+        updateCache: (cacheKey, data) =>
+          set(state => ({
+            cache: { ...state.cache, [cacheKey]: data },
+          })),
+
+        clearCache: () =>
+          set(state => ({
+            cache: {
+              workouts: [],
+              exercises: [],
+              nutritionEntries: [],
+              sleepEntries: [],
+              hydrationEntries: [],
+              wellnessEntries: [],
+              socialData: null,
+              analytics: null,
+            },
+          })),
+
+        addPendingSync: sync =>
+          set(state => ({
+            ui: {
+              ...state.ui,
+              pendingSyncs: [...state.ui.pendingSyncs, sync],
+            },
+          })),
+
+        removePendingSync: syncId =>
+          set(state => ({
+            ui: {
+              ...state.ui,
+              pendingSyncs: state.ui.pendingSyncs.filter(sync => sync.id !== syncId),
+            },
+          })),
       }),
       {
         name: 'myfithero-store',
-        partialize: (state) => ({
+        partialize: state => ({
           user: state.user,
           preferences: state.preferences,
-          onboarding: state.onboarding
-        })
+          onboarding: state.onboarding,
+        }),
       }
     )
   )
@@ -971,35 +977,36 @@ const useUSLocation = () => {
   const getUSLocation = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Utiliser l'API de géolocalisation du navigateur
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 10000,
-          maximumAge: 300000 // 5 minutes
+          maximumAge: 300000, // 5 minutes
         });
       });
-      
+
       // Convertir les coordonnées en adresse US via une API de geocoding
       const response = await fetch(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=${import.meta.env.VITE_MAPBOX_TOKEN}&country=us&types=place,postcode`
       );
-      
+
       const data = await response.json();
-      
+
       if (data.features && data.features.length > 0) {
         const feature = data.features[0];
         const context = feature.context || [];
-        
-        const state = context.find((c: any) => c.id.startsWith('region'))?.short_code?.replace('US-', '') || '';
+
+        const state =
+          context.find((c: any) => c.id.startsWith('region'))?.short_code?.replace('US-', '') || '';
         const city = feature.text || '';
         const zip = context.find((c: any) => c.id.startsWith('postcode'))?.text || '';
-        
+
         // Déterminer le fuseau horaire basé sur l'état
         const timezone = getTimezoneFromState(state);
-        
+
         setLocation({ state, city, zip, timezone });
       }
     } catch (err) {
@@ -1016,59 +1023,59 @@ const useUSLocation = () => {
 // Fonction utilitaire pour déterminer le fuseau horaire
 const getTimezoneFromState = (state: string): string => {
   const stateTimezones: Record<string, string> = {
-    'CA': 'America/Los_Angeles',
-    'NY': 'America/New_York',
-    'TX': 'America/Chicago',
-    'FL': 'America/New_York',
-    'IL': 'America/Chicago',
-    'PA': 'America/New_York',
-    'OH': 'America/New_York',
-    'GA': 'America/New_York',
-    'NC': 'America/New_York',
-    'MI': 'America/New_York',
-    'NJ': 'America/New_York',
-    'VA': 'America/New_York',
-    'WA': 'America/Los_Angeles',
-    'AZ': 'America/Phoenix',
-    'MA': 'America/New_York',
-    'TN': 'America/Chicago',
-    'IN': 'America/New_York',
-    'MO': 'America/Chicago',
-    'MD': 'America/New_York',
-    'WI': 'America/Chicago',
-    'CO': 'America/Denver',
-    'MN': 'America/Chicago',
-    'SC': 'America/New_York',
-    'AL': 'America/Chicago',
-    'LA': 'America/Chicago',
-    'KY': 'America/New_York',
-    'OR': 'America/Los_Angeles',
-    'OK': 'America/Chicago',
-    'CT': 'America/New_York',
-    'UT': 'America/Denver',
-    'IA': 'America/Chicago',
-    'NV': 'America/Los_Angeles',
-    'AR': 'America/Chicago',
-    'MS': 'America/Chicago',
-    'KS': 'America/Chicago',
-    'NM': 'America/Denver',
-    'NE': 'America/Chicago',
-    'WV': 'America/New_York',
-    'ID': 'America/Denver',
-    'HI': 'Pacific/Honolulu',
-    'AK': 'America/Anchorage',
-    'NH': 'America/New_York',
-    'ME': 'America/New_York',
-    'MT': 'America/Denver',
-    'RI': 'America/New_York',
-    'DE': 'America/New_York',
-    'SD': 'America/Chicago',
-    'ND': 'America/Chicago',
-    'DC': 'America/New_York',
-    'VT': 'America/New_York',
-    'WY': 'America/Denver'
+    CA: 'America/Los_Angeles',
+    NY: 'America/New_York',
+    TX: 'America/Chicago',
+    FL: 'America/New_York',
+    IL: 'America/Chicago',
+    PA: 'America/New_York',
+    OH: 'America/New_York',
+    GA: 'America/New_York',
+    NC: 'America/New_York',
+    MI: 'America/New_York',
+    NJ: 'America/New_York',
+    VA: 'America/New_York',
+    WA: 'America/Los_Angeles',
+    AZ: 'America/Phoenix',
+    MA: 'America/New_York',
+    TN: 'America/Chicago',
+    IN: 'America/New_York',
+    MO: 'America/Chicago',
+    MD: 'America/New_York',
+    WI: 'America/Chicago',
+    CO: 'America/Denver',
+    MN: 'America/Chicago',
+    SC: 'America/New_York',
+    AL: 'America/Chicago',
+    LA: 'America/Chicago',
+    KY: 'America/New_York',
+    OR: 'America/Los_Angeles',
+    OK: 'America/Chicago',
+    CT: 'America/New_York',
+    UT: 'America/Denver',
+    IA: 'America/Chicago',
+    NV: 'America/Los_Angeles',
+    AR: 'America/Chicago',
+    MS: 'America/Chicago',
+    KS: 'America/Chicago',
+    NM: 'America/Denver',
+    NE: 'America/Chicago',
+    WV: 'America/New_York',
+    ID: 'America/Denver',
+    HI: 'Pacific/Honolulu',
+    AK: 'America/Anchorage',
+    NH: 'America/New_York',
+    ME: 'America/New_York',
+    MT: 'America/Denver',
+    RI: 'America/New_York',
+    DE: 'America/New_York',
+    SD: 'America/Chicago',
+    ND: 'America/Chicago',
+    DC: 'America/New_York',
+    VT: 'America/New_York',
+    WY: 'America/Denver',
   };
-  
+
   return stateTimezones[state] || 'America/New_York';
 };
 
@@ -1077,79 +1084,96 @@ const useUSUnits = () => {
   const { preferences } = useAppStore();
   const isImperial = preferences.units === 'imperial';
 
-  const convertWeight = useCallback((value: number, fromUnit: 'lbs' | 'kg', toUnit?: 'lbs' | 'kg') => {
-    const targetUnit = toUnit || (isImperial ? 'lbs' : 'kg');
-    
-    if (fromUnit === targetUnit) return { value, unit: targetUnit };
-    
-    if (fromUnit === 'lbs' && targetUnit === 'kg') {
-      return { value: Math.round(value * 0.453592 * 10) / 10, unit: 'kg' };
-    } else if (fromUnit === 'kg' && targetUnit === 'lbs') {
-      return { value: Math.round(value * 2.20462 * 10) / 10, unit: 'lbs' };
-    }
-    
-    return { value, unit: fromUnit };
-  }, [isImperial]);
+  const convertWeight = useCallback(
+    (value: number, fromUnit: 'lbs' | 'kg', toUnit?: 'lbs' | 'kg') => {
+      const targetUnit = toUnit || (isImperial ? 'lbs' : 'kg');
 
-  const convertHeight = useCallback((feet: number, inches: number, targetUnit?: 'ft_in' | 'cm') => {
-    const unit = targetUnit || (isImperial ? 'ft_in' : 'cm');
-    
-    if (unit === 'ft_in') {
-      return { feet, inches, unit: 'ft_in' };
-    } else {
-      const totalInches = feet * 12 + inches;
-      const cm = Math.round(totalInches * 2.54);
-      return { value: cm, unit: 'cm' };
-    }
-  }, [isImperial]);
+      if (fromUnit === targetUnit) return { value, unit: targetUnit };
 
-  const convertDistance = useCallback((value: number, fromUnit: 'miles' | 'km', toUnit?: 'miles' | 'km') => {
-    const targetUnit = toUnit || (isImperial ? 'miles' : 'km');
-    
-    if (fromUnit === targetUnit) return { value, unit: targetUnit };
-    
-    if (fromUnit === 'miles' && targetUnit === 'km') {
-      return { value: Math.round(value * 1.60934 * 100) / 100, unit: 'km' };
-    } else if (fromUnit === 'km' && targetUnit === 'miles') {
-      return { value: Math.round(value * 0.621371 * 100) / 100, unit: 'miles' };
-    }
-    
-    return { value, unit: fromUnit };
-  }, [isImperial]);
+      if (fromUnit === 'lbs' && targetUnit === 'kg') {
+        return { value: Math.round(value * 0.453592 * 10) / 10, unit: 'kg' };
+      } else if (fromUnit === 'kg' && targetUnit === 'lbs') {
+        return { value: Math.round(value * 2.20462 * 10) / 10, unit: 'lbs' };
+      }
 
-  const convertVolume = useCallback((value: number, fromUnit: 'floz' | 'ml' | 'liters', toUnit?: string) => {
-    const targetUnit = toUnit || (isImperial ? 'floz' : 'ml');
-    
-    if (fromUnit === targetUnit) return { value, unit: targetUnit };
-    
-    // Conversions vers fl oz
-    if (targetUnit === 'floz') {
-      if (fromUnit === 'ml') return { value: Math.round(value * 0.033814 * 10) / 10, unit: 'floz' };
-      if (fromUnit === 'liters') return { value: Math.round(value * 33.814 * 10) / 10, unit: 'floz' };
-    }
-    
-    // Conversions vers ml
-    if (targetUnit === 'ml') {
-      if (fromUnit === 'floz') return { value: Math.round(value * 29.5735), unit: 'ml' };
-      if (fromUnit === 'liters') return { value: value * 1000, unit: 'ml' };
-    }
-    
-    return { value, unit: fromUnit };
-  }, [isImperial]);
+      return { value, unit: fromUnit };
+    },
+    [isImperial]
+  );
 
-  const convertTemperature = useCallback((value: number, fromUnit: 'F' | 'C', toUnit?: 'F' | 'C') => {
-    const targetUnit = toUnit || (isImperial ? 'F' : 'C');
-    
-    if (fromUnit === targetUnit) return { value, unit: targetUnit };
-    
-    if (fromUnit === 'F' && targetUnit === 'C') {
-      return { value: Math.round((value - 32) * 5/9 * 10) / 10, unit: 'C' };
-    } else if (fromUnit === 'C' && targetUnit === 'F') {
-      return { value: Math.round((value * 9/5 + 32) * 10) / 10, unit: 'F' };
-    }
-    
-    return { value, unit: fromUnit };
-  }, [isImperial]);
+  const convertHeight = useCallback(
+    (feet: number, inches: number, targetUnit?: 'ft_in' | 'cm') => {
+      const unit = targetUnit || (isImperial ? 'ft_in' : 'cm');
+
+      if (unit === 'ft_in') {
+        return { feet, inches, unit: 'ft_in' };
+      } else {
+        const totalInches = feet * 12 + inches;
+        const cm = Math.round(totalInches * 2.54);
+        return { value: cm, unit: 'cm' };
+      }
+    },
+    [isImperial]
+  );
+
+  const convertDistance = useCallback(
+    (value: number, fromUnit: 'miles' | 'km', toUnit?: 'miles' | 'km') => {
+      const targetUnit = toUnit || (isImperial ? 'miles' : 'km');
+
+      if (fromUnit === targetUnit) return { value, unit: targetUnit };
+
+      if (fromUnit === 'miles' && targetUnit === 'km') {
+        return { value: Math.round(value * 1.60934 * 100) / 100, unit: 'km' };
+      } else if (fromUnit === 'km' && targetUnit === 'miles') {
+        return { value: Math.round(value * 0.621371 * 100) / 100, unit: 'miles' };
+      }
+
+      return { value, unit: fromUnit };
+    },
+    [isImperial]
+  );
+
+  const convertVolume = useCallback(
+    (value: number, fromUnit: 'floz' | 'ml' | 'liters', toUnit?: string) => {
+      const targetUnit = toUnit || (isImperial ? 'floz' : 'ml');
+
+      if (fromUnit === targetUnit) return { value, unit: targetUnit };
+
+      // Conversions vers fl oz
+      if (targetUnit === 'floz') {
+        if (fromUnit === 'ml')
+          return { value: Math.round(value * 0.033814 * 10) / 10, unit: 'floz' };
+        if (fromUnit === 'liters')
+          return { value: Math.round(value * 33.814 * 10) / 10, unit: 'floz' };
+      }
+
+      // Conversions vers ml
+      if (targetUnit === 'ml') {
+        if (fromUnit === 'floz') return { value: Math.round(value * 29.5735), unit: 'ml' };
+        if (fromUnit === 'liters') return { value: value * 1000, unit: 'ml' };
+      }
+
+      return { value, unit: fromUnit };
+    },
+    [isImperial]
+  );
+
+  const convertTemperature = useCallback(
+    (value: number, fromUnit: 'F' | 'C', toUnit?: 'F' | 'C') => {
+      const targetUnit = toUnit || (isImperial ? 'F' : 'C');
+
+      if (fromUnit === targetUnit) return { value, unit: targetUnit };
+
+      if (fromUnit === 'F' && targetUnit === 'C') {
+        return { value: Math.round((((value - 32) * 5) / 9) * 10) / 10, unit: 'C' };
+      } else if (fromUnit === 'C' && targetUnit === 'F') {
+        return { value: Math.round(((value * 9) / 5 + 32) * 10) / 10, unit: 'F' };
+      }
+
+      return { value, unit: fromUnit };
+    },
+    [isImperial]
+  );
 
   return {
     isImperial,
@@ -1157,7 +1181,7 @@ const useUSUnits = () => {
     convertHeight,
     convertDistance,
     convertVolume,
-    convertTemperature
+    convertTemperature,
   };
 };
 
@@ -1167,109 +1191,116 @@ const useConversationalAI = () => {
   const [error, setError] = useState<string | null>(null);
   const { onboarding, updateOnboarding } = useAppStore();
 
-  const sendMessage = useCallback(async (message: string, context?: Record<string, any>) => {
-    setIsProcessing(true);
-    setError(null);
+  const sendMessage = useCallback(
+    async (message: string, context?: Record<string, any>) => {
+      setIsProcessing(true);
+      setError(null);
 
-    try {
-      const response = await fetch('/api/ai/conversation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({
-          message,
-          context: {
-            ...context,
-            conversationHistory: onboarding.conversationHistory,
-            currentStep: onboarding.currentStep,
+      try {
+        const response = await fetch('/api/ai/conversation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            message,
+            context: {
+              ...context,
+              conversationHistory: onboarding.conversationHistory,
+              currentStep: onboarding.currentStep,
+              userData: onboarding.userData,
+              usMarket: true,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to get AI response');
+        }
+
+        const data = await response.json();
+
+        // Ajouter les messages à l'historique
+        const userMessage: ConversationMessage = {
+          id: `user_${Date.now()}`,
+          type: 'user',
+          content: message,
+          timestamp: new Date(),
+          context,
+        };
+
+        const aiMessage: ConversationMessage = {
+          id: `ai_${Date.now()}`,
+          type: 'ai',
+          content: data.response,
+          timestamp: new Date(),
+          context: data.context,
+          suggestedResponses: data.suggestedResponses,
+        };
+
+        updateOnboarding({
+          conversationHistory: [...onboarding.conversationHistory, userMessage, aiMessage],
+          aiRecommendations: data.recommendations || onboarding.aiRecommendations,
+        });
+
+        return { response: data.response, recommendations: data.recommendations };
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'AI service unavailable';
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    [onboarding, updateOnboarding]
+  );
+
+  const generateRecommendations = useCallback(
+    async (type: 'workout' | 'nutrition' | 'hydration' | 'sleep') => {
+      setIsProcessing(true);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/ai/recommendations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({
+            type,
             userData: onboarding.userData,
-            usMarket: true
-          }
-        })
-      });
+            usMarket: true,
+            preferences: {
+              units: 'imperial',
+              language: 'en',
+            },
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
+        if (!response.ok) {
+          throw new Error('Failed to generate recommendations');
+        }
+
+        const recommendations = await response.json();
+
+        updateOnboarding({
+          aiRecommendations: [...onboarding.aiRecommendations, ...recommendations],
+        });
+
+        return recommendations;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to generate recommendations';
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setIsProcessing(false);
       }
-
-      const data = await response.json();
-      
-      // Ajouter les messages à l'historique
-      const userMessage: ConversationMessage = {
-        id: `user_${Date.now()}`,
-        type: 'user',
-        content: message,
-        timestamp: new Date(),
-        context
-      };
-      
-      const aiMessage: ConversationMessage = {
-        id: `ai_${Date.now()}`,
-        type: 'ai',
-        content: data.response,
-        timestamp: new Date(),
-        context: data.context,
-        suggestedResponses: data.suggestedResponses
-      };
-
-      updateOnboarding({
-        conversationHistory: [...onboarding.conversationHistory, userMessage, aiMessage],
-        aiRecommendations: data.recommendations || onboarding.aiRecommendations
-      });
-
-      return { response: data.response, recommendations: data.recommendations };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'AI service unavailable';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [onboarding, updateOnboarding]);
-
-  const generateRecommendations = useCallback(async (type: 'workout' | 'nutrition' | 'hydration' | 'sleep') => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/ai/recommendations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({
-          type,
-          userData: onboarding.userData,
-          usMarket: true,
-          preferences: {
-            units: 'imperial',
-            language: 'en'
-          }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate recommendations');
-      }
-
-      const recommendations = await response.json();
-      
-      updateOnboarding({
-        aiRecommendations: [...onboarding.aiRecommendations, ...recommendations]
-      });
-
-      return recommendations;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate recommendations';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [onboarding, updateOnboarding]);
+    },
+    [onboarding, updateOnboarding]
+  );
 
   return {
     sendMessage,
@@ -1277,7 +1308,7 @@ const useConversationalAI = () => {
     isProcessing,
     error,
     conversationHistory: onboarding.conversationHistory,
-    recommendations: onboarding.aiRecommendations
+    recommendations: onboarding.aiRecommendations,
   };
 };
 
@@ -1286,22 +1317,25 @@ const useOfflineSync = () => {
   const { ui, addPendingSync, removePendingSync } = useAppStore();
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const addToSyncQueue = useCallback((type: PendingSync['type'], data: any) => {
-    const sync: PendingSync = {
-      id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type,
-      data,
-      timestamp: new Date().toISOString(),
-      retryCount: 0
-    };
-    
-    addPendingSync(sync);
-    
-    // Essayer de synchroniser immédiatement si en ligne
-    if (navigator.onLine) {
-      syncPendingData();
-    }
-  }, [addPendingSync]);
+  const addToSyncQueue = useCallback(
+    (type: PendingSync['type'], data: any) => {
+      const sync: PendingSync = {
+        id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type,
+        data,
+        timestamp: new Date().toISOString(),
+        retryCount: 0,
+      };
+
+      addPendingSync(sync);
+
+      // Essayer de synchroniser immédiatement si en ligne
+      if (navigator.onLine) {
+        syncPendingData();
+      }
+    },
+    [addPendingSync]
+  );
 
   const syncPendingData = useCallback(async () => {
     if (isSyncing || ui.pendingSyncs.length === 0) return;
@@ -1314,9 +1348,9 @@ const useOfflineSync = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
           },
-          body: JSON.stringify(sync.data)
+          body: JSON.stringify(sync.data),
         });
 
         if (response.ok) {
@@ -1324,7 +1358,7 @@ const useOfflineSync = () => {
         } else {
           // Incrémenter le compteur de retry
           const updatedSync = { ...sync, retryCount: sync.retryCount + 1 };
-          
+
           // Supprimer après 3 tentatives échouées
           if (updatedSync.retryCount >= 3) {
             removePendingSync(sync.id);
@@ -1354,7 +1388,7 @@ const useOfflineSync = () => {
     syncPendingData,
     isSyncing,
     pendingSyncs: ui.pendingSyncs,
-    isOffline: !navigator.onLine
+    isOffline: !navigator.onLine,
   };
 };
 
@@ -1375,7 +1409,6 @@ const AnalyticsPage = lazy(() => import('./Analytics'));
 const SettingsPage = lazy(() => import('./settings'));
 const ProfilePage = lazy(() => import('./ProfilePage'));
 const NotFoundPage = lazy(() => import('./NotFound'));
-
 
 // Composants spécialisés
 const USOnboardingFlow = lazy(() => import('../components/USMarketOnboarding'));
@@ -1446,37 +1479,38 @@ const appRoutes: RouteConfig[] = [
     component: lazy(() => import('./LandingPage')),
     exact: true,
     title: 'MyFitHero - AI-Powered Fitness for Americans',
-    description: 'The ultimate US-ready fitness & wellness app with AI coaching, nutrition tracking, and social features.'
+    description:
+      'The ultimate US-ready fitness & wellness app with AI coaching, nutrition tracking, and social features.',
   },
   {
     path: '/login',
     component: lazy(() => import('./AuthPage')),
     title: 'Sign In - MyFitHero',
-    description: 'Sign in to your MyFitHero account and continue your fitness journey.'
+    description: 'Sign in to your MyFitHero account and continue your fitness journey.',
   },
   {
     path: '/register',
     component: lazy(() => import('./AuthPage')),
     title: 'Create Account - MyFitHero',
-    description: 'Join thousands of Americans achieving their fitness goals with MyFitHero.'
+    description: 'Join thousands of Americans achieving their fitness goals with MyFitHero.',
   },
-  
+
   // Routes d'onboarding
   {
     path: '/onboarding',
     component: OnboardingPage,
     requiresAuth: true,
     title: 'Welcome to MyFitHero',
-    description: 'Let\'s personalize your fitness journey with our AI-powered onboarding.'
+    description: "Let's personalize your fitness journey with our AI-powered onboarding.",
   },
   {
     path: '/onboarding/:step',
     component: OnboardingPage,
     requiresAuth: true,
     title: 'Setup Your Profile - MyFitHero',
-    description: 'Personalized fitness setup designed specifically for Americans.'
+    description: 'Personalized fitness setup designed specifically for Americans.',
   },
-  
+
   // Routes principales de l'application
   {
     path: '/dashboard',
@@ -1484,7 +1518,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Dashboard - MyFitHero',
-    description: 'Your personalized fitness dashboard with AI insights and progress tracking.'
+    description: 'Your personalized fitness dashboard with AI insights and progress tracking.',
   },
   {
     path: '/workouts',
@@ -1492,14 +1526,14 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Workouts - MyFitHero',
-    description: 'AI-powered workouts tailored for your sport and fitness goals.'
+    description: 'AI-powered workouts tailored for your sport and fitness goals.',
   },
   {
     path: '/workouts/:id',
     component: lazy(() => import('./WorkoutDetailPage')),
     requiresAuth: true,
     requiresOnboarding: true,
-    title: 'Workout Details - MyFitHero'
+    title: 'Workout Details - MyFitHero',
   },
   {
     path: '/nutrition',
@@ -1507,7 +1541,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Nutrition - MyFitHero',
-    description: 'Track your nutrition with the most comprehensive US food database.'
+    description: 'Track your nutrition with the most comprehensive US food database.',
   },
   {
     path: '/sleep',
@@ -1515,7 +1549,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Sleep Tracking - MyFitHero',
-    description: 'Optimize your recovery with advanced sleep analytics and recommendations.'
+    description: 'Optimize your recovery with advanced sleep analytics and recommendations.',
   },
   {
     path: '/hydration',
@@ -1523,7 +1557,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Hydration - MyFitHero',
-    description: 'Stay hydrated with personalized goals and smart reminders in fl oz.'
+    description: 'Stay hydrated with personalized goals and smart reminders in fl oz.',
   },
   {
     path: '/wellness',
@@ -1531,7 +1565,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Mental Wellness - MyFitHero',
-    description: 'Track your mental health, mood, and stress with AI-powered insights.'
+    description: 'Track your mental health, mood, and stress with AI-powered insights.',
   },
   {
     path: '/social',
@@ -1539,7 +1573,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Community - MyFitHero',
-    description: 'Connect with friends, join challenges, and share your fitness journey.'
+    description: 'Connect with friends, join challenges, and share your fitness journey.',
   },
   {
     path: '/social/challenges',
@@ -1547,7 +1581,7 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Fitness Challenges - MyFitHero',
-    description: 'Join community challenges and compete with friends across America.'
+    description: 'Join community challenges and compete with friends across America.',
   },
   {
     path: '/analytics',
@@ -1555,23 +1589,23 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Progress Analytics - MyFitHero',
-    description: 'Detailed analytics and insights about your fitness progress and trends.'
+    description: 'Detailed analytics and insights about your fitness progress and trends.',
   },
   {
     path: '/profile',
     component: ProfilePage,
     requiresAuth: true,
     title: 'Your Profile - MyFitHero',
-    description: 'Manage your profile, preferences, and fitness goals.'
+    description: 'Manage your profile, preferences, and fitness goals.',
   },
   {
     path: '/settings',
     component: SettingsPage,
     requiresAuth: true,
     title: 'Settings - MyFitHero',
-    description: 'Customize your MyFitHero experience, privacy, and notifications.'
+    description: 'Customize your MyFitHero experience, privacy, and notifications.',
   },
-  
+
   // Routes spécialisées
   {
     path: '/ai-coach',
@@ -1579,41 +1613,41 @@ const appRoutes: RouteConfig[] = [
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'AI Coach - MyFitHero',
-    description: 'Get personalized coaching and recommendations from your AI fitness assistant.'
+    description: 'Get personalized coaching and recommendations from your AI fitness assistant.',
   },
   {
     path: '/exercises',
     component: lazy(() => import('./ExercisesPage')),
     requiresAuth: true,
     title: 'Exercise Library - MyFitHero',
-    description: 'Comprehensive exercise library with 450+ video-guided workouts.'
+    description: 'Comprehensive exercise library with 450+ video-guided workouts.',
   },
   {
     path: '/exercises/:id',
     component: lazy(() => import('./ExerciseDetailPage')),
     requiresAuth: true,
-    title: 'Exercise Details - MyFitHero'
+    title: 'Exercise Details - MyFitHero',
   },
-  
+
   // Routes utilitaires
   {
     path: '/privacy',
     component: lazy(() => import('./PrivacyPage')),
     title: 'Privacy Policy - MyFitHero',
-    description: 'Your privacy matters. Learn how we protect your fitness data.'
+    description: 'Your privacy matters. Learn how we protect your fitness data.',
   },
   {
     path: '/terms',
     component: lazy(() => import('./TermsPage')),
     title: 'Terms of Service - MyFitHero',
-    description: 'Terms and conditions for using MyFitHero fitness application.'
+    description: 'Terms and conditions for using MyFitHero fitness application.',
   },
   {
     path: '/support',
     component: lazy(() => import('./SupportPage')),
     title: 'Support - MyFitHero',
-    description: 'Get help and support for your MyFitHero experience.'
-  }
+    description: 'Get help and support for your MyFitHero experience.',
+  },
 ];
 
 // ====================================================================
@@ -1626,10 +1660,10 @@ interface AuthGuardProps {
   requiresOnboarding?: boolean;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ 
-  children, 
-  requiresAuth = false, 
-  requiresOnboarding = false 
+const AuthGuard: React.FC<AuthGuardProps> = ({
+  children,
+  requiresAuth = false,
+  requiresOnboarding = false,
 }) => {
   const { user, isAuthenticated, onboarding } = useAppStore();
   const [location, setLocation] = useLocation();
@@ -1638,12 +1672,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
         if (error) {
           console.error('Auth check error:', error);
         }
-        
+
         if (session && !user) {
           // Charger les données utilisateur
           const { data: userData, error: userError } = await supabase
@@ -1651,7 +1688,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
             .select('*')
             .eq('id', session.user.id)
             .single();
-          
+
           if (userData && !userError) {
             useAppStore.getState().setUser(userData);
           }
@@ -1668,27 +1705,27 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 
   // Écouter les changements d'authentification
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          // Utilisateur connecté
-          const { data: userData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (userData) {
-            useAppStore.getState().setUser(userData);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // Utilisateur déconnecté
-          useAppStore.getState().setUser(null);
-          useAppStore.getState().clearCache();
-          setLocation('/');
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // Utilisateur connecté
+        const { data: userData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (userData) {
+          useAppStore.getState().setUser(userData);
         }
+      } else if (event === 'SIGNED_OUT') {
+        // Utilisateur déconnecté
+        useAppStore.getState().setUser(null);
+        useAppStore.getState().clearCache();
+        setLocation('/');
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, [setLocation]);
@@ -1750,7 +1787,7 @@ const MyFitHeroIndex: React.FC = () => {
         // Configurer les métriques de performance
         if (process.env.NODE_ENV === 'production') {
           // Web Vitals et autres métriques
-          
+
           onCLS(console.log);
           onFID(console.log);
           onFCP(console.log);
@@ -1774,7 +1811,7 @@ const MyFitHeroIndex: React.FC = () => {
       if (route.title) {
         document.title = route.title;
       }
-      
+
       if (route.description) {
         const metaDescription = document.querySelector('meta[name="description"]');
         if (metaDescription) {
@@ -1784,9 +1821,11 @@ const MyFitHeroIndex: React.FC = () => {
     };
 
     // Écouter les changements de route
-    const currentRoute = routes.find(route => 
-      window.location.pathname === route.path || 
-      (route.path.includes(':') && new RegExp(route.path.replace(/:[^/]+/g, '[^/]+')).test(window.location.pathname))
+    const currentRoute = routes.find(
+      route =>
+        window.location.pathname === route.path ||
+        (route.path.includes(':') &&
+          new RegExp(route.path.replace(/:[^/]+/g, '[^/]+')).test(window.location.pathname))
     );
 
     if (currentRoute) {
@@ -1812,7 +1851,7 @@ const MyFitHeroIndex: React.FC = () => {
                 </AuthGuard>
               </Route>
             ))}
-            
+
             {/* Routes spéciales */}
             <Route path="/debug" nest>
               {process.env.NODE_ENV === 'development' && (
@@ -1821,16 +1860,16 @@ const MyFitHeroIndex: React.FC = () => {
                 </Route>
               )}
             </Route>
-            
+
             {/* Route catch-all pour 404 */}
             <Route>
               <NotFoundPage />
             </Route>
           </Router>
         </Suspense>
-        
+
         {/* Composants Analytics et Monitoring */}
-        
+
         {/* Informations de version (visible en développement) */}
         {process.env.NODE_ENV === 'development' && (
           <div className="fixed bottom-4 left-4 bg-black/80 text-white text-xs p-2 rounded-lg font-mono">
@@ -1849,13 +1888,7 @@ export default React.memo(MyFitHeroIndex);
 // ====================================================================
 
 // Export des hooks personnalisés
-export {
-  useUSLocation,
-  useUSUnits,
-  useConversationalAI,
-  useOfflineSync,
-  useAppStore
-};
+export { useUSLocation, useUSUnits, useConversationalAI, useOfflineSync, useAppStore };
 
 // Export des types principaux
 export type {
@@ -1879,14 +1912,8 @@ export type {
   MentalWellnessEntry,
   SocialProfile,
   Challenge,
-  UserAnalytics
+  UserAnalytics,
 };
 
 // Export des utilitaires
-export {
-   pwaConfig,
-  AppErrorBoundary,
-  AppLoadingSpinner,
-  AuthGuard
-};
-
+export { pwaConfig, AppErrorBoundary, AppLoadingSpinner, AuthGuard };

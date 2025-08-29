@@ -22,16 +22,17 @@ export const usePWA = (): PWAState & PWAActions => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  
+
   const { toast } = useToast();
 
   // === ENREGISTREMENT DU SERVICE WORKER ===
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker
+        .register('/sw.js')
         .then(registration => {
           console.log('✅ Service Worker enregistré:', registration);
-          
+
           // Vérifier les mises à jour
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
@@ -40,7 +41,7 @@ export const usePWA = (): PWAState & PWAActions => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   setUpdateAvailable(true);
                   toast({
-                    title: "Mise à jour disponible",
+                    title: 'Mise à jour disponible',
                     description: "Une nouvelle version de l'app est prête !",
                   });
                 }
@@ -62,29 +63,29 @@ export const usePWA = (): PWAState & PWAActions => {
         setIsInstalled(true);
       }
     };
-    
+
     checkInstalled();
-    
+
     // Écouter l'événement beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
     };
-    
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    
+
     // Écouter l'installation
     window.addEventListener('appinstalled', () => {
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
       toast({
-        title: "App installée !",
+        title: 'App installée !',
         description: "MyFitHero a été ajouté à votre écran d'accueil",
       });
     });
-    
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
@@ -95,22 +96,22 @@ export const usePWA = (): PWAState & PWAActions => {
     const handleOnline = () => {
       setIsOnline(true);
       toast({
-        title: "Connexion rétablie",
-        description: "Synchronisation des données...",
+        title: 'Connexion rétablie',
+        description: 'Synchronisation des données...',
       });
     };
-    
+
     const handleOffline = () => {
       setIsOnline(false);
       toast({
-        title: "Mode hors ligne",
-        description: "Données sauvegardées localement",
+        title: 'Mode hors ligne',
+        description: 'Données sauvegardées localement',
       });
     };
-    
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
@@ -120,7 +121,7 @@ export const usePWA = (): PWAState & PWAActions => {
   // === ACTIONS PWA ===
   const installApp = async (): Promise<void> => {
     if (!deferredPrompt) return;
-    
+
     try {
       const result = await deferredPrompt.prompt();
       if (result.outcome === 'accepted') {
@@ -128,7 +129,7 @@ export const usePWA = (): PWAState & PWAActions => {
         setDeferredPrompt(null);
       }
     } catch (error) {
-      console.error('Erreur lors de l\'installation:', error);
+      console.error("Erreur lors de l'installation:", error);
     }
   };
 
@@ -144,31 +145,34 @@ export const usePWA = (): PWAState & PWAActions => {
   const enableNotifications = async (): Promise<boolean> => {
     if (!('Notification' in window)) {
       toast({
-        title: "Notifications non supportées",
-        description: "Votre navigateur ne supporte pas les notifications",
+        title: 'Notifications non supportées',
+        description: 'Votre navigateur ne supporte pas les notifications',
       });
       return false;
     }
 
     const permission = await Notification.requestPermission();
-    
+
     if (permission === 'granted') {
       toast({
-        title: "Notifications activées",
-        description: "Vous recevrez des rappels pour vos objectifs",
+        title: 'Notifications activées',
+        description: 'Vous recevrez des rappels pour vos objectifs',
       });
       return true;
     } else {
       toast({
-        title: "Notifications refusées",
-        description: "Vous pouvez les activer dans les paramètres",
+        title: 'Notifications refusées',
+        description: 'Vous pouvez les activer dans les paramètres',
       });
       return false;
     }
   };
 
   const registerBackgroundSync = async (tag: string): Promise<void> => {
-    if ('serviceWorker' in navigator && 'sync' in (window as any).ServiceWorkerRegistration.prototype) {
+    if (
+      'serviceWorker' in navigator &&
+      'sync' in (window as any).ServiceWorkerRegistration.prototype
+    ) {
       const registration = await navigator.serviceWorker.ready;
       await (registration as any).sync.register(tag);
     }
@@ -182,7 +186,7 @@ export const usePWA = (): PWAState & PWAActions => {
     installApp,
     checkForUpdates,
     enableNotifications,
-    registerBackgroundSync
+    registerBackgroundSync,
   };
 };
 
@@ -193,60 +197,60 @@ export const useOfflineStorage = () => {
   useEffect(() => {
     const openDB = () => {
       const request = indexedDB.open('MyFitHeroDB', 1);
-      
-      request.onupgradeneeded = (event) => {
+
+      request.onupgradeneeded = event => {
         const database = (event.target as IDBOpenDBRequest).result;
-        
+
         // Store pour les données fitness en attente
         if (!database.objectStoreNames.contains('pendingData')) {
-          const store = database.createObjectStore('pendingData', { 
-            keyPath: 'id', 
-            autoIncrement: true 
+          const store = database.createObjectStore('pendingData', {
+            keyPath: 'id',
+            autoIncrement: true,
           });
           store.createIndex('type', 'type', { unique: false });
           store.createIndex('timestamp', 'timestamp', { unique: false });
         }
-        
+
         // Store pour le cache des données utilisateur
         if (!database.objectStoreNames.contains('userCache')) {
-          const userStore = database.createObjectStore('userCache', { 
-            keyPath: 'key' 
+          const userStore = database.createObjectStore('userCache', {
+            keyPath: 'key',
           });
           userStore.createIndex('expiresAt', 'expiresAt', { unique: false });
         }
       };
-      
-      request.onsuccess = (event) => {
+
+      request.onsuccess = event => {
         setDb((event.target as IDBOpenDBRequest).result);
       };
-      
-      request.onerror = (event) => {
+
+      request.onerror = event => {
         console.error('Erreur IndexedDB:', event);
       };
     };
-    
+
     openDB();
   }, []);
 
   const storePendingData = async (data: any) => {
     if (!db) return;
-    
+
     const transaction = db.transaction(['pendingData'], 'readwrite');
     const store = transaction.objectStore('pendingData');
-    
+
     await store.add({
       ...data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   };
 
   const getCachedData = async (key: string) => {
     if (!db) return null;
-    
+
     const transaction = db.transaction(['userCache'], 'readonly');
     const store = transaction.objectStore('userCache');
-    
-    return new Promise((resolve) => {
+
+    return new Promise(resolve => {
       const request = store.get(key);
       request.onsuccess = () => {
         const result = request.result;
@@ -262,15 +266,15 @@ export const useOfflineStorage = () => {
 
   const setCachedData = async (key: string, data: any, ttl = 300000) => {
     if (!db) return;
-    
+
     const transaction = db.transaction(['userCache'], 'readwrite');
     const store = transaction.objectStore('userCache');
-    
-    return new Promise<void>((resolve) => {
+
+    return new Promise<void>(resolve => {
       const request = store.put({
         key,
         data,
-        expiresAt: Date.now() + ttl
+        expiresAt: Date.now() + ttl,
       });
       request.onsuccess = () => resolve();
       request.onerror = () => resolve();
@@ -281,6 +285,6 @@ export const useOfflineStorage = () => {
     storePendingData,
     getCachedData,
     setCachedData,
-    isReady: !!db
+    isReady: !!db,
   };
 };

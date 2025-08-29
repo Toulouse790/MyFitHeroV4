@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Trophy, 
-  Star, 
-  Target, 
+import {
+  Trophy,
+  Star,
+  Target,
   Award,
   Crown,
   Zap,
@@ -11,7 +11,7 @@ import {
   Calendar,
   Lock,
   Unlock,
-  Moon
+  Moon,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { supabase } from '../config/supabaseClient';
@@ -53,19 +53,19 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 7,
       category: 'consistency',
-      rarity: 'common'
+      rarity: 'common',
     },
     {
       id: 'hydration_master',
       title: 'Maître Hydratation',
-      description: 'Atteignez votre objectif d\'hydratation 30 jours',
+      description: "Atteignez votre objectif d'hydratation 30 jours",
       icon: Shield,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
       earned: false,
       target: 30,
       category: 'consistency',
-      rarity: 'rare'
+      rarity: 'rare',
     },
     {
       id: 'workout_warrior',
@@ -77,7 +77,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 50,
       category: 'fitness',
-      rarity: 'epic'
+      rarity: 'epic',
     },
     {
       id: 'sleep_champion',
@@ -89,7 +89,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 14,
       category: 'consistency',
-      rarity: 'rare'
+      rarity: 'rare',
     },
     {
       id: 'streak_legend',
@@ -101,7 +101,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 100,
       category: 'achievement',
-      rarity: 'legendary'
+      rarity: 'legendary',
     },
     {
       id: 'perfect_week',
@@ -113,7 +113,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 7,
       category: 'achievement',
-      rarity: 'epic'
+      rarity: 'epic',
     },
     {
       id: 'nutrition_guru',
@@ -125,7 +125,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 21,
       category: 'consistency',
-      rarity: 'rare'
+      rarity: 'rare',
     },
     {
       id: 'first_milestone',
@@ -137,8 +137,8 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       earned: false,
       target: 1,
       category: 'milestone',
-      rarity: 'common'
-    }
+      rarity: 'common',
+    },
   ];
 
   useEffect(() => {
@@ -163,24 +163,25 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
         .eq('user_id', appStoreUser.id);
 
       const earnedBadgeIds = userBadges?.map(b => b.badge_id) || [];
-      
+
       const updatedBadges = predefinedBadges.map(badge => {
         const isEarned = earnedBadgeIds.includes(badge.id);
         const progress = calculateProgress(badge.id, stats || []);
-        
+
         return {
           ...badge,
           earned: isEarned,
           progress,
-          earnedAt: isEarned ? userBadges?.find(b => b.badge_id === badge.id)?.earned_at : undefined
+          earnedAt: isEarned
+            ? userBadges?.find(b => b.badge_id === badge.id)?.earned_at
+            : undefined,
         };
       });
 
       setBadges(updatedBadges);
-      
+
       // Vérifier si des badges peuvent être débloqués
       await checkForNewBadges(updatedBadges);
-      
     } catch (error) {
       console.error('Erreur lors du chargement des badges:', error);
     } finally {
@@ -222,11 +223,12 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
   };
 
   const checkForNewBadges = async (badges: Badge[]) => {
-    const newlyEarned = badges.filter(badge => 
-      !badge.earned && 
-      badge.progress !== undefined && 
-      badge.target !== undefined && 
-      badge.progress >= badge.target
+    const newlyEarned = badges.filter(
+      badge =>
+        !badge.earned &&
+        badge.progress !== undefined &&
+        badge.target !== undefined &&
+        badge.progress >= badge.target
     );
 
     for (const badge of newlyEarned) {
@@ -236,35 +238,38 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
 
   const awardBadge = async (badge: Badge) => {
     try {
-      const { error } = await (supabase as any)
-        .from('user_badges')
-        .insert({
-          user_id: appStoreUser.id,
-          badge_id: badge.id,
-          earned_at: new Date().toISOString()
-        });
+      const { error } = await (supabase as any).from('user_badges').insert({
+        user_id: appStoreUser.id,
+        badge_id: badge.id,
+        earned_at: new Date().toISOString(),
+      });
 
       if (!error) {
         // Mise à jour locale
-        setBadges(prev => prev.map(b => 
-          b.id === badge.id ? { ...b, earned: true, earnedAt: new Date() } : b
-        ));
+        setBadges(prev =>
+          prev.map(b => (b.id === badge.id ? { ...b, earned: true, earnedAt: new Date() } : b))
+        );
 
         // Notification (si toast disponible)
         console.log(`Badge débloqué: ${badge.title}`);
       }
     } catch (error) {
-      console.error('Erreur lors de l\'attribution du badge:', error);
+      console.error("Erreur lors de l'attribution du badge:", error);
     }
   };
 
   const getBadgeRarityColor = (rarity: string): string => {
     switch (rarity) {
-      case 'common': return 'border-gray-300';
-      case 'rare': return 'border-blue-400';
-      case 'epic': return 'border-purple-400';
-      case 'legendary': return 'border-yellow-400';
-      default: return 'border-gray-300';
+      case 'common':
+        return 'border-gray-300';
+      case 'rare':
+        return 'border-blue-400';
+      case 'epic':
+        return 'border-purple-400';
+      case 'legendary':
+        return 'border-yellow-400';
+      default:
+        return 'border-gray-300';
     }
   };
 
@@ -280,16 +285,20 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
   }
 
   return (
-    <div className={`bg-white rounded-2xl p-6 shadow-lg border border-gray-100 ${compact ? 'p-4' : ''}`}>
+    <div
+      className={`bg-white rounded-2xl p-6 shadow-lg border border-gray-100 ${compact ? 'p-4' : ''}`}
+    >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Trophy className="text-yellow-500" size={28} />
           <div>
             <h2 className="text-2xl font-bold text-gray-800">Badges</h2>
-            <p className="text-gray-600">{earnedBadges.length} / {badges.length} débloqués</p>
+            <p className="text-gray-600">
+              {earnedBadges.length} / {badges.length} débloqués
+            </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-full">
           <Award className="text-yellow-600" size={20} />
           <span className="font-bold text-yellow-700">{earnedBadges.length}</span>
@@ -305,7 +314,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full transition-all duration-500"
               style={{ width: `${(earnedBadges.length / badges.length) * 100}%` }}
             ></div>
@@ -321,7 +330,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
             Badges Débloqués
           </h3>
           <div className={`grid ${compact ? 'grid-cols-4' : 'grid-cols-3 md:grid-cols-4'} gap-3`}>
-            {earnedBadges.map((badge) => {
+            {earnedBadges.map(badge => {
               const Icon = badge.icon;
               return (
                 <div
@@ -338,7 +347,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Indicateur de rareté */}
                   {badge.rarity === 'legendary' && (
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
@@ -358,10 +367,12 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
             Badges à Débloquer
           </h3>
           <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-1 md:grid-cols-2'} gap-3`}>
-            {availableBadges.slice(0, compact ? 4 : 8).map((badge) => {
+            {availableBadges.slice(0, compact ? 4 : 8).map(badge => {
               const Icon = badge.icon;
-              const progressPercentage = badge.target ? ((badge.progress || 0) / badge.target) * 100 : 0;
-              
+              const progressPercentage = badge.target
+                ? ((badge.progress || 0) / badge.target) * 100
+                : 0;
+
               return (
                 <div
                   key={badge.id}
@@ -372,7 +383,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
                     <div className="flex-1">
                       <h4 className="font-semibold text-sm text-gray-700">{badge.title}</h4>
                       <p className="text-xs text-gray-500">{badge.description}</p>
-                      
+
                       {badge.target && (
                         <div className="mt-2">
                           <div className="flex items-center justify-between mb-1">
@@ -384,7 +395,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div 
+                            <div
                               className="bg-gray-400 h-1 rounded-full transition-all duration-500"
                               style={{ width: `${progressPercentage}%` }}
                             ></div>

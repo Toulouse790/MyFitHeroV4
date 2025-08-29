@@ -59,8 +59,8 @@ const Admin: React.FC = () => {
       if (!profile) {
         toast({
           title: "Erreur d'accès",
-          description: "Impossible de vérifier vos permissions",
-          variant: "destructive"
+          description: 'Impossible de vérifier vos permissions',
+          variant: 'destructive',
         });
         setLocation('/');
         return;
@@ -71,9 +71,9 @@ const Admin: React.FC = () => {
       // Vérifier si l'utilisateur est admin
       if (profile.role !== 'admin') {
         toast({
-          title: "Accès refusé",
+          title: 'Accès refusé',
           description: "Vous n'avez pas les permissions pour accéder à cette page",
-          variant: "destructive"
+          variant: 'destructive',
         });
         setLocation('/');
         return;
@@ -91,7 +91,7 @@ const Admin: React.FC = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
         <p className="text-gray-600 text-sm">
-          {loading ? 'Vérification de l\'authentification...' : 'Vérification des permissions...'}
+          {loading ? "Vérification de l'authentification..." : 'Vérification des permissions...'}
         </p>
         <span className="sr-only">Chargement de la page d\'administration</span>
       </div>

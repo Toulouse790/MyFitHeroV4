@@ -14,9 +14,9 @@ export const authRoutes: RouteConfig[] = [
     isProtected: false,
     metadata: {
       title: 'Accueil',
-      description: 'Page d\'accueil MyFitHero',
-      category: 'auth'
-    }
+      description: "Page d'accueil MyFitHero",
+      category: 'auth',
+    },
   },
   {
     path: '/login',
@@ -25,8 +25,8 @@ export const authRoutes: RouteConfig[] = [
     metadata: {
       title: 'Connexion',
       description: 'Se connecter à MyFitHero',
-      category: 'auth'
-    }
+      category: 'auth',
+    },
   },
   {
     path: '/register',
@@ -35,8 +35,8 @@ export const authRoutes: RouteConfig[] = [
     metadata: {
       title: 'Inscription',
       description: 'Créer un compte MyFitHero',
-      category: 'auth'
-    }
+      category: 'auth',
+    },
   },
   {
     path: '/auth',
@@ -44,9 +44,9 @@ export const authRoutes: RouteConfig[] = [
     isProtected: false,
     metadata: {
       title: 'Authentification',
-      description: 'Page d\'authentification',
-      category: 'auth'
-    }
+      description: "Page d'authentification",
+      category: 'auth',
+    },
   },
   {
     path: '/landing',
@@ -55,7 +55,7 @@ export const authRoutes: RouteConfig[] = [
     metadata: {
       title: 'Bienvenue',
       description: 'Page de présentation',
-      category: 'auth'
-    }
-  }
+      category: 'auth',
+    },
+  },
 ];

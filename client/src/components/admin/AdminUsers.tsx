@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  Plus 
-} from 'lucide-react';
+import { Users, Search, Filter, Edit, Trash2, Plus } from 'lucide-react';
 
 interface User {
   id: string;
@@ -28,7 +21,7 @@ const AdminUsers: React.FC = () => {
       email: 'john@example.com',
       role: 'user',
       status: 'active',
-      joinDate: '2024-01-15'
+      joinDate: '2024-01-15',
     },
     {
       id: '2',
@@ -36,7 +29,7 @@ const AdminUsers: React.FC = () => {
       email: 'jane@example.com',
       role: 'premium',
       status: 'active',
-      joinDate: '2024-02-20'
+      joinDate: '2024-02-20',
     },
     {
       id: '3',
@@ -44,8 +37,8 @@ const AdminUsers: React.FC = () => {
       email: 'admin@example.com',
       role: 'admin',
       status: 'active',
-      joinDate: '2024-01-01'
-    }
+      joinDate: '2024-01-01',
+    },
   ]);
 
   const getRoleColor = (role: User['role']) => {
@@ -114,19 +107,15 @@ const AdminUsers: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {users.map(user => (
                   <tr key={user.id} className="border-b hover:bg-gray-50">
                     <td className="p-3 font-medium">{user.name}</td>
                     <td className="p-3 text-gray-600">{user.email}</td>
                     <td className="p-3">
-                      <Badge className={getRoleColor(user.role)}>
-                        {user.role}
-                      </Badge>
+                      <Badge className={getRoleColor(user.role)}>{user.role}</Badge>
                     </td>
                     <td className="p-3">
-                      <Badge className={getStatusColor(user.status)}>
-                        {user.status}
-                      </Badge>
+                      <Badge className={getStatusColor(user.status)}>{user.status}</Badge>
                     </td>
                     <td className="p-3 text-gray-600">{user.joinDate}</td>
                     <td className="p-3">

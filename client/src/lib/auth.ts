@@ -21,9 +21,9 @@ class SupabaseAuthClient {
         options: {
           data: {
             username: username,
-            full_name: username
-          }
-        }
+            full_name: username,
+          },
+        },
       });
 
       if (error) {
@@ -35,8 +35,8 @@ class SupabaseAuthClient {
           user: {
             id: data.user.id,
             email: data.user.email!,
-            user_metadata: data.user.user_metadata
-          }
+            user_metadata: data.user.user_metadata,
+          },
         };
       }
 
@@ -50,7 +50,7 @@ class SupabaseAuthClient {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
       if (error) {
@@ -62,8 +62,8 @@ class SupabaseAuthClient {
           user: {
             id: data.user.id,
             email: data.user.email!,
-            user_metadata: data.user.user_metadata
-          }
+            user_metadata: data.user.user_metadata,
+          },
         };
       }
 
@@ -79,8 +79,11 @@ class SupabaseAuthClient {
 
   async getUser(): Promise<AuthUser | null> {
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
       if (error || !user) {
         return null;
       }
@@ -88,7 +91,7 @@ class SupabaseAuthClient {
       return {
         id: user.id,
         email: user.email!,
-        user_metadata: user.user_metadata
+        user_metadata: user.user_metadata,
       };
     } catch (error) {
       return null;
@@ -97,7 +100,10 @@ class SupabaseAuthClient {
 
   async getSession(): Promise<Session | null> {
     try {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
       return error ? null : session;
     } catch (error) {
       return null;
@@ -111,7 +117,7 @@ class SupabaseAuthClient {
         callback({
           id: session.user.id,
           email: session.user.email!,
-          user_metadata: session.user.user_metadata
+          user_metadata: session.user.user_metadata,
         });
       } else {
         callback(null);

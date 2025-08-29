@@ -41,7 +41,7 @@ export class PositionService {
       console.error('getPositionsFromDrills:', error);
       return [];
     }
-    const positions = Array.from(new Set(data.map((r) => r.position!).filter(Boolean)));
+    const positions = Array.from(new Set(data.map(r => r.position!).filter(Boolean)));
     memoryCache[`drills_${sportName}`] = { data: positions, expiry: Date.now() + CACHE_TTL };
     return positions;
   }

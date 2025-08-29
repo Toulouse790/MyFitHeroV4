@@ -8,7 +8,9 @@ const WorkoutDetailPage = lazy(() => import('@/pages/WorkoutDetailPage'));
 const ExercisesPage = lazy(() => import('@/pages/ExercisesPage'));
 const ExerciseDetailPage = lazy(() => import('@/pages/ExerciseDetailPage'));
 const ChallengesPage = lazy(() => import('@/pages/ChallengesPage'));
-const RecoveryPage = lazy(() => import('@/pages/RecoveryPage').then(module => ({ default: module.RecoveryPage })));
+const RecoveryPage = lazy(() =>
+  import('@/pages/RecoveryPage').then(module => ({ default: module.RecoveryPage }))
+);
 const AICoachPage = lazy(() => import('@/pages/AICoachPage'));
 
 export const fitnessRoutes: RouteConfig[] = [
@@ -18,10 +20,10 @@ export const fitnessRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Entraînement',
-      description: 'Sessions d\'entraînement',
+      description: "Sessions d'entraînement",
       icon: 'Dumbbell',
-      category: 'fitness'
-    }
+      category: 'fitness',
+    },
   },
   {
     path: '/workout/:id',
@@ -29,10 +31,10 @@ export const fitnessRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Détail entraînement',
-      description: 'Détails d\'une session d\'entraînement',
+      description: "Détails d'une session d'entraînement",
       icon: 'Eye',
-      category: 'fitness'
-    }
+      category: 'fitness',
+    },
   },
   {
     path: '/exercises',
@@ -40,10 +42,10 @@ export const fitnessRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Exercices',
-      description: 'Bibliothèque d\'exercices',
+      description: "Bibliothèque d'exercices",
       icon: 'Activity',
-      category: 'fitness'
-    }
+      category: 'fitness',
+    },
   },
   {
     path: '/exercises/:id',
@@ -51,10 +53,10 @@ export const fitnessRoutes: RouteConfig[] = [
     isProtected: true,
     metadata: {
       title: 'Détail exercice',
-      description: 'Instructions détaillées de l\'exercice',
+      description: "Instructions détaillées de l'exercice",
       icon: 'Info',
-      category: 'fitness'
-    }
+      category: 'fitness',
+    },
   },
   {
     path: '/challenges',
@@ -64,8 +66,8 @@ export const fitnessRoutes: RouteConfig[] = [
       title: 'Défis',
       description: 'Relevez des défis fitness',
       icon: 'Trophy',
-      category: 'fitness'
-    }
+      category: 'fitness',
+    },
   },
   {
     path: '/recovery',
@@ -75,8 +77,8 @@ export const fitnessRoutes: RouteConfig[] = [
       title: 'Récupération',
       description: 'Suivi de votre récupération musculaire',
       icon: 'Heart',
-      category: 'fitness'
-    }
+      category: 'fitness',
+    },
   },
   {
     path: '/ai-coach',
@@ -86,7 +88,7 @@ export const fitnessRoutes: RouteConfig[] = [
       title: 'Coach IA',
       description: 'Coaching personnalisé par intelligence artificielle',
       icon: 'Brain',
-      category: 'fitness'
-    }
-  }
+      category: 'fitness',
+    },
+  },
 ];

@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Target,
-  Award,
-  RefreshCw,
-  Download,
-  Activity,
-  Flame
-} from 'lucide-react';
+import { Target, Award, RefreshCw, Download, Activity, Flame } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 import { useAnimateOnMount } from '@/hooks/useAnimations';
@@ -16,16 +9,14 @@ import {
   type AnalyticsData,
   type PillarProgress,
   type PerformanceMetrics,
-  type DetailedInsight
+  type DetailedInsight,
 } from '@/services/analyticsService';
 
 interface AnalyticsDashboardProps {
   className?: string;
 }
 
-const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
-  className = ''
-}) => {
+const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ className = '' }) => {
   const { appStoreUser } = useAppStore();
   const adaptiveColors = useAdaptiveColors();
   const isAnimated = useAnimateOnMount();
@@ -35,7 +26,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const [pillarProgress, setPillarProgress] = useState<PillarProgress[]>([]);
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
   const [insights, setInsights] = useState<DetailedInsight[]>([]);
-  
+
   // États de contrôle
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,14 +45,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         analyticsService.getMultiPillarData(appStoreUser.id, selectedPeriod),
         analyticsService.getPillarProgress(appStoreUser.id),
         analyticsService.getPerformanceMetrics(appStoreUser.id),
-        analyticsService.getDetailedInsights(appStoreUser.id)
+        analyticsService.getDetailedInsights(appStoreUser.id),
       ]);
 
       setMultiPillarData(multiData);
       setPillarProgress(progressData);
       setPerformanceMetrics(metricsData);
       setInsights(insightsData);
-
     } catch (err) {
       setError('Erreur lors du chargement des analytics');
       console.error('Analytics loading error:', err);
@@ -80,7 +70,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       pillars: pillarProgress,
       metrics: performanceMetrics,
       insights: insights,
-      exported_at: new Date().toISOString()
+      exported_at: new Date().toISOString(),
     };
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -92,14 +82,21 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     URL.revokeObjectURL(url);
   }, [selectedPeriod, pillarProgress, performanceMetrics, insights]);
 
-  const getPriorityColor = useCallback((priority: string) => {
-    switch (priority) {
-      case 'high': return '#ef4444';
-      case 'medium': return '#f59e0b';
-      case 'low': return '#10b981';
-      default: return adaptiveColors.text;
-    }
-  }, [adaptiveColors.text]);
+  const getPriorityColor = useCallback(
+    (priority: string) => {
+      switch (priority) {
+        case 'high':
+          return '#ef4444';
+        case 'medium':
+          return '#f59e0b';
+        case 'low':
+          return '#10b981';
+        default:
+          return adaptiveColors.text;
+      }
+    },
+    [adaptiveColors.text]
+  );
 
   if (loading) {
     return (
@@ -117,15 +114,15 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className={`analytics-dashboard error ${className}`}>
         <div className="error-message">
           <p style={{ color: '#ef4444' }}>{error}</p>
-          <button 
+          <button
             onClick={loadAnalyticsData}
-            style={{ 
+            style={{
               backgroundColor: adaptiveColors.accent,
               color: 'white',
               border: 'none',
               padding: '8px 16px',
               borderRadius: '6px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             Réessayer
@@ -140,9 +137,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* Header avec contrôles */}
       <div className="analytics-header">
         <div className="header-title">
-          <h2 style={{ color: adaptiveColors.text }}>
-            📊 Analytics Avancées
-          </h2>
+          <h2 style={{ color: adaptiveColors.text }}>📊 Analytics Avancées</h2>
           <p style={{ color: adaptiveColors.textSecondary }}>
             Analyse complète de vos performances
           </p>
@@ -157,12 +152,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 className={`period-btn ${selectedPeriod === period ? 'active' : ''}`}
                 onClick={() => setSelectedPeriod(period as '7d' | '30d' | '90d')}
                 style={{
-                  backgroundColor: selectedPeriod === period ? adaptiveColors.accent : 'transparent',
+                  backgroundColor:
+                    selectedPeriod === period ? adaptiveColors.accent : 'transparent',
                   color: selectedPeriod === period ? 'white' : adaptiveColors.text,
                   border: `1px solid ${adaptiveColors.border}`,
                   padding: '6px 12px',
                   borderRadius: '6px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
                 }}
               >
                 {period === '7d' ? '7 jours' : period === '30d' ? '30 jours' : '3 mois'}
@@ -174,24 +170,24 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="action-controls">
             <button
               onClick={loadAnalyticsData}
-              style={{ 
+              style={{
                 background: 'none',
                 border: 'none',
                 color: adaptiveColors.accent,
                 cursor: 'pointer',
-                padding: '8px'
+                padding: '8px',
               }}
             >
               <RefreshCw size={18} />
             </button>
             <button
               onClick={handleExportData}
-              style={{ 
+              style={{
                 background: 'none',
                 border: 'none',
                 color: adaptiveColors.accent,
                 cursor: 'pointer',
-                padding: '8px'
+                padding: '8px',
               }}
             >
               <Download size={18} />
@@ -283,7 +279,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     padding: '4px 8px',
                     borderRadius: '4px',
                     cursor: 'pointer',
-                    marginLeft: '4px'
+                    marginLeft: '4px',
                   }}
                 >
                   {type === 'line' ? '📈' : type === 'area' ? '📊' : '📋'}
@@ -291,7 +287,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               ))}
             </div>
           </div>
-          
+
           <AdvancedCharts
             data={multiPillarData}
             type={chartType}
@@ -307,7 +303,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="pillars-progress">
         <h3 style={{ color: adaptiveColors.text }}>Progrès par Pilier</h3>
         <div className="pillars-grid">
-          {pillarProgress.map((pillar) => (
+          {pillarProgress.map(pillar => (
             <div
               key={pillar.pillar}
               className="pillar-card"
@@ -316,25 +312,29 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="pillar-header">
                 <span className="pillar-icon">{pillar.icon}</span>
                 <h4 style={{ color: adaptiveColors.text }}>{pillar.pillar}</h4>
-                <span 
+                <span
                   className={`trend-badge ${pillar.trend}`}
-                  style={{ 
-                    color: pillar.trend === 'up' ? '#10b981' : 
-                           pillar.trend === 'down' ? '#ef4444' : '#f59e0b'
+                  style={{
+                    color:
+                      pillar.trend === 'up'
+                        ? '#10b981'
+                        : pillar.trend === 'down'
+                          ? '#ef4444'
+                          : '#f59e0b',
                   }}
                 >
                   {pillar.trend === 'up' ? '↗️' : pillar.trend === 'down' ? '↘️' : '➡️'}
                   {Math.abs(pillar.trend_percentage)}%
                 </span>
               </div>
-              
+
               <div className="progress-section">
                 <div className="progress-bar-container">
-                  <div 
+                  <div
                     className="progress-bar"
-                    style={{ 
+                    style={{
                       width: `${pillar.progress_percentage}%`,
-                      backgroundColor: pillar.color
+                      backgroundColor: pillar.color,
                     }}
                   ></div>
                 </div>
@@ -358,7 +358,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                       style={{
                         height: `${(value / Math.max(...pillar.last_7_days)) * 100}%`,
                         backgroundColor: pillar.color,
-                        opacity: 0.7
+                        opacity: 0.7,
                       }}
                     ></div>
                   ))}
@@ -377,14 +377,14 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <div
               key={index}
               className={`insight-card ${insight.type}`}
-              style={{ 
+              style={{
                 backgroundColor: adaptiveColors.surface,
-                borderLeft: `4px solid ${insight.color}`
+                borderLeft: `4px solid ${insight.color}`,
               }}
             >
               <div className="insight-header">
                 <span className="insight-icon">{insight.icon}</span>
-                <span 
+                <span
                   className="insight-priority"
                   style={{ color: getPriorityColor(insight.priority) }}
                 >
@@ -404,7 +404,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     borderRadius: '4px',
                     fontSize: '0.8rem',
                     cursor: 'pointer',
-                    marginTop: '8px'
+                    marginTop: '8px',
                   }}
                 >
                   Agir maintenant
@@ -415,8 +415,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .analytics-dashboard {
           max-width: 1200px;
           margin: 0 auto;
@@ -721,7 +722,9 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             grid-template-columns: 1fr;
           }
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 };

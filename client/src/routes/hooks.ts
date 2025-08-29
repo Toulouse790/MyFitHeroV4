@@ -12,15 +12,15 @@ export const useCurrentRoute = (): {
   isProtectedRoute: boolean;
 } => {
   const [location] = useLocation();
-  
+
   const currentRoute = useMemo(() => {
     return findRouteByPath(location);
   }, [location]);
-  
+
   return {
     currentRoute,
     currentPath: location,
-    isProtectedRoute: currentRoute?.isProtected ?? false
+    isProtectedRoute: currentRoute?.isProtected ?? false,
   };
 };
 
@@ -30,7 +30,7 @@ export const useCurrentRoute = (): {
 export const useAppNavigation = () => {
   const [location, setLocation] = useLocation();
   const { currentRoute } = useCurrentRoute();
-  
+
   const navigateTo = (path: string, options?: { replace?: boolean }) => {
     if (options?.replace) {
       setLocation(path, { replace: true });
@@ -38,21 +38,21 @@ export const useAppNavigation = () => {
       setLocation(path);
     }
   };
-  
+
   const goBack = () => {
     window.history.back();
   };
-  
+
   const goHome = () => {
     navigateTo('/dashboard');
   };
-  
+
   return {
     navigateTo,
     goBack,
     goHome,
     currentRoute,
-    location
+    location,
   };
 };
 
@@ -70,7 +70,7 @@ export const useNavigationRoutes = (category?: string) => {
       .concat(getRoutesByCategory('wellness'))
       .concat(getRoutesByCategory('social'));
   }, [category]);
-  
+
   return routes;
 };
 
@@ -82,19 +82,19 @@ export const useRoutePermissions = (routePath?: string) => {
     if (!routePath) return null;
     return findRouteByPath(routePath);
   }, [routePath]);
-  
+
   const hasAccess = (userRoles: string[] = []): boolean => {
     if (!route) return false;
     if (!route.isProtected) return true;
     if (!route.requiredRoles || route.requiredRoles.length === 0) return true;
-    
+
     return route.requiredRoles.some(role => userRoles.includes(role));
   };
-  
+
   return {
     route,
     hasAccess,
     isProtected: route?.isProtected ?? false,
-    requiredRoles: route?.requiredRoles ?? []
+    requiredRoles: route?.requiredRoles ?? [],
   };
 };

@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
-  adminRequired = false
+  adminRequired = false,
 }) => {
   const { appStoreUser } = useAppStore();
 

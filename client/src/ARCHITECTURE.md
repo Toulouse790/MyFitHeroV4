@@ -2,7 +2,9 @@
 
 ## 🏗️ Vue d'ensemble de l'architecture
 
-MyFitHero implémente une **architecture feature-first moderne** avec les meilleures pratiques React/TypeScript pour une application de santé et bien-être scalable et maintenable.
+MyFitHero implémente une **architecture feature-first moderne** avec les
+meilleures pratiques React/TypeScript pour une application de santé et bien-être
+scalable et maintenable.
 
 ## 📁 Structure organisationnelle
 
@@ -43,6 +45,7 @@ src/
 **Localisation :** `src/shared/components/`
 
 Chaque composant suit la structure :
+
 ```typescript
 // Structure standardisée des composants
 interface ComponentProps {
@@ -62,6 +65,7 @@ const Component = React.forwardRef<HTMLElement, ComponentProps>(({ ... }) => {
 ```
 
 **Composants disponibles :**
+
 - `Button` : Boutons avec variants, tailles, états loading
 - `Input` : Champs de saisie avec validation, icônes, types password
 - `Card` : Cartes avec header/footer, variants d'élévation
@@ -73,6 +77,7 @@ const Component = React.forwardRef<HTMLElement, ComponentProps>(({ ... }) => {
 **Localisation :** `src/shared/stores/` et `src/features/*/hooks/`
 
 Pattern unifié pour tous les stores :
+
 ```typescript
 interface FeatureState {
   data: Data[];
@@ -111,7 +116,9 @@ const useFeatureStore = create<FeatureState & FeatureActions>()(
     }),
     {
       name: 'feature-storage',
-      partialize: (state) => ({ /* sélection des données à persister */ })
+      partialize: state => ({
+        /* sélection des données à persister */
+      }),
     }
   )
 );
@@ -122,6 +129,7 @@ const useFeatureStore = create<FeatureState & FeatureActions>()(
 **Localisation :** `src/shared/hooks/`
 
 Hooks réutilisables standardisés :
+
 ```typescript
 // useLocalStorage - Persistence locale typée
 const [value, setValue, removeValue] = useLocalStorage('key', initialValue);
@@ -138,6 +146,7 @@ const { execute, data, loading, error, reset } = useAsync(asyncFunction);
 **Localisation :** `src/app/router/`
 
 Configuration centralisée avec :
+
 - **Lazy loading** automatique de toutes les pages
 - **Métadonnées** typées par route (title, description, auth)
 - **Protection de routes** avec redirections automatiques
@@ -151,9 +160,9 @@ const routes: RouteConfig[] = [
     meta: {
       title: 'Hydratation - MyFitHero',
       requiresAuth: true,
-      description: 'Suivez votre consommation d\'eau quotidienne'
-    }
-  }
+      description: "Suivez votre consommation d'eau quotidienne",
+    },
+  },
 ];
 ```
 
@@ -162,6 +171,7 @@ const routes: RouteConfig[] = [
 ### TypeScript Configuration stricte
 
 Configuration dans `tsconfig.json` :
+
 ```json
 {
   "strict": true,
@@ -176,6 +186,7 @@ Configuration dans `tsconfig.json` :
 ### Path Mapping optimisé
 
 Alias configurés pour import clean :
+
 ```typescript
 import { Button, Card } from '@/shared/components';
 import { useHydrationStore } from '@/features/hydration/hooks';
@@ -291,4 +302,5 @@ docs(architecture): update feature structure guide
 
 ---
 
-**Architecture évolutive et maintenable pour une application de santé moderne ! 🏆**
+**Architecture évolutive et maintenable pour une application de santé moderne !
+🏆**

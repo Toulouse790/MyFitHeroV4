@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  Eye, 
-  EyeOff, 
-  Bell, 
-  BellOff, 
-  Trash2, 
+import {
+  Shield,
+  Eye,
+  EyeOff,
+  Bell,
+  BellOff,
+  Trash2,
   Download,
   AlertTriangle,
   Lock,
@@ -13,7 +13,7 @@ import {
   Users,
   Settings,
   CheckCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
@@ -41,7 +41,7 @@ const PrivacyManager: React.FC = () => {
     email_notifications: true,
     push_notifications: true,
     marketing_emails: false,
-    data_analytics: true
+    data_analytics: true,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -80,13 +80,11 @@ const PrivacyManager: React.FC = () => {
     try {
       const updatedSettings = { ...settings, ...newSettings };
 
-      const { error } = await (supabase as any)
-        .from('user_privacy_settings')
-        .upsert({
-          user_id: appStoreUser.id,
-          ...updatedSettings,
-          updated_at: new Date().toISOString()
-        });
+      const { error } = await (supabase as any).from('user_privacy_settings').upsert({
+        user_id: appStoreUser.id,
+        ...updatedSettings,
+        updated_at: new Date().toISOString(),
+      });
 
       if (error) {
         throw error;
@@ -97,13 +95,12 @@ const PrivacyManager: React.FC = () => {
         title: 'Paramètres mis à jour',
         description: 'Vos préférences de confidentialité ont été sauvegardées.',
       });
-
     } catch (error) {
       console.error('Erreur sauvegarde paramètres:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder vos paramètres.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -143,12 +140,12 @@ const PrivacyManager: React.FC = () => {
         badges,
         ai_requests: aiRequests,
         privacy_settings: settings,
-        export_date: new Date().toISOString()
+        export_date: new Date().toISOString(),
       };
 
       // Créer et télécharger le fichier
       const blob = new Blob([JSON.stringify(userData, null, 2)], {
-        type: 'application/json'
+        type: 'application/json',
       });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -163,13 +160,12 @@ const PrivacyManager: React.FC = () => {
         title: 'Export terminé',
         description: 'Vos données ont été exportées avec succès.',
       });
-
     } catch (error) {
       console.error('Erreur export données:', error);
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'exporter vos données.',
-        variant: 'destructive'
+        description: "Impossible d'exporter vos données.",
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -202,13 +198,12 @@ const PrivacyManager: React.FC = () => {
 
       // Déconnexion
       await supabase.auth.signOut();
-
     } catch (error) {
       console.error('Erreur suppression compte:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer votre compte.',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -219,19 +214,27 @@ const PrivacyManager: React.FC = () => {
 
   const getVisibilityIcon = (visibility: string) => {
     switch (visibility) {
-      case 'public': return Globe;
-      case 'friends': return Users;
-      case 'private': return Lock;
-      default: return Globe;
+      case 'public':
+        return Globe;
+      case 'friends':
+        return Users;
+      case 'private':
+        return Lock;
+      default:
+        return Globe;
     }
   };
 
   const getVisibilityLabel = (visibility: string) => {
     switch (visibility) {
-      case 'public': return 'Public';
-      case 'friends': return 'Amis uniquement';
-      case 'private': return 'Privé';
-      default: return 'Public';
+      case 'public':
+        return 'Public';
+      case 'friends':
+        return 'Amis uniquement';
+      case 'private':
+        return 'Privé';
+      default:
+        return 'Public';
     }
   };
 
@@ -249,7 +252,7 @@ const PrivacyManager: React.FC = () => {
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Visibilité du profil</h3>
         <div className="space-y-3">
-          {(['public', 'friends', 'private'] as const).map((visibility) => {
+          {(['public', 'friends', 'private'] as const).map(visibility => {
             const Icon = getVisibilityIcon(visibility);
             return (
               <div
@@ -265,7 +268,9 @@ const PrivacyManager: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <Icon size={20} className="text-gray-600" />
                     <div>
-                      <h4 className="font-medium text-gray-800">{getVisibilityLabel(visibility)}</h4>
+                      <h4 className="font-medium text-gray-800">
+                        {getVisibilityLabel(visibility)}
+                      </h4>
                       <p className="text-sm text-gray-600">
                         {visibility === 'public' && 'Visible par tous les utilisateurs'}
                         {visibility === 'friends' && 'Visible par vos amis uniquement'}
@@ -338,9 +343,13 @@ const PrivacyManager: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={() => savePrivacySettings({ email_notifications: !settings.email_notifications })}
+              onClick={() =>
+                savePrivacySettings({ email_notifications: !settings.email_notifications })
+              }
               className={`p-2 rounded-full transition-colors ${
-                settings.email_notifications ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
+                settings.email_notifications
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-300 text-gray-600'
               }`}
             >
               {settings.email_notifications ? <Bell size={16} /> : <BellOff size={16} />}
@@ -398,11 +407,11 @@ const PrivacyManager: React.FC = () => {
               <AlertTriangle className="text-red-600" size={24} />
               <h3 className="text-xl font-bold text-gray-800">Supprimer le compte</h3>
             </div>
-            
+
             <p className="text-gray-600 mb-4">
               Cette action est irréversible. Toutes vos données seront supprimées définitivement.
             </p>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Tapez "SUPPRIMER" pour confirmer :
@@ -410,12 +419,12 @@ const PrivacyManager: React.FC = () => {
               <input
                 type="text"
                 value={deleteConfirmText}
-                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                onChange={e => setDeleteConfirmText(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500"
                 placeholder="SUPPRIMER"
               />
             </div>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={() => {

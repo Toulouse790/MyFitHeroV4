@@ -5,7 +5,12 @@
 
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
-import { render, userEvent, createMockWorkout, createMockExercise } from '../../test-utils/test-utils';
+import {
+  render,
+  userEvent,
+  createMockWorkout,
+  createMockExercise,
+} from '../../test-utils/test-utils';
 import { server } from '../../test-utils/mocks/server';
 import { http, HttpResponse } from 'msw';
 import WorkoutPage from '../../pages/WorkoutPage';
@@ -51,11 +56,13 @@ describe('WorkoutPage', () => {
 
     it('affiche un état de chargement pendant la récupération', () => {
       render(<WorkoutPage />);
-      
-      expect(screen.getByTestId('workout-loading') || screen.getByText(/chargement/i)).toBeInTheDocument();
+
+      expect(
+        screen.getByTestId('workout-loading') || screen.getByText(/chargement/i)
+      ).toBeInTheDocument();
     });
 
-    it('gère l\'erreur si la séance n\'existe pas', async () => {
+    it("gère l'erreur si la séance n'existe pas", async () => {
       server.use(
         http.get('*/rest/v1/workouts*', () => {
           return HttpResponse.json([], { status: 404 });
@@ -126,7 +133,7 @@ describe('WorkoutPage', () => {
   describe('Timer de séance', () => {
     it('démarre le timer lors du début de séance', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       const startButton = await screen.findByRole('button', { name: /commencer.*séance/i });
@@ -139,7 +146,7 @@ describe('WorkoutPage', () => {
 
     it('met en pause et reprend le timer', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       // Démarrer la séance
@@ -161,7 +168,7 @@ describe('WorkoutPage', () => {
 
     it('arrête le timer et termine la séance', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       // Démarrer puis arrêter
@@ -182,12 +189,12 @@ describe('WorkoutPage', () => {
   describe('Gestion des repos', () => {
     it('démarre un timer de repos entre les exercices', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       // Démarrer la séance et terminer un exercice
       await waitFor(() => screen.findByRole('button', { name: /commencer/i }));
-      
+
       const restButton = screen.getByRole('button', { name: /repos/i });
       await user.click(restButton);
 
@@ -197,7 +204,7 @@ describe('WorkoutPage', () => {
 
     it('permet de personnaliser la durée de repos', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       // Ouvrir les paramètres de repos
@@ -244,7 +251,7 @@ describe('WorkoutPage', () => {
 
     it('met à jour la progression quand un exercice est terminé', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       await waitFor(() => screen.findByRole('checkbox'));
@@ -262,7 +269,7 @@ describe('WorkoutPage', () => {
   describe('Sauvegarde et historique', () => {
     it('sauvegarde automatiquement la progression', async () => {
       const user = userEvent.setup();
-      
+
       // Mock de l'endpoint de sauvegarde
       const saveMock = jest.fn();
       server.use(
@@ -285,9 +292,9 @@ describe('WorkoutPage', () => {
       });
     });
 
-    it('permet de consulter l\'historique des séances', async () => {
+    it("permet de consulter l'historique des séances", async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       const historyButton = screen.getByRole('button', { name: /historique/i });
@@ -298,13 +305,15 @@ describe('WorkoutPage', () => {
   });
 
   describe('Interface et interactions', () => {
-    it('affiche les instructions d\'exercice en modal', async () => {
+    it("affiche les instructions d'exercice en modal", async () => {
       const user = userEvent.setup();
       const mockWorkout = createMockWorkout({
-        exercises: [createMockExercise({ 
-          name: 'Push-ups',
-          instructions: 'Keep your body straight and lower down slowly'
-        })],
+        exercises: [
+          createMockExercise({
+            name: 'Push-ups',
+            instructions: 'Keep your body straight and lower down slowly',
+          }),
+        ],
       });
 
       server.use(
@@ -327,7 +336,7 @@ describe('WorkoutPage', () => {
 
     it('permet de naviguer entre les exercices', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       // Boutons de navigation
@@ -347,21 +356,18 @@ describe('WorkoutPage', () => {
   describe('Erreurs et edge cases', () => {
     it('gère les erreurs de connexion pendant la séance', async () => {
       const user = userEvent.setup();
-      
+
       // Simuler une erreur réseau après le chargement initial
       server.use(
         http.patch('*/rest/v1/workout_sessions*', () => {
-          return HttpResponse.json(
-            { error: 'Network Error' },
-            { status: 500 }
-          );
+          return HttpResponse.json({ error: 'Network Error' }, { status: 500 });
         })
       );
 
       render(<WorkoutPage />);
 
       await waitFor(() => screen.findByRole('checkbox'));
-      
+
       const checkbox = screen.getByRole('checkbox');
       await user.click(checkbox);
 
@@ -371,9 +377,9 @@ describe('WorkoutPage', () => {
       });
     });
 
-    it('conserve l\'état local même en cas d\'erreur de sauvegarde', async () => {
+    it("conserve l'état local même en cas d'erreur de sauvegarde", async () => {
       const user = userEvent.setup();
-      
+
       // Simuler une erreur de sauvegarde
       server.use(
         http.patch('*/rest/v1/workout_sessions*', () => {
@@ -384,7 +390,7 @@ describe('WorkoutPage', () => {
       render(<WorkoutPage />);
 
       await waitFor(() => screen.findByRole('checkbox'));
-      
+
       const checkbox = screen.getByRole('checkbox');
       await user.click(checkbox);
 
@@ -396,7 +402,7 @@ describe('WorkoutPage', () => {
   describe('Accessibilité', () => {
     it('supporte la navigation au clavier', async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       // Navigation avec Tab
@@ -407,13 +413,13 @@ describe('WorkoutPage', () => {
       expect(screen.getByRole('button', { name: /paramètres/i })).toHaveFocus();
     });
 
-    it('annonce les changements d\'état au lecteur d\'écran', async () => {
+    it("annonce les changements d'état au lecteur d'écran", async () => {
       const user = userEvent.setup();
-      
+
       render(<WorkoutPage />);
 
       await waitFor(() => screen.findByRole('checkbox'));
-      
+
       const checkbox = screen.getByRole('checkbox');
       await user.click(checkbox);
 

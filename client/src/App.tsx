@@ -5,9 +5,9 @@ import { LoadingRoute } from '@/router/components/LoadingRoute';
 
 const App: React.FC = () => {
   const [location] = useLocation();
-  
-  console.log("🟢 MyFitHero - Route actuelle:", location);
-  
+
+  console.log('🟢 MyFitHero - Route actuelle:', location);
+
   return (
     <Suspense fallback={<LoadingRoute />}>
       <AppRouter />

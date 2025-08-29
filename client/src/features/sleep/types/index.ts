@@ -81,13 +81,17 @@ export interface SleepStore {
   error: string | null;
 
   // Actions - Entries
-  addEntry: (entryData: Omit<SleepEntry, 'id' | 'userId' | 'created_at' | 'updated_at'>) => Promise<void>;
+  addEntry: (
+    entryData: Omit<SleepEntry, 'id' | 'userId' | 'created_at' | 'updated_at'>
+  ) => Promise<void>;
   updateEntry: (id: string, updates: Partial<SleepEntry>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
   loadEntries: () => Promise<void>;
 
   // Actions - Goals
-  setGoal: (goalData: Omit<SleepGoal, 'id' | 'userId' | 'created_at' | 'updated_at'>) => Promise<void>;
+  setGoal: (
+    goalData: Omit<SleepGoal, 'id' | 'userId' | 'created_at' | 'updated_at'>
+  ) => Promise<void>;
   updateGoal: (id: string, updates: Partial<SleepGoal>) => Promise<void>;
   loadGoals: () => Promise<void>;
 

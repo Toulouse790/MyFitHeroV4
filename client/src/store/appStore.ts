@@ -136,7 +136,7 @@ class ScaleService {
   static async scanForDevices(): Promise<ScaleDevice[]> {
     // Simuler la recherche de balances
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
+
     const mockDevices: Omit<ScaleDevice, 'userId' | 'createdAt' | 'updatedAt'>[] = [
       {
         id: `xiaomi-${Date.now()}`,
@@ -145,7 +145,7 @@ class ScaleService {
         model: 'XMTZC05HM',
         connectionType: 'bluetooth',
         batteryLevel: 78,
-        isConnected: false
+        isConnected: false,
       },
       {
         id: `withings-${Date.now()}`,
@@ -153,10 +153,10 @@ class ScaleService {
         brand: 'Withings',
         model: 'WBS05',
         connectionType: 'wifi',
-        isConnected: false
-      }
+        isConnected: false,
+      },
     ];
-    
+
     return mockDevices;
   }
 
@@ -169,9 +169,9 @@ class ScaleService {
   static async syncWeight(deviceId: string): Promise<ScaleReading> {
     // Simuler la lecture du poids
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     const baseWeight = 70 + Math.random() * 30; // Entre 70 et 100kg
-    
+
     return {
       weight: Math.round(baseWeight * 10) / 10,
       bodyFat: Math.round((10 + Math.random() * 20) * 10) / 10,
@@ -181,7 +181,7 @@ class ScaleService {
       visceralFat: Math.round((5 + Math.random() * 10) * 10) / 10,
       bmr: Math.round(1200 + Math.random() * 800),
       timestamp: new Date().toISOString(),
-      deviceId
+      deviceId,
     };
   }
 }
@@ -202,22 +202,26 @@ export const useAppStore = create<AppStore>()(
       lastScaleSync: null,
 
       // Actions utilisateur
-      setUser: (user) => {
+      setUser: user => {
         set({ user });
       },
 
-      setUserProfile: (profile) => {
+      setUserProfile: profile => {
         set({ userProfile: profile });
       },
 
-      updateUserProfile: async (updates) => {
+      updateUserProfile: async updates => {
         const { userProfile, user } = get();
         if (!userProfile || !user) throw new Error('Utilisateur non connecté');
 
         set({ isLoading: true, error: null });
 
         try {
-          const updatedProfile = { ...userProfile, ...updates, updatedAt: new Date().toISOString() };
+          const updatedProfile = {
+            ...userProfile,
+            ...updates,
+            updatedAt: new Date().toISOString(),
+          };
 
           // Mise à jour en base de données
           const { error } = await supabase
@@ -236,7 +240,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      loadUserProfile: async (userId) => {
+      loadUserProfile: async userId => {
         set({ isLoading: true, error: null });
 
         try {
@@ -257,7 +261,7 @@ export const useAppStore = create<AppStore>()(
       },
 
       // Actions balances connectées
-      connectScale: async (device) => {
+      connectScale: async device => {
         const { user } = get();
         if (!user) throw new Error('Utilisateur non connecté');
 
@@ -273,18 +277,16 @@ export const useAppStore = create<AppStore>()(
             isConnected: true,
             userId: user.id,
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           };
 
           // Sauvegarder en base de données
-          const { error } = await supabase
-            .from('connected_scales')
-            .insert([newScale]);
+          const { error } = await supabase.from('connected_scales').insert([newScale]);
 
           if (error) throw error;
 
-          set((state) => ({
-            connectedScales: [...state.connectedScales, newScale]
+          set(state => ({
+            connectedScales: [...state.connectedScales, newScale],
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -294,7 +296,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      disconnectScale: async (scaleId) => {
+      disconnectScale: async scaleId => {
         const { user } = get();
         if (!user) throw new Error('Utilisateur non connecté');
 
@@ -310,8 +312,8 @@ export const useAppStore = create<AppStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
-            connectedScales: state.connectedScales.filter(scale => scale.id !== scaleId)
+          set(state => ({
+            connectedScales: state.connectedScales.filter(scale => scale.id !== scaleId),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -321,7 +323,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      syncScaleWeight: async (scaleId) => {
+      syncScaleWeight: async scaleId => {
         const { user, connectedScales } = get();
         if (!user) throw new Error('Utilisateur non connecté');
 
@@ -345,7 +347,7 @@ export const useAppStore = create<AppStore>()(
             visceralFat: reading.visceralFat,
             bmr: reading.bmr,
             source: 'scale',
-            scaleId: scaleId
+            scaleId: scaleId,
           };
 
           await get().addWeightEntry(weightEntry);
@@ -353,7 +355,7 @@ export const useAppStore = create<AppStore>()(
           // Mettre à jour la dernière synchronisation
           const now = new Date().toISOString();
           await get().updateScaleStatus(scaleId, { lastSync: now });
-          
+
           set({ lastScaleSync: now });
 
           return reading.weight;
@@ -365,7 +367,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      loadConnectedScales: async (userId) => {
+      loadConnectedScales: async userId => {
         set({ isLoading: true, error: null });
 
         try {
@@ -398,10 +400,10 @@ export const useAppStore = create<AppStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             connectedScales: state.connectedScales.map(scale =>
               scale.id === scaleId ? { ...scale, ...updates } : scale
-            )
+            ),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -410,7 +412,7 @@ export const useAppStore = create<AppStore>()(
       },
 
       // Actions historique du poids
-      addWeightEntry: async (entry) => {
+      addWeightEntry: async entry => {
         const { user } = get();
         if (!user) throw new Error('Utilisateur non connecté');
 
@@ -420,7 +422,7 @@ export const useAppStore = create<AppStore>()(
           const newEntry: WeightEntry = {
             ...entry,
             userId: user.id,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
           };
 
           // Sauvegarder en base de données
@@ -432,13 +434,16 @@ export const useAppStore = create<AppStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
-            weightHistory: [data, ...state.weightHistory].slice(0, 100) // Garder 100 entrées max
+          set(state => ({
+            weightHistory: [data, ...state.weightHistory].slice(0, 100), // Garder 100 entrées max
           }));
 
           // Mettre à jour le profil avec le nouveau poids si c'est plus récent
           const { userProfile } = get();
-          if (userProfile && (!userProfile.weight_kg || new Date(entry.date) > new Date(userProfile.updatedAt || 0))) {
+          if (
+            userProfile &&
+            (!userProfile.weight_kg || new Date(entry.date) > new Date(userProfile.updatedAt || 0))
+          ) {
             await get().updateUserProfile({ weight_kg: entry.weight });
           }
         } catch (error: any) {
@@ -464,10 +469,10 @@ export const useAppStore = create<AppStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
+          set(state => ({
             weightHistory: state.weightHistory.map(entry =>
               entry.id === entryId ? { ...entry, ...updates } : entry
-            )
+            ),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -477,7 +482,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      deleteWeightEntry: async (entryId) => {
+      deleteWeightEntry: async entryId => {
         const { user } = get();
         if (!user) throw new Error('Utilisateur non connecté');
 
@@ -492,8 +497,8 @@ export const useAppStore = create<AppStore>()(
 
           if (error) throw error;
 
-          set((state) => ({
-            weightHistory: state.weightHistory.filter(entry => entry.id !== entryId)
+          set(state => ({
+            weightHistory: state.weightHistory.filter(entry => entry.id !== entryId),
           }));
         } catch (error: any) {
           set({ error: error.message });
@@ -525,11 +530,11 @@ export const useAppStore = create<AppStore>()(
       },
 
       // Actions utilitaires
-      setLoading: (loading) => {
+      setLoading: loading => {
         set({ isLoading: loading });
       },
 
-      setError: (error) => {
+      setError: error => {
         set({ error });
       },
 
@@ -556,7 +561,7 @@ export const useAppStore = create<AppStore>()(
         if (Math.abs(diff) < 0.1) return { type: 'stable', diff: 0 };
         return {
           type: diff > 0 ? 'up' : 'down',
-          diff: Math.abs(diff)
+          diff: Math.abs(diff),
         };
       },
 
@@ -590,11 +595,13 @@ export const useAppStore = create<AppStore>()(
         set({ isSyncing: true, error: null });
 
         try {
-          const syncPromises = connectedDevices.map(scale => 
-            get().syncScaleWeight(scale.id).catch(error => {
-              console.error(`Erreur sync ${scale.name}:`, error);
-              return null;
-            })
+          const syncPromises = connectedDevices.map(scale =>
+            get()
+              .syncScaleWeight(scale.id)
+              .catch(error => {
+                console.error(`Erreur sync ${scale.name}:`, error);
+                return null;
+              })
           );
 
           await Promise.all(syncPromises);
@@ -605,7 +612,7 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      importWeightData: async (data) => {
+      importWeightData: async data => {
         const { user } = get();
         if (!user) throw new Error('Utilisateur non connecté');
 
@@ -616,12 +623,10 @@ export const useAppStore = create<AppStore>()(
             ...entry,
             userId: user.id,
             source: 'import' as const,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
           }));
 
-          const { error } = await supabase
-            .from('weight_entries')
-            .insert(entries);
+          const { error } = await supabase.from('weight_entries').insert(entries);
 
           if (error) throw error;
 
@@ -633,17 +638,17 @@ export const useAppStore = create<AppStore>()(
         } finally {
           set({ isLoading: false });
         }
-      }
+      },
     }),
     {
       name: 'myfit-hero-store',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         userProfile: state.userProfile,
         connectedScales: state.connectedScales,
         weightHistory: state.weightHistory.slice(0, 20), // Persister seulement les 20 dernières entrées
-        lastScaleSync: state.lastScaleSync
-      })
+        lastScaleSync: state.lastScaleSync,
+      }),
     }
   )
 );
@@ -661,7 +666,7 @@ export const useScales = () => {
     scanForScales,
     syncAllScales,
     loadConnectedScales,
-    updateScaleStatus
+    updateScaleStatus,
   } = useAppStore();
 
   return {
@@ -675,7 +680,7 @@ export const useScales = () => {
     scanForScales,
     syncAllScales,
     loadConnectedScales,
-    updateScaleStatus
+    updateScaleStatus,
   };
 };
 
@@ -690,7 +695,7 @@ export const useWeight = () => {
     importWeightData,
     calculateBMI,
     getWeightTrend,
-    getLatestWeight
+    getLatestWeight,
   } = useAppStore();
 
   return {
@@ -702,26 +707,20 @@ export const useWeight = () => {
     importWeightData,
     calculateBMI,
     getWeightTrend,
-    getLatestWeight
+    getLatestWeight,
   };
 };
 
 // Hook personnalisé pour le profil
 export const useProfile = () => {
-  const {
-    userProfile,
-    updateUserProfile,
-    loadUserProfile,
-    isLoading,
-    error
-  } = useAppStore();
+  const { userProfile, updateUserProfile, loadUserProfile, isLoading, error } = useAppStore();
 
   return {
     userProfile,
     updateUserProfile,
     loadUserProfile,
     isLoading,
-    error
+    error,
   };
 };
 

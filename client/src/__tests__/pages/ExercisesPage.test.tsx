@@ -28,13 +28,13 @@ describe('ExercisesPage', () => {
   describe('Rendu initial', () => {
     it('affiche correctement la page des exercices', async () => {
       render(<ExercisesPage />);
-      
+
       // Vérifier le titre principal
       expect(screen.getByRole('heading', { name: /exercices/i })).toBeInTheDocument();
-      
+
       // Vérifier la présence de la barre de recherche
       expect(screen.getByPlaceholderText(/rechercher un exercice/i)).toBeInTheDocument();
-      
+
       // Vérifier la présence des filtres
       expect(screen.getByLabelText(/catégorie/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/niveau/i)).toBeInTheDocument();
@@ -43,16 +43,18 @@ describe('ExercisesPage', () => {
 
     it('affiche un état de chargement initial', () => {
       render(<ExercisesPage />);
-      
+
       // Vérifier la présence d'un indicateur de chargement
-      expect(screen.getByTestId('loading-spinner') || screen.getByText(/chargement/i)).toBeInTheDocument();
+      expect(
+        screen.getByTestId('loading-spinner') || screen.getByText(/chargement/i)
+      ).toBeInTheDocument();
     });
   });
 
   describe('Recherche et filtrage', () => {
     it('permet de rechercher des exercices par nom', async () => {
       const user = userEvent.setup();
-      
+
       // Mock des exercices de test
       const mockExercises = [
         createMockExercise({ id: '1', name: 'Push-ups', muscle_groups: ['chest'] }),
@@ -87,7 +89,7 @@ describe('ExercisesPage', () => {
 
     it('filtre les exercices par catégorie', async () => {
       const user = userEvent.setup();
-      
+
       render(<ExercisesPage />);
 
       // Sélectionner une catégorie dans le filtre
@@ -105,7 +107,7 @@ describe('ExercisesPage', () => {
 
     it('filtre les exercices par niveau de difficulté', async () => {
       const user = userEvent.setup();
-      
+
       render(<ExercisesPage />);
 
       const difficultyFilter = screen.getByLabelText(/niveau/i);
@@ -121,13 +123,13 @@ describe('ExercisesPage', () => {
 
     it('combine plusieurs filtres correctement', async () => {
       const user = userEvent.setup();
-      
+
       render(<ExercisesPage />);
 
       // Appliquer plusieurs filtres
       const searchInput = screen.getByPlaceholderText(/rechercher un exercice/i);
       const categoryFilter = screen.getByLabelText(/catégorie/i);
-      
+
       await user.type(searchInput, 'push');
       await user.selectOptions(categoryFilter, 'chest');
 
@@ -214,9 +216,9 @@ describe('ExercisesPage', () => {
   describe('Navigation et interactions', () => {
     it('navigue vers le détail d un exercice lors du clic', async () => {
       const user = userEvent.setup();
-      const mockExercise = createMockExercise({ 
+      const mockExercise = createMockExercise({
         id: 'exercise-123',
-        name: 'Test Exercise' 
+        name: 'Test Exercise',
       });
 
       server.use(
@@ -245,10 +247,7 @@ describe('ExercisesPage', () => {
       // Simuler une erreur API
       server.use(
         http.get('*/rest/v1/exercises', () => {
-          return HttpResponse.json(
-            { error: 'Internal Server Error' },
-            { status: 500 }
-          );
+          return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 });
         })
       );
 
@@ -261,14 +260,11 @@ describe('ExercisesPage', () => {
 
     it('permet de réessayer après une erreur', async () => {
       const user = userEvent.setup();
-      
+
       // D'abord une erreur
       server.use(
         http.get('*/rest/v1/exercises', () => {
-          return HttpResponse.json(
-            { error: 'Network Error' },
-            { status: 500 }
-          );
+          return HttpResponse.json({ error: 'Network Error' }, { status: 500 });
         })
       );
 
@@ -302,7 +298,7 @@ describe('ExercisesPage', () => {
       // Vérifier la présence des landmarks
       expect(screen.getByRole('main')).toBeInTheDocument();
       expect(screen.getByRole('search')).toBeInTheDocument();
-      
+
       // Vérifier les labels des formulaires
       expect(screen.getByLabelText(/rechercher/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/catégorie/i)).toBeInTheDocument();
@@ -310,7 +306,7 @@ describe('ExercisesPage', () => {
 
     it('supporte la navigation au clavier', async () => {
       const user = userEvent.setup();
-      
+
       render(<ExercisesPage />);
 
       // Tab vers la recherche
@@ -326,19 +322,22 @@ describe('ExercisesPage', () => {
   describe('Performance et optimisation', () => {
     it('debounce la recherche pour éviter trop d appels API', async () => {
       const user = userEvent.setup();
-      
+
       render(<ExercisesPage />);
 
       const searchInput = screen.getByPlaceholderText(/rechercher/i);
-      
+
       // Taper rapidement plusieurs caractères
       await user.type(searchInput, 'abc', { delay: 50 });
 
       // Vérifier qu'un seul appel API est fait après le debounce
       // Cette vérification dépend de votre implémentation de debounce
-      await waitFor(() => {
-        // Assert sur le nombre d'appels API mockés
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          // Assert sur le nombre d'appels API mockés
+        },
+        { timeout: 1000 }
+      );
     });
   });
 });

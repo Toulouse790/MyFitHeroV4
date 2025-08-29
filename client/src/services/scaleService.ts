@@ -24,9 +24,9 @@ export class ScaleService {
           { namePrefix: 'Mi Scale' },
           { namePrefix: 'XIAOMI' },
           { namePrefix: 'Withings' },
-          { namePrefix: 'Fitbit' }
+          { namePrefix: 'Fitbit' },
         ],
-        optionalServices: ['battery_service', 'device_information']
+        optionalServices: ['battery_service', 'device_information'],
       });
 
       await device.gatt?.connect();
@@ -42,21 +42,21 @@ export class ScaleService {
     try {
       // Implémentation spécifique selon le protocole de la balance
       // Ceci est un exemple générique
-      
+
       const server = await device.gatt?.connect();
       if (!server) return null;
 
       // Exemple pour Xiaomi Mi Scale
       const service = await server.getPrimaryService('181b'); // Weight Scale Service
       const characteristic = await service.getCharacteristic('2a9d'); // Weight Measurement
-      
+
       const value = await characteristic.readValue();
       const weight = value.getFloat32(1, true); // Little endian
-      
+
       return {
         weight: Math.round(weight * 10) / 10,
         timestamp: new Date().toISOString(),
-        deviceId: device.id
+        deviceId: device.id,
       };
     } catch (error) {
       console.error('Erreur lecture données:', error);
@@ -65,7 +65,10 @@ export class ScaleService {
   }
 
   // Synchronisation avec API cloud (Xiaomi, Withings, etc.)
-  static async syncWithCloudAPI(provider: 'xiaomi' | 'withings' | 'fitbit', accessToken: string): Promise<ScaleReading[]> {
+  static async syncWithCloudAPI(
+    provider: 'xiaomi' | 'withings' | 'fitbit',
+    accessToken: string
+  ): Promise<ScaleReading[]> {
     try {
       let apiUrl = '';
       let headers = {};
@@ -73,21 +76,21 @@ export class ScaleService {
       switch (provider) {
         case 'xiaomi':
           apiUrl = 'https://api.mi-fit.com/v1/data/weight';
-          headers = { 'Authorization': `Bearer ${accessToken}` };
+          headers = { Authorization: `Bearer ${accessToken}` };
           break;
         case 'withings':
           apiUrl = 'https://wbsapi.withings.net/measure';
-          headers = { 'Authorization': `Bearer ${accessToken}` };
+          headers = { Authorization: `Bearer ${accessToken}` };
           break;
         case 'fitbit':
           apiUrl = 'https://api.fitbit.com/1/user/-/body/log/weight/date/today/1m.json';
-          headers = { 'Authorization': `Bearer ${accessToken}` };
+          headers = { Authorization: `Bearer ${accessToken}` };
           break;
       }
 
       const response = await fetch(apiUrl, { headers });
       const data = await response.json();
-      
+
       // Parser selon le format de chaque API
       return this.parseCloudData(provider, data);
     } catch (error) {
@@ -109,7 +112,7 @@ export class ScaleService {
       await fetch('/api/scale-readings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reading)
+        body: JSON.stringify(reading),
       });
     } catch (error) {
       console.error('Erreur sauvegarde:', error);

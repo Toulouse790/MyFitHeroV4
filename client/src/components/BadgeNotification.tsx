@@ -24,7 +24,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
   isVisible,
   onClose,
   onShare,
-  onViewDetails
+  onViewDetails,
 }) => {
   const [showAnimation, setShowAnimation] = useState(false);
 
@@ -35,7 +35,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
       const timer = setTimeout(() => {
         onClose();
       }, 8000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isVisible, onClose]);
@@ -43,7 +43,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
   const getRarityDisplayConfig = (rarity: string) => {
     const rarityKey = rarity as BadgeRarity;
     const baseConfig = RARITY_CONFIGS[rarityKey] || RARITY_CONFIGS.common;
-    
+
     // Configuration d'affichage spécifique pour les notifications avec gradients et animations
     const displayConfigs = {
       mythic: {
@@ -51,36 +51,36 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
         border: 'border-red-400',
         text: 'text-red-100',
         glow: 'shadow-red-400/50',
-        particles: '🔥'
+        particles: '🔥',
       },
       legendary: {
         bg: 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600',
         border: 'border-yellow-400',
         text: 'text-yellow-100',
         glow: 'shadow-yellow-400/50',
-        particles: '✨'
+        particles: '✨',
       },
       epic: {
         bg: 'bg-gradient-to-br from-purple-500 via-indigo-600 to-blue-700',
         border: 'border-purple-400',
         text: 'text-purple-100',
         glow: 'shadow-purple-400/50',
-        particles: '🌟'
+        particles: '🌟',
       },
       rare: {
         bg: 'bg-gradient-to-br from-blue-500 via-cyan-600 to-teal-700',
         border: 'border-blue-400',
         text: 'text-blue-100',
         glow: 'shadow-blue-400/50',
-        particles: '💎'
+        particles: '💎',
       },
       common: {
         bg: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
         border: 'border-green-400',
         text: 'text-green-100',
         glow: 'shadow-green-400/50',
-        particles: '🌱'
-      }
+        particles: '🌱',
+      },
     };
 
     return displayConfigs[rarityKey] || displayConfigs.common;
@@ -92,11 +92,13 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className={`
+      <div
+        className={`
         relative max-w-sm w-full mx-4 rounded-2xl border-2 ${config.border} ${config.bg} 
         shadow-2xl ${config.glow} transform transition-all duration-500
         ${showAnimation ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
-      `}>
+      `}
+      >
         {/* Particules d'animation */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl">
           {[...Array(12)].map((_, i) => (
@@ -107,7 +109,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random() * 2}s`
+                animationDuration: `${2 + Math.random() * 2}s`,
               }}
             >
               <span className="text-xl opacity-70">{config.particles}</span>
@@ -148,7 +150,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
           <div className="mb-6">
             <h3 className="text-xl font-bold text-white mb-2">{badge.name}</h3>
             <p className="text-white/90 text-sm mb-3">{badge.description}</p>
-            
+
             {/* XP gagné */}
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Star size={16} className="text-yellow-300" />
@@ -181,7 +183,7 @@ export const BadgeNotification: React.FC<BadgeNotificationProps> = ({
               <Share2 size={16} />
               <span>Partager</span>
             </button>
-            
+
             <button
               onClick={onViewDetails}
               className="flex-1 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2"

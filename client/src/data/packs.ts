@@ -1,11 +1,5 @@
 // src/data/packs.ts
-export type ModuleId =
-  | 'sport'
-  | 'strength'
-  | 'nutrition'
-  | 'hydration'
-  | 'sleep'
-  | 'wellness';
+export type ModuleId = 'sport' | 'strength' | 'nutrition' | 'hydration' | 'sleep' | 'wellness';
 
 export interface Pack {
   id: string;

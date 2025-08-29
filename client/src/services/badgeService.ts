@@ -35,7 +35,6 @@ export interface BadgeProgress {
 }
 
 export class BadgeService {
-  
   /**
    * Récupère tous les badges disponibles
    */
@@ -66,10 +65,12 @@ export class BadgeService {
     try {
       const { data, error } = await supabase
         .from('user_badges')
-        .select(`
+        .select(
+          `
           *,
           badge:badges(*)
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('earned_at', { ascending: false });
 
@@ -92,19 +93,19 @@ export class BadgeService {
     try {
       const [allBadges, userBadges] = await Promise.all([
         this.getAllBadges(),
-        this.getUserBadges(userId)
+        this.getUserBadges(userId),
       ]);
 
       const userBadgeMap = new Map(userBadges.map(ub => [ub.badge_id, ub]));
 
       const progress: BadgeProgress[] = allBadges.map(badge => {
         const userBadge = userBadgeMap.get(badge.id);
-        
+
         return {
           badge,
           progress: userBadge?.progress || 0,
           isEarned: !!userBadge,
-          earnedAt: userBadge?.earned_at
+          earnedAt: userBadge?.earned_at,
         };
       });
 
@@ -147,28 +148,32 @@ export class BadgeService {
         if (earnedBadgeIds.has(badge.id)) continue;
 
         const progress = this.calculateBadgeProgress(badge, userStats, userCheckins || []);
-        
+
         if (progress >= badge.condition_value) {
           // Attribuer le badge
           const { data: newBadge, error } = await supabase
             .from('user_badges')
-            .insert([{
-              user_id: userId,
-              badge_id: badge.id,
-              earned_at: new Date().toISOString(),
-              progress: progress,
-              is_notified: false,
-              created_at: new Date().toISOString()
-            }])
-            .select(`
+            .insert([
+              {
+                user_id: userId,
+                badge_id: badge.id,
+                earned_at: new Date().toISOString(),
+                progress: progress,
+                is_notified: false,
+                created_at: new Date().toISOString(),
+              },
+            ])
+            .select(
+              `
               *,
               badge:badges(*)
-            `)
+            `
+            )
             .single();
 
           if (!error && newBadge) {
             newBadges.push(newBadge);
-            
+
             // Mettre à jour les points d'expérience
             await this.updateUserExperience(userId, badge.points_reward);
           }
@@ -188,11 +193,7 @@ export class BadgeService {
   /**
    * Calcule le progrès d'un badge
    */
-  private static calculateBadgeProgress(
-    badge: Badge, 
-    userStats: any, 
-    userCheckins: any[]
-  ): number {
+  private static calculateBadgeProgress(badge: Badge, userStats: any, userCheckins: any[]): number {
     switch (badge.condition_type) {
       case 'count':
         return this.calculateCountProgress(badge, userStats);
@@ -229,25 +230,25 @@ export class BadgeService {
    * Calcule le progrès spécial
    */
   private static calculateSpecialProgress(
-    badge: Badge, 
-    userStats: any, 
+    badge: Badge,
+    userStats: any,
     userCheckins: any[]
   ): number {
     // Logique spécifique pour chaque badge spécial
     switch (badge.name) {
       case 'Perfectionniste':
         // Compter les check-ins parfaits (tous les piliers complétés)
-        return userCheckins.filter(checkin => 
-          checkin.workout_completed && 
-          checkin.nutrition_logged && 
-          checkin.sleep_tracked && 
-          checkin.hydration_logged
+        return userCheckins.filter(
+          checkin =>
+            checkin.workout_completed &&
+            checkin.nutrition_logged &&
+            checkin.sleep_tracked &&
+            checkin.hydration_logged
         ).length;
       case 'Lève-tôt':
         // Compter les check-ins avec un bon score de sommeil
-        return userCheckins.filter(checkin => 
-          checkin.sleep_tracked && checkin.energy_level >= 8
-        ).length;
+        return userCheckins.filter(checkin => checkin.sleep_tracked && checkin.energy_level >= 8)
+          .length;
       case 'Warrior':
         // Compter les workouts intenses
         return userStats.total_workouts || 0;
@@ -260,20 +261,18 @@ export class BadgeService {
    * Met à jour le progrès d'un badge pour un utilisateur
    */
   private static async updateBadgeProgress(
-    userId: string, 
-    badgeId: string, 
+    userId: string,
+    badgeId: string,
     progress: number
   ): Promise<void> {
     try {
-      await supabase
-        .from('user_badges')
-        .upsert({
-          user_id: userId,
-          badge_id: badgeId,
-          progress: progress,
-          is_notified: false,
-          created_at: new Date().toISOString()
-        });
+      await supabase.from('user_badges').upsert({
+        user_id: userId,
+        badge_id: badgeId,
+        progress: progress,
+        is_notified: false,
+        created_at: new Date().toISOString(),
+      });
     } catch (error) {
       console.error('Erreur lors de la mise à jour du progrès du badge:', error);
     }
@@ -300,11 +299,11 @@ export class BadgeService {
         .update({
           experience_points: newExperience,
           level: newLevel,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'expérience:', error);
+      console.error("Erreur lors de la mise à jour de l'expérience:", error);
     }
   }
 
@@ -330,10 +329,12 @@ export class BadgeService {
     try {
       const { data, error } = await supabase
         .from('user_badges')
-        .select(`
+        .select(
+          `
           *,
           badge:badges(*)
-        `)
+        `
+        )
         .eq('user_id', userId)
         .eq('is_notified', false)
         .order('earned_at', { ascending: false });
@@ -389,17 +390,20 @@ export class BadgeService {
     try {
       const [allBadges, userBadges] = await Promise.all([
         this.getAllBadges(),
-        this.getUserBadges(userId)
+        this.getUserBadges(userId),
       ]);
 
       const earnedBadges = userBadges.filter(ub => ub.badge);
       const totalPoints = earnedBadges.reduce((sum, ub) => sum + (ub.badge?.points_reward || 0), 0);
 
-      const rarityCount = earnedBadges.reduce((acc, ub) => {
-        const rarity = ub.badge?.rarity || 'common';
-        acc[rarity] = (acc[rarity] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
+      const rarityCount = earnedBadges.reduce(
+        (acc, ub) => {
+          const rarity = ub.badge?.rarity || 'common';
+          acc[rarity] = (acc[rarity] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>
+      );
 
       return {
         totalBadges: allBadges.length,
@@ -408,7 +412,7 @@ export class BadgeService {
         rareBadges: rarityCount.rare || 0,
         epicBadges: rarityCount.epic || 0,
         legendaryBadges: rarityCount.legendary || 0,
-        totalPoints
+        totalPoints,
       };
     } catch (error) {
       console.error('Erreur lors de la récupération des statistiques des badges:', error);
@@ -419,7 +423,7 @@ export class BadgeService {
         rareBadges: 0,
         epicBadges: 0,
         legendaryBadges: 0,
-        totalPoints: 0
+        totalPoints: 0,
       };
     }
   }

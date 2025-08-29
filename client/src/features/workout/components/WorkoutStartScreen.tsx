@@ -21,12 +21,12 @@ interface WorkoutStartScreenProps {
 export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
   workout,
   onStart,
-  onCancel
+  onCancel,
 }) => {
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${remainingMinutes}m`;
     }
@@ -54,23 +54,17 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
       {/* Workout Image */}
       {workout.imageUrl && (
         <div className="h-48 bg-gray-200 overflow-hidden">
-          <img
-            src={workout.imageUrl}
-            alt={workout.name}
-            className="w-full h-full object-cover"
-          />
+          <img src={workout.imageUrl} alt={workout.name} className="w-full h-full object-cover" />
         </div>
       )}
-      
+
       <div className="p-6">
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-xl font-bold text-gray-900 mb-2">{workout.name}</h1>
-          {workout.description && (
-            <p className="text-gray-600 text-sm">{workout.description}</p>
-          )}
+          {workout.description && <p className="text-gray-600 text-sm">{workout.description}</p>}
         </div>
-        
+
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="flex items-center gap-2">
@@ -80,7 +74,7 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
               <p className="text-sm font-medium">{formatTime(workout.duration)}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Dumbbell className="text-purple-500" size={16} />
             <div>
@@ -88,7 +82,7 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
               <p className="text-sm font-medium">{workout.exercisesCount}</p>
             </div>
           </div>
-          
+
           {workout.rating && (
             <div className="flex items-center gap-2">
               <Star className="text-yellow-500" size={16} />
@@ -98,18 +92,20 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
               </div>
             </div>
           )}
-          
+
           <div className="flex items-center gap-2">
             <Users className="text-green-500" size={16} />
             <div>
               <p className="text-xs text-gray-500">Niveau</p>
-              <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(workout.difficulty)}`}>
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(workout.difficulty)}`}
+              >
                 {workout.difficulty}
               </span>
             </div>
           </div>
         </div>
-        
+
         {/* Equipment */}
         {workout.equipment && workout.equipment.length > 0 && (
           <div className="mb-4">
@@ -126,7 +122,7 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* Muscle Groups */}
         {workout.muscleGroups && workout.muscleGroups.length > 0 && (
           <div className="mb-6">
@@ -143,7 +139,7 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* Action Buttons */}
         <div className="flex gap-3">
           <button
@@ -153,7 +149,7 @@ export const WorkoutStartScreen: React.FC<WorkoutStartScreenProps> = ({
             <Play size={20} />
             Commencer l'entraînement
           </button>
-          
+
           <button
             onClick={onCancel}
             className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"

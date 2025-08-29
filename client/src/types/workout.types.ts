@@ -117,7 +117,12 @@ export interface WorkoutPreferences {
 
 // Types pour les événements/analytics
 export interface WorkoutEvent {
-  type: 'session_started' | 'session_paused' | 'session_completed' | 'exercise_completed' | 'set_completed';
+  type:
+    | 'session_started'
+    | 'session_paused'
+    | 'session_completed'
+    | 'exercise_completed'
+    | 'set_completed';
   sessionId: string;
   exerciseId?: string;
   setIndex?: number;

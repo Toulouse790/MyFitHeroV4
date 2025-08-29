@@ -31,8 +31,8 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
   const queryClient = useQueryClient();
   const { appStoreUser } = useAppStore();
 
-  const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(
-    () => loadLocalSession()
+  const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(() =>
+    loadLocalSession()
   );
   const [isSessionActive, setIsSessionActive] = useState<boolean>(
     () => loadLocalSession()?.status === 'active' || false
@@ -83,12 +83,10 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         exercises: session.exercises,
         notes: session.notes,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
-      const { error } = await (supabase as any)
-        .from('workouts')
-        .upsert(workoutData);
+      const { error } = await (supabase as any).from('workouts').upsert(workoutData);
 
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ['workouts', session.user_id] });
@@ -97,13 +95,16 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
     }
   };
 
-  const updateSession = useCallback((updates: Partial<WorkoutSession>) => {
-    if (!currentSession) return;
-    const updatedSession = { ...currentSession, ...updates };
-    setCurrentSession(updatedSession);
-    saveLocalSession(updatedSession);
-    persistToSupabase(updatedSession);
-  }, [currentSession]);
+  const updateSession = useCallback(
+    (updates: Partial<WorkoutSession>) => {
+      if (!currentSession) return;
+      const updatedSession = { ...currentSession, ...updates };
+      setCurrentSession(updatedSession);
+      saveLocalSession(updatedSession);
+      persistToSupabase(updatedSession);
+    },
+    [currentSession]
+  );
 
   const startSession = useCallback(
     async (
@@ -112,14 +113,14 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         targetDuration = 30,
         workout_type = 'strength',
         difficulty = 'intermediate',
-        exercises = [] as WorkoutExercise[]
+        exercises = [] as WorkoutExercise[],
       } = {}
     ) => {
       if (!appStoreUser?.id) {
         toast({
           title: 'Erreur',
           description: 'Utilisateur non connecté',
-          variant: 'destructive'
+          variant: 'destructive',
         });
         return;
       }
@@ -133,9 +134,9 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         targetDuration,
         status: 'active',
         caloriesBurned: 0,
-        workout_type: workout_type as "strength" | "cardio" | "flexibility" | "sports" | "other",
-        difficulty: difficulty as "beginner" | "intermediate" | "advanced",
-        exercises
+        workout_type: workout_type as 'strength' | 'cardio' | 'flexibility' | 'sports' | 'other',
+        difficulty: difficulty as 'beginner' | 'intermediate' | 'advanced',
+        exercises,
       };
 
       setCurrentSession(newSession);
@@ -153,7 +154,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         (window as any).gtag('event', 'workout_started', {
           workout_name: workoutName,
           workout_type,
-          user_id: appStoreUser.id
+          user_id: appStoreUser.id,
         });
       }
     },
@@ -212,17 +213,18 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
     // Mettre à jour les stats quotidiennes
     try {
       const today = new Date().toISOString().split('T')[0];
-      await (supabase as any)
-        .from('daily_stats')
-        .upsert({
+      await (supabase as any).from('daily_stats').upsert(
+        {
           user_id: appStoreUser.id,
           stat_date: today,
           workouts_completed: 1,
           total_workout_minutes: Math.floor(durationSec / 60),
-          calories_burned: completed.caloriesBurned
-        }, {
-          onConflict: 'user_id,stat_date'
-        });
+          calories_burned: completed.caloriesBurned,
+        },
+        {
+          onConflict: 'user_id,stat_date',
+        }
+      );
     } catch (error) {
       console.error('Erreur mise à jour stats quotidiennes:', error);
     }
@@ -238,7 +240,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         duration_minutes: Math.round(durationSec / 60),
         calories_burned: completed.caloriesBurned,
         workout_type: completed.workout_type,
-        user_id: appStoreUser.id
+        user_id: appStoreUser.id,
       });
     }
   }, [currentSession, calculateCalories, toast, appStoreUser?.id, persistToSupabase]);
@@ -286,9 +288,9 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
               workout_type: dbSession.workout_type || 'strength',
               difficulty: dbSession.difficulty || 'intermediate',
               exercises: dbSession.exercises || [],
-              notes: dbSession.notes
+              notes: dbSession.notes,
             };
-            
+
             setCurrentSession(session);
             setIsSessionActive(session.status === 'active');
             saveLocalSession(session);

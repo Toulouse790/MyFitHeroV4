@@ -25,7 +25,7 @@ type AuthStore = AuthState & AuthActions;
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
+    set => ({
       // État initial
       user: null,
       isLoading: false,
@@ -35,7 +35,7 @@ export const useAuthStore = create<AuthStore>()(
       // Actions
       signIn: async (email: string, password: string) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const { data, error } = await supabase.auth.signInWithPassword({
             email,
@@ -44,18 +44,18 @@ export const useAuthStore = create<AuthStore>()(
 
           if (error) throw error;
 
-          set({ 
-            user: data.user, 
+          set({
+            user: data.user,
             isAuthenticated: !!data.user,
-            isLoading: false 
+            isLoading: false,
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Erreur de connexion';
-          set({ 
-            error: message, 
+          set({
+            error: message,
             isLoading: false,
             isAuthenticated: false,
-            user: null 
+            user: null,
           });
           throw error;
         }
@@ -63,30 +63,30 @@ export const useAuthStore = create<AuthStore>()(
 
       signUp: async (email: string, password: string, metadata = {}) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
             options: {
-              data: metadata
-            }
+              data: metadata,
+            },
           });
 
           if (error) throw error;
 
-          set({ 
-            user: data.user, 
+          set({
+            user: data.user,
             isAuthenticated: !!data.user,
-            isLoading: false 
+            isLoading: false,
           });
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur lors de l\'inscription';
-          set({ 
-            error: message, 
+          const message = error instanceof Error ? error.message : "Erreur lors de l'inscription";
+          set({
+            error: message,
             isLoading: false,
             isAuthenticated: false,
-            user: null 
+            user: null,
           });
           throw error;
         }
@@ -94,16 +94,16 @@ export const useAuthStore = create<AuthStore>()(
 
       signOut: async () => {
         set({ isLoading: true });
-        
+
         try {
           const { error } = await supabase.auth.signOut();
           if (error) throw error;
 
-          set({ 
-            user: null, 
+          set({
+            user: null,
             isAuthenticated: false,
             isLoading: false,
-            error: null 
+            error: null,
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Erreur de déconnexion';
@@ -114,14 +114,15 @@ export const useAuthStore = create<AuthStore>()(
 
       resetPassword: async (email: string) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const { error } = await supabase.auth.resetPasswordForEmail(email);
           if (error) throw error;
 
           set({ isLoading: false });
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'Erreur lors de la réinitialisation';
+          const message =
+            error instanceof Error ? error.message : 'Erreur lors de la réinitialisation';
           set({ error: message, isLoading: false });
           throw error;
         }
@@ -129,17 +130,17 @@ export const useAuthStore = create<AuthStore>()(
 
       updateProfile: async (updates: Record<string, any>) => {
         set({ isLoading: true, error: null });
-        
+
         try {
           const { data, error } = await supabase.auth.updateUser({
-            data: updates
+            data: updates,
           });
 
           if (error) throw error;
 
-          set({ 
-            user: data.user, 
-            isLoading: false 
+          set({
+            user: data.user,
+            isLoading: false,
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : 'Erreur lors de la mise à jour';
@@ -149,10 +150,10 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       setUser: (user: User | null) => {
-        set({ 
-          user, 
+        set({
+          user,
           isAuthenticated: !!user,
-          error: null 
+          error: null,
         });
       },
 
@@ -166,7 +167,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),

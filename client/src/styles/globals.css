@@ -13,13 +13,7 @@
 /* Classe utilitaire pour le fond dégradé MyFitHero */
 @layer utilities {
   .hero-gradient-bg {
-    background: linear-gradient(
-      135deg,
-      #5d2cfe 0%,
-      #7d36fc 20%,
-      #a53eff 60%,
-      #ff549e 100%
-    );
+    background: linear-gradient(135deg, #5d2cfe 0%, #7d36fc 20%, #a53eff 60%, #ff549e 100%);
     background-attachment: fixed;
     min-height: 100vh;
   }

@@ -16,7 +16,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
   isVisible,
   onClose,
   workoutName = 'Entraînement',
-  targetDuration = 30
+  targetDuration = 30,
 }) => {
   const [timeElapsed, setTimeElapsed] = useState(0); // en secondes
   const [timerState, setTimerState] = useState<TimerState>('idle');
@@ -36,12 +36,12 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
 
   const startTimer = useCallback(() => {
     if (timerState === 'running') return;
-    
+
     // Démarrer une session si c'est la première fois
     if (timerState === 'idle') {
       startSession(workoutName, { targetDuration });
     }
-    
+
     setTimerState('running');
     const id = setInterval(() => {
       setTimeElapsed(prev => {
@@ -82,7 +82,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
       pauseTimer();
       setTimerState('completed');
       completeSession();
-      
+
       // Vibration sur mobile si disponible
       if ('vibrate' in navigator) {
         navigator.vibrate([200, 100, 200]);
@@ -124,14 +124,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
             {/* Cercle de progression */}
             <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
               {/* Cercle de fond */}
-              <circle
-                cx="60"
-                cy="60"
-                r="50"
-                fill="none"
-                stroke="#f3f4f6"
-                strokeWidth="8"
-              />
+              <circle cx="60" cy="60" r="50" fill="none" stroke="#f3f4f6" strokeWidth="8" />
               {/* Cercle de progression */}
               <circle
                 cx="60"
@@ -146,16 +139,12 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
                 className="transition-all duration-300"
               />
             </svg>
-            
+
             {/* Temps au centre */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-800">
-                  {formatTime(timeElapsed)}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {Math.round(getProgressPercentage())}%
-                </div>
+                <div className="text-2xl font-bold text-gray-800">{formatTime(timeElapsed)}</div>
+                <div className="text-xs text-gray-500">{Math.round(getProgressPercentage())}%</div>
               </div>
             </div>
           </div>
@@ -167,9 +156,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
             <div className="flex items-center justify-center mb-1">
               <Clock size={16} className="text-blue-500" />
             </div>
-            <div className="text-sm font-medium text-gray-800">
-              {formatTime(timeElapsed)}
-            </div>
+            <div className="text-sm font-medium text-gray-800">{formatTime(timeElapsed)}</div>
             <div className="text-xs text-gray-500">Écoulé</div>
           </div>
           <div className="text-center">
@@ -201,7 +188,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
           >
             <RotateCcw size={20} className="text-gray-600" />
           </button>
-          
+
           <button
             onClick={timerState === 'running' ? pauseTimer : startTimer}
             className={`p-4 rounded-full transition-colors ${
@@ -217,7 +204,7 @@ export const WorkoutTimer: React.FC<WorkoutTimerProps> = ({
               <Play size={24} className="text-white" />
             )}
           </button>
-          
+
           <button
             onClick={stopTimer}
             className="p-3 bg-red-100 hover:bg-red-200 rounded-full transition-colors"

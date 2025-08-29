@@ -27,7 +27,7 @@ export enum FoodCategory {
   SNACKS = 'snacks',
   SUPPLEMENTS = 'supplements',
   CONDIMENTS = 'condiments',
-  PREPARED_FOODS = 'prepared_foods'
+  PREPARED_FOODS = 'prepared_foods',
 }
 
 export interface NutritionFacts {
@@ -72,7 +72,7 @@ export enum MealType {
   DINNER = 'dinner',
   SNACK = 'snack',
   PRE_WORKOUT = 'pre_workout',
-  POST_WORKOUT = 'post_workout'
+  POST_WORKOUT = 'post_workout',
 }
 
 export interface MealFood {
@@ -159,13 +159,13 @@ export enum RecipeCategory {
   APPETIZER = 'appetizer',
   SOUP = 'soup',
   SALAD = 'salad',
-  SMOOTHIE = 'smoothie'
+  SMOOTHIE = 'smoothie',
 }
 
 export enum RecipeDifficulty {
   EASY = 'easy',
   MEDIUM = 'medium',
-  HARD = 'hard'
+  HARD = 'hard',
 }
 
 export interface RecipeIngredient {

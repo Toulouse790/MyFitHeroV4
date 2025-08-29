@@ -26,7 +26,7 @@ i18n
     resources,
     fallbackLng: 'en',
     debug: false,
-    
+
     // Détection automatique de la langue
     detection: {
       order: ['navigator', 'localStorage', 'sessionStorage', 'htmlTag', 'path', 'subdomain'],

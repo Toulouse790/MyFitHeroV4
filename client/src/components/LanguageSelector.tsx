@@ -2,17 +2,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Globe, Check } from 'lucide-react';
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸', region: 'United States' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷', region: 'France' }
+  { code: 'fr', name: 'Français', flag: '🇫🇷', region: 'France' },
 ];
 
 interface LanguageSelectorProps {
@@ -21,10 +21,10 @@ interface LanguageSelectorProps {
   className?: string;
 }
 
-export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
-  variant = 'outline', 
+export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
+  variant = 'outline',
   size = 'default',
-  className = ''
+  className = '',
 }) => {
   const { i18n } = useTranslation();
   const currentLanguage = languages.find(lang => lang.code === i18n.language);
@@ -42,7 +42,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        {languages.map((language) => (
+        {languages.map(language => (
           <DropdownMenuItem
             key={language.code}
             onClick={() => handleLanguageChange(language.code)}
@@ -55,9 +55,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 <div className="text-xs text-gray-500">{language.region}</div>
               </div>
             </div>
-            {i18n.language === language.code && (
-              <Check className="h-4 w-4 text-green-600" />
-            )}
+            {i18n.language === language.code && <Check className="h-4 w-4 text-green-600" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

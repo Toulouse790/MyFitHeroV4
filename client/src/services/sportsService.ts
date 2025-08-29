@@ -11,7 +11,7 @@ import React from 'react';
 
 const supabase: SupabaseClient = createClient(
   import.meta.env.VITE_SUPABASE_URL as string,
-  import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+  import.meta.env.VITE_SUPABASE_ANON_KEY as string
 );
 
 /* ------------------------------------------------------------------ */
@@ -71,9 +71,7 @@ async function fetchAllSports(): Promise<SportRow[]> {
   // 3. Requête Supabase
   const { data, error } = await supabase
     .from('sports_library')
-    .select(
-      'id, name, emoji, icon, category, positions, is_popular, user_count, updated_at',
-    )
+    .select('id, name, emoji, icon, category, positions, is_popular, user_count, updated_at')
     .order('name', { ascending: true });
 
   if (error) {
@@ -114,7 +112,7 @@ export const SportsService = {
   async getPopularSports(limit = 12): Promise<SportOption[]> {
     const rows = await fetchAllSports();
     return rows
-      .filter((r) => r.is_popular)
+      .filter(r => r.is_popular)
       .slice(0, limit)
       .map(mapRow);
   },
@@ -124,8 +122,8 @@ export const SportsService = {
     if (!query || query.length < 2) return [];
 
     // Recherche locale d’abord (perfs)
-    const localRows = (await fetchAllSports()).filter((r) =>
-      r.name.toLowerCase().includes(query.toLowerCase()),
+    const localRows = (await fetchAllSports()).filter(r =>
+      r.name.toLowerCase().includes(query.toLowerCase())
     );
 
     if (localRows.length > 0) return localRows.map(mapRow);
@@ -133,9 +131,7 @@ export const SportsService = {
     // Recherche SQL ILIKE
     const { data, error } = await supabase
       .from('sports_library')
-      .select(
-        'id, name, emoji, icon, category, positions',
-      )
+      .select('id, name, emoji, icon, category, positions')
       .ilike('name', `%${query}%`)
       .order('name')
       .limit(15);
@@ -151,9 +147,7 @@ export const SportsService = {
   async getSportById(id: string): Promise<SportOption | null> {
     const { data, error } = await supabase
       .from('sports_library')
-      .select(
-        'id, name, emoji, icon, category, positions',
-      )
+      .select('id, name, emoji, icon, category, positions')
       .eq('id', id)
       .single();
 
@@ -167,7 +161,7 @@ export const SportsService = {
   /** Suggestion utilisateur → table `sport_suggestions` */
   async suggestSport(
     sportName: string,
-    opts: { suggested_position?: string; locale?: string } = {},
+    opts: { suggested_position?: string; locale?: string } = {}
   ): Promise<boolean> {
     const { data: userData } = await supabase.auth.getUser();
     const payload: SportSuggestionPayload = {
@@ -177,9 +171,7 @@ export const SportsService = {
       user_id: userData?.user?.id ?? undefined,
     };
 
-    const { error } = await supabase
-      .from('sport_suggestions')
-      .insert(payload);
+    const { error } = await supabase.from('sport_suggestions').insert(payload);
 
     if (error) {
       console.error('[sportService] suggestSport:', error);
@@ -203,23 +195,19 @@ export function useSports(options?: { enabled?: boolean }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const query = useQuery(
-    ['sports', 'all'],
-    () => SportsService.getSports(),
-    {
-      staleTime: CACHE_TTL,
-      cacheTime: CACHE_TTL * 2,
-      enabled: options?.enabled ?? true,
-      onError: (err) => {
-        console.error(err);
-        toast({
-          title: 'Erreur',
-          description: 'Impossible de charger la liste des sports',
-          variant: 'destructive',
-        });
-      },
+  const query = useQuery(['sports', 'all'], () => SportsService.getSports(), {
+    staleTime: CACHE_TTL,
+    cacheTime: CACHE_TTL * 2,
+    enabled: options?.enabled ?? true,
+    onError: err => {
+      console.error(err);
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de charger la liste des sports',
+        variant: 'destructive',
+      });
     },
-  );
+  });
 
   return {
     sports: query.data ?? [],
@@ -250,8 +238,8 @@ export function useSportsFallback() {
 
   React.useEffect(() => {
     SportsService.getSports()
-      .then((s) => setState({ sports: s, loading: false, error: null }))
-      .catch((e) => {
+      .then(s => setState({ sports: s, loading: false, error: null }))
+      .catch(e => {
         console.error(e);
         toast({
           title: 'Erreur',

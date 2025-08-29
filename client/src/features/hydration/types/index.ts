@@ -62,19 +62,21 @@ export interface HydrationState {
 
 export interface HydrationActions {
   // Entries
-  addEntry: (entry: Omit<HydrationEntry, 'id' | 'userId' | 'created_at' | 'updated_at'>) => Promise<void>;
+  addEntry: (
+    entry: Omit<HydrationEntry, 'id' | 'userId' | 'created_at' | 'updated_at'>
+  ) => Promise<void>;
   updateEntry: (id: string, updates: Partial<HydrationEntry>) => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
   loadEntries: (startDate?: string, endDate?: string) => Promise<void>;
-  
+
   // Goals
   setGoal: (dailyTarget: number) => Promise<void>;
   updateGoal: (id: string, updates: Partial<HydrationGoal>) => Promise<void>;
   loadGoals: () => Promise<void>;
-  
+
   // Stats
   calculateStats: (period: 'daily' | 'weekly' | 'monthly') => Promise<void>;
-  
+
   // Utility
   clearError: () => void;
   resetStore: () => void;

@@ -10,12 +10,12 @@ interface AnimatedToastProps {
   onRemove: (id: string) => void;
 }
 
-const AnimatedToast: React.FC<AnimatedToastProps> = ({ 
-  id, 
-  message, 
-  type, 
-  isExiting, 
-  onRemove 
+const AnimatedToast: React.FC<AnimatedToastProps> = ({
+  id,
+  message,
+  type,
+  isExiting,
+  onRemove,
 }) => {
   const getToastConfig = () => {
     switch (type) {
@@ -23,19 +23,19 @@ const AnimatedToast: React.FC<AnimatedToastProps> = ({
         return {
           icon: CheckCircle,
           bgColor: 'bg-green-500',
-          textColor: 'text-white'
+          textColor: 'text-white',
         };
       case 'error':
         return {
           icon: AlertCircle,
           bgColor: 'bg-red-500',
-          textColor: 'text-white'
+          textColor: 'text-white',
         };
       default:
         return {
           icon: Info,
           bgColor: 'bg-blue-500',
-          textColor: 'text-white'
+          textColor: 'text-white',
         };
     }
   };
@@ -50,14 +50,11 @@ const AnimatedToast: React.FC<AnimatedToastProps> = ({
         ${config.bgColor} ${config.textColor}
         rounded-lg shadow-lg p-4
         transform transition-all duration-300 ease-out
-        ${isExiting 
-          ? 'translate-x-full opacity-0' 
-          : 'translate-x-0 opacity-100'
-        }
+        ${isExiting ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}
         animate-slideInRight
       `}
       style={{
-        animation: !isExiting ? 'slideInRight 0.3s ease-out' : undefined
+        animation: !isExiting ? 'slideInRight 0.3s ease-out' : undefined,
       }}
     >
       <div className="flex items-center space-x-3">
@@ -70,13 +67,13 @@ const AnimatedToast: React.FC<AnimatedToastProps> = ({
           <X size={16} />
         </button>
       </div>
-      
+
       {/* Barre de progression */}
       <div className="mt-2 w-full bg-white/20 rounded-full h-1">
-        <div 
+        <div
           className="bg-white rounded-full h-1 animate-progress"
           style={{
-            animation: 'progress 3s linear forwards'
+            animation: 'progress 3s linear forwards',
           }}
         />
       </div>
@@ -94,7 +91,7 @@ export const AnimatedToastContainer: React.FC = () => {
 
   return (
     <div className="fixed top-0 right-0 z-50 p-4 space-y-2">
-      {toasts.map((toast) => (
+      {toasts.map(toast => (
         <AnimatedToast
           key={toast.id}
           {...toast}

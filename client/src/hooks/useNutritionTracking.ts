@@ -64,36 +64,39 @@ export function useNutritionTracking() {
   }, [fetchEntries, fetchGoals]);
 
   // Ajouter une entrée
-  const addEntry = useCallback(async (entry: Omit<NutritionEntry, 'id' | 'user_id'>) => {
-    if (!user) return;
-    setLoading(true);
-    const { error } = await supabase
-      .from('nutrition_entries')
-      .insert({ ...entry, user_id: user.id });
-    if (!error) {
-      showToast('Aliment ajouté !', 'success');
-      fetchEntries();
-    } else {
-      showToast('Erreur lors de l\'ajout', 'error');
-    }
-    setLoading(false);
-  }, [user, fetchEntries, showToast]);
+  const addEntry = useCallback(
+    async (entry: Omit<NutritionEntry, 'id' | 'user_id'>) => {
+      if (!user) return;
+      setLoading(true);
+      const { error } = await supabase
+        .from('nutrition_entries')
+        .insert({ ...entry, user_id: user.id });
+      if (!error) {
+        showToast('Aliment ajouté !', 'success');
+        fetchEntries();
+      } else {
+        showToast("Erreur lors de l'ajout", 'error');
+      }
+      setLoading(false);
+    },
+    [user, fetchEntries, showToast]
+  );
 
   // Supprimer une entrée
-  const deleteEntry = useCallback(async (id: string) => {
-    setLoading(true);
-    const { error } = await supabase
-      .from('nutrition_entries')
-      .delete()
-      .eq('id', id);
-    if (!error) {
-      showToast('Entrée supprimée', 'success');
-      fetchEntries();
-    } else {
-      showToast('Erreur lors de la suppression', 'error');
-    }
-    setLoading(false);
-  }, [fetchEntries, showToast]);
+  const deleteEntry = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      const { error } = await supabase.from('nutrition_entries').delete().eq('id', id);
+      if (!error) {
+        showToast('Entrée supprimée', 'success');
+        fetchEntries();
+      } else {
+        showToast('Erreur lors de la suppression', 'error');
+      }
+      setLoading(false);
+    },
+    [fetchEntries, showToast]
+  );
 
   // Calcul des totaux du jour
   const dailyTotals = useMemo(() => {

@@ -16,64 +16,75 @@ export interface UseWorkoutExercisesReturn {
   getProgressPercentage: () => number;
 }
 
-export const useWorkoutExercises = (initialExercises: WorkoutExercise[] = []): UseWorkoutExercisesReturn => {
+export const useWorkoutExercises = (
+  initialExercises: WorkoutExercise[] = []
+): UseWorkoutExercisesReturn => {
   const [exercises, setExercises] = useState<WorkoutExercise[]>(initialExercises);
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
 
   const updateExercise = useCallback((exerciseId: string, updates: Partial<WorkoutExercise>) => {
-    setExercises(prev => prev.map(exercise =>
-      exercise.id === exerciseId ? { ...exercise, ...updates } : exercise
-    ));
+    setExercises(prev =>
+      prev.map(exercise => (exercise.id === exerciseId ? { ...exercise, ...updates } : exercise))
+    );
   }, []);
 
   const updateExerciseSet = useCallback((exerciseId: string, setIndex: number, updates: any) => {
-    setExercises(prev => prev.map(exercise => {
-      if (exercise.id === exerciseId && exercise.sets) {
-        const updatedSets = [...exercise.sets];
-        updatedSets[setIndex] = { ...updatedSets[setIndex], ...updates };
-        return { ...exercise, sets: updatedSets };
-      }
-      return exercise;
-    }));
+    setExercises(prev =>
+      prev.map(exercise => {
+        if (exercise.id === exerciseId && exercise.sets) {
+          const updatedSets = [...exercise.sets];
+          updatedSets[setIndex] = { ...updatedSets[setIndex], ...updates };
+          return { ...exercise, sets: updatedSets };
+        }
+        return exercise;
+      })
+    );
   }, []);
 
-  const completeExercise = useCallback((exerciseId: string) => {
-    updateExercise(exerciseId, { completed: true });
-    
-    // Passer au prochain exercice non terminé
-    const nextExercise = exercises.find(e => !e.completed && e.id !== exerciseId);
-    if (nextExercise) {
-      setExpandedExercise(nextExercise.id);
-    }
-  }, [exercises, updateExercise]);
+  const completeExercise = useCallback(
+    (exerciseId: string) => {
+      updateExercise(exerciseId, { completed: true });
+
+      // Passer au prochain exercice non terminé
+      const nextExercise = exercises.find(e => !e.completed && e.id !== exerciseId);
+      if (nextExercise) {
+        setExpandedExercise(nextExercise.id);
+      }
+    },
+    [exercises, updateExercise]
+  );
 
   const addSetToExercise = useCallback((exerciseId: string) => {
-    setExercises(prev => prev.map(exercise => {
-      if (exercise.id === exerciseId && exercise.sets) {
-        const lastSet = exercise.sets[exercise.sets.length - 1];
-        const newSet = {
-          reps: lastSet?.reps || 10,
-          weight: lastSet?.weight,
-          duration: lastSet?.duration,
-          completed: false
-        };
-        return {
-          ...exercise,
-          sets: [...exercise.sets, newSet]
-        };
-      }
-      return exercise;
-    }));
+    setExercises(prev =>
+      prev.map(exercise => {
+        if (exercise.id === exerciseId && exercise.sets) {
+          const lastSet = exercise.sets[exercise.sets.length - 1];
+          const newSet = {
+            reps: lastSet?.reps || 10,
+            weight: lastSet?.weight,
+            duration: lastSet?.duration,
+            completed: false,
+          };
+          return {
+            ...exercise,
+            sets: [...exercise.sets, newSet],
+          };
+        }
+        return exercise;
+      })
+    );
   }, []);
 
   const removeSetFromExercise = useCallback((exerciseId: string, setIndex: number) => {
-    setExercises(prev => prev.map(exercise => {
-      if (exercise.id === exerciseId && exercise.sets && exercise.sets.length > 1) {
-        const updatedSets = exercise.sets.filter((_, index) => index !== setIndex);
-        return { ...exercise, sets: updatedSets };
-      }
-      return exercise;
-    }));
+    setExercises(prev =>
+      prev.map(exercise => {
+        if (exercise.id === exerciseId && exercise.sets && exercise.sets.length > 1) {
+          const updatedSets = exercise.sets.filter((_, index) => index !== setIndex);
+          return { ...exercise, sets: updatedSets };
+        }
+        return exercise;
+      })
+    );
   }, []);
 
   const getCompletedExercisesCount = useCallback(() => {
@@ -102,6 +113,6 @@ export const useWorkoutExercises = (initialExercises: WorkoutExercise[] = []): U
     setExpandedExercise,
     getCompletedExercisesCount,
     getTotalExercisesCount,
-    getProgressPercentage
+    getProgressPercentage,
   };
 };

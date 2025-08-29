@@ -27,7 +27,7 @@ export enum FitnessLevel {
   BEGINNER = 'beginner',
   INTERMEDIATE = 'intermediate',
   ADVANCED = 'advanced',
-  EXPERT = 'expert'
+  EXPERT = 'expert',
 }
 
 export interface ProfileStats {
@@ -55,7 +55,7 @@ export interface PrivacySettings {
 export enum Visibility {
   PUBLIC = 'public',
   FRIENDS = 'friends',
-  PRIVATE = 'private'
+  PRIVATE = 'private',
 }
 
 // Types pour les amis
@@ -72,7 +72,7 @@ export interface Friend {
 export enum FriendshipStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
-  BLOCKED = 'blocked'
+  BLOCKED = 'blocked',
 }
 
 export interface FriendRequest {
@@ -91,7 +91,7 @@ export enum FriendRequestStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   DECLINED = 'declined',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 // Types pour les publications
@@ -120,7 +120,7 @@ export enum PostType {
   IMAGE = 'image',
   VIDEO = 'video',
   NUTRITION = 'nutrition',
-  SLEEP = 'sleep'
+  SLEEP = 'sleep',
 }
 
 export interface PostContent {
@@ -205,7 +205,7 @@ export enum ChallengeType {
   INDIVIDUAL = 'individual',
   GROUP = 'group',
   VERSUS = 'versus',
-  TEAM = 'team'
+  TEAM = 'team',
 }
 
 export enum ChallengeCategory {
@@ -216,14 +216,14 @@ export enum ChallengeCategory {
   WEIGHT_LOSS = 'weight_loss',
   STRENGTH = 'strength',
   ENDURANCE = 'endurance',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
 }
 
 export enum ChallengeDifficulty {
   EASY = 'easy',
   MEDIUM = 'medium',
   HARD = 'hard',
-  EXTREME = 'extreme'
+  EXTREME = 'extreme',
 }
 
 export interface ChallengeRule {
@@ -249,7 +249,7 @@ export enum RewardType {
   BADGE = 'badge',
   POINTS = 'points',
   TITLE = 'title',
-  VIRTUAL_CURRENCY = 'virtual_currency'
+  VIRTUAL_CURRENCY = 'virtual_currency',
 }
 
 export interface ChallengeParticipant {
@@ -266,7 +266,7 @@ export enum ParticipantStatus {
   ACTIVE = 'active',
   COMPLETED = 'completed',
   DROPPED_OUT = 'dropped_out',
-  DISQUALIFIED = 'disqualified'
+  DISQUALIFIED = 'disqualified',
 }
 
 export interface ChallengeProgress {
@@ -303,7 +303,7 @@ export enum AchievementCategory {
   CONSISTENCY = 'consistency',
   PROGRESS = 'progress',
   CHALLENGE = 'challenge',
-  MILESTONE = 'milestone'
+  MILESTONE = 'milestone',
 }
 
 export enum AchievementRarity {
@@ -311,7 +311,7 @@ export enum AchievementRarity {
   UNCOMMON = 'uncommon',
   RARE = 'rare',
   EPIC = 'epic',
-  LEGENDARY = 'legendary'
+  LEGENDARY = 'legendary',
 }
 
 export interface AchievementCriteria {
@@ -354,7 +354,7 @@ export enum NotificationType {
   CHALLENGE_COMPLETED = 'challenge_completed',
   ACHIEVEMENT_UNLOCKED = 'achievement_unlocked',
   WORKOUT_REMINDER = 'workout_reminder',
-  MILESTONE_REACHED = 'milestone_reached'
+  MILESTONE_REACHED = 'milestone_reached',
 }
 
 // Types pour les classements
@@ -373,7 +373,7 @@ export enum LeaderboardType {
   GLOBAL = 'global',
   FRIENDS = 'friends',
   LOCAL = 'local',
-  CHALLENGE = 'challenge'
+  CHALLENGE = 'challenge',
 }
 
 export enum LeaderboardPeriod {
@@ -381,7 +381,7 @@ export enum LeaderboardPeriod {
   WEEKLY = 'weekly',
   MONTHLY = 'monthly',
   YEARLY = 'yearly',
-  ALL_TIME = 'all_time'
+  ALL_TIME = 'all_time',
 }
 
 export interface LeaderboardEntry {
@@ -419,7 +419,7 @@ export enum CommunityCategory {
   FITNESS_GOAL = 'fitness_goal',
   LOCAL = 'local',
   SUPPORT = 'support',
-  CHALLENGES = 'challenges'
+  CHALLENGES = 'challenges',
 }
 
 export interface CommunityMember {
@@ -436,5 +436,5 @@ export enum CommunityRole {
   MEMBER = 'member',
   MODERATOR = 'moderator',
   ADMIN = 'admin',
-  OWNER = 'owner'
+  OWNER = 'owner',
 }

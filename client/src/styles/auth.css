@@ -2,10 +2,11 @@
 
 /* Gradient de fond pour la page d'authentification */
 .hero-gradient-bg {
-  background: linear-gradient(135deg, 
-    rgb(239, 246, 255) 0%, 
-    rgb(255, 255, 255) 25%, 
-    rgb(250, 245, 255) 75%, 
+  background: linear-gradient(
+    135deg,
+    rgb(239, 246, 255) 0%,
+    rgb(255, 255, 255) 25%,
+    rgb(250, 245, 255) 75%,
     rgb(237, 233, 254) 100%
   );
   min-height: 100vh;
@@ -99,7 +100,7 @@
   .hero-gradient-bg {
     padding: 1rem;
   }
-  
+
   .auth-card {
     margin: 0;
     max-width: 100%;
@@ -109,10 +110,11 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .hero-gradient-bg {
-    background: linear-gradient(135deg, 
-      rgb(17, 24, 39) 0%, 
-      rgb(31, 41, 55) 25%, 
-      rgb(55, 65, 81) 75%, 
+    background: linear-gradient(
+      135deg,
+      rgb(17, 24, 39) 0%,
+      rgb(31, 41, 55) 25%,
+      rgb(55, 65, 81) 75%,
       rgb(75, 85, 99) 100%
     );
   }

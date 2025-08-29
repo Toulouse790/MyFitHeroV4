@@ -33,36 +33,39 @@ export const useToast = () => {
     };
   }, []);
 
-  const toast = useCallback(({ title, description, variant = 'default', duration = 4000 }: ToastOptions) => {
-    const id = Math.random().toString(36).substring(7);
-    const newToast: ToastState = { id, title, description, variant, duration };
-    
-    toastsStore.push(newToast);
-    notifyListeners();
-    
-    // Auto-remove after duration
-    setTimeout(() => {
-      toastsStore = toastsStore.filter(t => t.id !== id);
-      notifyListeners();
-    }, duration);
+  const toast = useCallback(
+    ({ title, description, variant = 'default', duration = 4000 }: ToastOptions) => {
+      const id = Math.random().toString(36).substring(7);
+      const newToast: ToastState = { id, title, description, variant, duration };
 
-    const message = description ? `${title}: ${description}` : title;
-    
-    switch (variant) {
-      case 'destructive':
-        sonnerToast.error(message, { duration });
-        break;
-      case 'success':
-        sonnerToast.success(message, { duration });
-        break;
-      default:
-        sonnerToast(title, { 
-          description,
-          duration 
-        });
-        break;
-    }
-  }, []);
+      toastsStore.push(newToast);
+      notifyListeners();
+
+      // Auto-remove after duration
+      setTimeout(() => {
+        toastsStore = toastsStore.filter(t => t.id !== id);
+        notifyListeners();
+      }, duration);
+
+      const message = description ? `${title}: ${description}` : title;
+
+      switch (variant) {
+        case 'destructive':
+          sonnerToast.error(message, { duration });
+          break;
+        case 'success':
+          sonnerToast.success(message, { duration });
+          break;
+        default:
+          sonnerToast(title, {
+            description,
+            duration,
+          });
+          break;
+      }
+    },
+    []
+  );
 
   return { toast, toasts, subscribe };
 };

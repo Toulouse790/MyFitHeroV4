@@ -24,9 +24,9 @@ interface ThemeProviderProps {
   defaultTheme?: Theme;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ 
-  children, 
-  defaultTheme = 'auto' 
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme = 'auto',
 }) => {
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
@@ -42,20 +42,20 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Résolution du thème
   useEffect(() => {
     let newResolvedTheme: 'light' | 'dark';
-    
+
     if (theme === 'auto') {
       newResolvedTheme = getSystemTheme();
     } else {
       newResolvedTheme = theme;
     }
-    
+
     setResolvedTheme(newResolvedTheme);
-    
+
     // Application du thème au DOM
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(newResolvedTheme);
-    
+
     // Sauvegarde dans localStorage
     localStorage.setItem('theme', theme);
   }, [theme]);
@@ -67,7 +67,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       const handleChange = () => {
         setResolvedTheme(getSystemTheme());
       };
-      
+
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
@@ -97,12 +97,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   };
 
   return (
-    <ThemeContext.Provider value={{
-      theme,
-      resolvedTheme,
-      setTheme,
-      toggleTheme
-    }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        resolvedTheme,
+        setTheme,
+        toggleTheme,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -111,7 +113,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 // Hook pour les couleurs adaptatives
 export const useAdaptiveColors = () => {
   const { resolvedTheme } = useTheme();
-  
+
   const colors = {
     light: {
       background: 'bg-gray-50',
@@ -128,16 +130,16 @@ export const useAdaptiveColors = () => {
       textSecondary: 'text-gray-300',
       border: 'border-gray-700',
       accent: 'text-blue-400',
-    }
+    },
   };
-  
+
   return colors[resolvedTheme];
 };
 
 // Composant de toggle du thème
 export const ThemeToggle: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  
+
   const getThemeIcon = () => {
     switch (theme) {
       case 'light':
@@ -150,7 +152,7 @@ export const ThemeToggle: React.FC = () => {
         return '☀️';
     }
   };
-  
+
   return (
     <button
       onClick={toggleTheme}

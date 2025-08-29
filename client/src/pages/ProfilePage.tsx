@@ -3,30 +3,30 @@ import { useAppStore } from '@/store/useAppStore';
 import AvatarUpload from '@/components/AvatarUpload';
 import UserProfileTabs from '@/components/UserProfileTabs';
 import { toast } from 'react-hot-toast';
-import { 
-  Scale, 
-  RefreshCw as Sync, 
-  CheckCircle2, 
-  XCircle, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Scale,
+  RefreshCw as Sync,
+  CheckCircle2,
+  XCircle,
+  TrendingUp,
+  TrendingDown,
   Minus,
   Bluetooth,
   Wifi,
   Calendar,
   Activity,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 
 const ProfilePage: React.FC = () => {
   // Store principal
-  const { 
-    appStoreUser, 
-    connectedScales, 
+  const {
+    appStoreUser,
+    connectedScales,
     weightHistory,
     updateUserProfile,
     addConnectedScale,
-    addWeightEntry
+    addWeightEntry,
   } = useAppStore();
 
   // États locaux pour les champs modifiables
@@ -75,9 +75,9 @@ const ProfilePage: React.FC = () => {
         weight_kg: parseFloat(currentWeight) || undefined,
         height_cm: parseInt(height) || undefined,
         age: parseInt(age) || undefined,
-        gender: (gender as "male" | "female" | "other") || undefined,
+        gender: (gender as 'male' | 'female' | 'other') || undefined,
         activity_level: activityLevel as any,
-        fitness_goal: fitnessGoal as any
+        fitness_goal: fitnessGoal as any,
       } as any);
       toast.success('Profil mis à jour avec succès !');
     } catch (error) {
@@ -131,7 +131,7 @@ const ProfilePage: React.FC = () => {
         device_id: device.id,
         brand: device.brand,
         model: device.model,
-        is_active: true
+        is_active: true,
       } as any);
       toast.success(`${device.name} connectée avec succès !`);
     } catch (error) {
@@ -156,7 +156,7 @@ const ProfilePage: React.FC = () => {
     const diff = recent[1].weight - recent[0].weight;
     return {
       type: diff > 0.5 ? 'up' : diff < -0.5 ? 'down' : 'stable',
-      diff: Math.abs(diff)
+      diff: Math.abs(diff),
     };
   };
 
@@ -183,7 +183,6 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="container mx-auto px-4 py-6 max-w-2xl">
-        
         {/* Affichage des erreurs */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -196,10 +195,12 @@ const ProfilePage: React.FC = () => {
           <div className="flex flex-col items-center">
             <AvatarUpload />
             <h1 className="text-2xl font-bold mt-4 text-gray-900">
-              {(userProfile as any)?.displayName || (user as any)?.email?.split('@')[0] || 'Utilisateur'}
+              {(userProfile as any)?.displayName ||
+                (user as any)?.email?.split('@')[0] ||
+                'Utilisateur'}
             </h1>
             <p className="text-gray-500 mt-1">{(user as any)?.email}</p>
-            
+
             {/* Statistiques rapides */}
             <div className="flex items-center gap-6 mt-4 text-sm">
               {bmi && (
@@ -210,10 +211,15 @@ const ProfilePage: React.FC = () => {
               )}
               {weightTrend && (
                 <div className="text-center">
-                  <div className={`font-semibold flex items-center gap-1 ${
-                    weightTrend.type === 'up' ? 'text-red-500' : 
-                    weightTrend.type === 'down' ? 'text-green-500' : 'text-gray-500'
-                  }`}>
+                  <div
+                    className={`font-semibold flex items-center gap-1 ${
+                      weightTrend.type === 'up'
+                        ? 'text-red-500'
+                        : weightTrend.type === 'down'
+                          ? 'text-green-500'
+                          : 'text-gray-500'
+                    }`}
+                  >
                     {weightTrend.type === 'up' && <TrendingUp size={16} />}
                     {weightTrend.type === 'down' && <TrendingDown size={16} />}
                     {weightTrend.type === 'stable' && <Minus size={16} />}
@@ -238,7 +244,7 @@ const ProfilePage: React.FC = () => {
             <Activity className="text-blue-500" size={20} />
             Données physiques
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -250,52 +256,46 @@ const ProfilePage: React.FC = () => {
                 max="300"
                 step="0.1"
                 value={currentWeight}
-                onChange={(e) => setCurrentWeight(e.target.value)}
+                onChange={e => setCurrentWeight(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: 70.5"
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Taille (cm)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Taille (cm)</label>
               <input
                 type="number"
                 min="100"
                 max="250"
                 value={height}
-                onChange={(e) => setHeight(e.target.value)}
+                onChange={e => setHeight(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: 175"
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Âge
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Âge</label>
               <input
                 type="number"
                 min="10"
                 max="120"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={e => setAge(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Ex: 25"
                 disabled={isLoading}
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sexe
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Sexe</label>
               <select
                 value={gender}
-                onChange={(e) => setGender(e.target.value)}
+                onChange={e => setGender(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
               >
@@ -305,14 +305,14 @@ const ProfilePage: React.FC = () => {
                 <option value="other">Autre</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Niveau d'activité
               </label>
               <select
                 value={activityLevel}
-                onChange={(e) => setActivityLevel(e.target.value)}
+                onChange={e => setActivityLevel(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
               >
@@ -323,14 +323,14 @@ const ProfilePage: React.FC = () => {
                 <option value="extra_active">Extrêmement actif</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Objectif principal
               </label>
               <select
                 value={fitnessGoal}
-                onChange={(e) => setFitnessGoal(e.target.value)}
+                onChange={e => setFitnessGoal(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={isLoading}
               >
@@ -342,7 +342,7 @@ const ProfilePage: React.FC = () => {
               </select>
             </div>
           </div>
-          
+
           <button
             onClick={handleSaveProfile}
             disabled={isLoading}
@@ -365,53 +365,69 @@ const ProfilePage: React.FC = () => {
             <Scale className="text-green-500" size={20} />
             Balance connectée
           </h2>
-          
+
           {connectedScales.length > 0 ? (
             <div className="space-y-4">
-              {connectedScales.map((scale) => (
+              {connectedScales.map(scale => (
                 <div key={scale.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full ${
-                        (scale as any).isConnected ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
-                        {(scale as any).connectionType === 'bluetooth' && <Bluetooth size={16} className={
-                          (scale as any).isConnected ? 'text-green-600' : 'text-red-600'
-                        } />}
-                        {(scale as any).connectionType === 'wifi' && <Wifi size={16} className={
-                          (scale as any).isConnected ? 'text-green-600' : 'text-red-600'
-                        } />}
+                      <div
+                        className={`p-2 rounded-full ${
+                          (scale as any).isConnected ? 'bg-green-100' : 'bg-red-100'
+                        }`}
+                      >
+                        {(scale as any).connectionType === 'bluetooth' && (
+                          <Bluetooth
+                            size={16}
+                            className={
+                              (scale as any).isConnected ? 'text-green-600' : 'text-red-600'
+                            }
+                          />
+                        )}
+                        {(scale as any).connectionType === 'wifi' && (
+                          <Wifi
+                            size={16}
+                            className={
+                              (scale as any).isConnected ? 'text-green-600' : 'text-red-600'
+                            }
+                          />
+                        )}
                       </div>
                       <div>
                         <h3 className="font-medium">{(scale as any).name}</h3>
-                        <p className="text-sm text-gray-500">{scale.brand} {scale.model}</p>
+                        <p className="text-sm text-gray-500">
+                          {scale.brand} {scale.model}
+                        </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       {(scale as any).batteryLevel && (
                         <div className="text-sm text-gray-500">
                           🔋 {(scale as any).batteryLevel}%
                         </div>
                       )}
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        (scale as any).isConnected 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          (scale as any).isConnected
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {(scale as any).isConnected ? 'Connectée' : 'Déconnectée'}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">
-                      Dernière synchro: {(scale as any).lastSync 
+                      Dernière synchro:{' '}
+                      {(scale as any).lastSync
                         ? new Date((scale as any).lastSync).toLocaleString('fr-FR')
-                        : 'Jamais'
-                      }
+                        : 'Jamais'}
                     </div>
-                    
+
                     <button
                       onClick={() => handleSyncScale(scale.id)}
                       disabled={!(scale as any).isConnected || isSyncing}
@@ -427,15 +443,13 @@ const ProfilePage: React.FC = () => {
           ) : (
             <div className="text-center py-8">
               <Scale className="mx-auto text-gray-400 mb-4" size={48} />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Aucune balance connectée
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune balance connectée</h3>
               <p className="text-gray-500 mb-4">
                 Connectez votre balance pour synchroniser automatiquement votre poids
               </p>
             </div>
           )}
-          
+
           <button
             onClick={handleScanForScales}
             disabled={isScanning}
@@ -466,29 +480,42 @@ const ProfilePage: React.FC = () => {
               {showWeightHistory ? 'Masquer' : 'Voir tout'}
             </button>
           </div>
-          
+
           {weightHistory.length > 0 ? (
             <div className="space-y-3">
-              {(showWeightHistory ? weightHistory : weightHistory.slice(0, 3)).map((entry, index) => (
-                <div key={entry.id || index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${
-                      entry.source === 'connected_scale' ? 'bg-green-500' : 
-                      entry.source === 'manual' ? 'bg-blue-500' : 'bg-gray-500'
-                    }`}></div>
-                    <div>
-                      <div className="font-medium">{entry.weight} kg</div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(entry.recorded_at).toLocaleDateString('fr-FR')}
+              {(showWeightHistory ? weightHistory : weightHistory.slice(0, 3)).map(
+                (entry, index) => (
+                  <div
+                    key={entry.id || index}
+                    className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          entry.source === 'connected_scale'
+                            ? 'bg-green-500'
+                            : entry.source === 'manual'
+                              ? 'bg-blue-500'
+                              : 'bg-gray-500'
+                        }`}
+                      ></div>
+                      <div>
+                        <div className="font-medium">{entry.weight} kg</div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(entry.recorded_at).toLocaleDateString('fr-FR')}
+                        </div>
                       </div>
                     </div>
+                    <div className="text-xs text-gray-400 capitalize">
+                      {entry.source === 'connected_scale'
+                        ? 'Balance'
+                        : entry.source === 'manual'
+                          ? 'Manuel'
+                          : 'Import'}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400 capitalize">
-                    {entry.source === 'connected_scale' ? 'Balance' : 
-                     entry.source === 'manual' ? 'Manuel' : 'Import'}
-                  </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">

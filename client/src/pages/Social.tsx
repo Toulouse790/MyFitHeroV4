@@ -1,13 +1,13 @@
 // pages/Social.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useLocation } from 'wouter';
-import { 
-  Users, 
-  Target, 
-  Trophy, 
+import {
+  Users,
+  Target,
+  Trophy,
   MessageCircle,
-  Star, 
-  Zap, 
+  Star,
+  Zap,
   ChevronRight,
   Plus,
   Heart,
@@ -35,7 +35,7 @@ import {
   UserPlus,
   MessageSquare,
   ThumbsUp,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -48,10 +48,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import AIIntelligence from '@/components/AIIntelligence';
 
 // Types
@@ -164,7 +176,9 @@ const Social: React.FC = () => {
   const { toast } = useToast();
 
   // States
-  const [activeTab, setActiveTab] = useState<'feed' | 'challenges' | 'leaderboard' | 'friends'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'challenges' | 'leaderboard' | 'friends'>(
+    'feed'
+  );
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -190,7 +204,7 @@ const Social: React.FC = () => {
     post_type: 'general',
     media_files: [],
     achievements: [],
-    location: ''
+    location: '',
   });
 
   const [newChallenge, setNewChallenge] = useState<CreateChallengeData>({
@@ -202,7 +216,7 @@ const Social: React.FC = () => {
     target_unit: '',
     duration_days: 7,
     difficulty: 'medium',
-    reward_points: 100
+    reward_points: 100,
   });
 
   // Chargement des données
@@ -216,7 +230,7 @@ const Social: React.FC = () => {
         global_rank: 47,
         total_points: 1240,
         streak_days: 12,
-        achievements_count: 15
+        achievements_count: 15,
       };
       setUserStats(mockStats);
     } catch (error) {
@@ -248,13 +262,15 @@ const Social: React.FC = () => {
             username: 'marie_fit',
             avatar_url: '',
             sport: appStoreUser.sport || 'fitness',
-            level: 8
+            level: 8,
           },
-          achievements: [{
-            type: 'personal_record',
-            value: '45min',
-            description: `Record ${appStoreUser.sport}`
-          }],
+          achievements: [
+            {
+              type: 'personal_record',
+              value: '45min',
+              description: `Record ${appStoreUser.sport}`,
+            },
+          ],
           comments: [
             {
               id: 'c1',
@@ -265,10 +281,10 @@ const Social: React.FC = () => {
               user: {
                 name: 'Thomas Martin',
                 username: 'tom_athlete',
-                avatar_url: ''
-              }
-            }
-          ]
+                avatar_url: '',
+              },
+            },
+          ],
         },
         {
           id: '2',
@@ -287,10 +303,10 @@ const Social: React.FC = () => {
             name: 'Thomas Martin',
             username: 'tom_athlete',
             sport: appStoreUser.sport || 'fitness',
-            level: 12
+            level: 12,
           },
-          comments: []
-        }
+          comments: [],
+        },
       ];
 
       setPosts(mockPosts);
@@ -327,8 +343,8 @@ const Social: React.FC = () => {
           creator: {
             name: 'Coach Sophie',
             username: 'coach_sophie',
-            avatar_url: ''
-          }
+            avatar_url: '',
+          },
         },
         {
           id: '2',
@@ -351,9 +367,9 @@ const Social: React.FC = () => {
           creator: {
             name: 'Dr. Martin',
             username: 'dr_nutrition',
-            avatar_url: ''
-          }
-        }
+            avatar_url: '',
+          },
+        },
       ];
 
       setChallenges(mockChallenges);
@@ -378,7 +394,7 @@ const Social: React.FC = () => {
           level: 8,
           is_online: true,
           mutual_friends: 5,
-          last_activity: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+          last_activity: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
         },
         {
           id: 'friend2',
@@ -389,7 +405,7 @@ const Social: React.FC = () => {
           level: 12,
           is_online: false,
           mutual_friends: 3,
-          last_activity: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+          last_activity: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
         },
         {
           id: 'friend3',
@@ -400,8 +416,8 @@ const Social: React.FC = () => {
           level: 15,
           is_online: true,
           mutual_friends: 8,
-          last_activity: new Date(Date.now() - 10 * 60 * 1000).toISOString()
-        }
+          last_activity: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+        },
       ];
 
       setFriends(mockFriends);
@@ -416,7 +432,7 @@ const Social: React.FC = () => {
       toast({
         title: 'Erreur',
         description: 'Le contenu du post ne peut pas être vide',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -441,10 +457,10 @@ const Social: React.FC = () => {
           name: appStoreUser?.first_name || appStoreUser?.username || 'Utilisateur',
           username: appStoreUser?.username || 'user',
           sport: appStoreUser?.sport || 'fitness',
-          level: 5
+          level: 5,
         },
         achievements: newPost.achievements,
-        comments: []
+        comments: [],
       };
 
       setPosts(prev => [newPostData, ...prev]);
@@ -454,8 +470,8 @@ const Social: React.FC = () => {
         description: 'Votre post a été partagé avec la communauté',
         action: {
           label: 'Voir',
-          onClick: () => setActiveTab('feed')
-        }
+          onClick: () => setActiveTab('feed'),
+        },
       });
 
       setNewPost({
@@ -463,7 +479,7 @@ const Social: React.FC = () => {
         post_type: 'general',
         media_files: [],
         achievements: [],
-        location: ''
+        location: '',
       });
       setShowCreatePost(false);
 
@@ -472,16 +488,15 @@ const Social: React.FC = () => {
           post_type: newPost.post_type,
           content_length: newPost.content.length,
           user_sport: appStoreUser?.sport,
-          user_id: appStoreUser?.id
+          user_id: appStoreUser?.id,
         });
       }
-
     } catch (error) {
       console.error('Erreur création post:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de publier le post',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   }, [newPost, appStoreUser, toast]);
@@ -491,7 +506,7 @@ const Social: React.FC = () => {
       toast({
         title: 'Erreur',
         description: 'Titre et description sont requis',
-        variant: 'destructive'
+        variant: 'destructive',
       });
       return;
     }
@@ -504,15 +519,17 @@ const Social: React.FC = () => {
         ...newChallenge,
         creator_id: appStoreUser?.id || '',
         start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + newChallenge.duration_days * 24 * 60 * 60 * 1000).toISOString(),
+        end_date: new Date(
+          Date.now() + newChallenge.duration_days * 24 * 60 * 60 * 1000
+        ).toISOString(),
         participants_count: 1,
         is_participating: true,
         progress_percentage: 0,
         creator: {
           name: appStoreUser?.first_name || appStoreUser?.username || 'Utilisateur',
           username: appStoreUser?.username || 'user',
-          avatar_url: ''
-        }
+          avatar_url: '',
+        },
       };
 
       setChallenges(prev => [challengeData, ...prev]);
@@ -522,8 +539,8 @@ const Social: React.FC = () => {
         description: 'Votre défi est maintenant disponible pour la communauté',
         action: {
           label: 'Voir les défis',
-          onClick: () => setActiveTab('challenges')
-        }
+          onClick: () => setActiveTab('challenges'),
+        },
       });
 
       setNewChallenge({
@@ -535,7 +552,7 @@ const Social: React.FC = () => {
         target_unit: '',
         duration_days: 7,
         difficulty: 'medium',
-        reward_points: 100
+        reward_points: 100,
       });
       setShowCreateChallenge(false);
 
@@ -545,133 +562,156 @@ const Social: React.FC = () => {
           difficulty: newChallenge.difficulty,
           duration_days: newChallenge.duration_days,
           user_sport: appStoreUser?.sport,
-          user_id: appStoreUser?.id
+          user_id: appStoreUser?.id,
         });
       }
-
     } catch (error) {
       console.error('Erreur création challenge:', error);
       toast({
         title: 'Erreur',
         description: 'Impossible de créer le défi',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   }, [newChallenge, appStoreUser, toast]);
 
-  const handleLikePost = useCallback(async (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            is_liked: !post.is_liked,
-            likes_count: post.is_liked ? post.likes_count - 1 : post.likes_count + 1
-          }
-        : post
-    ));
+  const handleLikePost = useCallback(
+    async (postId: string) => {
+      setPosts(prev =>
+        prev.map(post =>
+          post.id === postId
+            ? {
+                ...post,
+                is_liked: !post.is_liked,
+                likes_count: post.is_liked ? post.likes_count - 1 : post.likes_count + 1,
+              }
+            : post
+        )
+      );
 
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'social_post_liked', {
-        post_id: postId,
-        user_id: appStoreUser?.id
-      });
-    }
-  }, [appStoreUser?.id]);
-
-  const handleBookmarkPost = useCallback(async (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { ...post, is_bookmarked: !post.is_bookmarked }
-        : post
-    ));
-
-    const post = posts.find(p => p.id === postId);
-    toast({
-      title: post?.is_bookmarked ? 'Retiré des favoris' : 'Ajouté aux favoris',
-      description: post?.is_bookmarked 
-        ? 'Post retiré de vos favoris' 
-        : 'Post ajouté à vos favoris',
-    });
-  }, [posts, toast]);
-
-  const handleDeletePost = useCallback(async (postId: string) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) {
-      return;
-    }
-
-    setPosts(prev => prev.filter(post => post.id !== postId));
-    toast({
-      title: "Post supprimé",
-      description: "Votre post a bien été supprimé.",
-    });
-  }, [toast]);
-
-  const handleAddComment = useCallback(async (postId: string) => {
-    if (!newComment.trim()) return;
-
-    const comment: Comment = {
-      id: Date.now().toString(),
-      post_id: postId,
-      user_id: appStoreUser?.id || '',
-      content: newComment,
-      created_at: new Date().toISOString(),
-      user: {
-        name: appStoreUser?.first_name || appStoreUser?.username || 'Utilisateur',
-        username: appStoreUser?.username || 'user',
-        avatar_url: ''
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'social_post_liked', {
+          post_id: postId,
+          user_id: appStoreUser?.id,
+        });
       }
-    };
+    },
+    [appStoreUser?.id]
+  );
 
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? { 
-            ...post, 
-            comments: [...(post.comments || []), comment],
-            comments_count: post.comments_count + 1
-          }
-        : post
-    ));
+  const handleBookmarkPost = useCallback(
+    async (postId: string) => {
+      setPosts(prev =>
+        prev.map(post =>
+          post.id === postId ? { ...post, is_bookmarked: !post.is_bookmarked } : post
+        )
+      );
 
-    setNewComment('');
-    toast({ title: "Commentaire ajouté !" });
-  }, [newComment, appStoreUser, toast]);
+      const post = posts.find(p => p.id === postId);
+      toast({
+        title: post?.is_bookmarked ? 'Retiré des favoris' : 'Ajouté aux favoris',
+        description: post?.is_bookmarked
+          ? 'Post retiré de vos favoris'
+          : 'Post ajouté à vos favoris',
+      });
+    },
+    [posts, toast]
+  );
 
-  const handleJoinChallenge = useCallback(async (challengeId: string) => {
-    const challenge = challenges.find(c => c.id === challengeId);
-
-    if (challenge?.is_participating) {
-      if (!window.confirm('Voulez-vous vraiment quitter ce défi ?')) {
+  const handleDeletePost = useCallback(
+    async (postId: string) => {
+      if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce post ?')) {
         return;
       }
-    }
 
-    setChallenges(prev => prev.map(challenge => 
-      challenge.id === challengeId 
-        ? { 
-            ...challenge, 
-            is_participating: !challenge.is_participating,
-            participants_count: challenge.is_participating 
-              ? challenge.participants_count - 1 
-              : challenge.participants_count + 1
-          }
-        : challenge
-    ));
+      setPosts(prev => prev.filter(post => post.id !== postId));
+      toast({
+        title: 'Post supprimé',
+        description: 'Votre post a bien été supprimé.',
+      });
+    },
+    [toast]
+  );
 
-    const updatedChallenge = challenges.find(c => c.id === challengeId);
-    toast({
-      title: updatedChallenge?.is_participating ? 'Défi quitté' : 'Défi rejoint !',
-      description: updatedChallenge?.is_participating 
-        ? 'Vous avez quitté ce défi' 
-        : `Vous participez maintenant au défi "${updatedChallenge?.title}"`,
-    });
-  }, [challenges, toast]);
+  const handleAddComment = useCallback(
+    async (postId: string) => {
+      if (!newComment.trim()) return;
 
-  const handleAddFriend = useCallback(async (friendId: string) => {
-    toast({
-      title: "Demande d'ami envoyée",
-      description: "Votre demande d'ami a été envoyée.",
-    });
-  }, [toast]);
+      const comment: Comment = {
+        id: Date.now().toString(),
+        post_id: postId,
+        user_id: appStoreUser?.id || '',
+        content: newComment,
+        created_at: new Date().toISOString(),
+        user: {
+          name: appStoreUser?.first_name || appStoreUser?.username || 'Utilisateur',
+          username: appStoreUser?.username || 'user',
+          avatar_url: '',
+        },
+      };
+
+      setPosts(prev =>
+        prev.map(post =>
+          post.id === postId
+            ? {
+                ...post,
+                comments: [...(post.comments || []), comment],
+                comments_count: post.comments_count + 1,
+              }
+            : post
+        )
+      );
+
+      setNewComment('');
+      toast({ title: 'Commentaire ajouté !' });
+    },
+    [newComment, appStoreUser, toast]
+  );
+
+  const handleJoinChallenge = useCallback(
+    async (challengeId: string) => {
+      const challenge = challenges.find(c => c.id === challengeId);
+
+      if (challenge?.is_participating) {
+        if (!window.confirm('Voulez-vous vraiment quitter ce défi ?')) {
+          return;
+        }
+      }
+
+      setChallenges(prev =>
+        prev.map(challenge =>
+          challenge.id === challengeId
+            ? {
+                ...challenge,
+                is_participating: !challenge.is_participating,
+                participants_count: challenge.is_participating
+                  ? challenge.participants_count - 1
+                  : challenge.participants_count + 1,
+              }
+            : challenge
+        )
+      );
+
+      const updatedChallenge = challenges.find(c => c.id === challengeId);
+      toast({
+        title: updatedChallenge?.is_participating ? 'Défi quitté' : 'Défi rejoint !',
+        description: updatedChallenge?.is_participating
+          ? 'Vous avez quitté ce défi'
+          : `Vous participez maintenant au défi "${updatedChallenge?.title}"`,
+      });
+    },
+    [challenges, toast]
+  );
+
+  const handleAddFriend = useCallback(
+    async (friendId: string) => {
+      toast({
+        title: "Demande d'ami envoyée",
+        description: "Votre demande d'ami a été envoyée.",
+      });
+    },
+    [toast]
+  );
 
   // Messages personnalisés
   const getPersonalizedMessage = useMemo(() => {
@@ -683,9 +723,10 @@ const Social: React.FC = () => {
 
   // Filtrage des amis
   const filteredFriends = useMemo(() => {
-    return friends.filter(friend => 
-      friend.name.toLowerCase().includes(friendsSearch.toLowerCase()) ||
-      friend.username.toLowerCase().includes(friendsSearch.toLowerCase())
+    return friends.filter(
+      friend =>
+        friend.name.toLowerCase().includes(friendsSearch.toLowerCase()) ||
+        friend.username.toLowerCase().includes(friendsSearch.toLowerCase())
     );
   }, [friends, friendsSearch]);
 
@@ -693,12 +734,7 @@ const Social: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([
-        loadUserStats(),
-        loadPosts(),
-        loadChallenges(),
-        loadFriends()
-      ]);
+      await Promise.all([loadUserStats(), loadPosts(), loadChallenges(), loadFriends()]);
       setLoading(false);
     };
 
@@ -716,7 +752,11 @@ const Social: React.FC = () => {
           <div className="flex items-center space-x-3">
             <Avatar>
               <AvatarFallback>
-                {(appStoreUser?.first_name?.[0] || appStoreUser?.username?.[0] || 'U').toUpperCase()}
+                {(
+                  appStoreUser?.first_name?.[0] ||
+                  appStoreUser?.username?.[0] ||
+                  'U'
+                ).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -725,8 +765,8 @@ const Social: React.FC = () => {
             </div>
           </div>
 
-          <Select 
-            value={newPost.post_type} 
+          <Select
+            value={newPost.post_type}
             onValueChange={(value: any) => setNewPost(prev => ({ ...prev, post_type: value }))}
           >
             <SelectTrigger>
@@ -742,7 +782,7 @@ const Social: React.FC = () => {
 
           <Textarea
             value={newPost.content}
-            onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+            onChange={e => setNewPost(prev => ({ ...prev, content: e.target.value }))}
             placeholder={`Partagez votre expérience ${appStoreUser?.sport}, vos achievements, vos conseils...`}
             className="min-h-32 resize-none"
             maxLength={500}
@@ -764,13 +804,10 @@ const Social: React.FC = () => {
           </div>
 
           <div className="flex justify-end space-x-3">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCreatePost(false)}
-            >
+            <Button variant="outline" onClick={() => setShowCreatePost(false)}>
               Annuler
             </Button>
-            <Button 
+            <Button
               onClick={handleCreatePost}
               disabled={!newPost.content.trim()}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -796,22 +833,22 @@ const Social: React.FC = () => {
         <div className="space-y-4">
           <Input
             value={newChallenge.title}
-            onChange={(e) => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
+            onChange={e => setNewChallenge(prev => ({ ...prev, title: e.target.value }))}
             placeholder={`ex: Défi ${appStoreUser?.sport} 30 jours`}
             maxLength={100}
           />
 
           <Textarea
             value={newChallenge.description}
-            onChange={(e) => setNewChallenge(prev => ({ ...prev, description: e.target.value }))}
+            onChange={e => setNewChallenge(prev => ({ ...prev, description: e.target.value }))}
             placeholder="Décrivez votre défi en détail..."
             className="min-h-24 resize-none"
             maxLength={300}
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <Select 
-              value={newChallenge.pillar} 
+            <Select
+              value={newChallenge.pillar}
               onValueChange={(value: any) => setNewChallenge(prev => ({ ...prev, pillar: value }))}
             >
               <SelectTrigger>
@@ -826,9 +863,11 @@ const Social: React.FC = () => {
               </SelectContent>
             </Select>
 
-            <Select 
-              value={newChallenge.difficulty} 
-              onValueChange={(value: any) => setNewChallenge(prev => ({ ...prev, difficulty: value }))}
+            <Select
+              value={newChallenge.difficulty}
+              onValueChange={(value: any) =>
+                setNewChallenge(prev => ({ ...prev, difficulty: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -846,13 +885,15 @@ const Social: React.FC = () => {
             <Input
               type="number"
               value={newChallenge.target_value || ''}
-              onChange={(e) => setNewChallenge(prev => ({ ...prev, target_value: parseInt(e.target.value) || 0 }))}
+              onChange={e =>
+                setNewChallenge(prev => ({ ...prev, target_value: parseInt(e.target.value) || 0 }))
+              }
               placeholder="Objectif"
             />
 
             <Input
               value={newChallenge.target_unit}
-              onChange={(e) => setNewChallenge(prev => ({ ...prev, target_unit: e.target.value }))}
+              onChange={e => setNewChallenge(prev => ({ ...prev, target_unit: e.target.value }))}
               placeholder="Unité (km, reps...)"
             />
           </div>
@@ -863,7 +904,12 @@ const Social: React.FC = () => {
               <Input
                 type="number"
                 value={newChallenge.duration_days || ''}
-                onChange={(e) => setNewChallenge(prev => ({ ...prev, duration_days: parseInt(e.target.value) || 1 }))}
+                onChange={e =>
+                  setNewChallenge(prev => ({
+                    ...prev,
+                    duration_days: parseInt(e.target.value) || 1,
+                  }))
+                }
                 min="1"
                 max="365"
               />
@@ -874,16 +920,23 @@ const Social: React.FC = () => {
               <Input
                 type="number"
                 value={newChallenge.reward_points || ''}
-                onChange={(e) => setNewChallenge(prev => ({ ...prev, reward_points: parseInt(e.target.value) || 10 }))}
+                onChange={e =>
+                  setNewChallenge(prev => ({
+                    ...prev,
+                    reward_points: parseInt(e.target.value) || 10,
+                  }))
+                }
                 min="10"
                 step="10"
               />
             </div>
           </div>
 
-          <Select 
-            value={newChallenge.challenge_type} 
-            onValueChange={(value: any) => setNewChallenge(prev => ({ ...prev, challenge_type: value }))}
+          <Select
+            value={newChallenge.challenge_type}
+            onValueChange={(value: any) =>
+              setNewChallenge(prev => ({ ...prev, challenge_type: value }))
+            }
           >
             <SelectTrigger>
               <SelectValue />
@@ -896,13 +949,10 @@ const Social: React.FC = () => {
           </Select>
 
           <div className="flex justify-end space-x-3 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowCreateChallenge(false)}
-            >
+            <Button variant="outline" onClick={() => setShowCreateChallenge(false)}>
               Annuler
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateChallenge}
               disabled={!newChallenge.title.trim() || !newChallenge.description.trim()}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -964,13 +1014,15 @@ const Social: React.FC = () => {
             )}
 
             <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-              <span>{new Date(post.created_at).toLocaleTimeString('fr-FR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}</span>
+              <span>
+                {new Date(post.created_at).toLocaleTimeString('fr-FR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
 
               <div className="flex items-center space-x-4">
-                <button 
+                <button
                   onClick={() => handleLikePost(post.id)}
                   className={`flex items-center space-x-1 hover:text-red-500 transition-colors ${
                     post.is_liked ? 'text-red-500' : ''
@@ -980,7 +1032,7 @@ const Social: React.FC = () => {
                   <span>{post.likes_count}</span>
                 </button>
 
-                <button 
+                <button
                   onClick={() => setShowComments(showComments === post.id ? null : post.id)}
                   className="flex items-center space-x-1 hover:text-blue-500 transition-colors"
                 >
@@ -993,7 +1045,7 @@ const Social: React.FC = () => {
                   <span>{post.shares_count}</span>
                 </button>
 
-                <button 
+                <button
                   onClick={() => handleBookmarkPost(post.id)}
                   className={`hover:text-yellow-500 transition-colors ${
                     post.is_bookmarked ? 'text-yellow-500' : ''
@@ -1007,7 +1059,7 @@ const Social: React.FC = () => {
             {/* Section commentaires */}
             {showComments === post.id && (
               <div className="border-t pt-3 space-y-3">
-                {post.comments?.map((comment) => (
+                {post.comments?.map(comment => (
                   <div key={comment.id} className="flex items-start space-x-2">
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={comment.user.avatar_url} />
@@ -1019,9 +1071,9 @@ const Social: React.FC = () => {
                         <p className="text-sm">{comment.content}</p>
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        {new Date(comment.created_at).toLocaleTimeString('fr-FR', { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                        {new Date(comment.created_at).toLocaleTimeString('fr-FR', {
+                          hour: '2-digit',
+                          minute: '2-digit',
                         })}
                       </p>
                     </div>
@@ -1031,23 +1083,27 @@ const Social: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <Avatar className="h-6 w-6">
                     <AvatarFallback className="text-xs">
-                      {(appStoreUser?.first_name?.[0] || appStoreUser?.username?.[0] || 'U').toUpperCase()}
+                      {(
+                        appStoreUser?.first_name?.[0] ||
+                        appStoreUser?.username?.[0] ||
+                        'U'
+                      ).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <Input
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
+                    onChange={e => setNewComment(e.target.value)}
                     placeholder="Ajouter un commentaire..."
                     className="flex-1"
-                    onKeyPress={(e) => {
+                    onKeyPress={e => {
                       if (e.key === 'Enter' && newComment.trim()) {
                         handleAddComment(post.id);
                       }
                     }}
                   />
-                  <Button 
-                    onClick={() => handleAddComment(post.id)} 
-                    size="sm" 
+                  <Button
+                    onClick={() => handleAddComment(post.id)}
+                    size="sm"
                     disabled={!newComment.trim()}
                   >
                     <Send className="h-4 w-4" />
@@ -1064,21 +1120,31 @@ const Social: React.FC = () => {
   const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
     const getDifficultyColor = (difficulty: string) => {
       switch (difficulty) {
-        case 'easy': return 'bg-green-100 text-green-800';
-        case 'medium': return 'bg-yellow-100 text-yellow-800';
-        case 'hard': return 'bg-orange-100 text-orange-800';
-        case 'expert': return 'bg-red-100 text-red-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'easy':
+          return 'bg-green-100 text-green-800';
+        case 'medium':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'hard':
+          return 'bg-orange-100 text-orange-800';
+        case 'expert':
+          return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
       }
     };
 
     const getPillarIcon = (pillar: string) => {
       switch (pillar) {
-        case 'workout': return '💪';
-        case 'nutrition': return '🍎';
-        case 'hydration': return '💧';
-        case 'sleep': return '😴';
-        default: return '⭐';
+        case 'workout':
+          return '💪';
+        case 'nutrition':
+          return '🍎';
+        case 'hydration':
+          return '💧';
+        case 'sleep':
+          return '😴';
+        default:
+          return '⭐';
       }
     };
 
@@ -1096,8 +1162,12 @@ const Social: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-            <span>{getPillarIcon(challenge.pillar)} {challenge.pillar}</span>
-            <span>🎯 {challenge.target_value} {challenge.target_unit}</span>
+            <span>
+              {getPillarIcon(challenge.pillar)} {challenge.pillar}
+            </span>
+            <span>
+              🎯 {challenge.target_value} {challenge.target_unit}
+            </span>
             <span>⏱️ {challenge.duration_days} jours</span>
             <span>🏆 {challenge.reward_points} pts</span>
           </div>
@@ -1124,7 +1194,7 @@ const Social: React.FC = () => {
 
             <Button
               onClick={() => handleJoinChallenge(challenge.id)}
-              variant={challenge.is_participating ? "outline" : "default"}
+              variant={challenge.is_participating ? 'outline' : 'default'}
               size="sm"
             >
               {challenge.is_participating ? 'Quitter' : 'Rejoindre'}
@@ -1153,7 +1223,9 @@ const Social: React.FC = () => {
               <h4 className="font-semibold">{friend.name}</h4>
               <p className="text-sm text-gray-600">@{friend.username}</p>
               <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <span>{friend.sport} • Niveau {friend.level}</span>
+                <span>
+                  {friend.sport} • Niveau {friend.level}
+                </span>
                 <span>•</span>
                 <span>{friend.mutual_friends} amis communs</span>
               </div>
@@ -1161,11 +1233,7 @@ const Social: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              onClick={() => handleAddFriend(friend.id)}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={() => handleAddFriend(friend.id)} variant="outline" size="sm">
               <MessageSquare className="h-4 w-4 mr-1" />
               Message
             </Button>
@@ -1178,7 +1246,7 @@ const Social: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <UniformHeader 
+        <UniformHeader
           title="Social"
           subtitle="Chargement..."
           showBackButton={true}
@@ -1197,12 +1265,12 @@ const Social: React.FC = () => {
     { id: 'feed', label: 'Feed', icon: MessageCircle },
     { id: 'challenges', label: 'Défis', icon: Target },
     { id: 'leaderboard', label: 'Classement', icon: Trophy },
-    { id: 'friends', label: 'Amis', icon: Users }
+    { id: 'friends', label: 'Amis', icon: Users },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <UniformHeader 
+      <UniformHeader
         title="Social Hub"
         subtitle={getPersonalizedMessage}
         showBackButton={true}
@@ -1232,7 +1300,6 @@ const Social: React.FC = () => {
       />
 
       <div className="p-4 space-y-6 max-w-6xl mx-auto">
-
         {/* Stats rapides */}
         {userStats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1251,7 +1318,9 @@ const Social: React.FC = () => {
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Target size={20} className="text-green-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-800">{userStats.active_challenges}</div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {userStats.active_challenges}
+                </div>
                 <div className="text-sm text-gray-600">Défis Actifs</div>
               </CardContent>
             </Card>
@@ -1271,7 +1340,9 @@ const Social: React.FC = () => {
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <Star size={20} className="text-purple-600" />
                 </div>
-                <div className="text-2xl font-bold text-gray-800">{userStats.total_points.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-gray-800">
+                  {userStats.total_points.toLocaleString()}
+                </div>
                 <div className="text-sm text-gray-600">Points</div>
               </CardContent>
             </Card>
@@ -1281,12 +1352,20 @@ const Social: React.FC = () => {
         {/* Navigation par onglets */}
         <Card>
           <CardContent className="p-2">
-            <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)} className="space-y-6">
+            <Tabs
+              value={activeTab}
+              onValueChange={(value: any) => setActiveTab(value)}
+              className="space-y-6"
+            >
               <TabsList className="grid w-full grid-cols-4">
-                {tabs.map((tab) => {
+                {tabs.map(tab => {
                   const TabIcon = tab.icon;
                   return (
-                    <TabsTrigger key={tab.id} value={tab.id} className="flex items-center space-x-2">
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className="flex items-center space-x-2"
+                    >
                       <TabIcon className="h-4 w-4" />
                       <span className="hidden sm:inline">{tab.label}</span>
                     </TabsTrigger>
@@ -1330,7 +1409,10 @@ const Social: React.FC = () => {
               <TabsContent value="challenges" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold">Défis Communauté</h2>
-                  <Select value={challengeFilter} onValueChange={(value: any) => setChallengeFilter(value)}>
+                  <Select
+                    value={challengeFilter}
+                    onValueChange={(value: any) => setChallengeFilter(value)}
+                  >
                     <SelectTrigger className="w-40">
                       <Filter className="h-4 w-4 mr-2" />
                       <SelectValue />
@@ -1397,12 +1479,12 @@ const Social: React.FC = () => {
                             </div>
                             <div>
                               <div className="font-semibold">Votre position</div>
-                              <div className="text-sm text-gray-600">{userStats?.total_points} points</div>
+                              <div className="text-sm text-gray-600">
+                                {userStats?.total_points} points
+                              </div>
                             </div>
                           </div>
-                          <Badge className="bg-blue-600">
-                            {appStoreUser?.sport}
-                          </Badge>
+                          <Badge className="bg-blue-600">{appStoreUser?.sport}</Badge>
                         </div>
                       </div>
                     </div>
@@ -1422,7 +1504,7 @@ const Social: React.FC = () => {
                       <div className="flex items-center space-x-2">
                         <Input
                           value={friendsSearch}
-                          onChange={(e) => setFriendsSearch(e.target.value)}
+                          onChange={e => setFriendsSearch(e.target.value)}
                           placeholder="Rechercher un ami..."
                           className="w-48"
                         />
@@ -1443,10 +1525,14 @@ const Social: React.FC = () => {
                         <div className="text-center py-8 text-gray-500">
                           <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                           <p>
-                            {friendsSearch ? 'Aucun ami trouvé' : "Connectez-vous avec d'autres athlètes"}
+                            {friendsSearch
+                              ? 'Aucun ami trouvé'
+                              : "Connectez-vous avec d'autres athlètes"}
                           </p>
                           <p className="text-sm">
-                            {friendsSearch ? 'Essayez un autre terme de recherche' : `Trouvez des partenaires d'entraînement ${appStoreUser?.sport}`}
+                            {friendsSearch
+                              ? 'Essayez un autre terme de recherche'
+                              : `Trouvez des partenaires d'entraînement ${appStoreUser?.sport}`}
                           </p>
                         </div>
                       )}

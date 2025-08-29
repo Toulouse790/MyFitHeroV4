@@ -12,10 +12,7 @@ interface PackSelectorProps {
   recommendedPacks?: string[];
 }
 
-export const PackSelector: React.FC<PackSelectorProps> = ({ 
-  onSelect, 
-  recommendedPacks = [] 
-}) => {
+export const PackSelector: React.FC<PackSelectorProps> = ({ onSelect, recommendedPacks = [] }) => {
   const [selectedPack, setSelectedPack] = useState<string | null>(null);
   const [hoveredPack, setHoveredPack] = useState<string | null>(null);
 
@@ -30,16 +27,14 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Choisissez votre programme
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Choisissez votre programme</h2>
         <p className="text-gray-600">
           Sélectionnez le pack qui correspond le mieux à vos objectifs
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-        {SMART_PACKS.map((pack) => {
+        {SMART_PACKS.map(pack => {
           const isRecommended = recommendedPacks.includes(pack.id);
           const isSelected = selectedPack === pack.id;
           const isHovered = hoveredPack === pack.id;
@@ -49,10 +44,10 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
             <Card
               key={pack.id}
               className={cn(
-                "relative cursor-pointer transition-all duration-300 overflow-hidden",
-                "hover:shadow-lg hover:scale-[1.02]",
-                isSelected && "ring-2 ring-blue-500 shadow-lg scale-[1.02]",
-                isRecommended && "border-blue-200 bg-gradient-to-br from-blue-50/50 to-transparent"
+                'relative cursor-pointer transition-all duration-300 overflow-hidden',
+                'hover:shadow-lg hover:scale-[1.02]',
+                isSelected && 'ring-2 ring-blue-500 shadow-lg scale-[1.02]',
+                isRecommended && 'border-blue-200 bg-gradient-to-br from-blue-50/50 to-transparent'
               )}
               onClick={() => handleSelect(pack.id)}
               onMouseEnter={() => setHoveredPack(pack.id)}
@@ -71,9 +66,7 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
               {/* Badge Recommandé */}
               {isRecommended && (
                 <div className="absolute top-3 left-3">
-                  <Badge className="bg-blue-500 text-white border-0">
-                    Recommandé
-                  </Badge>
+                  <Badge className="bg-blue-500 text-white border-0">Recommandé</Badge>
                 </div>
               )}
 
@@ -82,12 +75,8 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
                 <div className="flex items-start space-x-4">
                   <div className="text-4xl flex-shrink-0">{pack.icon}</div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1">
-                      {pack.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed">
-                      {pack.description}
-                    </p>
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">{pack.name}</h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">{pack.description}</p>
                   </div>
                 </div>
 
@@ -97,12 +86,8 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
                     Modules inclus :
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {pack.modules.map((module) => (
-                      <Badge 
-                        key={module} 
-                        variant="outline" 
-                        className="text-xs capitalize"
-                      >
+                    {pack.modules.map(module => (
+                      <Badge key={module} variant="outline" className="text-xs capitalize">
                         {module === 'strength' ? 'Musculation' : module}
                       </Badge>
                     ))}
@@ -120,12 +105,14 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
                     <Clock className="h-4 w-4 mr-1" />
                     <span>~{estimatedTime} minutes</span>
                   </div>
-                  
-                  <div className={cn(
-                    "flex items-center text-sm font-medium transition-all duration-300",
-                    isSelected && "text-blue-600",
-                    isHovered && !isSelected && "text-gray-700 translate-x-1"
-                  )}>
+
+                  <div
+                    className={cn(
+                      'flex items-center text-sm font-medium transition-all duration-300',
+                      isSelected && 'text-blue-600',
+                      isHovered && !isSelected && 'text-gray-700 translate-x-1'
+                    )}
+                  >
                     {isSelected ? (
                       <>
                         <Check className="h-4 w-4 mr-1" />
@@ -142,10 +129,12 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
               </div>
 
               {/* Effet de survol */}
-              <div className={cn(
-                "absolute inset-0 bg-gradient-to-t from-blue-500/10 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none",
-                isHovered && "opacity-100"
-              )} />
+              <div
+                className={cn(
+                  'absolute inset-0 bg-gradient-to-t from-blue-500/10 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none',
+                  isHovered && 'opacity-100'
+                )}
+              />
             </Card>
           );
         })}
@@ -155,7 +144,8 @@ export const PackSelector: React.FC<PackSelectorProps> = ({
       {(hoveredPack === 'custom' || selectedPack === 'custom') && (
         <div className="text-center mt-4">
           <p className="text-sm text-gray-600 italic">
-            💡 Le pack "Sur Mesure" vous permettra de choisir précisément les modules qui vous intéressent
+            💡 Le pack "Sur Mesure" vous permettra de choisir précisément les modules qui vous
+            intéressent
           </p>
         </div>
       )}

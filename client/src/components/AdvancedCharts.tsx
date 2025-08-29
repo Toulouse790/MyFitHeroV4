@@ -19,7 +19,7 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  Radar
+  Radar,
 } from 'recharts';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 
@@ -50,7 +50,7 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
   showLegend = true,
   showGrid = true,
   animate = true,
-  className = ''
+  className = '',
 }) => {
   const adaptiveColors = useAdaptiveColors();
 
@@ -73,14 +73,14 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div 
+        <div
           className="custom-tooltip"
           style={{
             background: adaptiveColors.surface,
             border: `1px solid ${adaptiveColors.border}`,
             borderRadius: '8px',
             padding: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           }}
         >
           <p style={{ color: adaptiveColors.text, fontWeight: 'bold', marginBottom: '8px' }}>
@@ -110,24 +110,13 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
         return (
           <LineChart data={rechartsData}>
             {showGrid && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={adaptiveColors.border}
-                opacity={0.3}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={adaptiveColors.border} opacity={0.3} />
             )}
-            <XAxis 
-              dataKey="name" 
-              stroke={adaptiveColors.textSecondary}
-              fontSize={12}
-            />
-            <YAxis 
-              stroke={adaptiveColors.textSecondary}
-              fontSize={12}
-            />
+            <XAxis dataKey="name" stroke={adaptiveColors.textSecondary} fontSize={12} />
+            <YAxis stroke={adaptiveColors.textSecondary} fontSize={12} />
             <Tooltip content={<CustomTooltip />} />
             {showLegend && <Legend />}
-            {data.datasets?.map((dataset) => (
+            {data.datasets?.map(dataset => (
               <Line
                 key={dataset.label}
                 type="monotone"
@@ -146,24 +135,13 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
         return (
           <AreaChart data={rechartsData}>
             {showGrid && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={adaptiveColors.border}
-                opacity={0.3}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={adaptiveColors.border} opacity={0.3} />
             )}
-            <XAxis 
-              dataKey="name" 
-              stroke={adaptiveColors.textSecondary}
-              fontSize={12}
-            />
-            <YAxis 
-              stroke={adaptiveColors.textSecondary}
-              fontSize={12}
-            />
+            <XAxis dataKey="name" stroke={adaptiveColors.textSecondary} fontSize={12} />
+            <YAxis stroke={adaptiveColors.textSecondary} fontSize={12} />
             <Tooltip content={<CustomTooltip />} />
             {showLegend && <Legend />}
-            {data.datasets?.map((dataset) => (
+            {data.datasets?.map(dataset => (
               <Area
                 key={dataset.label}
                 type="monotone"
@@ -182,24 +160,13 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
         return (
           <BarChart data={rechartsData}>
             {showGrid && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={adaptiveColors.border}
-                opacity={0.3}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={adaptiveColors.border} opacity={0.3} />
             )}
-            <XAxis 
-              dataKey="name" 
-              stroke={adaptiveColors.textSecondary}
-              fontSize={12}
-            />
-            <YAxis 
-              stroke={adaptiveColors.textSecondary}
-              fontSize={12}
-            />
+            <XAxis dataKey="name" stroke={adaptiveColors.textSecondary} fontSize={12} />
+            <YAxis stroke={adaptiveColors.textSecondary} fontSize={12} />
             <Tooltip content={<CustomTooltip />} />
             {showLegend && <Legend />}
-            {data.datasets?.map((dataset) => (
+            {data.datasets?.map(dataset => (
               <Bar
                 key={dataset.label}
                 dataKey={dataset.label}
@@ -213,21 +180,22 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
 
       case 'radar':
         // Transformation spéciale pour le radar
-        const radarData = data.datasets?.[0]?.data.map((value, index) => ({
-          subject: data.labels?.[index] || `Item ${index}`,
-          value: value,
-          fullMark: Math.max(...(data.datasets?.[0]?.data || [100]))
-        })) || [];
+        const radarData =
+          data.datasets?.[0]?.data.map((value, index) => ({
+            subject: data.labels?.[index] || `Item ${index}`,
+            value: value,
+            fullMark: Math.max(...(data.datasets?.[0]?.data || [100])),
+          })) || [];
 
         return (
           <RadarChart data={radarData}>
             <PolarGrid stroke={adaptiveColors.border} />
-            <PolarAngleAxis 
-              dataKey="subject" 
+            <PolarAngleAxis
+              dataKey="subject"
               tick={{ fontSize: 12, fill: adaptiveColors.textSecondary }}
             />
-            <PolarRadiusAxis 
-              angle={90} 
+            <PolarRadiusAxis
+              angle={90}
               domain={[0, 'dataMax']}
               tick={{ fontSize: 10, fill: adaptiveColors.textSecondary }}
             />
@@ -246,11 +214,12 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
 
       case 'pie':
         // Transformation pour le pie chart
-        const pieData = data.datasets?.map((dataset) => ({
-          name: dataset.label,
-          value: dataset.data.reduce((a, b) => a + b, 0),
-          color: dataset.color
-        })) || [];
+        const pieData =
+          data.datasets?.map(dataset => ({
+            name: dataset.label,
+            value: dataset.data.reduce((a, b) => a + b, 0),
+            color: dataset.color,
+          })) || [];
 
         return (
           <PieChart>
@@ -283,9 +252,10 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
       <ResponsiveContainer width="100%" height={height}>
         {renderChart()}
       </ResponsiveContainer>
-      
-      <style dangerouslySetInnerHTML={{
-        __html: `
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .advanced-charts {
           background: ${adaptiveColors.surface};
           border-radius: 12px;
@@ -324,7 +294,9 @@ const AdvancedCharts: React.FC<AdvancedChartsProps> = ({
         .recharts-polar-angle-axis-tick-value {
           fill: ${adaptiveColors.textSecondary} !important;
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 };

@@ -25,7 +25,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   isActive = false,
   onStartSet,
   onCompleteSet,
-  onRestStart
+  onRestStart,
 }) => {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -34,10 +34,11 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   };
 
   return (
-    <div className={`rounded-lg border p-4 transition-all ${
-      isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
-    } ${exercise.completed ? 'opacity-60' : ''}`}>
-      
+    <div
+      className={`rounded-lg border p-4 transition-all ${
+        isActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
+      } ${exercise.completed ? 'opacity-60' : ''}`}
+    >
       {/* Exercise Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-medium text-gray-900">{exercise.name}</h3>
@@ -48,28 +49,30 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
       </div>
-      
+
       {/* Exercise Details */}
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
         <div>
           <span className="text-gray-500">Séries:</span>
-          <span className="ml-2 font-medium">{currentSet}/{exercise.sets}</span>
+          <span className="ml-2 font-medium">
+            {currentSet}/{exercise.sets}
+          </span>
         </div>
-        
+
         {exercise.reps && (
           <div>
             <span className="text-gray-500">Répétitions:</span>
             <span className="ml-2 font-medium">{exercise.reps}</span>
           </div>
         )}
-        
+
         {exercise.duration && (
           <div>
             <span className="text-gray-500">Durée:</span>
             <span className="ml-2 font-medium">{formatTime(exercise.duration)}</span>
           </div>
         )}
-        
+
         {exercise.weight && (
           <div>
             <span className="text-gray-500">Poids:</span>
@@ -77,7 +80,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
       </div>
-      
+
       {/* Rest Time */}
       {exercise.restTime && (
         <div className="mb-4 text-sm">
@@ -85,7 +88,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
           <span className="ml-2 font-medium">{formatTime(exercise.restTime)}</span>
         </div>
       )}
-      
+
       {/* Progress Dots */}
       <div className="flex gap-2 mb-4">
         {Array.from({ length: exercise.sets }, (_, i) => (
@@ -95,13 +98,13 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               i < currentSet - 1
                 ? 'bg-green-500'
                 : i === currentSet - 1 && isActive
-                ? 'bg-blue-500'
-                : 'bg-gray-200'
+                  ? 'bg-blue-500'
+                  : 'bg-gray-200'
             }`}
           />
         ))}
       </div>
-      
+
       {/* Action Buttons */}
       {isActive && !exercise.completed && (
         <div className="flex gap-2">
@@ -112,7 +115,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             <Play size={16} />
             Commencer
           </button>
-          
+
           <button
             onClick={onCompleteSet}
             className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
@@ -120,7 +123,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             <Check size={16} />
             Terminer
           </button>
-          
+
           {exercise.restTime && (
             <button
               onClick={onRestStart}

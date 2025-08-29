@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MessageSquare, 
-  Clock, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Clock,
+  CheckCircle,
   AlertCircle,
   Search,
   Filter,
@@ -18,7 +18,7 @@ import {
   Plus,
   RefreshCw,
   Star,
-  Mail
+  Mail,
 } from 'lucide-react';
 
 interface TicketData {
@@ -56,7 +56,7 @@ const AdminSupport: React.FC = () => {
     resolvedTickets: 0,
     averageResponseTime: 0,
     averageResolutionTime: 0,
-    customerSatisfaction: 0
+    customerSatisfaction: 0,
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,12 +75,13 @@ const AdminSupport: React.FC = () => {
     try {
       // Simuler le chargement des données de support
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const mockTickets: TicketData[] = [
         {
           id: '1',
           subject: 'Problème de synchronisation des données',
-          description: 'Les données d\'entraînement ne se synchronisent pas correctement entre les appareils.',
+          description:
+            "Les données d'entraînement ne se synchronisent pas correctement entre les appareils.",
           status: 'open',
           priority: 'high',
           category: 'bug',
@@ -91,12 +92,12 @@ const AdminSupport: React.FC = () => {
           created_at: '2024-01-15T10:30:00Z',
           updated_at: '2024-01-15T14:20:00Z',
           messages_count: 3,
-          rating: null
+          rating: null,
         },
         {
           id: '2',
           subject: 'Demande de fonctionnalité: Mode sombre',
-          description: 'Serait-il possible d\'ajouter un mode sombre à l\'application?',
+          description: "Serait-il possible d'ajouter un mode sombre à l'application?",
           status: 'in_progress',
           priority: 'medium',
           category: 'feature',
@@ -107,12 +108,12 @@ const AdminSupport: React.FC = () => {
           created_at: '2024-01-14T09:15:00Z',
           updated_at: '2024-01-15T11:30:00Z',
           messages_count: 5,
-          rating: null
+          rating: null,
         },
         {
           id: '3',
-          subject: 'Impossible de changer d\'abonnement',
-          description: 'Je n\'arrive pas à passer de Premium à Pro dans les paramètres.',
+          subject: "Impossible de changer d'abonnement",
+          description: "Je n'arrive pas à passer de Premium à Pro dans les paramètres.",
           status: 'resolved',
           priority: 'high',
           category: 'account',
@@ -123,12 +124,12 @@ const AdminSupport: React.FC = () => {
           created_at: '2024-01-13T16:45:00Z',
           updated_at: '2024-01-14T10:20:00Z',
           messages_count: 4,
-          rating: 5
+          rating: 5,
         },
         {
           id: '4',
           subject: 'Problème de facturation',
-          description: 'J\'ai été facturé deux fois pour le même abonnement ce mois-ci.',
+          description: "J'ai été facturé deux fois pour le même abonnement ce mois-ci.",
           status: 'open',
           priority: 'urgent',
           category: 'payment',
@@ -139,8 +140,8 @@ const AdminSupport: React.FC = () => {
           created_at: '2024-01-15T12:00:00Z',
           updated_at: '2024-01-15T12:00:00Z',
           messages_count: 1,
-          rating: null
-        }
+          rating: null,
+        },
       ];
 
       const mockStats: SupportStats = {
@@ -149,7 +150,7 @@ const AdminSupport: React.FC = () => {
         resolvedTickets: 133,
         averageResponseTime: 2.4,
         averageResolutionTime: 18.6,
-        customerSatisfaction: 4.2
+        customerSatisfaction: 4.2,
       };
 
       setTickets(mockTickets);
@@ -224,11 +225,11 @@ const AdminSupport: React.FC = () => {
   };
 
   const filteredTickets = tickets.filter(ticket => {
-    const matchesSearch = 
+    const matchesSearch =
       ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.user_email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = filterStatus === 'all' || ticket.status === filterStatus;
     const matchesPriority = filterPriority === 'all' || ticket.priority === filterPriority;
     const matchesCategory = filterCategory === 'all' || ticket.category === filterCategory;
@@ -263,23 +264,15 @@ const AdminSupport: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {t('admin.support')}
-        </h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900">{t('admin.support')}</h2>
+
         <div className="flex items-center space-x-4">
-          <Button
-            onClick={loadSupportData}
-            variant="outline"
-            className="flex items-center"
-          >
+          <Button onClick={loadSupportData} variant="outline" className="flex items-center">
             <RefreshCw className="h-4 w-4 mr-2" />
             {t('admin.refresh')}
           </Button>
 
-          <Button
-            className="flex items-center"
-          >
+          <Button className="flex items-center">
             <Plus className="h-4 w-4 mr-2" />
             {t('admin.createTicket')}
           </Button>
@@ -296,12 +289,8 @@ const AdminSupport: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {stats.totalTickets}
-            </div>
-            <p className="text-xs text-gray-600">
-              {stats.openTickets} ouverts
-            </p>
+            <div className="text-2xl font-bold text-blue-600">{stats.totalTickets}</div>
+            <p className="text-xs text-gray-600">{stats.openTickets} ouverts</p>
           </CardContent>
         </Card>
 
@@ -313,12 +302,8 @@ const AdminSupport: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              {stats.averageResponseTime}h
-            </div>
-            <p className="text-xs text-gray-600">
-              Temps moyen
-            </p>
+            <div className="text-2xl font-bold text-orange-600">{stats.averageResponseTime}h</div>
+            <p className="text-xs text-gray-600">Temps moyen</p>
           </CardContent>
         </Card>
 
@@ -330,9 +315,7 @@ const AdminSupport: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {stats.customerSatisfaction}/5
-            </div>
+            <div className="text-2xl font-bold text-yellow-600">{stats.customerSatisfaction}/5</div>
             <div className="flex items-center mt-1">
               {renderStars(Math.round(stats.customerSatisfaction))}
             </div>
@@ -349,7 +332,7 @@ const AdminSupport: React.FC = () => {
               type="text"
               placeholder={t('admin.searchTickets')}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -360,7 +343,7 @@ const AdminSupport: React.FC = () => {
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={e => setFilterStatus(e.target.value)}
               className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
             >
               <option value="all">{t('admin.allStatuses')}</option>
@@ -373,7 +356,7 @@ const AdminSupport: React.FC = () => {
 
           <select
             value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
+            onChange={e => setFilterPriority(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
           >
             <option value="all">{t('admin.allPriorities')}</option>
@@ -385,7 +368,7 @@ const AdminSupport: React.FC = () => {
 
           <select
             value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
+            onChange={e => setFilterCategory(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
           >
             <option value="all">{t('admin.allCategories')}</option>
@@ -439,7 +422,7 @@ const AdminSupport: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredTickets.map((ticket) => (
+                  filteredTickets.map(ticket => (
                     <tr key={ticket.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="max-w-xs">
@@ -457,13 +440,13 @@ const AdminSupport: React.FC = () => {
                           <div className="text-sm font-medium text-gray-900">
                             {ticket.user_name}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {ticket.user_email}
-                          </div>
+                          <div className="text-sm text-gray-500">{ticket.user_email}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge className={`inline-flex items-center ${getStatusColor(ticket.status)}`}>
+                        <Badge
+                          className={`inline-flex items-center ${getStatusColor(ticket.status)}`}
+                        >
                           {getStatusIcon(ticket.status)}
                           <span className="ml-1">{ticket.status}</span>
                         </Badge>
@@ -483,9 +466,7 @@ const AdminSupport: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {ticket.rating ? (
-                          <div className="flex items-center">
-                            {renderStars(ticket.rating)}
-                          </div>
+                          <div className="flex items-center">{renderStars(ticket.rating)}</div>
                         ) : (
                           <span className="text-sm text-gray-400">-</span>
                         )}
@@ -526,7 +507,7 @@ const AdminSupport: React.FC = () => {
                 ×
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -540,17 +521,19 @@ const AdminSupport: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.status')}
                 </label>
-                <Badge className={`inline-flex items-center ${getStatusColor(selectedTicket.status)}`}>
+                <Badge
+                  className={`inline-flex items-center ${getStatusColor(selectedTicket.status)}`}
+                >
                   {getStatusIcon(selectedTicket.status)}
                   <span className="ml-1">{selectedTicket.status}</span>
                 </Badge>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.priority')}
@@ -559,7 +542,7 @@ const AdminSupport: React.FC = () => {
                   {selectedTicket.priority}
                 </Badge>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.category')}
@@ -584,15 +567,13 @@ const AdminSupport: React.FC = () => {
                 <Calendar className="h-4 w-4 inline mr-1" />
                 Créé le {new Date(selectedTicket.created_at).toLocaleDateString()}
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm">
                   <Mail className="h-4 w-4 mr-1" />
                   {t('admin.reply')}
                 </Button>
-                <Button size="sm">
-                  {t('admin.resolve')}
-                </Button>
+                <Button size="sm">{t('admin.resolve')}</Button>
               </div>
             </div>
           </div>

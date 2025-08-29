@@ -16,7 +16,7 @@ interface SleepGoalsProps {
 export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
   const { toast } = useToast();
   const { currentGoal, setGoal, updateGoal, isLoading } = useSleepStore();
-  
+
   const [isEditing, setIsEditing] = useState(!currentGoal);
   const [formData, setFormData] = useState({
     targetDuration: currentGoal?.targetDuration || 480, // 8h par défaut
@@ -24,45 +24,48 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
     targetWakeTime: currentGoal?.targetWakeTime || '07:00',
   });
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    try {
-      if (currentGoal) {
-        await updateGoal(currentGoal.id, formData);
+      try {
+        if (currentGoal) {
+          await updateGoal(currentGoal.id, formData);
+          toast({
+            title: 'Objectif mis à jour !',
+            description: 'Vos nouveaux objectifs de sommeil ont été sauvegardés',
+          });
+        } else {
+          await setGoal(formData);
+          toast({
+            title: 'Objectif défini !',
+            description: 'Votre objectif de sommeil a été créé',
+          });
+        }
+
+        setIsEditing(false);
+      } catch (error) {
         toast({
-          title: "Objectif mis à jour !",
-          description: "Vos nouveaux objectifs de sommeil ont été sauvegardés",
-        });
-      } else {
-        await setGoal(formData);
-        toast({
-          title: "Objectif défini !",
-          description: "Votre objectif de sommeil a été créé",
+          title: 'Erreur',
+          description: "Impossible de sauvegarder l'objectif",
+          variant: 'destructive',
         });
       }
-      
-      setIsEditing(false);
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder l'objectif",
-        variant: "destructive",
-      });
-    }
-  }, [currentGoal, formData, setGoal, updateGoal, toast]);
+    },
+    [currentGoal, formData, setGoal, updateGoal, toast]
+  );
 
   const calculateDuration = useCallback(() => {
     const [bedHour, bedMin] = formData.targetBedtime.split(':').map(Number);
     const [wakeHour, wakeMin] = formData.targetWakeTime.split(':').map(Number);
-    
+
     let bedTimeMinutes = bedHour * 60 + bedMin;
     let wakeTimeMinutes = wakeHour * 60 + wakeMin;
-    
+
     if (wakeTimeMinutes < bedTimeMinutes) {
       wakeTimeMinutes += 24 * 60;
     }
-    
+
     return wakeTimeMinutes - bedTimeMinutes;
   }, [formData.targetBedtime, formData.targetWakeTime]);
 
@@ -77,11 +80,7 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
               <Target className="mr-2" size={20} />
               Mes objectifs
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
               <Edit size={16} className="mr-1" />
               Modifier
             </Button>
@@ -95,9 +94,7 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
                 <div className="text-3xl font-bold text-blue-800 mb-1">
                   {formatDuration(currentGoal.targetDuration)}
                 </div>
-                <div className="text-sm text-blue-600 font-medium">
-                  Objectif de sommeil
-                </div>
+                <div className="text-sm text-blue-600 font-medium">Objectif de sommeil</div>
               </div>
             </div>
 
@@ -108,7 +105,7 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
                 <div className="font-semibold text-lg">{currentGoal.targetBedtime}</div>
                 <div className="text-sm text-gray-600">Coucher</div>
               </div>
-              
+
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <Sun size={24} className="mx-auto mb-2 text-gray-600" />
                 <div className="font-semibold text-lg">{currentGoal.targetWakeTime}</div>
@@ -149,10 +146,12 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
                 max="720"
                 step="15"
                 value={formData.targetDuration}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  targetDuration: parseInt(e.target.value) 
-                }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    targetDuration: parseInt(e.target.value),
+                  }))
+                }
                 className="flex-1"
               />
               <div className="w-20 text-center font-bold text-blue-600">
@@ -176,10 +175,12 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
                 id="targetBedtime"
                 type="time"
                 value={formData.targetBedtime}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  targetBedtime: e.target.value 
-                }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    targetBedtime: e.target.value,
+                  }))
+                }
                 required
               />
             </div>
@@ -193,10 +194,12 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
                 id="targetWakeTime"
                 type="time"
                 value={formData.targetWakeTime}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  targetWakeTime: e.target.value 
-                }))}
+                onChange={e =>
+                  setFormData(prev => ({
+                    ...prev,
+                    targetWakeTime: e.target.value,
+                  }))
+                }
                 required
               />
             </div>
@@ -229,11 +232,7 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
 
           {/* Actions */}
           <div className="flex space-x-3">
-            <Button 
-              type="submit" 
-              className="flex-1"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="flex-1" disabled={isLoading}>
               {isLoading ? (
                 <div className="flex items-center">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -246,13 +245,9 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
                 </div>
               )}
             </Button>
-            
+
             {currentGoal && (
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={() => setIsEditing(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
                 Annuler
               </Button>
             )}

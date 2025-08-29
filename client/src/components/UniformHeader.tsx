@@ -44,7 +44,7 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
   notificationCount = 0,
   className = '',
   rightContent,
-  gradient = false
+  gradient = false,
 }) => {
   const [, navigate] = useLocation();
 
@@ -97,9 +97,10 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
   };
 
   const headerClasses = `
-    ${gradient 
-      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
-      : 'bg-white border-b border-gray-200'
+    ${
+      gradient
+        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+        : 'bg-white border-b border-gray-200'
     }
     ${className}
   `;
@@ -120,7 +121,7 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             )}
-            
+
             <div>
               <h1 className={`text-lg font-semibold ${gradient ? 'text-white' : 'text-gray-900'}`}>
                 {title}
@@ -135,12 +136,8 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
 
           {/* Section droite */}
           <div className="flex items-center space-x-2">
-            {rightContent && (
-              <div className="mr-2">
-                {rightContent}
-              </div>
-            )}
-            
+            {rightContent && <div className="mr-2">{rightContent}</div>}
+
             {showSettings && (
               <Button
                 variant="ghost"
@@ -183,7 +180,7 @@ export const UniformHeader: React.FC<UniformHeaderProps> = ({
               >
                 <Bell className="w-5 h-5" />
                 {notificationCount > 0 && (
-                  <Badge 
+                  <Badge
                     variant="destructive"
                     className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs flex items-center justify-center"
                   >

@@ -13,9 +13,9 @@ interface DailyCheckInProps {
   onCheckInComplete?: (checkin: DailyCheckin) => void;
 }
 
-export const DailyCheckIn: React.FC<DailyCheckInProps> = ({ 
-  className = '', 
-  onCheckInComplete 
+export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
+  className = '',
+  onCheckInComplete,
 }) => {
   const [checkin, setCheckin] = useState<DailyCheckin | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,9 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
 
   useEffect(() => {
     const initialize = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       setUserId(user.id);
@@ -41,7 +43,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
     try {
       setLoading(true);
       const todayCheckin = await UserDataService.getDailyCheckin(uid, today);
-      
+
       if (todayCheckin) {
         setCheckin(todayCheckin);
       } else {
@@ -58,28 +60,33 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
           energy_level: 5,
           notes: '',
           created_at: '',
-          updated_at: ''
+          updated_at: '',
         };
         setCheckin(newCheckin);
       }
     } catch (error) {
       console.error('Erreur lors du chargement du check-in:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les données du check-in",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de charger les données du check-in',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleToggle = async (field: keyof Pick<DailyCheckin, 'workout_completed' | 'nutrition_logged' | 'sleep_tracked' | 'hydration_logged'>) => {
+  const handleToggle = async (
+    field: keyof Pick<
+      DailyCheckin,
+      'workout_completed' | 'nutrition_logged' | 'sleep_tracked' | 'hydration_logged'
+    >
+  ) => {
     if (!checkin || !userId) return;
 
     const updatedCheckin = {
       ...checkin,
-      [field]: !checkin[field]
+      [field]: !checkin[field],
     };
 
     setCheckin(updatedCheckin);
@@ -100,13 +107,13 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
         hydration_logged: checkinData.hydration_logged,
         mood_score: checkinData.mood_score,
         energy_level: checkinData.energy_level,
-        notes: checkinData.notes
+        notes: checkinData.notes,
       });
 
       if (success) {
         // Vérifier les badges après chaque mise à jour
         await BadgeService.checkAndAwardBadges(userId);
-        
+
         if (onCheckInComplete) {
           onCheckInComplete(checkinData);
         }
@@ -114,18 +121,18 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
         // Afficher un toast de succès si le check-in est complet
         if (isCheckinComplete(checkinData)) {
           toast({
-            title: "🎉 Check-in complet !",
+            title: '🎉 Check-in complet !',
             description: "Bravo ! Vous avez complété tous vos objectifs aujourd'hui.",
-            variant: "default"
+            variant: 'default',
           });
         }
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde du check-in:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder le check-in",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder le check-in',
+        variant: 'destructive',
       });
     } finally {
       setSaving(false);
@@ -133,22 +140,24 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
   };
 
   const isCheckinComplete = (checkinData: DailyCheckin): boolean => {
-    return checkinData.workout_completed &&
-           checkinData.nutrition_logged &&
-           checkinData.sleep_tracked &&
-           checkinData.hydration_logged;
+    return (
+      checkinData.workout_completed &&
+      checkinData.nutrition_logged &&
+      checkinData.sleep_tracked &&
+      checkinData.hydration_logged
+    );
   };
 
   const getCompletionPercentage = (): number => {
     if (!checkin) return 0;
-    
+
     const completed = [
       checkin.workout_completed,
       checkin.nutrition_logged,
       checkin.sleep_tracked,
-      checkin.hydration_logged
+      checkin.hydration_logged,
     ].filter(Boolean).length;
-    
+
     return Math.round((completed / 4) * 100);
   };
 
@@ -185,7 +194,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Check-in Quotidien</span>
-          <Badge variant={isCheckinComplete(checkin) ? "default" : "secondary"}>
+          <Badge variant={isCheckinComplete(checkin) ? 'default' : 'secondary'}>
             {getCompletionPercentage()}% complet
           </Badge>
         </CardTitle>
@@ -194,7 +203,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
         {/* Piliers */}
         <div className="grid grid-cols-2 gap-4">
           <Button
-            variant={checkin.workout_completed ? "default" : "outline"}
+            variant={checkin.workout_completed ? 'default' : 'outline'}
             onClick={() => handleToggle('workout_completed')}
             disabled={saving}
             className="h-16 flex flex-col items-center justify-center"
@@ -202,9 +211,9 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
             <span className="text-xl mb-1">🏋️‍♂️</span>
             <span className="text-sm">Workout</span>
           </Button>
-          
+
           <Button
-            variant={checkin.nutrition_logged ? "default" : "outline"}
+            variant={checkin.nutrition_logged ? 'default' : 'outline'}
             onClick={() => handleToggle('nutrition_logged')}
             disabled={saving}
             className="h-16 flex flex-col items-center justify-center"
@@ -212,9 +221,9 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
             <span className="text-xl mb-1">🥗</span>
             <span className="text-sm">Nutrition</span>
           </Button>
-          
+
           <Button
-            variant={checkin.sleep_tracked ? "default" : "outline"}
+            variant={checkin.sleep_tracked ? 'default' : 'outline'}
             onClick={() => handleToggle('sleep_tracked')}
             disabled={saving}
             className="h-16 flex flex-col items-center justify-center"
@@ -222,9 +231,9 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
             <span className="text-xl mb-1">😴</span>
             <span className="text-sm">Sommeil</span>
           </Button>
-          
+
           <Button
-            variant={checkin.hydration_logged ? "default" : "outline"}
+            variant={checkin.hydration_logged ? 'default' : 'outline'}
             onClick={() => handleToggle('hydration_logged')}
             disabled={saving}
             className="h-16 flex flex-col items-center justify-center"

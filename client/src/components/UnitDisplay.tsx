@@ -1,7 +1,12 @@
 // client/src/components/UnitDisplay.tsx
 import React from 'react';
 import { useUnitPreferences } from '@/hooks/useUnitPreferences';
-import { convertWeight, convertHeight, convertLiquid, convertTemperature } from '@/lib/unitConversions';
+import {
+  convertWeight,
+  convertHeight,
+  convertLiquid,
+  convertTemperature,
+} from '@/lib/unitConversions';
 
 interface UnitDisplayProps {
   value: number;
@@ -16,7 +21,7 @@ export const UnitDisplay: React.FC<UnitDisplayProps> = ({
   type,
   className = '',
   showUnit = true,
-  precision = 1
+  precision = 1,
 }) => {
   const { preferences } = useUnitPreferences();
 
@@ -27,25 +32,25 @@ export const UnitDisplay: React.FC<UnitDisplayProps> = ({
           return convertWeight(value, 'kg', 'lbs');
         }
         return value;
-      
+
       case 'height':
         if (preferences.height === 'ft/in') {
           return convertHeight(value, 'cm', 'ft/in');
         }
         return value;
-      
+
       case 'liquid':
         if (preferences.liquid === 'fl_oz') {
           return convertLiquid(value, 'ml', 'fl_oz');
         }
         return value;
-      
+
       case 'temperature':
         if (preferences.temperature === 'fahrenheit') {
           return convertTemperature(value, 'celsius', 'fahrenheit');
         }
         return value;
-      
+
       default:
         return value;
     }
@@ -55,16 +60,16 @@ export const UnitDisplay: React.FC<UnitDisplayProps> = ({
     switch (type) {
       case 'weight':
         return preferences.weight === 'lbs' ? 'lbs' : 'kg';
-      
+
       case 'height':
         return preferences.height === 'ft/in' ? 'ft' : 'cm';
-      
+
       case 'liquid':
         return preferences.liquid === 'fl_oz' ? 'fl oz' : 'ml';
-      
+
       case 'temperature':
         return preferences.temperature === 'fahrenheit' ? '°F' : '°C';
-      
+
       default:
         return '';
     }
@@ -85,9 +90,7 @@ export const UnitDisplay: React.FC<UnitDisplayProps> = ({
   return (
     <span className={className}>
       {formatValue(displayValue)}
-      {showUnit && unit && (
-        <span className="text-gray-500 ml-1">{unit}</span>
-      )}
+      {showUnit && unit && <span className="text-gray-500 ml-1">{unit}</span>}
     </span>
   );
 };
@@ -122,6 +125,6 @@ export const useUnitDisplay = () => {
     formatWeight,
     formatHeight,
     formatLiquid,
-    preferences
+    preferences,
   };
 };

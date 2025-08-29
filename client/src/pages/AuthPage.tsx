@@ -1,30 +1,26 @@
-import React, { useState, useCallback, useEffect, memo } from "react";
-import { createClient } from "@supabase/supabase-js";
-import {
-  useForm,
-  SubmitHandler,
-  FormProvider,
-  useFormContext,
-} from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { motion } from "framer-motion";
-import clsx from "clsx";
-import { toast } from "sonner";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaFacebook } from "react-icons/fa";
+import React, { useState, useCallback, useEffect, memo } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { useForm, SubmitHandler, FormProvider, useFormContext } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { motion } from 'framer-motion';
+import clsx from 'clsx';
+import { toast } from 'sonner';
+import { FcGoogle } from 'react-icons/fc';
+import { FaApple, FaFacebook } from 'react-icons/fa';
 
 // Supabase client - remplacer par vos clés publiques réelles
-const supabaseUrl = "https://zfmlzxhxhaezdkzjanbc.supabase.co";
-const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbWx6eGh4aGFlemRremphbmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NDc4MzIsImV4cCI6MjA2NjMyMzgzMn0.x6GpX8ep6YxVEZQt7pcH0SIWzxhTYcXLnaVmD5IGErw";
+const supabaseUrl = 'https://zfmlzxhxhaezdkzjanbc.supabase.co';
+const supabaseAnonKey =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpmbWx6eGh4aGFlemRremphbmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NDc4MzIsImV4cCI6MjA2NjMyMzgzMn0.x6GpX8ep6YxVEZQt7pcH0SIWzxhTYcXLnaVmD5IGErw';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const trackEvent = (event: string) => {
-  if (window.gtag) window.gtag("event", event);
+  if (window.gtag) window.gtag('event', event);
 };
 
 // --- Types ---
-type PackType = "nutrition" | "hydration" | "sport";
+type PackType = 'nutrition' | 'hydration' | 'sport';
 
 interface FormInputs {
   email: string;
@@ -38,32 +34,27 @@ interface FormInputs {
 }
 
 // --- Zod schemas ---
-const packOptions = z.enum(["nutrition", "hydration", "sport"]);
+const packOptions = z.enum(['nutrition', 'hydration', 'sport']);
 
 const schemaStep1 = z.object({
-  email: z.string().email("Email invalide"),
+  email: z.string().email('Email invalide'),
   password: z
     .string()
-    .min(8, "Mot de passe minimum 8 caractères")
+    .min(8, 'Mot de passe minimum 8 caractères')
     .max(50)
-    .regex(/[A-Z]/, "Doit contenir une majuscule")
-    .regex(/[a-z]/, "Doit contenir une minuscule")
-    .regex(/[0-9]/, "Doit contenir un chiffre")
-    .regex(/[^A-Za-z0-9]/, "Doit contenir un caractère spécial"),
+    .regex(/[A-Z]/, 'Doit contenir une majuscule')
+    .regex(/[a-z]/, 'Doit contenir une minuscule')
+    .regex(/[0-9]/, 'Doit contenir un chiffre')
+    .regex(/[^A-Za-z0-9]/, 'Doit contenir un caractère spécial'),
 });
 
 const schemaStep2 = z.object({
-  fullName: z.string().min(2, "Nom complet requis"),
-  phone: z
-    .string()
-    .min(10, "Numéro invalide")
-    .max(15)
-    .optional()
-    .or(z.literal("")),
+  fullName: z.string().min(2, 'Nom complet requis'),
+  phone: z.string().min(10, 'Numéro invalide').max(15).optional().or(z.literal('')),
 });
 
 const schemaStep3 = z.object({
-  packs: z.array(packOptions).nonempty("Sélectionnez au moins un pack"),
+  packs: z.array(packOptions).nonempty('Sélectionnez au moins un pack'),
 });
 
 const schemaStep4 = z.object({
@@ -72,10 +63,7 @@ const schemaStep4 = z.object({
   sportGoal: z.string().optional(),
 });
 
-const combinedSchema = schemaStep1
-  .and(schemaStep2)
-  .and(schemaStep3)
-  .and(schemaStep4);
+const combinedSchema = schemaStep1.and(schemaStep2).and(schemaStep3).and(schemaStep4);
 
 // --- Components ---
 const Step1: React.FC = () => {
@@ -91,10 +79,10 @@ const Step1: React.FC = () => {
       <input
         id="email"
         type="email"
-        {...register("email")}
+        {...register('email')}
         className={clsx(
-          "w-full px-3 py-2 border rounded-md",
-          errors.email ? "border-red-600" : "border-gray-300"
+          'w-full px-3 py-2 border rounded-md',
+          errors.email ? 'border-red-600' : 'border-gray-300'
         )}
         aria-invalid={!!errors.email}
         aria-describedby="email-error"
@@ -111,10 +99,10 @@ const Step1: React.FC = () => {
       <input
         id="password"
         type="password"
-        {...register("password")}
+        {...register('password')}
         className={clsx(
-          "w-full px-3 py-2 border rounded-md",
-          errors.password ? "border-red-600" : "border-gray-300"
+          'w-full px-3 py-2 border rounded-md',
+          errors.password ? 'border-red-600' : 'border-gray-300'
         )}
         aria-invalid={!!errors.password}
         aria-describedby="password-error"
@@ -141,10 +129,10 @@ const Step2: React.FC = () => {
       <input
         id="fullName"
         type="text"
-        {...register("fullName")}
+        {...register('fullName')}
         className={clsx(
-          "w-full px-3 py-2 border rounded-md",
-          errors.fullName ? "border-red-600" : "border-gray-300"
+          'w-full px-3 py-2 border rounded-md',
+          errors.fullName ? 'border-red-600' : 'border-gray-300'
         )}
         aria-invalid={!!errors.fullName}
         aria-describedby="fullname-error"
@@ -161,10 +149,10 @@ const Step2: React.FC = () => {
       <input
         id="phone"
         type="tel"
-        {...register("phone")}
+        {...register('phone')}
         className={clsx(
-          "w-full px-3 py-2 border rounded-md",
-          errors.phone ? "border-red-600" : "border-gray-300"
+          'w-full px-3 py-2 border rounded-md',
+          errors.phone ? 'border-red-600' : 'border-gray-300'
         )}
         aria-invalid={!!errors.phone}
         aria-describedby="phone-error"
@@ -178,16 +166,14 @@ const Step2: React.FC = () => {
   );
 };
 
-const Step3: React.FC<{ onSelectPack: (selected: PackType[]) => void }> = ({
-  onSelectPack,
-}) => {
+const Step3: React.FC<{ onSelectPack: (selected: PackType[]) => void }> = ({ onSelectPack }) => {
   const {
     register,
     formState: { errors },
     watch,
   } = useFormContext<FormInputs>();
 
-  const selectedPacks = watch("packs") || [];
+  const selectedPacks = watch('packs') || [];
 
   useEffect(() => {
     onSelectPack(selectedPacks as PackType[]);
@@ -199,21 +185,19 @@ const Step3: React.FC<{ onSelectPack: (selected: PackType[]) => void }> = ({
         Sélectionnez les packs qui vous intéressent
       </label>
       <div className="flex flex-col gap-3">
-        {["nutrition", "hydration", "sport"].map((pack) => (
+        {['nutrition', 'hydration', 'sport'].map(pack => (
           <label key={pack} className="cursor-pointer inline-flex items-center space-x-2">
             <input
               type="checkbox"
               value={pack}
-              {...register("packs")}
+              {...register('packs')}
               aria-checked={selectedPacks.includes(pack as PackType)}
             />
             <span>{pack.charAt(0).toUpperCase() + pack.slice(1)}</span>
           </label>
         ))}
       </div>
-      {errors.packs && (
-        <p className="text-red-600 text-sm">{errors.packs.message}</p>
-      )}
+      {errors.packs && <p className="text-red-600 text-sm">{errors.packs.message}</p>}
     </div>
   );
 };
@@ -226,7 +210,7 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
 
   return (
     <div className="space-y-4">
-      {selectedPacks.includes("nutrition") && (
+      {selectedPacks.includes('nutrition') && (
         <>
           <label htmlFor="nutritionGoal" className="block font-semibold">
             Objectif Nutritionnel (ex: prise de masse, sèche...)
@@ -234,10 +218,10 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
           <input
             id="nutritionGoal"
             type="text"
-            {...register("nutritionGoal")}
+            {...register('nutritionGoal')}
             className={clsx(
-              "w-full px-3 py-2 border rounded-md",
-              errors.nutritionGoal ? "border-red-600" : "border-gray-300"
+              'w-full px-3 py-2 border rounded-md',
+              errors.nutritionGoal ? 'border-red-600' : 'border-gray-300'
             )}
             aria-invalid={!!errors.nutritionGoal}
           />
@@ -246,7 +230,7 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
           )}
         </>
       )}
-      {selectedPacks.includes("hydration") && (
+      {selectedPacks.includes('hydration') && (
         <>
           <label htmlFor="hydrationGoal" className="block font-semibold mt-4">
             Objectif Hydratation (ex: 2L/jour)
@@ -254,10 +238,10 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
           <input
             id="hydrationGoal"
             type="text"
-            {...register("hydrationGoal")}
+            {...register('hydrationGoal')}
             className={clsx(
-              "w-full px-3 py-2 border rounded-md",
-              errors.hydrationGoal ? "border-red-600" : "border-gray-300"
+              'w-full px-3 py-2 border rounded-md',
+              errors.hydrationGoal ? 'border-red-600' : 'border-gray-300'
             )}
             aria-invalid={!!errors.hydrationGoal}
           />
@@ -266,7 +250,7 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
           )}
         </>
       )}
-      {selectedPacks.includes("sport") && (
+      {selectedPacks.includes('sport') && (
         <>
           <label htmlFor="sportGoal" className="block font-semibold mt-4">
             Objectif Sportif (ex: perdre du poids, préparation marathon)
@@ -274,16 +258,14 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
           <input
             id="sportGoal"
             type="text"
-            {...register("sportGoal")}
+            {...register('sportGoal')}
             className={clsx(
-              "w-full px-3 py-2 border rounded-md",
-              errors.sportGoal ? "border-red-600" : "border-gray-300"
+              'w-full px-3 py-2 border rounded-md',
+              errors.sportGoal ? 'border-red-600' : 'border-gray-300'
             )}
             aria-invalid={!!errors.sportGoal}
           />
-          {errors.sportGoal && (
-            <p className="text-red-600 text-sm">{errors.sportGoal.message}</p>
-          )}
+          {errors.sportGoal && <p className="text-red-600 text-sm">{errors.sportGoal.message}</p>}
         </>
       )}
     </div>
@@ -291,25 +273,25 @@ const Step4: React.FC<{ selectedPacks: PackType[] }> = ({ selectedPacks }) => {
 };
 
 const STEPS = [
-  "Informations connexion",
-  "Infos personnelles",
-  "Sélection pack",
-  "Objectifs personnalisés",
+  'Informations connexion',
+  'Infos personnelles',
+  'Sélection pack',
+  'Objectifs personnalisés',
 ];
 
 const AuthPage: React.FC = () => {
   const methods = useForm<FormInputs>({
-    mode: "onBlur",
+    mode: 'onBlur',
     resolver: zodResolver(combinedSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      fullName: "",
-      phone: "",
+      email: '',
+      password: '',
+      fullName: '',
+      phone: '',
       packs: [],
-      nutritionGoal: "",
-      hydrationGoal: "",
-      sportGoal: "",
+      nutritionGoal: '',
+      hydrationGoal: '',
+      sportGoal: '',
     },
   });
 
@@ -318,18 +300,18 @@ const AuthPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showRecoverPassword, setShowRecoverPassword] = useState(false);
-  const [recoverEmail, setRecoverEmail] = useState("");
+  const [recoverEmail, setRecoverEmail] = useState('');
   const [userLoggedIn, setUserLoggedIn] = useState(false);
 
   const onStepNext = () => {
-    if (currentStep < STEPS.length - 1) setCurrentStep((x) => x + 1);
+    if (currentStep < STEPS.length - 1) setCurrentStep(x => x + 1);
   };
 
   const onStepBack = () => {
-    if (currentStep > 0) setCurrentStep((x) => x - 1);
+    if (currentStep > 0) setCurrentStep(x => x - 1);
   };
 
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<FormInputs> = async data => {
     setAuthError(null);
     setLoading(true);
     try {
@@ -348,13 +330,13 @@ const AuthPage: React.FC = () => {
         },
       });
       if (error) throw error;
-      toast.success("Inscription réussie, merci de confirmer votre email.");
-      trackEvent("sign_up");
+      toast.success('Inscription réussie, merci de confirmer votre email.');
+      trackEvent('sign_up');
       setCurrentStep(0);
       setUserLoggedIn(true);
     } catch (error: any) {
       setAuthError(error.message);
-      toast.error("Erreur inscription : " + error.message);
+      toast.error('Erreur inscription : ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -369,12 +351,12 @@ const AuthPage: React.FC = () => {
         password,
       });
       if (error) throw error;
-      toast.success("Connexion réussie");
-      trackEvent("login");
+      toast.success('Connexion réussie');
+      trackEvent('login');
       setUserLoggedIn(true);
     } catch (error: any) {
       setAuthError(error.message);
-      toast.error("Erreur connexion : " + error.message);
+      toast.error('Erreur connexion : ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -386,40 +368,38 @@ const AuthPage: React.FC = () => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(recoverEmail);
       if (error) throw error;
-      toast.success("Email de récupération envoyé");
+      toast.success('Email de récupération envoyé');
       setShowRecoverPassword(false);
     } catch (error: any) {
       setAuthError(error.message);
-      toast.error("Erreur récupération: " + error.message);
+      toast.error('Erreur récupération: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const onSocialLogin = async (
-    provider: "google" | "apple" | "facebook"
-  ) => {
+  const onSocialLogin = async (provider: 'google' | 'apple' | 'facebook') => {
     setLoading(true);
     setAuthError(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({ provider });
       if (error) throw error;
-      trackEvent("oauth_login_" + provider);
+      trackEvent('oauth_login_' + provider);
     } catch (error: any) {
       setAuthError(error.message);
-      toast.error("Erreur login social : " + error.message);
+      toast.error('Erreur login social : ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const LoginForm = () => {
-    const [loginEmail, setLoginEmail] = useState("");
-    const [loginPassword, setLoginPassword] = useState("");
+    const [loginEmail, setLoginEmail] = useState('');
+    const [loginPassword, setLoginPassword] = useState('');
 
     return (
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           e.preventDefault();
           onLogin(loginEmail, loginPassword);
         }}
@@ -434,7 +414,7 @@ const AuthPage: React.FC = () => {
             id="loginEmail"
             type="email"
             value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
+            onChange={e => setLoginEmail(e.target.value)}
             className="w-full px-3 py-2 border rounded-md"
             required
             autoComplete="email"
@@ -448,7 +428,7 @@ const AuthPage: React.FC = () => {
             id="loginPassword"
             type="password"
             value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
+            onChange={e => setLoginPassword(e.target.value)}
             className="w-full px-3 py-2 border rounded-md"
             required
             autoComplete="current-password"
@@ -459,7 +439,7 @@ const AuthPage: React.FC = () => {
           disabled={loading}
           className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md"
         >
-          {loading ? "Connexion..." : "Se connecter"}
+          {loading ? 'Connexion...' : 'Se connecter'}
         </button>
         <button
           type="button"
@@ -506,9 +486,7 @@ const AuthPage: React.FC = () => {
       >
         {!showRecoverPassword ? (
           <>
-            <h1 className="text-3xl font-bold mb-6 text-center">
-              Se connecter / S'inscrire
-            </h1>
+            <h1 className="text-3xl font-bold mb-6 text-center">Se connecter / S'inscrire</h1>
 
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
@@ -532,9 +510,7 @@ const AuthPage: React.FC = () => {
                 {currentStep < STEPS.length - 1 ? (
                   <button
                     type="button"
-                    onClick={() =>
-                      methods.trigger().then((valid) => valid && onStepNext())
-                    }
+                    onClick={() => methods.trigger().then(valid => valid && onStepNext())}
                     disabled={loading}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
@@ -546,7 +522,7 @@ const AuthPage: React.FC = () => {
                     disabled={loading}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
-                    {loading ? "Inscription..." : "S'inscrire"}
+                    {loading ? 'Inscription...' : "S'inscrire"}
                   </button>
                 )}
               </div>
@@ -557,21 +533,21 @@ const AuthPage: React.FC = () => {
               <p>Ou connectez-vous avec</p>
               <div className="flex justify-center space-x-4 mt-3">
                 <button
-                  onClick={() => onSocialLogin("google")}
+                  onClick={() => onSocialLogin('google')}
                   className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                   aria-label="Connexion avec Google"
                 >
                   <FcGoogle size={32} />
                 </button>
                 <button
-                  onClick={() => onSocialLogin("apple")}
+                  onClick={() => onSocialLogin('apple')}
                   className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                   aria-label="Connexion avec Apple"
                 >
                   <FaApple size={28} />
                 </button>
                 <button
-                  onClick={() => onSocialLogin("facebook")}
+                  onClick={() => onSocialLogin('facebook')}
                   className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
                   aria-label="Connexion avec Facebook"
                 >
@@ -581,22 +557,18 @@ const AuthPage: React.FC = () => {
             </div>
 
             <div className="mt-8">
-              <h2 className="text-xl font-semibold mb-2 text-center">
-                Vous avez déjà un compte ?
-              </h2>
+              <h2 className="text-xl font-semibold mb-2 text-center">Vous avez déjà un compte ?</h2>
               <LoginForm />
             </div>
           </>
         ) : (
           <div className="space-y-4" aria-label="Récupération mot de passe">
-            <h2 className="text-xl font-semibold mb-4 text-center">
-              Récupération du mot de passe
-            </h2>
+            <h2 className="text-xl font-semibold mb-4 text-center">Récupération du mot de passe</h2>
             <input
               type="email"
               placeholder="Votre email"
               value={recoverEmail}
-              onChange={(e) => setRecoverEmail(e.target.value)}
+              onChange={e => setRecoverEmail(e.target.value)}
               className="w-full p-2 border rounded-md"
               autoComplete="email"
             />
@@ -605,7 +577,7 @@ const AuthPage: React.FC = () => {
               disabled={loading}
               className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              {loading ? "Envoi en cours..." : "Envoyer le lien de récupération"}
+              {loading ? 'Envoi en cours...' : 'Envoyer le lien de récupération'}
             </button>
             <button
               onClick={() => {

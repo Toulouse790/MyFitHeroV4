@@ -123,7 +123,8 @@ class SocialService {
     try {
       const { data, error } = await supabase
         .from('user_connections')
-        .select(`
+        .select(
+          `
           *,
           friend_profile:user_profiles!friend_id(
             username,
@@ -134,7 +135,8 @@ class SocialService {
             is_online,
             last_seen
           )
-        `)
+        `
+        )
         .eq('user_id', userId)
         .eq('status', 'accepted')
         .order('updated_at', { ascending: false });
@@ -151,7 +153,8 @@ class SocialService {
     try {
       const { data, error } = await supabase
         .from('user_profiles')
-        .select(`
+        .select(
+          `
           id,
           username,
           avatar_url,
@@ -159,7 +162,8 @@ class SocialService {
           sport_position,
           level,
           is_online
-        `)
+        `
+        )
         .ilike('username', `%${query}%`)
         .neq('id', userId)
         .limit(20);
@@ -180,8 +184,8 @@ class SocialService {
           sport: user.sport,
           sport_position: user.sport_position,
           level: user.level,
-          is_online: user.is_online
-        }
+          is_online: user.is_online,
+        },
       }));
     } catch (error) {
       console.error('Error searching users:', error);
@@ -191,13 +195,11 @@ class SocialService {
 
   async sendFriendRequest(userId: string, friendId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_connections')
-        .insert({
-          user_id: userId,
-          friend_id: friendId,
-          status: 'pending'
-        });
+      const { error } = await supabase.from('user_connections').insert({
+        user_id: userId,
+        friend_id: friendId,
+        status: 'pending',
+      });
 
       if (error) throw error;
       return true;
@@ -232,14 +234,16 @@ class SocialService {
     try {
       let query = supabase
         .from('challenges')
-        .select(`
+        .select(
+          `
           *,
           creator_profile:user_profiles!creator_id(
             username,
             avatar_url,
             sport
           )
-        `)
+        `
+        )
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -259,15 +263,13 @@ class SocialService {
 
   async joinChallenge(challengeId: string, userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('challenge_participations')
-        .insert({
-          challenge_id: challengeId,
-          user_id: userId,
-          current_progress: 0,
-          completion_percentage: 0,
-          points_earned: 0
-        });
+      const { error } = await supabase.from('challenge_participations').insert({
+        challenge_id: challengeId,
+        user_id: userId,
+        current_progress: 0,
+        completion_percentage: 0,
+        points_earned: 0,
+      });
 
       if (error) throw error;
       return true;
@@ -277,10 +279,7 @@ class SocialService {
     }
   }
 
-  async createChallenge(
-    userId: string,
-    challengeData: Partial<Challenge>
-  ): Promise<string | null> {
+  async createChallenge(userId: string, challengeData: Partial<Challenge>): Promise<string | null> {
     try {
       const { data, error } = await supabase
         .from('challenges')
@@ -288,16 +287,16 @@ class SocialService {
           creator_id: userId,
           ...challengeData,
           is_active: true,
-          participants_count: 1
+          participants_count: 1,
         })
         .select('id')
         .single();
 
       if (error) throw error;
-      
+
       // Auto-joindre le créateur au défi
       await this.joinChallenge(data.id, userId);
-      
+
       return data.id;
     } catch (error) {
       console.error('Error creating challenge:', error);
@@ -312,7 +311,8 @@ class SocialService {
     try {
       const { data, error } = await supabase
         .from('challenge_participations')
-        .select(`
+        .select(
+          `
           *,
           challenge:challenges(
             *,
@@ -322,7 +322,8 @@ class SocialService {
               sport
             )
           )
-        `)
+        `
+        )
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -335,7 +336,7 @@ class SocialService {
       participations.forEach(participation => {
         const challenge = participation.challenge;
         const combined = { ...challenge, ...participation };
-        
+
         if (participation.completed_at) {
           completed.push(combined);
         } else {
@@ -374,7 +375,7 @@ class SocialService {
           challenges_completed: 47,
           current_streak: 12,
           rank: 1,
-          change_from_last_week: 2
+          change_from_last_week: 2,
         },
         {
           user_id: '2',
@@ -389,7 +390,7 @@ class SocialService {
           challenges_completed: 39,
           current_streak: 8,
           rank: 2,
-          change_from_last_week: -1
+          change_from_last_week: -1,
         },
         {
           user_id: '3',
@@ -403,8 +404,8 @@ class SocialService {
           challenges_completed: 52,
           current_streak: 15,
           rank: 3,
-          change_from_last_week: 1
-        }
+          change_from_last_week: 1,
+        },
       ];
 
       // Simulation du filtrage par sport
@@ -431,15 +432,16 @@ class SocialService {
         {
           id: '1',
           user_id: '2',
-          content: 'Nouveau PR au développé couché ! 120kg x5 reps 💪 Les entraînements payent enfin !',
+          content:
+            'Nouveau PR au développé couché ! 120kg x5 reps 💪 Les entraînements payent enfin !',
           post_type: 'achievement',
           achievements: [
             {
               type: 'bench_press_pr',
               value: 120,
               unit: 'kg',
-              milestone: true
-            }
+              milestone: true,
+            },
           ],
           likes_count: 23,
           comments_count: 8,
@@ -449,20 +451,20 @@ class SocialService {
             username: 'FitNinja_Pro',
             avatar_url: '/avatars/user2.jpg',
             sport: 'basketball',
-            level: 13
+            level: 13,
           },
           is_liked: false,
-          is_bookmarked: false
+          is_bookmarked: false,
         },
         {
           id: '2',
           user_id: '1',
-          content: 'Session mêlée ce matin avec l\'équipe. Ready pour le match de samedi ! 🏉',
+          content: "Session mêlée ce matin avec l'équipe. Ready pour le match de samedi ! 🏉",
           post_type: 'workout',
           workout_data: {
             duration: 90,
             exercises: ['Mêlée', 'Scrum', 'Poussée traîneau'],
-            calories_burned: 650
+            calories_burned: 650,
           },
           likes_count: 18,
           comments_count: 5,
@@ -472,11 +474,11 @@ class SocialService {
             username: 'Rugby_Beast_33',
             avatar_url: '/avatars/user1.jpg',
             sport: 'rugby',
-            level: 15
+            level: 15,
           },
           is_liked: true,
-          is_bookmarked: false
-        }
+          is_bookmarked: false,
+        },
       ];
 
       return mockPosts.slice(0, limit);
@@ -486,10 +488,7 @@ class SocialService {
     }
   }
 
-  async createPost(
-    userId: string,
-    postData: Partial<SocialPost>
-  ): Promise<string | null> {
+  async createPost(userId: string, postData: Partial<SocialPost>): Promise<string | null> {
     try {
       const { data, error } = await supabase
         .from('social_posts')
@@ -498,7 +497,7 @@ class SocialService {
           ...postData,
           likes_count: 0,
           comments_count: 0,
-          shares_count: 0
+          shares_count: 0,
         })
         .select('id')
         .single();
@@ -513,12 +512,10 @@ class SocialService {
 
   async likePost(postId: string, userId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('post_likes')
-        .insert({
-          post_id: postId,
-          user_id: userId
-        });
+      const { error } = await supabase.from('post_likes').insert({
+        post_id: postId,
+        user_id: userId,
+      });
 
       if (error) throw error;
       return true;
@@ -542,7 +539,7 @@ class SocialService {
         total_challenges_completed: 23,
         community_rank: 47,
         sport_rank: 12,
-        influence_score: 78
+        influence_score: 78,
       };
 
       return mockStats;
@@ -568,7 +565,7 @@ class SocialService {
         total_calories_burned: 2800,
         water_intake_liters: 14.5,
         sleep_hours_avg: 7.2,
-        challenges_completed: 2
+        challenges_completed: 2,
       };
 
       const friendsStats = [
@@ -579,7 +576,7 @@ class SocialService {
           total_calories_burned: 3200,
           water_intake_liters: 16.8,
           sleep_hours_avg: 8.1,
-          challenges_completed: 3
+          challenges_completed: 3,
         },
         {
           user_id: '2',
@@ -588,14 +585,14 @@ class SocialService {
           total_calories_burned: 2400,
           water_intake_liters: 12.3,
           sleep_hours_avg: 6.8,
-          challenges_completed: 1
-        }
+          challenges_completed: 1,
+        },
       ];
 
       return {
         user_stats: userStats,
         friends_stats: friendsStats,
-        user_rank: 2
+        user_rank: 2,
       };
     } catch (error) {
       console.error('Error fetching friends comparison:', error);
@@ -616,7 +613,7 @@ class SocialService {
         friend_requests: [],
         challenge_invites: [],
         mentions: [],
-        achievements: []
+        achievements: [],
       };
     } catch (error) {
       console.error('Error fetching social notifications:', error);
@@ -624,7 +621,7 @@ class SocialService {
         friend_requests: [],
         challenge_invites: [],
         mentions: [],
-        achievements: []
+        achievements: [],
       };
     }
   }

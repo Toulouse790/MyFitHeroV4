@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Activity, 
-  Heart, 
-  Settings as SettingsIcon, 
-  Bell, 
-  TrendingUp, 
+import {
+  Activity,
+  Heart,
+  Settings as SettingsIcon,
+  Bell,
+  TrendingUp,
   Watch,
   Smartphone,
   BarChart3,
@@ -19,7 +19,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Wifi,
-  WifiOff
+  WifiOff,
 } from 'lucide-react';
 import WearableStats from '@/components/WearableStats';
 import WearableNotificationCenter from '@/components/WearableNotificationCenter';
@@ -68,7 +68,7 @@ const WearableHub: React.FC = () => {
           connected: true,
           battery_level: 78,
           last_sync: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          sync_status: 'synced'
+          sync_status: 'synced',
         },
         {
           id: '2',
@@ -78,7 +78,7 @@ const WearableHub: React.FC = () => {
           model: 'Fit App',
           connected: true,
           last_sync: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          sync_status: 'synced'
+          sync_status: 'synced',
         },
         {
           id: '3',
@@ -88,8 +88,8 @@ const WearableHub: React.FC = () => {
           model: 'H10',
           connected: false,
           last_sync: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          sync_status: 'error'
-        }
+          sync_status: 'error',
+        },
       ];
 
       setDevices(mockDevices);
@@ -100,17 +100,17 @@ const WearableHub: React.FC = () => {
           device_id: '3',
           message: 'Connexion Bluetooth perdue avec Polar H10',
           timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          resolved: false
-        }
+          resolved: false,
+        },
       ];
 
       setErrors(mockErrors);
     } catch (error) {
       console.error('Erreur chargement appareils:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de charger vos appareils connectés",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de charger vos appareils connectés',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -126,15 +126,17 @@ const WearableHub: React.FC = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Mise à jour des statuts
-      setDevices(prev => prev.map(device => ({
-        ...device,
-        last_sync: new Date().toISOString(),
-        sync_status: device.connected ? 'synced' : 'error'
-      })));
+      setDevices(prev =>
+        prev.map(device => ({
+          ...device,
+          last_sync: new Date().toISOString(),
+          sync_status: device.connected ? 'synced' : 'error',
+        }))
+      );
 
       toast({
-        title: "Synchronisation réussie",
-        description: "Toutes vos données wearables sont à jour."
+        title: 'Synchronisation réussie',
+        description: 'Toutes vos données wearables sont à jour.',
       });
 
       // Analytics
@@ -142,16 +144,15 @@ const WearableHub: React.FC = () => {
         window.gtag('event', 'wearable_manual_sync', {
           event_category: 'engagement',
           event_label: 'manual_sync',
-          value: devices.filter(d => d.connected).length
+          value: devices.filter(d => d.connected).length,
         });
       }
-
     } catch (error) {
       console.error('Erreur synchronisation:', error);
       toast({
-        title: "Erreur de synchronisation",
-        description: "Impossible de synchroniser vos appareils.",
-        variant: "destructive"
+        title: 'Erreur de synchronisation',
+        description: 'Impossible de synchroniser vos appareils.',
+        variant: 'destructive',
       });
     } finally {
       setSyncLoading(false);
@@ -159,58 +160,58 @@ const WearableHub: React.FC = () => {
   }, [devices, appStoreUser?.id, toast]);
 
   // Reconnexion d'un appareil
-  const handleReconnectDevice = useCallback(async (deviceId: string) => {
-    try {
-      setDevices(prev => prev.map(device => 
-        device.id === deviceId 
-          ? { ...device, sync_status: 'syncing' }
-          : device
-      ));
+  const handleReconnectDevice = useCallback(
+    async (deviceId: string) => {
+      try {
+        setDevices(prev =>
+          prev.map(device =>
+            device.id === deviceId ? { ...device, sync_status: 'syncing' } : device
+          )
+        );
 
-      // Simulation reconnexion
-      await new Promise(resolve => setTimeout(resolve, 3000));
+        // Simulation reconnexion
+        await new Promise(resolve => setTimeout(resolve, 3000));
 
-      setDevices(prev => prev.map(device => 
-        device.id === deviceId 
-          ? { 
-              ...device, 
-              connected: true, 
-              sync_status: 'synced',
-              last_sync: new Date().toISOString()
-            }
-          : device
-      ));
+        setDevices(prev =>
+          prev.map(device =>
+            device.id === deviceId
+              ? {
+                  ...device,
+                  connected: true,
+                  sync_status: 'synced',
+                  last_sync: new Date().toISOString(),
+                }
+              : device
+          )
+        );
 
-      // Résoudre les erreurs liées à cet appareil
-      setErrors(prev => prev.map(error => 
-        error.device_id === deviceId 
-          ? { ...error, resolved: true }
-          : error
-      ));
+        // Résoudre les erreurs liées à cet appareil
+        setErrors(prev =>
+          prev.map(error => (error.device_id === deviceId ? { ...error, resolved: true } : error))
+        );
 
-      const device = devices.find(d => d.id === deviceId);
-      toast({
-        title: "Appareil reconnecté",
-        description: `${device?.name} est maintenant connecté et synchronisé.`,
-      });
-
-    } catch (error) {
-      console.error('Erreur reconnexion:', error);
-      setDevices(prev => prev.map(device => 
-        device.id === deviceId 
-          ? { ...device, sync_status: 'error' }
-          : device
-      ));
-    }
-  }, [devices, toast]);
+        const device = devices.find(d => d.id === deviceId);
+        toast({
+          title: 'Appareil reconnecté',
+          description: `${device?.name} est maintenant connecté et synchronisé.`,
+        });
+      } catch (error) {
+        console.error('Erreur reconnexion:', error);
+        setDevices(prev =>
+          prev.map(device =>
+            device.id === deviceId ? { ...device, sync_status: 'error' } : device
+          )
+        );
+      }
+    },
+    [devices, toast]
+  );
 
   // Résoudre une erreur
   const handleResolveError = useCallback((errorIndex: number) => {
-    setErrors(prev => prev.map((error, index) => 
-      index === errorIndex 
-        ? { ...error, resolved: true }
-        : error
-    ));
+    setErrors(prev =>
+      prev.map((error, index) => (index === errorIndex ? { ...error, resolved: true } : error))
+    );
   }, []);
 
   // Chargement initial
@@ -220,11 +221,14 @@ const WearableHub: React.FC = () => {
 
   // Auto-refresh toutes les 5 minutes
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!syncLoading) {
-        loadDevices();
-      }
-    }, 5 * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        if (!syncLoading) {
+          loadDevices();
+        }
+      },
+      5 * 60 * 1000
+    );
 
     return () => clearInterval(interval);
   }, [loadDevices, syncLoading]);
@@ -244,9 +248,7 @@ const WearableHub: React.FC = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">MyFitHero Wearables</h1>
-                <p className="text-gray-600">
-                  Centre de contrôle pour vos appareils connectés
-                </p>
+                <p className="text-gray-600">Centre de contrôle pour vos appareils connectés</p>
               </div>
             </div>
 
@@ -262,13 +264,15 @@ const WearableHub: React.FC = () => {
                 {syncLoading ? 'Sync...' : 'Synchroniser'}
               </Button>
 
-              <Badge 
-                variant={connectedDevices.length > 0 ? "default" : "destructive"} 
-                className={connectedDevices.length > 0 ? "text-green-600 border-green-600" : ""}
+              <Badge
+                variant={connectedDevices.length > 0 ? 'default' : 'destructive'}
+                className={connectedDevices.length > 0 ? 'text-green-600 border-green-600' : ''}
               >
-                <div className={`w-2 h-2 rounded-full mr-2 ${
-                  connectedDevices.length > 0 ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-                }`} />
+                <div
+                  className={`w-2 h-2 rounded-full mr-2 ${
+                    connectedDevices.length > 0 ? 'bg-green-500 animate-pulse' : 'bg-red-500'
+                  }`}
+                />
                 {connectedDevices.length > 0 ? 'En ligne' : 'Hors ligne'}
               </Badge>
 
@@ -289,19 +293,24 @@ const WearableHub: React.FC = () => {
                 </span>
               </div>
               <div className="mt-2 space-y-1">
-                {errors.filter(e => !e.resolved).map((error, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm text-red-700">
-                    <span>{error.message}</span>
-                    <Button
-                      onClick={() => handleResolveError(index)}
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-800"
+                {errors
+                  .filter(e => !e.resolved)
+                  .map((error, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between text-sm text-red-700"
                     >
-                      Résoudre
-                    </Button>
-                  </div>
-                ))}
+                      <span>{error.message}</span>
+                      <Button
+                        onClick={() => handleResolveError(index)}
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Résoudre
+                      </Button>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -377,12 +386,16 @@ const WearableHub: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {devices.map((device) => (
+                    {devices.map(device => (
                       <div key={device.id} className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           {device.type === 'watch' && <Watch className="text-blue-500" size={16} />}
-                          {device.type === 'fitness_tracker' && <Activity className="text-green-500" size={16} />}
-                          {device.type === 'heart_monitor' && <Heart className="text-red-500" size={16} />}
+                          {device.type === 'fitness_tracker' && (
+                            <Activity className="text-green-500" size={16} />
+                          )}
+                          {device.type === 'heart_monitor' && (
+                            <Heart className="text-red-500" size={16} />
+                          )}
                           <div>
                             <span className="text-sm font-medium">{device.name}</span>
                             {device.battery_level && (
@@ -465,7 +478,10 @@ const WearableHub: React.FC = () => {
                   <h3 className="font-medium text-gray-900 mb-2">Insights personnalisés</h3>
                   <ul className="space-y-2 text-sm text-gray-600">
                     <li>• Votre activité est optimale entre 10h et 16h</li>
-                    <li>• Les jours avec plus de sommeil REM correspondent à de meilleures performances</li>
+                    <li>
+                      • Les jours avec plus de sommeil REM correspondent à de meilleures
+                      performances
+                    </li>
                     <li>• Votre fréquence cardiaque de repos s'améliore constamment</li>
                     <li>• Les entraînements matinaux donnent les meilleurs résultats</li>
                   </ul>

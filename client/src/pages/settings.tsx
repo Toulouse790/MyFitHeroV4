@@ -1,11 +1,11 @@
 // pages/settings.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
-import { 
-  Settings as SettingsIcon, 
-  User, 
-  Bell, 
-  Shield, 
+import {
+  Settings as SettingsIcon,
+  User,
+  Bell,
+  Shield,
   Smartphone,
   Heart,
   Moon,
@@ -20,7 +20,7 @@ import {
   ArrowLeft,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
 } from 'lucide-react';
 import { useWearableSync } from '@/hooks/useWearableSync';
 import { useToast } from '@/hooks/use-toast';
@@ -59,7 +59,7 @@ const Settings: React.FC = () => {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const { appStoreUser, setAppStoreUser, clearStore } = useAppStore();
-  
+
   const {
     isLoading: wearableLoading,
     lastSyncTime,
@@ -71,7 +71,7 @@ const Settings: React.FC = () => {
     syncAll,
     scheduleSync,
     getCachedData,
-    cacheData
+    cacheData,
   } = useWearableSync();
 
   const [loading, setLoading] = useState(false);
@@ -80,7 +80,7 @@ const Settings: React.FC = () => {
   const [syncInterval, setSyncInterval] = useState(30);
   const [lastCachedData, setLastCachedData] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
   // Profile settings state
   const [profileData, setProfileData] = useState({
     full_name: appStoreUser?.full_name || '',
@@ -89,7 +89,7 @@ const Settings: React.FC = () => {
     phone: appStoreUser?.phone || '',
     bio: appStoreUser?.bio || '',
     city: appStoreUser?.city || '',
-    country: appStoreUser?.country || ''
+    country: appStoreUser?.country || '',
   });
 
   // Notification settings state
@@ -100,7 +100,7 @@ const Settings: React.FC = () => {
     sleep_reminders: true,
     achievement_alerts: true,
     weekly_summary: true,
-    marketing_emails: false
+    marketing_emails: false,
   });
 
   // Privacy settings state
@@ -108,7 +108,7 @@ const Settings: React.FC = () => {
     profile_public: false,
     share_stats: false,
     allow_friend_requests: true,
-    show_activity: true
+    show_activity: true,
   });
 
   // App preferences
@@ -116,7 +116,7 @@ const Settings: React.FC = () => {
     language: 'fr',
     theme: 'light',
     units: 'metric',
-    currency: 'EUR'
+    currency: 'EUR',
   });
 
   // 🆕 FONCTION DE SUPPRESSION DE COMPTE
@@ -137,13 +137,13 @@ const Settings: React.FC = () => {
     if (!secondConfirm) return;
 
     const finalConfirmation = window.prompt(
-      "Pour confirmer la suppression définitive, tapez exactement : SUPPRIMER"
+      'Pour confirmer la suppression définitive, tapez exactement : SUPPRIMER'
     );
 
-    if (finalConfirmation !== "SUPPRIMER") {
+    if (finalConfirmation !== 'SUPPRIMER') {
       toast({
-        title: "Suppression annulée",
-        description: "La suppression de votre compte a été annulée.",
+        title: 'Suppression annulée',
+        description: 'La suppression de votre compte a été annulée.',
       });
       return;
     }
@@ -158,22 +158,19 @@ const Settings: React.FC = () => {
       const tablesToClean = [
         'user_workouts',
         'user_nutrition',
-        'user_hydration', 
+        'user_hydration',
         'user_sleep',
         'user_analytics',
         'user_preferences',
         'user_social_connections',
         'user_achievements',
         'user_wearable_data',
-        'user_profiles'
+        'user_profiles',
       ];
 
       for (const table of tablesToClean) {
-        const { error } = await supabase
-          .from(table)
-          .delete()
-          .eq('user_id', userId);
-        
+        const { error } = await supabase.from(table).delete().eq('user_id', userId);
+
         if (error) {
           console.warn(`Erreur suppression ${table}:`, error);
         }
@@ -181,13 +178,13 @@ const Settings: React.FC = () => {
 
       // 2. Supprimer le compte Auth Supabase
       const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      
+
       if (authError) {
         // Si on n'a pas les droits admin, on utilise une RPC
         const { error: rpcError } = await supabase.rpc('delete_user_account', {
-          user_id: userId
+          user_id: userId,
         });
-        
+
         if (rpcError) {
           throw new Error('Impossible de supprimer le compte: ' + rpcError.message);
         }
@@ -195,7 +192,7 @@ const Settings: React.FC = () => {
 
       // 3. Nettoyer le store local
       clearStore();
-      
+
       // 4. Nettoyer le localStorage
       localStorage.clear();
       sessionStorage.clear();
@@ -204,16 +201,17 @@ const Settings: React.FC = () => {
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'account_deleted', {
           user_id: userId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
 
       // 6. Déconnexion et redirection
       await supabase.auth.signOut();
-      
+
       toast({
-        title: "Compte supprimé",
-        description: "Votre compte MyFitHero a été définitivement supprimé. Nous espérons vous revoir bientôt !",
+        title: 'Compte supprimé',
+        description:
+          'Votre compte MyFitHero a été définitivement supprimé. Nous espérons vous revoir bientôt !',
         duration: 5000,
       });
 
@@ -221,13 +219,13 @@ const Settings: React.FC = () => {
       setTimeout(() => {
         setLocation('/goodbye');
       }, 2000);
-
     } catch (error) {
       console.error('Erreur suppression compte:', error);
       toast({
-        title: "Erreur de suppression",
-        description: "Une erreur est survenue lors de la suppression. Contactez le support si le problème persiste.",
-        variant: "destructive",
+        title: 'Erreur de suppression',
+        description:
+          'Une erreur est survenue lors de la suppression. Contactez le support si le problème persiste.',
+        variant: 'destructive',
         duration: 8000,
       });
     } finally {
@@ -262,14 +260,13 @@ const Settings: React.FC = () => {
       // Charger les préférences de sync
       const savedAutoSync = localStorage.getItem('autoSyncEnabled');
       const savedInterval = localStorage.getItem('syncInterval');
-      
+
       if (savedAutoSync) {
         setAutoSyncEnabled(JSON.parse(savedAutoSync));
       }
       if (savedInterval) {
         setSyncInterval(parseInt(savedInterval));
       }
-
     } catch (error) {
       console.error('Erreur chargement paramètres:', error);
     }
@@ -285,33 +282,32 @@ const Settings: React.FC = () => {
         .from('user_profiles')
         .update({
           ...profileData,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', appStoreUser.id);
 
       if (error) throw error;
 
       setAppStoreUser({ ...appStoreUser, ...profileData });
-      
+
       toast({
-        title: "Profil mis à jour",
-        description: "Vos informations ont été sauvegardées avec succès.",
+        title: 'Profil mis à jour',
+        description: 'Vos informations ont été sauvegardées avec succès.',
       });
 
       // Analytics
       if (typeof window !== 'undefined' && window.gtag) {
         window.gtag('event', 'profile_updated', {
           user_id: appStoreUser.id,
-          section: 'settings'
+          section: 'settings',
         });
       }
-
     } catch (error) {
       console.error('Erreur sauvegarde profil:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder le profil.",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder le profil.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -324,30 +320,30 @@ const Settings: React.FC = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
+      const { error } = await supabase.from('user_preferences').upsert(
+        {
           user_id: appStoreUser.id,
           notifications,
-          updated_at: new Date().toISOString()
-        }, {
+          updated_at: new Date().toISOString(),
+        },
+        {
           onConflict: 'user_id',
-          ignoreDuplicates: false
-        });
+          ignoreDuplicates: false,
+        }
+      );
 
       if (error) throw error;
 
       toast({
-        title: "Notifications mises à jour",
-        description: "Vos préférences de notification ont été sauvegardées.",
+        title: 'Notifications mises à jour',
+        description: 'Vos préférences de notification ont été sauvegardées.',
       });
-
     } catch (error) {
       console.error('Erreur sauvegarde notifications:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les notifications.",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder les notifications.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -360,30 +356,30 @@ const Settings: React.FC = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
+      const { error } = await supabase.from('user_preferences').upsert(
+        {
           user_id: appStoreUser.id,
           app_preferences: preferences,
-          updated_at: new Date().toISOString()
-        }, {
+          updated_at: new Date().toISOString(),
+        },
+        {
           onConflict: 'user_id',
-          ignoreDuplicates: false
-        });
+          ignoreDuplicates: false,
+        }
+      );
 
       if (error) throw error;
 
       toast({
-        title: "Préférences mises à jour",
+        title: 'Préférences mises à jour',
         description: "Vos préférences d'application ont été sauvegardées.",
       });
-
     } catch (error) {
       console.error('Erreur sauvegarde préférences:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder les préférences.",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder les préférences.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -396,30 +392,30 @@ const Settings: React.FC = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
+      const { error } = await supabase.from('user_preferences').upsert(
+        {
           user_id: appStoreUser.id,
           privacy,
-          updated_at: new Date().toISOString()
-        }, {
+          updated_at: new Date().toISOString(),
+        },
+        {
           onConflict: 'user_id',
-          ignoreDuplicates: false
-        });
+          ignoreDuplicates: false,
+        }
+      );
 
       if (error) throw error;
 
       toast({
-        title: "Confidentialité mise à jour",
-        description: "Vos paramètres de confidentialité ont été sauvegardés.",
+        title: 'Confidentialité mise à jour',
+        description: 'Vos paramètres de confidentialité ont été sauvegardés.',
       });
-
     } catch (error) {
       console.error('Erreur sauvegarde confidentialité:', error);
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder la confidentialité.",
-        variant: "destructive"
+        title: 'Erreur',
+        description: 'Impossible de sauvegarder la confidentialité.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -432,7 +428,7 @@ const Settings: React.FC = () => {
     if (data && appStoreUser?.id) {
       cacheData(data);
       setLastCachedData(data);
-      
+
       // Sauvegarder dans Supabase
       if (data.steps) {
         await AnalyticsService.saveWearableSteps(appStoreUser.id, data.steps);
@@ -440,10 +436,10 @@ const Settings: React.FC = () => {
       if (data.heartRate && data.heartRate.length > 0) {
         await AnalyticsService.saveHeartRateData(appStoreUser.id, data.heartRate);
       }
-      
+
       toast({
-        title: "Apple Health synchronisé",
-        description: "Vos données ont été mises à jour.",
+        title: 'Apple Health synchronisé',
+        description: 'Vos données ont été mises à jour.',
       });
     }
   }, [syncAppleHealth, cacheData, appStoreUser?.id, toast]);
@@ -453,10 +449,10 @@ const Settings: React.FC = () => {
     if (data && appStoreUser?.id) {
       cacheData(data);
       setLastCachedData(data);
-      
+
       toast({
-        title: "Google Fit synchronisé",
-        description: "Vos données ont été mises à jour.",
+        title: 'Google Fit synchronisé',
+        description: 'Vos données ont été mises à jour.',
       });
     }
   }, [syncGoogleFit, cacheData, appStoreUser?.id, toast]);
@@ -466,10 +462,10 @@ const Settings: React.FC = () => {
     if (data && appStoreUser?.id) {
       cacheData(data);
       setLastCachedData(data);
-      
+
       toast({
-        title: "Synchronisation complète",
-        description: "Tous vos appareils ont été synchronisés.",
+        title: 'Synchronisation complète',
+        description: 'Tous vos appareils ont été synchronisés.',
       });
     }
   }, [syncAll, cacheData, appStoreUser?.id, toast]);
@@ -478,12 +474,12 @@ const Settings: React.FC = () => {
     const newValue = !autoSyncEnabled;
     setAutoSyncEnabled(newValue);
     localStorage.setItem('autoSyncEnabled', JSON.stringify(newValue));
-    
+
     toast({
-      title: newValue ? "Auto-sync activé" : "Auto-sync désactivé",
-      description: newValue 
+      title: newValue ? 'Auto-sync activé' : 'Auto-sync désactivé',
+      description: newValue
         ? `Synchronisation toutes les ${syncInterval} minutes`
-        : "Vous pouvez toujours synchroniser manuellement",
+        : 'Vous pouvez toujours synchroniser manuellement',
     });
   }, [autoSyncEnabled, syncInterval, toast]);
 
@@ -491,8 +487,8 @@ const Settings: React.FC = () => {
     if (!date) return 'Jamais';
     const now = new Date();
     const diffMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffMinutes < 1) return 'À l\'instant';
+
+    if (diffMinutes < 1) return "À l'instant";
     if (diffMinutes < 60) return `Il y a ${diffMinutes} min`;
     if (diffMinutes < 1440) return `Il y a ${Math.floor(diffMinutes / 60)}h`;
     return `Il y a ${Math.floor(diffMinutes / 1440)}j`;
@@ -520,12 +516,12 @@ const Settings: React.FC = () => {
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'wearables', label: 'Appareils', icon: Smartphone },
     { id: 'privacy', label: 'Confidentialité', icon: Shield },
-    { id: 'preferences', label: 'Préférences', icon: Palette }
+    { id: 'preferences', label: 'Préférences', icon: Palette },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <UniformHeader 
+      <UniformHeader
         title="Paramètres"
         subtitle={getPersonalizedMessage()}
         showBackButton={true}
@@ -544,16 +540,19 @@ const Settings: React.FC = () => {
       />
 
       <div className="p-4 space-y-6 max-w-4xl mx-auto">
-        
         {/* Navigation par onglets */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <Card>
             <CardContent className="p-2">
               <TabsList className="grid w-full grid-cols-5">
-                {tabs.map((tab) => {
+                {tabs.map(tab => {
                   const TabIcon = tab.icon;
                   return (
-                    <TabsTrigger key={tab.id} value={tab.id} className="flex items-center space-x-2">
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className="flex items-center space-x-2"
+                    >
                       <TabIcon className="h-4 w-4" />
                       <span className="hidden sm:inline">{tab.label}</span>
                     </TabsTrigger>
@@ -577,7 +576,7 @@ const Settings: React.FC = () => {
                     <Input
                       id="full_name"
                       value={profileData.full_name}
-                      onChange={(e) => setProfileData({...profileData, full_name: e.target.value})}
+                      onChange={e => setProfileData({ ...profileData, full_name: e.target.value })}
                       placeholder="Votre nom complet"
                     />
                   </div>
@@ -586,12 +585,12 @@ const Settings: React.FC = () => {
                     <Input
                       id="username"
                       value={profileData.username}
-                      onChange={(e) => setProfileData({...profileData, username: e.target.value})}
+                      onChange={e => setProfileData({ ...profileData, username: e.target.value })}
                       placeholder="Nom d'utilisateur unique"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -599,7 +598,7 @@ const Settings: React.FC = () => {
                       id="email"
                       type="email"
                       value={profileData.email}
-                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                      onChange={e => setProfileData({ ...profileData, email: e.target.value })}
                       placeholder="votre@email.com"
                     />
                   </div>
@@ -609,30 +608,30 @@ const Settings: React.FC = () => {
                       id="phone"
                       type="tel"
                       value={profileData.phone}
-                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      onChange={e => setProfileData({ ...profileData, phone: e.target.value })}
                       placeholder="+33 6 12 34 56 78"
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea
                     id="bio"
                     value={profileData.bio}
-                    onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                    onChange={e => setProfileData({ ...profileData, bio: e.target.value })}
                     placeholder="Parlez-nous de vous, vos objectifs..."
                     rows={3}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">Ville</Label>
                     <Input
                       id="city"
                       value={profileData.city}
-                      onChange={(e) => setProfileData({...profileData, city: e.target.value})}
+                      onChange={e => setProfileData({ ...profileData, city: e.target.value })}
                       placeholder="Votre ville"
                     />
                   </div>
@@ -641,14 +640,14 @@ const Settings: React.FC = () => {
                     <Input
                       id="country"
                       value={profileData.country}
-                      onChange={(e) => setProfileData({...profileData, country: e.target.value})}
+                      onChange={e => setProfileData({ ...profileData, country: e.target.value })}
                       placeholder="Votre pays"
                     />
                   </div>
                 </div>
-                
-                <Button 
-                  onClick={handleSaveProfile} 
+
+                <Button
+                  onClick={handleSaveProfile}
                   disabled={loading}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
@@ -664,15 +663,20 @@ const Settings: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Préférences de notifications</CardTitle>
-                <CardDescription>Choisissez les notifications que vous souhaitez recevoir</CardDescription>
+                <CardDescription>
+                  Choisissez les notifications que vous souhaitez recevoir
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {Object.entries(notifications).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-4 rounded-lg border">
+                  <div
+                    key={key}
+                    className="flex items-center justify-between p-4 rounded-lg border"
+                  >
                     <div>
                       <Label htmlFor={key} className="font-medium">
-                        {key === 'workout_reminders' && 'Rappels d\'entraînement'}
-                        {key === 'hydration_reminders' && 'Rappels d\'hydratation'}
+                        {key === 'workout_reminders' && "Rappels d'entraînement"}
+                        {key === 'hydration_reminders' && "Rappels d'hydratation"}
                         {key === 'meal_reminders' && 'Rappels de repas'}
                         {key === 'sleep_reminders' && 'Rappels de sommeil'}
                         {key === 'achievement_alerts' && 'Alertes de réussite'}
@@ -680,27 +684,32 @@ const Settings: React.FC = () => {
                         {key === 'marketing_emails' && 'Emails marketing'}
                       </Label>
                       <p className="text-sm text-gray-600">
-                        {key === 'workout_reminders' && 'Recevez des rappels pour vos entraînements programmés'}
-                        {key === 'hydration_reminders' && 'Restez hydraté avec des rappels réguliers'}
+                        {key === 'workout_reminders' &&
+                          'Recevez des rappels pour vos entraînements programmés'}
+                        {key === 'hydration_reminders' &&
+                          'Restez hydraté avec des rappels réguliers'}
                         {key === 'meal_reminders' && 'Ne manquez jamais un repas'}
                         {key === 'sleep_reminders' && 'Notifications pour optimiser votre sommeil'}
-                        {key === 'achievement_alerts' && 'Célébrez vos réussites et objectifs atteints'}
-                        {key === 'weekly_summary' && 'Recevez votre résumé de progression hebdomadaire'}
-                        {key === 'marketing_emails' && 'Nouvelles fonctionnalités et offres spéciales'}
+                        {key === 'achievement_alerts' &&
+                          'Célébrez vos réussites et objectifs atteints'}
+                        {key === 'weekly_summary' &&
+                          'Recevez votre résumé de progression hebdomadaire'}
+                        {key === 'marketing_emails' &&
+                          'Nouvelles fonctionnalités et offres spéciales'}
                       </p>
                     </div>
                     <Switch
                       id={key}
                       checked={value}
-                      onCheckedChange={(checked) => 
-                        setNotifications({...notifications, [key]: checked})
+                      onCheckedChange={checked =>
+                        setNotifications({ ...notifications, [key]: checked })
                       }
                     />
                   </div>
                 ))}
-                
-                <Button 
-                  onClick={handleSaveNotifications} 
+
+                <Button
+                  onClick={handleSaveNotifications}
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
@@ -723,7 +732,6 @@ const Settings: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  
                   {/* Dernière sync */}
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
@@ -733,7 +741,7 @@ const Settings: React.FC = () => {
                         <p className="text-xs text-gray-500">{formatLastSync(lastSyncTime)}</p>
                       </div>
                     </div>
-                    <Badge variant={lastSyncTime ? "default" : "secondary"}>
+                    <Badge variant={lastSyncTime ? 'default' : 'secondary'}>
                       {lastSyncTime ? 'Synchronisé' : 'Jamais synchronisé'}
                     </Badge>
                   </div>
@@ -743,7 +751,9 @@ const Settings: React.FC = () => {
                     <div className="flex items-center space-x-3 p-4 bg-red-50 border border-red-200 rounded-lg">
                       <AlertCircle className="text-red-500" size={16} />
                       <div>
-                        <p className="text-sm font-medium text-red-800">Erreur de synchronisation</p>
+                        <p className="text-sm font-medium text-red-800">
+                          Erreur de synchronisation
+                        </p>
                         <p className="text-xs text-red-600">{syncError}</p>
                       </div>
                     </div>
@@ -754,58 +764,59 @@ const Settings: React.FC = () => {
                     <Button
                       onClick={handleAppleHealthSync}
                       disabled={!isAppleHealthAvailable || wearableLoading}
-                      variant={isAppleHealthAvailable ? "default" : "outline"}
+                      variant={isAppleHealthAvailable ? 'default' : 'outline'}
                       className="flex items-center space-x-2"
                     >
                       <Heart className="text-red-500" size={16} />
                       <span>Apple Health</span>
                       {wearableLoading && <RefreshCw className="animate-spin" size={14} />}
                     </Button>
-                    
+
                     <Button
                       onClick={handleGoogleFitSync}
                       disabled={!isGoogleFitAvailable || wearableLoading}
-                      variant={isGoogleFitAvailable ? "default" : "outline"}
+                      variant={isGoogleFitAvailable ? 'default' : 'outline'}
                       className="flex items-center space-x-2"
                     >
                       <Activity className="text-green-500" size={16} />
                       <span>Google Fit</span>
                       {wearableLoading && <RefreshCw className="animate-spin" size={14} />}
                     </Button>
-                    
+
                     <Button
                       onClick={handleSyncAll}
-                      disabled={(!isAppleHealthAvailable && !isGoogleFitAvailable) || wearableLoading}
+                      disabled={
+                        (!isAppleHealthAvailable && !isGoogleFitAvailable) || wearableLoading
+                      }
                       className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700"
                     >
-                      <RefreshCw className={wearableLoading ? "animate-spin" : ""} size={16} />
+                      <RefreshCw className={wearableLoading ? 'animate-spin' : ''} size={16} />
                       <span>Tout synchroniser</span>
                     </Button>
                   </div>
 
                   {/* Paramètres de sync automatique */}
                   <Separator />
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="font-medium">Synchronisation automatique</Label>
-                        <p className="text-sm text-gray-600">Synchroniser automatiquement vos appareils</p>
+                        <p className="text-sm text-gray-600">
+                          Synchroniser automatiquement vos appareils
+                        </p>
                       </div>
-                      <Switch
-                        checked={autoSyncEnabled}
-                        onCheckedChange={toggleAutoSync}
-                      />
+                      <Switch checked={autoSyncEnabled} onCheckedChange={toggleAutoSync} />
                     </div>
-                    
+
                     {autoSyncEnabled && (
                       <div>
                         <Label className="text-sm">Intervalle (minutes)</Label>
                         <div className="flex space-x-2 mt-2">
-                          {[15, 30, 60, 120].map((interval) => (
+                          {[15, 30, 60, 120].map(interval => (
                             <Button
                               key={interval}
-                              variant={syncInterval === interval ? "default" : "outline"}
+                              variant={syncInterval === interval ? 'default' : 'outline'}
                               size="sm"
                               onClick={() => setSyncInterval(interval)}
                             >
@@ -820,19 +831,29 @@ const Settings: React.FC = () => {
                   {/* Données en cache */}
                   {lastCachedData && (
                     <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">Dernières données synchronisées</h4>
+                      <h4 className="font-medium text-blue-900 mb-2">
+                        Dernières données synchronisées
+                      </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-blue-700">Pas: {lastCachedData.steps?.toLocaleString() || 0}</p>
+                          <p className="text-blue-700">
+                            Pas: {lastCachedData.steps?.toLocaleString() || 0}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-blue-700">Calories: {lastCachedData.caloriesBurned || 0}</p>
+                          <p className="text-blue-700">
+                            Calories: {lastCachedData.caloriesBurned || 0}
+                          </p>
                         </div>
                         <div>
-                          <p className="text-blue-700">FC moy: {lastCachedData.avgHeartRate || 0} bpm</p>
+                          <p className="text-blue-700">
+                            FC moy: {lastCachedData.avgHeartRate || 0} bpm
+                          </p>
                         </div>
                         <div>
-                          <p className="text-blue-700">Minutes actives: {lastCachedData.activeMinutes || 0}</p>
+                          <p className="text-blue-700">
+                            Minutes actives: {lastCachedData.activeMinutes || 0}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -851,48 +872,55 @@ const Settings: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 {Object.entries(privacy).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-4 rounded-lg border">
+                  <div
+                    key={key}
+                    className="flex items-center justify-between p-4 rounded-lg border"
+                  >
                     <div className="flex items-center space-x-3">
                       {key === 'profile_public' && <Eye className="text-gray-500" size={16} />}
                       {key === 'share_stats' && <Activity className="text-gray-500" size={16} />}
-                      {key === 'allow_friend_requests' && <User className="text-gray-500" size={16} />}
-                      {key === 'show_activity' && <CheckCircle className="text-gray-500" size={16} />}
+                      {key === 'allow_friend_requests' && (
+                        <User className="text-gray-500" size={16} />
+                      )}
+                      {key === 'show_activity' && (
+                        <CheckCircle className="text-gray-500" size={16} />
+                      )}
                       <div>
                         <Label htmlFor={key} className="font-medium">
                           {key === 'profile_public' && 'Profil public'}
                           {key === 'share_stats' && 'Partager les statistiques'}
-                          {key === 'allow_friend_requests' && 'Demandes d\'amis'}
-                          {key === 'show_activity' && 'Afficher l\'activité'}
+                          {key === 'allow_friend_requests' && "Demandes d'amis"}
+                          {key === 'show_activity' && "Afficher l'activité"}
                         </Label>
                         <p className="text-sm text-gray-600">
-                          {key === 'profile_public' && 'Rendre votre profil visible aux autres utilisateurs'}
+                          {key === 'profile_public' &&
+                            'Rendre votre profil visible aux autres utilisateurs'}
                           {key === 'share_stats' && 'Partager vos statistiques avec la communauté'}
-                          {key === 'allow_friend_requests' && 'Permettre aux autres de vous envoyer des demandes d\'amis'}
-                          {key === 'show_activity' && 'Afficher votre statut d\'activité aux amis'}
+                          {key === 'allow_friend_requests' &&
+                            "Permettre aux autres de vous envoyer des demandes d'amis"}
+                          {key === 'show_activity' && "Afficher votre statut d'activité aux amis"}
                         </p>
                       </div>
                     </div>
                     <Switch
                       id={key}
                       checked={value}
-                      onCheckedChange={(checked) => 
-                        setPrivacy({...privacy, [key]: checked})
-                      }
+                      onCheckedChange={checked => setPrivacy({ ...privacy, [key]: checked })}
                     />
                   </div>
                 ))}
-                
-                <Button 
-                  onClick={handleSavePrivacy} 
+
+                <Button
+                  onClick={handleSavePrivacy}
                   disabled={loading}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   <Save className="mr-2 h-4 w-4" />
                   {loading ? 'Sauvegarde...' : 'Sauvegarder la confidentialité'}
                 </Button>
-                
+
                 <Separator />
-                
+
                 {/* 🆕 ZONE DE DANGER AVEC SUPPRESSION DE COMPTE BRANCHÉE */}
                 <div className="space-y-4">
                   <h3 className="font-semibold text-red-600 flex items-center">
@@ -901,16 +929,20 @@ const Settings: React.FC = () => {
                   </h3>
                   <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-700 mb-3">
-                      ⚠️ <strong>ATTENTION :</strong> Cette action supprimera définitivement votre compte MyFitHero et toutes vos données associées (profil, entraînements, statistiques, etc.). Cette action est <strong>irréversible</strong>.
+                      ⚠️ <strong>ATTENTION :</strong> Cette action supprimera définitivement votre
+                      compte MyFitHero et toutes vos données associées (profil, entraînements,
+                      statistiques, etc.). Cette action est <strong>irréversible</strong>.
                     </p>
-                    <Button 
-                      variant="destructive" 
+                    <Button
+                      variant="destructive"
                       className="w-full"
                       onClick={handleDeleteAccount}
                       disabled={isDeleting}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      {isDeleting ? 'Suppression en cours...' : 'Supprimer définitivement mon compte'}
+                      {isDeleting
+                        ? 'Suppression en cours...'
+                        : 'Supprimer définitivement mon compte'}
                     </Button>
                   </div>
                 </div>
@@ -926,7 +958,6 @@ const Settings: React.FC = () => {
                 <CardDescription>Personnalisez votre expérience MyFitHero</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 rounded-lg border">
@@ -937,10 +968,10 @@ const Settings: React.FC = () => {
                           <p className="text-sm text-gray-600">Choisissez votre langue préférée</p>
                         </div>
                       </div>
-                      <select 
+                      <select
                         className="px-3 py-2 border rounded-md"
                         value={preferences.language}
-                        onChange={(e) => setPreferences({...preferences, language: e.target.value})}
+                        onChange={e => setPreferences({ ...preferences, language: e.target.value })}
                       >
                         <option value="fr">Français</option>
                         <option value="en">English</option>
@@ -948,7 +979,7 @@ const Settings: React.FC = () => {
                         <option value="de">Deutsch</option>
                       </select>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-4 rounded-lg border">
                       <div className="flex items-center space-x-3">
                         <Palette className="h-5 w-5 text-gray-600" />
@@ -957,10 +988,10 @@ const Settings: React.FC = () => {
                           <p className="text-sm text-gray-600">Apparence de l'application</p>
                         </div>
                       </div>
-                      <select 
+                      <select
                         className="px-3 py-2 border rounded-md"
                         value={preferences.theme}
-                        onChange={(e) => setPreferences({...preferences, theme: e.target.value})}
+                        onChange={e => setPreferences({ ...preferences, theme: e.target.value })}
                       >
                         <option value="light">Clair</option>
                         <option value="dark">Sombre</option>
@@ -978,16 +1009,16 @@ const Settings: React.FC = () => {
                           <p className="text-sm text-gray-600">Système de mesure</p>
                         </div>
                       </div>
-                      <select 
+                      <select
                         className="px-3 py-2 border rounded-md"
                         value={preferences.units}
-                        onChange={(e) => setPreferences({...preferences, units: e.target.value})}
+                        onChange={e => setPreferences({ ...preferences, units: e.target.value })}
                       >
                         <option value="metric">Métrique (kg, cm)</option>
                         <option value="imperial">Impérial (lbs, ft)</option>
                       </select>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-4 rounded-lg border">
                       <div className="flex items-center space-x-3">
                         <Globe className="h-5 w-5 text-gray-600" />
@@ -996,10 +1027,10 @@ const Settings: React.FC = () => {
                           <p className="text-sm text-gray-600">Monnaie pour les abonnements</p>
                         </div>
                       </div>
-                      <select 
+                      <select
                         className="px-3 py-2 border rounded-md"
                         value={preferences.currency}
-                        onChange={(e) => setPreferences({...preferences, currency: e.target.value})}
+                        onChange={e => setPreferences({ ...preferences, currency: e.target.value })}
                       >
                         <option value="EUR">Euro (€)</option>
                         <option value="USD">Dollar ($)</option>
@@ -1009,8 +1040,8 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={handleSavePreferences}
                   disabled={loading}
                   className="w-full bg-purple-600 hover:bg-purple-700"

@@ -3,16 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  TrendingUp, 
-  Users, 
-  Activity, 
+import {
+  TrendingUp,
+  Users,
+  Activity,
   Calendar,
   BarChart3,
   PieChart,
   LineChart,
   Download,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface AnalyticsData {
@@ -38,7 +38,7 @@ const AdminAnalytics: React.FC = () => {
     try {
       // Simuler le chargement des données d'analytics
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const mockData: AnalyticsData = {
         userGrowth: [
           { date: '2024-01-01', users: 1200, active: 890 },
@@ -47,7 +47,7 @@ const AdminAnalytics: React.FC = () => {
           { date: '2024-01-04', users: 1380, active: 1020 },
           { date: '2024-01-05', users: 1420, active: 1080 },
           { date: '2024-01-06', users: 1480, active: 1150 },
-          { date: '2024-01-07', users: 1520, active: 1200 }
+          { date: '2024-01-07', users: 1520, active: 1200 },
         ],
         sessionStats: [
           { date: '2024-01-01', sessions: 450, duration: 28 },
@@ -56,20 +56,20 @@ const AdminAnalytics: React.FC = () => {
           { date: '2024-01-04', sessions: 600, duration: 35 },
           { date: '2024-01-05', sessions: 650, duration: 38 },
           { date: '2024-01-06', sessions: 700, duration: 42 },
-          { date: '2024-01-07', sessions: 720, duration: 45 }
+          { date: '2024-01-07', sessions: 720, duration: 45 },
         ],
         popularExercises: [
           { name: 'Push-ups', count: 2400, percentage: 35 },
           { name: 'Squats', count: 1800, percentage: 26 },
           { name: 'Plank', count: 1200, percentage: 18 },
           { name: 'Burpees', count: 800, percentage: 12 },
-          { name: 'Lunges', count: 600, percentage: 9 }
+          { name: 'Lunges', count: 600, percentage: 9 },
         ],
         retentionRate: [
           { period: 'Day 1', rate: 100 },
           { period: 'Day 7', rate: 65 },
           { period: 'Day 30', rate: 42 },
-          { period: 'Day 90', rate: 28 }
+          { period: 'Day 90', rate: 28 },
         ],
         revenueData: [
           { month: 'Jan', revenue: 12500, subscriptions: 250 },
@@ -77,8 +77,8 @@ const AdminAnalytics: React.FC = () => {
           { month: 'Mar', revenue: 18900, subscriptions: 378 },
           { month: 'Apr', revenue: 22100, subscriptions: 442 },
           { month: 'May', revenue: 26800, subscriptions: 536 },
-          { month: 'Jun', revenue: 31200, subscriptions: 624 }
-        ]
+          { month: 'Jun', revenue: 31200, subscriptions: 624 },
+        ],
       };
 
       setAnalyticsData(mockData);
@@ -93,12 +93,12 @@ const AdminAnalytics: React.FC = () => {
     { value: '7d', label: '7 jours' },
     { value: '30d', label: '30 jours' },
     { value: '90d', label: '90 jours' },
-    { value: '1y', label: '1 an' }
+    { value: '1y', label: '1 an' },
   ];
 
   const exportData = () => {
     // Simuler l'export des données
-    const csvData = "Date,Users,Active Users,Sessions\n";
+    const csvData = 'Date,Users,Active Users,Sessions\n';
     console.log('Export des données analytics:', csvData);
   };
 
@@ -119,15 +119,13 @@ const AdminAnalytics: React.FC = () => {
     <div className="space-y-6">
       {/* Header avec filtres */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {t('admin.analytics')}
-        </h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900">{t('admin.analytics')}</h2>
+
         <div className="flex items-center space-x-4">
           {/* Sélecteur de période */}
           <select
             value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
+            onChange={e => setSelectedPeriod(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             {periods.map(period => (
@@ -138,19 +136,12 @@ const AdminAnalytics: React.FC = () => {
           </select>
 
           {/* Boutons d'action */}
-          <Button
-            onClick={loadAnalyticsData}
-            variant="outline"
-            className="flex items-center"
-          >
+          <Button onClick={loadAnalyticsData} variant="outline" className="flex items-center">
             <RefreshCw className="h-4 w-4 mr-2" />
             {t('admin.refresh')}
           </Button>
 
-          <Button
-            onClick={exportData}
-            className="flex items-center"
-          >
+          <Button onClick={exportData} className="flex items-center">
             <Download className="h-4 w-4 mr-2" />
             {t('admin.export')}
           </Button>
@@ -168,7 +159,9 @@ const AdminAnalytics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
-              {analyticsData.userGrowth[analyticsData.userGrowth.length - 1]?.users.toLocaleString()}
+              {analyticsData.userGrowth[
+                analyticsData.userGrowth.length - 1
+              ]?.users.toLocaleString()}
             </div>
             <p className="text-xs text-green-600">
               <TrendingUp className="h-3 w-3 inline mr-1" />
@@ -186,7 +179,9 @@ const AdminAnalytics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {analyticsData.userGrowth[analyticsData.userGrowth.length - 1]?.active.toLocaleString()}
+              {analyticsData.userGrowth[
+                analyticsData.userGrowth.length - 1
+              ]?.active.toLocaleString()}
             </div>
             <p className="text-xs text-green-600">
               <TrendingUp className="h-3 w-3 inline mr-1" />
@@ -204,7 +199,9 @@ const AdminAnalytics: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
-              {analyticsData.sessionStats[analyticsData.sessionStats.length - 1]?.sessions.toLocaleString()}
+              {analyticsData.sessionStats[
+                analyticsData.sessionStats.length - 1
+              ]?.sessions.toLocaleString()}
             </div>
             <p className="text-xs text-green-600">
               <TrendingUp className="h-3 w-3 inline mr-1" />
@@ -269,7 +266,12 @@ const AdminAnalytics: React.FC = () => {
                 <Activity className="h-16 w-16 text-green-400 mx-auto mb-4" />
                 <p className="text-gray-600">Sessions quotidiennes</p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Moyenne: {Math.round(analyticsData.sessionStats.reduce((sum, s) => sum + s.sessions, 0) / analyticsData.sessionStats.length)} sessions/jour
+                  Moyenne:{' '}
+                  {Math.round(
+                    analyticsData.sessionStats.reduce((sum, s) => sum + s.sessions, 0) /
+                      analyticsData.sessionStats.length
+                  )}{' '}
+                  sessions/jour
                 </p>
               </div>
             </div>
@@ -289,13 +291,15 @@ const AdminAnalytics: React.FC = () => {
               {analyticsData.popularExercises.map((exercise, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className={`w-3 h-3 rounded-full mr-3 bg-${['blue', 'green', 'purple', 'yellow', 'red'][index]}-500`} />
+                    <div
+                      className={`w-3 h-3 rounded-full mr-3 bg-${['blue', 'green', 'purple', 'yellow', 'red'][index]}-500`}
+                    />
                     <span className="text-sm font-medium">{exercise.name}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">{exercise.count.toLocaleString()}</span>
                     <div className="w-16 bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className={`h-2 rounded-full bg-${['blue', 'green', 'purple', 'yellow', 'red'][index]}-500`}
                         style={{ width: `${exercise.percentage}%` }}
                       />
@@ -323,7 +327,7 @@ const AdminAnalytics: React.FC = () => {
                   <span className="text-sm font-medium">{retention.period}</span>
                   <div className="flex items-center space-x-2">
                     <div className="w-20 bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="h-2 rounded-full bg-gradient-to-r from-green-500 to-blue-500"
                         style={{ width: `${retention.rate}%` }}
                       />

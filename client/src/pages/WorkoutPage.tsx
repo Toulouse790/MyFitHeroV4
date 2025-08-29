@@ -17,7 +17,7 @@ import {
   Square,
   Zap,
   Clock,
-  Info
+  Info,
 } from 'lucide-react';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
 import { useWorkoutSession } from '../hooks/workout/useWorkoutSession';
@@ -41,7 +41,7 @@ interface SetEditState {
 }
 
 const WorkoutPage: React.FC<WorkoutPageProps> = () => {
-  const { 
+  const {
     currentSession,
     isSessionActive,
     startSession,
@@ -57,7 +57,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     loadExercisesFromLastSession,
     getLastWeightForExercise,
     calculateCalories,
-    formatTime
+    formatTime,
   } = useWorkoutSession();
   const [, setLocation] = useLocation();
   const [editingSet, setEditingSet] = useState<SetEditState | null>(null);
@@ -78,10 +78,10 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       sets: [
         { reps: 10, weight: 60, completed: false },
         { reps: 8, weight: 65, completed: false },
-        { reps: 6, weight: 70, completed: false }
+        { reps: 6, weight: 70, completed: false },
       ],
       completed: false,
-      restTime: 120
+      restTime: 120,
     },
     {
       id: 'ex-2',
@@ -91,10 +91,10 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       sets: [
         { reps: 12, weight: 80, completed: false },
         { reps: 10, weight: 85, completed: false },
-        { reps: 8, weight: 90, completed: false }
+        { reps: 8, weight: 90, completed: false },
       ],
       completed: false,
-      restTime: 90
+      restTime: 90,
     },
     {
       id: 'ex-3',
@@ -104,37 +104,41 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       sets: [
         { reps: 8, completed: false },
         { reps: 6, completed: false },
-        { reps: 5, completed: false }
+        { reps: 5, completed: false },
       ],
       completed: false,
-      restTime: 90
-    }
+      restTime: 90,
+    },
   ];
 
   // Tips d'entraînement contextuels
   const workoutTips = [
-    { icon: Zap, text: "Concentrez-vous sur la forme plutôt que sur le poids", priority: "high" },
-    { icon: Clock, text: "Respectez vos temps de repos pour optimiser la récupération", priority: "medium" },
-    { icon: Info, text: "Chaque série compte, même si elle semble facile", priority: "high" }
+    { icon: Zap, text: 'Concentrez-vous sur la forme plutôt que sur le poids', priority: 'high' },
+    {
+      icon: Clock,
+      text: 'Respectez vos temps de repos pour optimiser la récupération',
+      priority: 'medium',
+    },
+    { icon: Info, text: 'Chaque série compte, même si elle semble facile', priority: 'high' },
   ];
 
   const getCurrentTip = () => {
-    const highPriorityTips = workoutTips.filter(tip => tip.priority === "high");
+    const highPriorityTips = workoutTips.filter(tip => tip.priority === 'high');
     return highPriorityTips[Math.floor(Math.random() * highPriorityTips.length)];
   };
 
   const handleStartWorkout = async () => {
-    const workoutName = "Entraînement Force";
+    const workoutName = 'Entraînement Force';
     // Charger avec les données de la dernière session
     const exercisesToAdd = await loadExercisesFromLastSession(workoutName);
-    
+
     // Démarrer la session avec les exercices
     await startSession(workoutName, {
       workout_type: 'strength',
       difficulty: 'intermediate',
-      exercises: exercisesToAdd.length > 0 ? exercisesToAdd : defaultExercises
+      exercises: exercisesToAdd.length > 0 ? exercisesToAdd : defaultExercises,
     });
-    
+
     // Ouvrir le premier exercice par défaut
     if (exercisesToAdd.length > 0) {
       setExpandedExercise(exercisesToAdd[0].id);
@@ -143,7 +147,11 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     }
   };
 
-  const handleSetEdit = (exerciseId: string, setIndex: number, field: 'reps' | 'weight' | 'duration') => {
+  const handleSetEdit = (
+    exerciseId: string,
+    setIndex: number,
+    field: 'reps' | 'weight' | 'duration'
+  ) => {
     const exercise = currentSession?.exercises.find(e => e.id === exerciseId);
     const set = exercise?.sets[setIndex];
 
@@ -152,7 +160,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
         exerciseId,
         setIndex,
         field,
-        value: (set[field] || 0).toString()
+        value: (set[field] || 0).toString(),
       });
     }
   };
@@ -161,7 +169,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     if (editingSet) {
       const numValue = parseFloat(editingSet.value) || 0;
       updateExerciseSet(editingSet.exerciseId, editingSet.setIndex, {
-        [editingSet.field]: numValue
+        [editingSet.field]: numValue,
       });
       setEditingSet(null);
     }
@@ -190,7 +198,11 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     setShowSessionSummary(true);
   };
 
-  const incrementSet = (exerciseId: string, setIndex: number, field: 'reps' | 'weight' | 'duration') => {
+  const incrementSet = (
+    exerciseId: string,
+    setIndex: number,
+    field: 'reps' | 'weight' | 'duration'
+  ) => {
     const exercise = currentSession?.exercises.find(e => e.id === exerciseId);
     const set = exercise?.sets[setIndex];
 
@@ -198,12 +210,16 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       const currentValue = set[field] || 0;
       const increment = field === 'weight' ? 2.5 : 1;
       updateExerciseSet(exerciseId, setIndex, {
-        [field]: currentValue + increment
+        [field]: currentValue + increment,
       });
     }
   };
 
-  const decrementSet = (exerciseId: string, setIndex: number, field: 'reps' | 'weight' | 'duration') => {
+  const decrementSet = (
+    exerciseId: string,
+    setIndex: number,
+    field: 'reps' | 'weight' | 'duration'
+  ) => {
     const exercise = currentSession?.exercises.find(e => e.id === exerciseId);
     const set = exercise?.sets[setIndex];
 
@@ -212,7 +228,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
       const decrement = field === 'weight' ? 2.5 : 1;
       const newValue = Math.max(0, currentValue - decrement);
       updateExerciseSet(exerciseId, setIndex, {
-        [field]: newValue
+        [field]: newValue,
       });
     }
   };
@@ -236,7 +252,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
   const progressPercentage = totalExercises > 0 ? (completedExercises / totalExercises) * 100 : 0;
 
   // Calculer les calories brûlées (estimation basique)
-  const estimatedCalories = calculateCalories ? calculateCalories(workoutTime) : Math.round(workoutTime * 0.15);
+  const estimatedCalories = calculateCalories
+    ? calculateCalories(workoutTime)
+    : Math.round(workoutTime * 0.15);
 
   const currentTip = getCurrentTip();
 
@@ -271,9 +289,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-lg font-bold text-blue-600">
-              {formatTime(workoutTime)}
-            </div>
+            <div className="text-lg font-bold text-blue-600">{formatTime(workoutTime)}</div>
             <p className="text-xs text-gray-500">Temps écoulé</p>
           </div>
         </div>
@@ -306,19 +322,19 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
-                      variant={quickMode ? "default" : "outline"}
+                      variant={quickMode ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => setQuickMode(!quickMode)}
                       className="text-xs"
                     >
-                      {quickMode ? "Mode Rapide" : "Mode Avancé"}
+                      {quickMode ? 'Mode Rapide' : 'Mode Avancé'}
                     </Button>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-300"
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
@@ -330,7 +346,10 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                       Pause
                     </Button>
                   ) : (
-                    <Button onClick={resumeSession} className="flex-1 bg-blue-600 hover:bg-blue-700">
+                    <Button
+                      onClick={resumeSession}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    >
                       <Play className="mr-2" size={16} />
                       Reprendre
                     </Button>
@@ -358,7 +377,10 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
             <Card className="bg-blue-50 border-blue-100">
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
-                  {React.createElement(currentTip.icon, { size: 18, className: "text-blue-500 mt-0.5" })}
+                  {React.createElement(currentTip.icon, {
+                    size: 18,
+                    className: 'text-blue-500 mt-0.5',
+                  })}
                   <div>
                     <h3 className="font-semibold text-blue-800 text-sm mb-1">
                       Conseil d'entraînement
@@ -371,11 +393,14 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
 
             {/* Exercises - ACCORDION */}
             <div className="space-y-3">
-              {currentSession?.exercises.map((exercise) => (
-                <Card key={exercise.id} className={exercise.completed ? 'bg-green-50 border-green-200' : ''}>
+              {currentSession?.exercises.map(exercise => (
+                <Card
+                  key={exercise.id}
+                  className={exercise.completed ? 'bg-green-50 border-green-200' : ''}
+                >
                   <Collapsible
                     open={expandedExercise === exercise.id}
-                    onOpenChange={(isOpen) => setExpandedExercise(isOpen ? exercise.id : null)}
+                    onOpenChange={isOpen => setExpandedExercise(isOpen ? exercise.id : null)}
                   >
                     <CollapsibleTrigger asChild>
                       <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
@@ -389,7 +414,8 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                           </div>
                           <div className="flex items-center space-x-2">
                             <Badge variant="outline" className="text-xs">
-                              {exercise.sets?.filter(s => s.completed).length || 0}/{exercise.sets?.length || 0} séries
+                              {exercise.sets?.filter(s => s.completed).length || 0}/
+                              {exercise.sets?.length || 0} séries
                             </Badge>
                             {expandedExercise === exercise.id ? (
                               <ChevronUp size={20} className="text-gray-400" />
@@ -406,17 +432,26 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                         <div className="space-y-3">
                           {exercise.sets && exercise.sets.length > 0 ? (
                             exercise.sets.map((set, setIndex) => (
-                              <div key={setIndex} className={`p-4 rounded-lg border-2 ${set.completed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                              <div
+                                key={setIndex}
+                                className={`p-4 rounded-lg border-2 ${set.completed ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}
+                              >
                                 <div className="flex items-center justify-between mb-3">
-                                  <span className="font-medium text-gray-800">Série {setIndex + 1}</span>
+                                  <span className="font-medium text-gray-800">
+                                    Série {setIndex + 1}
+                                  </span>
                                   {!set.completed && (
                                     <Button
-                                      onClick={() => quickMode ? handleQuickSetComplete(exercise.id, setIndex) : handleSetComplete(exercise.id, setIndex)}
+                                      onClick={() =>
+                                        quickMode
+                                          ? handleQuickSetComplete(exercise.id, setIndex)
+                                          : handleSetComplete(exercise.id, setIndex)
+                                      }
                                       size="sm"
                                       className="bg-green-600 hover:bg-green-700 h-8"
                                     >
                                       <CheckCircle size={14} className="mr-1" />
-                                      {quickMode ? "Valider" : "Terminé"}
+                                      {quickMode ? 'Valider' : 'Terminé'}
                                     </Button>
                                   )}
                                 </div>
@@ -425,23 +460,32 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                   <div className="flex items-center space-x-4">
                                     {/* Répétitions */}
                                     <div className="flex items-center space-x-2">
-                                      <span className="text-sm text-gray-600 min-w-[40px]">Reps:</span>
+                                      <span className="text-sm text-gray-600 min-w-[40px]">
+                                        Reps:
+                                      </span>
                                       <div className="flex items-center space-x-1">
                                         <Button
-                                          onClick={() => decrementSet(exercise.id, setIndex, 'reps')}
+                                          onClick={() =>
+                                            decrementSet(exercise.id, setIndex, 'reps')
+                                          }
                                           size="sm"
                                           variant="outline"
                                           className="h-8 w-8 p-0"
                                         >
                                           <Minus size={14} />
                                         </Button>
-                                        {editingSet?.exerciseId === exercise.id && 
-                                         editingSet?.setIndex === setIndex && 
-                                         editingSet?.field === 'reps' ? (
+                                        {editingSet?.exerciseId === exercise.id &&
+                                        editingSet?.setIndex === setIndex &&
+                                        editingSet?.field === 'reps' ? (
                                           <div className="flex items-center space-x-1">
                                             <Input
                                               value={editingSet.value}
-                                              onChange={(e) => setEditingSet({...editingSet, value: e.target.value})}
+                                              onChange={e =>
+                                                setEditingSet({
+                                                  ...editingSet,
+                                                  value: e.target.value,
+                                                })
+                                              }
                                               className="h-8 w-16 text-center text-sm"
                                             />
                                             <Button
@@ -454,7 +498,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                           </div>
                                         ) : (
                                           <button
-                                            onClick={() => handleSetEdit(exercise.id, setIndex, 'reps')}
+                                            onClick={() =>
+                                              handleSetEdit(exercise.id, setIndex, 'reps')
+                                            }
                                             className="text-sm font-medium hover:text-blue-600 flex items-center space-x-1 min-w-[50px] justify-center h-8 px-2 border rounded"
                                           >
                                             <span>{set.reps}</span>
@@ -462,7 +508,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                           </button>
                                         )}
                                         <Button
-                                          onClick={() => incrementSet(exercise.id, setIndex, 'reps')}
+                                          onClick={() =>
+                                            incrementSet(exercise.id, setIndex, 'reps')
+                                          }
                                           size="sm"
                                           variant="outline"
                                           className="h-8 w-8 p-0"
@@ -475,23 +523,32 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                     {/* Poids (si applicable) */}
                                     {set.weight !== undefined && (
                                       <div className="flex items-center space-x-2">
-                                        <span className="text-sm text-gray-600 min-w-[40px]">Poids:</span>
+                                        <span className="text-sm text-gray-600 min-w-[40px]">
+                                          Poids:
+                                        </span>
                                         <div className="flex items-center space-x-1">
                                           <Button
-                                            onClick={() => decrementSet(exercise.id, setIndex, 'weight')}
+                                            onClick={() =>
+                                              decrementSet(exercise.id, setIndex, 'weight')
+                                            }
                                             size="sm"
                                             variant="outline"
                                             className="h-8 w-8 p-0"
                                           >
                                             <Minus size={14} />
                                           </Button>
-                                          {editingSet?.exerciseId === exercise.id && 
-                                           editingSet?.setIndex === setIndex && 
-                                           editingSet?.field === 'weight' ? (
+                                          {editingSet?.exerciseId === exercise.id &&
+                                          editingSet?.setIndex === setIndex &&
+                                          editingSet?.field === 'weight' ? (
                                             <div className="flex items-center space-x-1">
                                               <Input
                                                 value={editingSet.value}
-                                                onChange={(e) => setEditingSet({...editingSet, value: e.target.value})}
+                                                onChange={e =>
+                                                  setEditingSet({
+                                                    ...editingSet,
+                                                    value: e.target.value,
+                                                  })
+                                                }
                                                 className="h-8 w-16 text-center text-sm"
                                               />
                                               <Button
@@ -504,7 +561,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                             </div>
                                           ) : (
                                             <button
-                                              onClick={() => handleSetEdit(exercise.id, setIndex, 'weight')}
+                                              onClick={() =>
+                                                handleSetEdit(exercise.id, setIndex, 'weight')
+                                              }
                                               className="text-sm font-medium hover:text-blue-600 flex items-center space-x-1 min-w-[60px] justify-center h-8 px-2 border rounded"
                                             >
                                               <span>{set.weight}kg</span>
@@ -512,7 +571,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                             </button>
                                           )}
                                           <Button
-                                            onClick={() => incrementSet(exercise.id, setIndex, 'weight')}
+                                            onClick={() =>
+                                              incrementSet(exercise.id, setIndex, 'weight')
+                                            }
                                             size="sm"
                                             variant="outline"
                                             className="h-8 w-8 p-0"
@@ -526,23 +587,32 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                     {/* Durée (si applicable) */}
                                     {set.duration !== undefined && (
                                       <div className="flex items-center space-x-2">
-                                        <span className="text-sm text-gray-600 min-w-[40px]">Durée:</span>
+                                        <span className="text-sm text-gray-600 min-w-[40px]">
+                                          Durée:
+                                        </span>
                                         <div className="flex items-center space-x-1">
                                           <Button
-                                            onClick={() => decrementSet(exercise.id, setIndex, 'duration')}
+                                            onClick={() =>
+                                              decrementSet(exercise.id, setIndex, 'duration')
+                                            }
                                             size="sm"
                                             variant="outline"
                                             className="h-8 w-8 p-0"
                                           >
                                             <Minus size={14} />
                                           </Button>
-                                          {editingSet?.exerciseId === exercise.id && 
-                                           editingSet?.setIndex === setIndex && 
-                                           editingSet?.field === 'duration' ? (
+                                          {editingSet?.exerciseId === exercise.id &&
+                                          editingSet?.setIndex === setIndex &&
+                                          editingSet?.field === 'duration' ? (
                                             <div className="flex items-center space-x-1">
                                               <Input
                                                 value={editingSet.value}
-                                                onChange={(e) => setEditingSet({...editingSet, value: e.target.value})}
+                                                onChange={e =>
+                                                  setEditingSet({
+                                                    ...editingSet,
+                                                    value: e.target.value,
+                                                  })
+                                                }
                                                 className="h-8 w-16 text-center text-sm"
                                               />
                                               <Button
@@ -555,7 +625,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                             </div>
                                           ) : (
                                             <button
-                                              onClick={() => handleSetEdit(exercise.id, setIndex, 'duration')}
+                                              onClick={() =>
+                                                handleSetEdit(exercise.id, setIndex, 'duration')
+                                              }
                                               className="text-sm font-medium hover:text-blue-600 flex items-center space-x-1 min-w-[50px] justify-center h-8 px-2 border rounded"
                                             >
                                               <span>{set.duration}s</span>
@@ -563,7 +635,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                                             </button>
                                           )}
                                           <Button
-                                            onClick={() => incrementSet(exercise.id, setIndex, 'duration')}
+                                            onClick={() =>
+                                              incrementSet(exercise.id, setIndex, 'duration')
+                                            }
                                             size="sm"
                                             variant="outline"
                                             className="h-8 w-8 p-0"
@@ -608,7 +682,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                               </Button>
                               {exercise.sets && exercise.sets.length > 1 && (
                                 <Button
-                                  onClick={() => removeSetFromExercise(exercise.id, exercise.sets.length - 1)}
+                                  onClick={() =>
+                                    removeSetFromExercise(exercise.id, exercise.sets.length - 1)
+                                  }
                                   size="sm"
                                   variant="outline"
                                   className="flex-1 text-red-600 border-red-300 hover:bg-red-50"
@@ -651,7 +727,9 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
             <CardContent>
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">{Math.floor(workoutTime / 60)}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {Math.floor(workoutTime / 60)}
+                  </div>
                   <div className="text-xs text-gray-500">Minutes</div>
                 </div>
                 <div className="text-center">
@@ -697,14 +775,12 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
 
               <div className="bg-green-50 p-4 rounded-lg text-center">
                 <p className="text-green-800 font-medium">
-                  🎉 Excellent travail ! Vous avez terminé {Math.round(progressPercentage)}% de votre programme.
+                  🎉 Excellent travail ! Vous avez terminé {Math.round(progressPercentage)}% de
+                  votre programme.
                 </p>
               </div>
 
-              <Button 
-                onClick={() => setShowSessionSummary(false)} 
-                className="w-full"
-              >
+              <Button onClick={() => setShowSessionSummary(false)} className="w-full">
                 Fermer
               </Button>
             </div>

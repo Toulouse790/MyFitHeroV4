@@ -14,19 +14,19 @@ export const socialRoutes: RouteConfig[] = [
       title: 'Social',
       description: 'Communauté et partage',
       icon: 'Users',
-      category: 'social'
-    }
+      category: 'social',
+    },
   },
   {
     path: '/social/feed',
     component: Social, // Vous pourriez créer des sous-composants
     isProtected: true,
     metadata: {
-      title: 'Fil d\'actualité',
+      title: "Fil d'actualité",
       description: 'Actualités de la communauté',
       icon: 'MessageSquare',
-      category: 'social'
-    }
+      category: 'social',
+    },
   },
   {
     path: '/social/challenges',
@@ -36,8 +36,8 @@ export const socialRoutes: RouteConfig[] = [
       title: 'Défis communautaires',
       description: 'Défis entre amis',
       icon: 'Zap',
-      category: 'social'
-    }
+      category: 'social',
+    },
   },
   {
     path: '/social/friends',
@@ -47,7 +47,7 @@ export const socialRoutes: RouteConfig[] = [
       title: 'Amis',
       description: 'Gérer vos connexions',
       icon: 'UserPlus',
-      category: 'social'
-    }
-  }
+      category: 'social',
+    },
+  },
 ];

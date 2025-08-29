@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Send, 
+import {
+  Send,
   Search,
   Filter,
   Eye,
@@ -16,7 +16,7 @@ import {
   Target,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 
 interface NotificationData {
@@ -52,7 +52,7 @@ const AdminNotifications: React.FC = () => {
     totalClicked: 0,
     averageOpenRate: 0,
     averageClickRate: 0,
-    activeNotifications: 0
+    activeNotifications: 0,
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,7 +64,7 @@ const AdminNotifications: React.FC = () => {
     message: '',
     type: 'general',
     target_audience: 'all',
-    scheduled_at: ''
+    scheduled_at: '',
   });
 
   useEffect(() => {
@@ -76,7 +76,7 @@ const AdminNotifications: React.FC = () => {
     try {
       // Simuler le chargement des données de notifications
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const mockNotifications: NotificationData[] = [
         {
           id: '1',
@@ -90,12 +90,12 @@ const AdminNotifications: React.FC = () => {
           recipients_count: 1250,
           opened_count: 875,
           clicked_count: 234,
-          created_at: '2024-01-15T09:30:00Z'
+          created_at: '2024-01-15T09:30:00Z',
         },
         {
           id: '2',
           title: 'Rappel nutrition',
-          message: 'N\'oubliez pas de boire vos 8 verres d\'eau aujourd\'hui!',
+          message: "N'oubliez pas de boire vos 8 verres d'eau aujourd'hui!",
           type: 'nutrition',
           status: 'sent',
           target_audience: 'premium',
@@ -104,7 +104,7 @@ const AdminNotifications: React.FC = () => {
           recipients_count: 420,
           opened_count: 315,
           clicked_count: 89,
-          created_at: '2024-01-14T07:30:00Z'
+          created_at: '2024-01-14T07:30:00Z',
         },
         {
           id: '3',
@@ -118,7 +118,7 @@ const AdminNotifications: React.FC = () => {
           recipients_count: 0,
           opened_count: 0,
           clicked_count: 0,
-          created_at: '2024-01-15T14:00:00Z'
+          created_at: '2024-01-15T14:00:00Z',
         },
         {
           id: '4',
@@ -132,8 +132,8 @@ const AdminNotifications: React.FC = () => {
           recipients_count: 0,
           opened_count: 0,
           clicked_count: 0,
-          created_at: '2024-01-15T16:00:00Z'
-        }
+          created_at: '2024-01-15T16:00:00Z',
+        },
       ];
 
       const mockStats: NotificationStats = {
@@ -142,7 +142,7 @@ const AdminNotifications: React.FC = () => {
         totalClicked: 2340,
         averageOpenRate: 71.6,
         averageClickRate: 18.8,
-        activeNotifications: 8
+        activeNotifications: 8,
       };
 
       setNotifications(mockNotifications);
@@ -202,10 +202,10 @@ const AdminNotifications: React.FC = () => {
   };
 
   const filteredNotifications = notifications.filter(notification => {
-    const matchesSearch = 
+    const matchesSearch =
       notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       notification.message.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesType = filterType === 'all' || notification.type === filterType;
     const matchesStatus = filterStatus === 'all' || notification.status === filterStatus;
 
@@ -225,7 +225,7 @@ const AdminNotifications: React.FC = () => {
       recipients_count: 0,
       opened_count: 0,
       clicked_count: 0,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     setNotifications([notification, ...notifications]);
@@ -235,7 +235,7 @@ const AdminNotifications: React.FC = () => {
       message: '',
       type: 'general',
       target_audience: 'all',
-      scheduled_at: ''
+      scheduled_at: '',
     });
   };
 
@@ -260,24 +260,15 @@ const AdminNotifications: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {t('admin.notifications')}
-        </h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900">{t('admin.notifications')}</h2>
+
         <div className="flex items-center space-x-4">
-          <Button
-            onClick={loadNotificationsData}
-            variant="outline"
-            className="flex items-center"
-          >
+          <Button onClick={loadNotificationsData} variant="outline" className="flex items-center">
             <RefreshCw className="h-4 w-4 mr-2" />
             {t('admin.refresh')}
           </Button>
 
-          <Button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center"
-          >
+          <Button onClick={() => setShowCreateModal(true)} className="flex items-center">
             <Plus className="h-4 w-4 mr-2" />
             {t('admin.createNotification')}
           </Button>
@@ -297,9 +288,7 @@ const AdminNotifications: React.FC = () => {
             <div className="text-2xl font-bold text-blue-600">
               {stats.totalSent.toLocaleString()}
             </div>
-            <p className="text-xs text-gray-600">
-              {t('admin.thisMonth')}
-            </p>
+            <p className="text-xs text-gray-600">{t('admin.thisMonth')}</p>
           </CardContent>
         </Card>
 
@@ -311,12 +300,8 @@ const AdminNotifications: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {stats.averageOpenRate}%
-            </div>
-            <p className="text-xs text-gray-600">
-              {stats.totalOpened.toLocaleString()} ouvertures
-            </p>
+            <div className="text-2xl font-bold text-green-600">{stats.averageOpenRate}%</div>
+            <p className="text-xs text-gray-600">{stats.totalOpened.toLocaleString()} ouvertures</p>
           </CardContent>
         </Card>
 
@@ -328,12 +313,8 @@ const AdminNotifications: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">
-              {stats.averageClickRate}%
-            </div>
-            <p className="text-xs text-gray-600">
-              {stats.totalClicked.toLocaleString()} clics
-            </p>
+            <div className="text-2xl font-bold text-purple-600">{stats.averageClickRate}%</div>
+            <p className="text-xs text-gray-600">{stats.totalClicked.toLocaleString()} clics</p>
           </CardContent>
         </Card>
       </div>
@@ -347,7 +328,7 @@ const AdminNotifications: React.FC = () => {
               type="text"
               placeholder={t('admin.searchNotifications')}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -358,7 +339,7 @@ const AdminNotifications: React.FC = () => {
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={e => setFilterType(e.target.value)}
               className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
             >
               <option value="all">{t('admin.allTypes')}</option>
@@ -372,7 +353,7 @@ const AdminNotifications: React.FC = () => {
 
           <select
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
+            onChange={e => setFilterStatus(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
           >
             <option value="all">{t('admin.allStatuses')}</option>
@@ -422,7 +403,7 @@ const AdminNotifications: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredNotifications.map((notification) => (
+                  filteredNotifications.map(notification => (
                     <tr key={notification.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="max-w-xs">
@@ -440,7 +421,9 @@ const AdminNotifications: React.FC = () => {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge className={`inline-flex items-center ${getStatusColor(notification.status)}`}>
+                        <Badge
+                          className={`inline-flex items-center ${getStatusColor(notification.status)}`}
+                        >
                           {getStatusIcon(notification.status)}
                           <span className="ml-1">{notification.status}</span>
                         </Badge>
@@ -455,7 +438,16 @@ const AdminNotifications: React.FC = () => {
                               {notification.recipients_count} envoyés
                             </div>
                             <div className="text-gray-500">
-                              {calculateOpenRate(notification.opened_count, notification.recipients_count)}% ouvert • {calculateClickRate(notification.clicked_count, notification.recipients_count)}% cliqué
+                              {calculateOpenRate(
+                                notification.opened_count,
+                                notification.recipients_count
+                              )}
+                              % ouvert •{' '}
+                              {calculateClickRate(
+                                notification.clicked_count,
+                                notification.recipients_count
+                              )}
+                              % cliqué
                             </div>
                           </div>
                         ) : (
@@ -463,12 +455,11 @@ const AdminNotifications: React.FC = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {notification.sent_at 
+                        {notification.sent_at
                           ? new Date(notification.sent_at).toLocaleDateString()
                           : notification.scheduled_at
-                          ? new Date(notification.scheduled_at).toLocaleDateString()
-                          : new Date(notification.created_at).toLocaleDateString()
-                        }
+                            ? new Date(notification.scheduled_at).toLocaleDateString()
+                            : new Date(notification.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
@@ -509,7 +500,7 @@ const AdminNotifications: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-4">{t('admin.createNotification')}</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -518,7 +509,7 @@ const AdminNotifications: React.FC = () => {
                 <input
                   type="text"
                   value={newNotification.title}
-                  onChange={(e) => setNewNotification({...newNotification, title: e.target.value})}
+                  onChange={e => setNewNotification({ ...newNotification, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder={t('admin.enterTitle')}
                 />
@@ -530,7 +521,9 @@ const AdminNotifications: React.FC = () => {
                 </label>
                 <textarea
                   value={newNotification.message}
-                  onChange={(e) => setNewNotification({...newNotification, message: e.target.value})}
+                  onChange={e =>
+                    setNewNotification({ ...newNotification, message: e.target.value })
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder={t('admin.enterMessage')}
@@ -543,7 +536,7 @@ const AdminNotifications: React.FC = () => {
                 </label>
                 <select
                   value={newNotification.type}
-                  onChange={(e) => setNewNotification({...newNotification, type: e.target.value})}
+                  onChange={e => setNewNotification({ ...newNotification, type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="general">General</option>
@@ -560,7 +553,9 @@ const AdminNotifications: React.FC = () => {
                 </label>
                 <select
                   value={newNotification.target_audience}
-                  onChange={(e) => setNewNotification({...newNotification, target_audience: e.target.value})}
+                  onChange={e =>
+                    setNewNotification({ ...newNotification, target_audience: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Users</option>
@@ -577,17 +572,16 @@ const AdminNotifications: React.FC = () => {
                 <input
                   type="datetime-local"
                   value={newNotification.scheduled_at}
-                  onChange={(e) => setNewNotification({...newNotification, scheduled_at: e.target.value})}
+                  onChange={e =>
+                    setNewNotification({ ...newNotification, scheduled_at: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             <div className="flex justify-end space-x-4 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setShowCreateModal(false)}
-              >
+              <Button variant="outline" onClick={() => setShowCreateModal(false)}>
                 {t('admin.cancel')}
               </Button>
               <Button

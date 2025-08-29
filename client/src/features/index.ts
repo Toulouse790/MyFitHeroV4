@@ -3,7 +3,7 @@
 // Sleep Feature
 export * from './sleep';
 
-// Social Feature  
+// Social Feature
 export * from './social';
 
 // Hydration Feature
@@ -31,21 +31,21 @@ export const FEATURES_CONFIG: Record<FeatureName, FeatureConfig> = {
     component: require('./sleep/pages/SleepPage').default,
   },
   social: {
-    name: 'social', 
+    name: 'social',
     enabled: true,
     route: '/social',
     component: require('./social/pages/SocialPage').default,
   },
   hydration: {
     name: 'hydration',
-    enabled: true, 
+    enabled: true,
     route: '/hydration',
     component: require('./hydration/pages/HydrationPage').default,
   },
   workout: {
     name: 'workout',
     enabled: true,
-    route: '/workouts', 
+    route: '/workouts',
     component: require('./workout/pages/WorkoutPage').default,
   },
   nutrition: {
@@ -55,7 +55,7 @@ export const FEATURES_CONFIG: Record<FeatureName, FeatureConfig> = {
     component: null as any,
   },
   dashboard: {
-    name: 'dashboard', 
+    name: 'dashboard',
     enabled: false, // En développement
     route: '/dashboard',
     component: null as any,

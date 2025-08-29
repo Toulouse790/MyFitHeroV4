@@ -57,20 +57,18 @@ export function usePositions(sportId: number, sportName: string) {
     }
   );
 
-  const positions = libraryQuery.data?.length
-    ? libraryQuery.data
-    : drillsQuery.data ?? [];
+  const positions = libraryQuery.data?.length ? libraryQuery.data : (drillsQuery.data ?? []);
 
-  const isLoading = libraryQuery.isLoading || 
-    (libraryQuery.data?.length === 0 && drillsQuery.isLoading);
+  const isLoading =
+    libraryQuery.isLoading || (libraryQuery.data?.length === 0 && drillsQuery.isLoading);
 
   return {
     positions,
     isLoading,
-    error: libraryQuery.error || drillsQuery.error ? 
-      'Erreur lors du chargement des positions' : null,
+    error:
+      libraryQuery.error || drillsQuery.error ? 'Erreur lors du chargement des positions' : null,
     refresh: () => {
       qc.invalidateQueries(['positions']);
-    }
+    },
   };
 }

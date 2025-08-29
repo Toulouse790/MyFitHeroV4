@@ -14,7 +14,7 @@ export interface RouteConfig {
   };
 }
 
-export type RouteCategory = 
+export type RouteCategory =
   | 'auth'
   | 'dashboard'
   | 'fitness'

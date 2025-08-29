@@ -40,7 +40,7 @@ export const ActiveSessionIndicator: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {currentSession.status === 'active' && (
               <button
@@ -51,7 +51,7 @@ export const ActiveSessionIndicator: React.FC = () => {
                 <Pause size={16} className="text-gray-600" />
               </button>
             )}
-            
+
             {currentSession.status === 'paused' && (
               <button
                 onClick={resumeSession}
@@ -61,7 +61,7 @@ export const ActiveSessionIndicator: React.FC = () => {
                 <Play size={16} className="text-gray-600" />
               </button>
             )}
-            
+
             <button
               onClick={completeSession}
               className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
@@ -71,14 +71,14 @@ export const ActiveSessionIndicator: React.FC = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Barre de progression */}
         <div className="mt-2">
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div
               className={`h-1.5 rounded-full transition-all duration-300 ${getStatusColor()}`}
               style={{
-                width: `${Math.min((currentSession.duration / (currentSession.targetDuration * 60)) * 100, 100)}%`
+                width: `${Math.min((currentSession.duration / (currentSession.targetDuration * 60)) * 100, 100)}%`,
               }}
             />
           </div>

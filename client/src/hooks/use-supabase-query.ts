@@ -22,11 +22,14 @@ interface UseSupabaseQueryResult<T> {
 }
 
 // Cache simple en mémoire
-const queryCache = new Map<string, {
-  data: any;
-  timestamp: number;
-  staleTime: number;
-}>();
+const queryCache = new Map<
+  string,
+  {
+    data: any;
+    timestamp: number;
+    staleTime: number;
+  }
+>();
 
 export function useSupabaseQuery<T>(
   queryKey: string[],
@@ -40,7 +43,7 @@ export function useSupabaseQuery<T>(
     staleTime = 5 * 60 * 1000, // 5 minutes
     cacheTime = 10 * 60 * 1000, // 10 minutes
     retry = 3,
-    retryDelay = 1000
+    retryDelay = 1000,
   } = options;
 
   const [data, setData] = useState<T | null>(null);
@@ -63,70 +66,75 @@ export function useSupabaseQuery<T>(
   }, [cacheKey]);
 
   // Mettre en cache
-  const setCachedData = useCallback((newData: T) => {
-    queryCache.set(cacheKey, {
-      data: newData,
-      timestamp: Date.now(),
-      staleTime
-    });
-  }, [cacheKey, staleTime]);
+  const setCachedData = useCallback(
+    (newData: T) => {
+      queryCache.set(cacheKey, {
+        data: newData,
+        timestamp: Date.now(),
+        staleTime,
+      });
+    },
+    [cacheKey, staleTime]
+  );
 
   // Fonction de fetch avec retry
-  const fetchData = useCallback(async (isRetry = false) => {
-    if (!enabled) return;
+  const fetchData = useCallback(
+    async (isRetry = false) => {
+      if (!enabled) return;
 
-    // Vérifier le cache d'abord
-    const cachedData = getCachedData();
-    if (cachedData && !isRetry) {
-      setData(cachedData);
-      setLoading(false);
-      setError(null);
-      setIsStale(false);
-      return;
-    }
-
-    try {
-      if (!isRetry) {
-        setLoading(true);
-        setError(null);
-      }
-
-      const result = await queryFn();
-      
-      if (result.error) {
-        throw new Error(result.error.message || 'Erreur lors de la requête');
-      }
-
-      setData(result.data);
-      setError(null);
-      setLastUpdated(new Date());
-      setIsStale(false);
-      retryCountRef.current = 0;
-
-      // Mettre en cache
-      if (result.data) {
-        setCachedData(result.data);
-      }
-
-    } catch (err) {
-      const errorObj = err as Error;
-      console.error('Erreur useSupabaseQuery:', errorObj);
-
-      if (retryCountRef.current < retry) {
-        retryCountRef.current++;
-        setTimeout(() => {
-          fetchData(true);
-        }, retryDelay * retryCountRef.current);
-      } else {
-        setError(errorObj);
-        retryCountRef.current = 0;
-      }
-    } finally {
-      if (!isRetry) {
+      // Vérifier le cache d'abord
+      const cachedData = getCachedData();
+      if (cachedData && !isRetry) {
+        setData(cachedData);
         setLoading(false);
+        setError(null);
+        setIsStale(false);
+        return;
       }
-    }
-  }, [enabled, queryFn, getCachedData, setCachedData, retry, retryDelay]);
+
+      try {
+        if (!isRetry) {
+          setLoading(true);
+          setError(null);
+        }
+
+        const result = await queryFn();
+
+        if (result.error) {
+          throw new Error(result.error.message || 'Erreur lors de la requête');
+        }
+
+        setData(result.data);
+        setError(null);
+        setLastUpdated(new Date());
+        setIsStale(false);
+        retryCountRef.current = 0;
+
+        // Mettre en cache
+        if (result.data) {
+          setCachedData(result.data);
+        }
+      } catch (err) {
+        const errorObj = err as Error;
+        console.error('Erreur useSupabaseQuery:', errorObj);
+
+        if (retryCountRef.current < retry) {
+          retryCountRef.current++;
+          setTimeout(() => {
+            fetchData(true);
+          }, retryDelay * retryCountRef.current);
+        } else {
+          setError(errorObj);
+          retryCountRef.current = 0;
+        }
+      } finally {
+        if (!isRetry) {
+          setLoading(false);
+        }
+      }
+    },
+    [enabled, queryFn, getCachedData, setCachedData, retry, retryDelay]
+  );
 
   // Refetch manuel
   const refetch = useCallback(async () => {
@@ -198,25 +206,27 @@ export function useSupabaseQuery<T>(
     error,
     refetch,
     isStale,
-    lastUpdated
+    lastUpdated,
   };
 }
 
 // Hook spécialisé pour les requêtes de table
 export function useSupabaseTable<T>(
   table: string,
-  queryBuilder?: (qb: PostgrestFilterBuilder<any, any, any>) => PostgrestFilterBuilder<any, any, any>,
+  queryBuilder?: (
+    qb: PostgrestFilterBuilder<any, any, any>
+  ) => PostgrestFilterBuilder<any, any, any>,
   options?: UseSupabaseQueryOptions
 ) {
   return useSupabaseQuery<T[]>(
     ['table', table, JSON.stringify(queryBuilder?.toString() || '')],
     async () => {
       let query = supabase.from(table).select('*');
-      
+
       if (queryBuilder) {
         query = queryBuilder(query as any);
       }
-      
+
       return await query;
     },
     options
@@ -232,11 +242,7 @@ export function useSupabaseRow<T>(
   return useSupabaseQuery<T>(
     ['row', table, String(id)],
     async () => {
-      return await supabase
-        .from(table)
-        .select('*')
-        .eq('id', id)
-        .single();
+      return await supabase.from(table).select('*').eq('id', id).single();
     },
     options
   );

@@ -53,12 +53,7 @@ describe('WorkoutCard', () => {
 
   describe('Affichage des informations', () => {
     it('affiche toutes les informations de base du workout', () => {
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       expect(screen.getByText('Upper Body Strength')).toBeInTheDocument();
       expect(screen.getByText('💪')).toBeInTheDocument();
@@ -71,39 +66,26 @@ describe('WorkoutCard', () => {
     });
 
     it('affiche les tags du workout', () => {
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       expect(screen.getByText('chest')).toBeInTheDocument();
       expect(screen.getByText('arms')).toBeInTheDocument();
     });
 
     it('affiche la description du workout', () => {
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
-      expect(screen.getByText('Complete upper body workout focusing on chest and arms')).toBeInTheDocument();
+      expect(
+        screen.getByText('Complete upper body workout focusing on chest and arms')
+      ).toBeInTheDocument();
     });
   });
 
-  describe('Interaction d\'expansion', () => {
-    it('s\'étend pour montrer plus de détails', async () => {
+  describe("Interaction d'expansion", () => {
+    it("s'étend pour montrer plus de détails", async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // La liste d'exercices ne devrait pas être visible initialement
       expect(screen.queryByText('Push-ups')).not.toBeInTheDocument();
@@ -120,13 +102,8 @@ describe('WorkoutCard', () => {
 
     it('se contracte pour cacher les détails', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // Étendre d'abord
       const expandButton = screen.getByRole('button', { name: /voir plus|expand/i });
@@ -142,18 +119,15 @@ describe('WorkoutCard', () => {
     });
   });
 
-  describe('Démarrage d\'entraînement', () => {
+  describe("Démarrage d'entraînement", () => {
     it('appelle onStartWorkout quand le bouton start est cliqué', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
 
-      const startButton = screen.getByRole('button', { name: /commencer.*entraînement|start.*workout/i });
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
+
+      const startButton = screen.getByRole('button', {
+        name: /commencer.*entraînement|start.*workout/i,
+      });
       await user.click(startButton);
 
       expect(mockOnStartWorkout).toHaveBeenCalledWith(mockWorkout);
@@ -161,15 +135,12 @@ describe('WorkoutCard', () => {
 
     it('démarre une session via le hook', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
 
-      const startButton = screen.getByRole('button', { name: /commencer.*entraînement|start.*workout/i });
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
+
+      const startButton = screen.getByRole('button', {
+        name: /commencer.*entraînement|start.*workout/i,
+      });
       await user.click(startButton);
 
       expect(mockStartSession).toHaveBeenCalledWith(
@@ -184,13 +155,8 @@ describe('WorkoutCard', () => {
   describe('Gestion des exercices', () => {
     it('affiche les contrôles pour chaque exercice quand étendu', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // Étendre la carte
       const expandButton = screen.getByRole('button', { name: /voir plus|expand/i });
@@ -199,9 +165,11 @@ describe('WorkoutCard', () => {
       // Vérifier les contrôles pour chaque exercice
       mockWorkout.exerciseList.forEach(exercise => {
         expect(screen.getByText(exercise)).toBeInTheDocument();
-        
+
         // Chercher les contrôles dans le conteneur de cet exercice
-        const exerciseContainer = screen.getByText(exercise).closest('[data-testid=\"exercise-item\"]');
+        const exerciseContainer = screen
+          .getByText(exercise)
+          .closest('[data-testid=\"exercise-item\"]');
         if (exerciseContainer) {
           expect(within(exerciseContainer).getByLabelText(/séries|sets/i)).toBeInTheDocument();
           expect(within(exerciseContainer).getByLabelText(/répétitions|reps/i)).toBeInTheDocument();
@@ -212,13 +180,8 @@ describe('WorkoutCard', () => {
 
     it('permet de modifier les séries et répétitions', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // Étendre et modifier les valeurs
       const expandButton = screen.getByRole('button', { name: /voir plus|expand/i });
@@ -239,24 +202,19 @@ describe('WorkoutCard', () => {
 
     it('utilise le dernier poids pour chaque exercice', async () => {
       const user = userEvent.setup();
-      
-      mockGetLastWeight.mockImplementation((exerciseName) => {
+
+      mockGetLastWeight.mockImplementation(exerciseName => {
         return exerciseName === 'Push-ups' ? 20 : 0;
       });
 
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       const expandButton = screen.getByRole('button', { name: /voir plus|expand/i });
       await user.click(expandButton);
 
       // Vérifier que le bon poids est récupéré pour Push-ups
       expect(mockGetLastWeight).toHaveBeenCalledWith('Push-ups');
-      
+
       const weightInputs = screen.getAllByLabelText(/poids|weight/i);
       expect(weightInputs[0]).toHaveValue(20); // Push-ups
     });
@@ -265,31 +223,21 @@ describe('WorkoutCard', () => {
   describe('États et feedback', () => {
     it('affiche un feedback visuel lors du survol', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       const card = screen.getByTestId('workout-card');
-      
+
       await user.hover(card);
-      
+
       // Vérifier que des classes de hover sont appliquées
       expect(card).toHaveClass(/hover:/);
     });
 
-    it('affiche un toast lors de l\'ajout d\'exercice', async () => {
+    it("affiche un toast lors de l'ajout d'exercice", async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // Étendre et ajouter un exercice
       const expandButton = screen.getByRole('button', { name: /voir plus|expand/i });
@@ -309,16 +257,11 @@ describe('WorkoutCard', () => {
 
   describe('Accessibilité', () => {
     it('a une structure accessible', () => {
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // Vérifier la présence d'un article/region
       expect(screen.getByRole('article') || screen.getByRole('region')).toBeInTheDocument();
-      
+
       // Vérifier les boutons accessibles
       expect(screen.getByRole('button', { name: /commencer/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /voir plus/i })).toBeInTheDocument();
@@ -326,13 +269,8 @@ describe('WorkoutCard', () => {
 
     it('supporte la navigation au clavier', async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       // Navigation avec Tab
       await user.tab();
@@ -346,18 +284,13 @@ describe('WorkoutCard', () => {
       expect(screen.getByText('Push-ups')).toBeInTheDocument();
     });
 
-    it('annonce les changements d\'état', async () => {
+    it("annonce les changements d'état", async () => {
       const user = userEvent.setup();
-      
-      render(
-        <WorkoutCard 
-          workout={mockWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+
+      render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       const expandButton = screen.getByRole('button', { name: /voir plus/i });
-      
+
       // Vérifier l'attribut aria-expanded
       expect(expandButton).toHaveAttribute('aria-expanded', 'false');
 
@@ -374,12 +307,7 @@ describe('WorkoutCard', () => {
         exerciseList: [],
       };
 
-      render(
-        <WorkoutCard 
-          workout={emptyWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={emptyWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       expect(screen.getByText(emptyWorkout.title)).toBeInTheDocument();
       // Ne devrait pas planter même sans exercices
@@ -393,31 +321,21 @@ describe('WorkoutCard', () => {
         tags: [],
       };
 
-      render(
-        <WorkoutCard 
-          workout={incompleteWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={incompleteWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       expect(screen.getByText(incompleteWorkout.title)).toBeInTheDocument();
       // Devrait gérer gracieusement les valeurs manquantes
     });
 
-    it('gère les noms d\'exercices très longs', async () => {
+    it("gère les noms d'exercices très longs", async () => {
       const user = userEvent.setup();
-      
+
       const longExerciseWorkout = {
         ...mockWorkout,
         exerciseList: ['Supercalifragilisticexpialidocious Extreme Ultra Maximum Power Exercise'],
       };
 
-      render(
-        <WorkoutCard 
-          workout={longExerciseWorkout} 
-          onStartWorkout={mockOnStartWorkout} 
-        />
-      );
+      render(<WorkoutCard workout={longExerciseWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       const expandButton = screen.getByRole('button', { name: /voir plus/i });
       await user.click(expandButton);

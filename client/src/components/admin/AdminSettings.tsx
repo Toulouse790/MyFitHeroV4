@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Settings, 
-  Shield, 
+import {
+  Settings,
+  Shield,
   CreditCard,
   RefreshCw,
   Save,
@@ -17,7 +17,7 @@ import {
   Bell,
   Globe,
   Database,
-  Server
+  Server,
 } from 'lucide-react';
 
 interface AppSettings {
@@ -26,13 +26,13 @@ interface AppSettings {
   appDescription: string;
   appVersion: string;
   maintenanceMode: boolean;
-  
+
   // Paramètres de sécurité
   requireEmailVerification: boolean;
   passwordMinLength: number;
   sessionTimeout: number;
   maxLoginAttempts: number;
-  
+
   // Paramètres de notification
   enablePushNotifications: boolean;
   enableEmailNotifications: boolean;
@@ -42,24 +42,24 @@ interface AppSettings {
     achievements: boolean;
     reminders: boolean;
   };
-  
+
   // Paramètres de paiement
   stripePublishableKey: string;
   stripeSecretKey: string;
   paypalClientId: string;
   enablePayments: boolean;
-  
+
   // Paramètres de localisation
   defaultLanguage: string;
   supportedLanguages: string[];
   defaultTimezone: string;
   defaultCurrency: string;
-  
+
   // Paramètres de base de données
   databaseUrl: string;
   backupFrequency: string;
   dataRetentionPeriod: number;
-  
+
   // Paramètres d'analyse
   enableAnalytics: boolean;
   googleAnalyticsId: string;
@@ -84,7 +84,7 @@ const AdminSettings: React.FC = () => {
       workout: true,
       nutrition: true,
       achievements: true,
-      reminders: false
+      reminders: false,
     },
     stripePublishableKey: '',
     stripeSecretKey: '',
@@ -100,9 +100,9 @@ const AdminSettings: React.FC = () => {
     enableAnalytics: true,
     googleAnalyticsId: '',
     enableErrorTracking: true,
-    sentryDsn: ''
+    sentryDsn: '',
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showSecrets, setShowSecrets] = useState(false);
@@ -143,7 +143,7 @@ const AdminSettings: React.FC = () => {
   const handleSettingChange = (key: string, value: any) => {
     setSettings(prev => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
     setHasChanges(true);
   };
@@ -153,17 +153,17 @@ const AdminSettings: React.FC = () => {
       ...prev,
       [parent]: {
         ...(prev[parent as keyof AppSettings] as object),
-        [key]: value
-      }
+        [key]: value,
+      },
     }));
     setHasChanges(true);
   };
 
   const exportSettings = () => {
     const dataStr = JSON.stringify(settings, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
     const exportFileDefaultName = 'myfithero-settings.json';
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -174,7 +174,7 @@ const AdminSettings: React.FC = () => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         try {
           const importedSettings = JSON.parse(e.target?.result as string);
           setSettings(importedSettings);
@@ -194,7 +194,7 @@ const AdminSettings: React.FC = () => {
     { id: 'payments', label: t('admin.payments'), icon: CreditCard },
     { id: 'localization', label: t('admin.localization'), icon: Globe },
     { id: 'database', label: t('admin.database'), icon: Database },
-    { id: 'analytics', label: t('admin.analytics'), icon: Server }
+    { id: 'analytics', label: t('admin.analytics'), icon: Server },
   ];
 
   if (loading) {
@@ -210,10 +210,8 @@ const AdminSettings: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {t('admin.settings')}
-        </h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900">{t('admin.settings')}</h2>
+
         <div className="flex items-center space-x-4">
           <input
             type="file"
@@ -230,12 +228,8 @@ const AdminSettings: React.FC = () => {
             <Upload className="h-4 w-4 mr-2" />
             {t('admin.import')}
           </Button>
-          
-          <Button
-            variant="outline"
-            onClick={exportSettings}
-            className="flex items-center"
-          >
+
+          <Button variant="outline" onClick={exportSettings} className="flex items-center">
             <Download className="h-4 w-4 mr-2" />
             {t('admin.export')}
           </Button>
@@ -273,7 +267,7 @@ const AdminSettings: React.FC = () => {
         {/* Sidebar avec onglets */}
         <div className="col-span-12 md:col-span-3">
           <div className="space-y-1">
-            {tabs.map((tab) => {
+            {tabs.map(tab => {
               const Icon = tab.icon;
               return (
                 <button
@@ -300,7 +294,7 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'general' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.generalSettings')}</h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -309,7 +303,7 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="text"
                         value={settings.appName}
-                        onChange={(e) => handleSettingChange('appName', e.target.value)}
+                        onChange={e => handleSettingChange('appName', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -321,7 +315,7 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="text"
                         value={settings.appVersion}
-                        onChange={(e) => handleSettingChange('appVersion', e.target.value)}
+                        onChange={e => handleSettingChange('appVersion', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -333,7 +327,7 @@ const AdminSettings: React.FC = () => {
                     </label>
                     <textarea
                       value={settings.appDescription}
-                      onChange={(e) => handleSettingChange('appDescription', e.target.value)}
+                      onChange={e => handleSettingChange('appDescription', e.target.value)}
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -344,14 +338,12 @@ const AdminSettings: React.FC = () => {
                       <label className="block text-sm font-medium text-gray-700">
                         {t('admin.maintenanceMode')}
                       </label>
-                      <p className="text-sm text-gray-500">
-                        {t('admin.maintenanceModeDesc')}
-                      </p>
+                      <p className="text-sm text-gray-500">{t('admin.maintenanceModeDesc')}</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={settings.maintenanceMode}
-                      onChange={(e) => handleSettingChange('maintenanceMode', e.target.checked)}
+                      onChange={e => handleSettingChange('maintenanceMode', e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
@@ -361,7 +353,7 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'security' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.securitySettings')}</h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -370,7 +362,9 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="number"
                         value={settings.passwordMinLength}
-                        onChange={(e) => handleSettingChange('passwordMinLength', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleSettingChange('passwordMinLength', parseInt(e.target.value))
+                        }
                         min="6"
                         max="20"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -384,7 +378,9 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="number"
                         value={settings.sessionTimeout}
-                        onChange={(e) => handleSettingChange('sessionTimeout', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleSettingChange('sessionTimeout', parseInt(e.target.value))
+                        }
                         min="1"
                         max="168"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -398,7 +394,9 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="number"
                         value={settings.maxLoginAttempts}
-                        onChange={(e) => handleSettingChange('maxLoginAttempts', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleSettingChange('maxLoginAttempts', parseInt(e.target.value))
+                        }
                         min="3"
                         max="10"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -418,7 +416,9 @@ const AdminSettings: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={settings.requireEmailVerification}
-                      onChange={(e) => handleSettingChange('requireEmailVerification', e.target.checked)}
+                      onChange={e =>
+                        handleSettingChange('requireEmailVerification', e.target.checked)
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
@@ -428,7 +428,7 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'notifications' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.notificationSettings')}</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -442,7 +442,9 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={settings.enablePushNotifications}
-                        onChange={(e) => handleSettingChange('enablePushNotifications', e.target.checked)}
+                        onChange={e =>
+                          handleSettingChange('enablePushNotifications', e.target.checked)
+                        }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </div>
@@ -459,7 +461,9 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={settings.enableEmailNotifications}
-                        onChange={(e) => handleSettingChange('enableEmailNotifications', e.target.checked)}
+                        onChange={e =>
+                          handleSettingChange('enableEmailNotifications', e.target.checked)
+                        }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </div>
@@ -478,7 +482,13 @@ const AdminSettings: React.FC = () => {
                           <input
                             type="checkbox"
                             checked={value}
-                            onChange={(e) => handleNestedSettingChange('defaultNotificationPrefs', key, e.target.checked)}
+                            onChange={e =>
+                              handleNestedSettingChange(
+                                'defaultNotificationPrefs',
+                                key,
+                                e.target.checked
+                              )
+                            }
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                           />
                         </div>
@@ -491,20 +501,18 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'payments' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.paymentSettings')}</h3>
-                  
+
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         {t('admin.enablePayments')}
                       </label>
-                      <p className="text-sm text-gray-500">
-                        {t('admin.enablePaymentsDesc')}
-                      </p>
+                      <p className="text-sm text-gray-500">{t('admin.enablePaymentsDesc')}</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={settings.enablePayments}
-                      onChange={(e) => handleSettingChange('enablePayments', e.target.checked)}
+                      onChange={e => handleSettingChange('enablePayments', e.target.checked)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
@@ -518,7 +526,9 @@ const AdminSettings: React.FC = () => {
                         <input
                           type={showSecrets ? 'text' : 'password'}
                           value={settings.stripePublishableKey}
-                          onChange={(e) => handleSettingChange('stripePublishableKey', e.target.value)}
+                          onChange={e =>
+                            handleSettingChange('stripePublishableKey', e.target.value)
+                          }
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="pk_test_..."
                         />
@@ -527,7 +537,11 @@ const AdminSettings: React.FC = () => {
                           onClick={() => setShowSecrets(!showSecrets)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          {showSecrets ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showSecrets ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -540,7 +554,7 @@ const AdminSettings: React.FC = () => {
                         <input
                           type={showSecrets ? 'text' : 'password'}
                           value={settings.stripeSecretKey}
-                          onChange={(e) => handleSettingChange('stripeSecretKey', e.target.value)}
+                          onChange={e => handleSettingChange('stripeSecretKey', e.target.value)}
                           className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="sk_test_..."
                         />
@@ -549,7 +563,11 @@ const AdminSettings: React.FC = () => {
                           onClick={() => setShowSecrets(!showSecrets)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          {showSecrets ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showSecrets ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -561,7 +579,7 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="text"
                         value={settings.paypalClientId}
-                        onChange={(e) => handleSettingChange('paypalClientId', e.target.value)}
+                        onChange={e => handleSettingChange('paypalClientId', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="AYjnxKDjGZbvOplqxzPSsJr..."
                       />
@@ -573,7 +591,7 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'localization' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.localizationSettings')}</h3>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -581,7 +599,7 @@ const AdminSettings: React.FC = () => {
                       </label>
                       <select
                         value={settings.defaultLanguage}
-                        onChange={(e) => handleSettingChange('defaultLanguage', e.target.value)}
+                        onChange={e => handleSettingChange('defaultLanguage', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="en">English</option>
@@ -597,7 +615,7 @@ const AdminSettings: React.FC = () => {
                       </label>
                       <select
                         value={settings.defaultCurrency}
-                        onChange={(e) => handleSettingChange('defaultCurrency', e.target.value)}
+                        onChange={e => handleSettingChange('defaultCurrency', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="USD">USD ($)</option>
@@ -613,7 +631,7 @@ const AdminSettings: React.FC = () => {
                       </label>
                       <select
                         value={settings.defaultTimezone}
-                        onChange={(e) => handleSettingChange('defaultTimezone', e.target.value)}
+                        onChange={e => handleSettingChange('defaultTimezone', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="UTC">UTC</option>
@@ -630,7 +648,7 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'database' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.databaseSettings')}</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -638,7 +656,7 @@ const AdminSettings: React.FC = () => {
                       </label>
                       <select
                         value={settings.backupFrequency}
-                        onChange={(e) => handleSettingChange('backupFrequency', e.target.value)}
+                        onChange={e => handleSettingChange('backupFrequency', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="hourly">Hourly</option>
@@ -655,7 +673,9 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="number"
                         value={settings.dataRetentionPeriod}
-                        onChange={(e) => handleSettingChange('dataRetentionPeriod', parseInt(e.target.value))}
+                        onChange={e =>
+                          handleSettingChange('dataRetentionPeriod', parseInt(e.target.value))
+                        }
                         min="30"
                         max="2555"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -668,21 +688,19 @@ const AdminSettings: React.FC = () => {
               {activeTab === 'analytics' && (
                 <div className="space-y-6">
                   <h3 className="text-lg font-semibold">{t('admin.analyticsSettings')}</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
                           {t('admin.enableAnalytics')}
                         </label>
-                        <p className="text-sm text-gray-500">
-                          {t('admin.enableAnalyticsDesc')}
-                        </p>
+                        <p className="text-sm text-gray-500">{t('admin.enableAnalyticsDesc')}</p>
                       </div>
                       <input
                         type="checkbox"
                         checked={settings.enableAnalytics}
-                        onChange={(e) => handleSettingChange('enableAnalytics', e.target.checked)}
+                        onChange={e => handleSettingChange('enableAnalytics', e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </div>
@@ -694,7 +712,7 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="text"
                         value={settings.googleAnalyticsId}
-                        onChange={(e) => handleSettingChange('googleAnalyticsId', e.target.value)}
+                        onChange={e => handleSettingChange('googleAnalyticsId', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="G-XXXXXXXXXX"
                       />
@@ -712,7 +730,7 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={settings.enableErrorTracking}
-                        onChange={(e) => handleSettingChange('enableErrorTracking', e.target.checked)}
+                        onChange={e => handleSettingChange('enableErrorTracking', e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </div>
@@ -724,7 +742,7 @@ const AdminSettings: React.FC = () => {
                       <input
                         type="text"
                         value={settings.sentryDsn}
-                        onChange={(e) => handleSettingChange('sentryDsn', e.target.value)}
+                        onChange={e => handleSettingChange('sentryDsn', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="https://..."
                       />

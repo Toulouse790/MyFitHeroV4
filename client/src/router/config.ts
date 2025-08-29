@@ -5,7 +5,7 @@ export const routeConfig = {
     auth: '/auth',
     login: '/auth/login',
     register: '/auth/register',
-    forgot: '/auth/forgot-password'
+    forgot: '/auth/forgot-password',
   },
 
   // Routes principales de l'application
@@ -20,7 +20,7 @@ export const routeConfig = {
     profile: '/profile',
     analytics: '/analytics',
     wearable: '/wearable',
-    aicoach: '/ai-coach'
+    aicoach: '/ai-coach',
   },
 
   // Routes d'administration
@@ -28,13 +28,13 @@ export const routeConfig = {
     dashboard: '/admin',
     users: '/admin/users',
     analytics: '/admin/analytics',
-    settings: '/admin/settings'
+    settings: '/admin/settings',
   },
 
   // Routes US Market
   usmarket: {
     dashboard: '/us-market',
-    onboarding: '/us-market/onboarding'
+    onboarding: '/us-market/onboarding',
   },
 
   // Routes de paramètres
@@ -42,8 +42,8 @@ export const routeConfig = {
     preferences: '/settings/preferences',
     account: '/settings/account',
     privacy: '/settings/privacy',
-    notifications: '/settings/notifications'
-  }
+    notifications: '/settings/notifications',
+  },
 } as const;
 
 // Type helper pour la validation des routes
@@ -55,13 +55,13 @@ export type AdminRoutes = RouteConfig['admin'][keyof RouteConfig['admin']];
 // Utilitaire pour construire les routes
 export const createRoute = (path: string, params?: Record<string, string>): string => {
   let route = path;
-  
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       route = route.replace(`:${key}`, value);
     });
   }
-  
+
   return route;
 };
 
@@ -70,5 +70,5 @@ export const dynamicRoutes = {
   workoutTemplate: '/workout/template/:templateId',
   workoutSession: '/workout/session/:sessionId',
   userProfile: '/profile/:userId',
-  adminUserDetail: '/admin/users/:userId'
+  adminUserDetail: '/admin/users/:userId',
 } as const;

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Trophy, 
-  Target, 
-  Zap, 
-  Star, 
-  TrendingUp, 
+import {
+  Trophy,
+  Target,
+  Zap,
+  Star,
+  TrendingUp,
   Brain,
   ChevronRight,
   Calendar,
   Award,
-  Flame
+  Flame,
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { supabase } from '@/lib/supabase';
@@ -48,7 +48,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   currentValue = 0,
   targetValue = 100,
   unit = '',
-  showAIRecommendation = true
+  showAIRecommendation = true,
 }) => {
   const { appStoreUser } = useAppStore();
   const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
@@ -94,7 +94,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
           title: data.title || 'Conseil IA',
           message: data.recommendation || 'Continuez vos efforts !',
           priority: data.priority || 'medium',
-          created_at: data.created_at
+          created_at: data.created_at,
         });
       }
     } catch (error) {
@@ -134,7 +134,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   const getDefaultGoal = (): string => {
     switch (pillar) {
       case 'hydration':
-        return 'Boire 2.5L d\'eau aujourd\'hui';
+        return "Boire 2.5L d'eau aujourd'hui";
       case 'nutrition':
         return 'Respecter vos macros quotidiennes';
       case 'sleep':
@@ -150,7 +150,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
     if (targetValue > 0) {
       const newPercentage = Math.min((animatedProgress / targetValue) * 100, 100);
       setProgressPercentage(newPercentage);
-      
+
       // Vibration de succès quand l'objectif est atteint
       if (newPercentage >= 100 && currentValue >= targetValue) {
         successVibration();
@@ -177,18 +177,20 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
       if (data) {
         let currentStreak = 0;
         const today = new Date();
-        
+
         for (const record of data) {
           const recordDate = new Date(record.date);
-          const diffDays = Math.floor((today.getTime() - recordDate.getTime()) / (1000 * 60 * 60 * 24));
-          
+          const diffDays = Math.floor(
+            (today.getTime() - recordDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
           if (diffDays === currentStreak && record.completed_goals?.includes(pillar)) {
             currentStreak++;
           } else {
             break;
           }
         }
-        
+
         setStreak(currentStreak);
       }
     } catch (error) {
@@ -197,10 +199,14 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   };
 
   const getBadgeForProgress = () => {
-    if (progressPercentage >= 100) return { icon: Trophy, color: 'text-yellow-500', label: 'Objectif atteint !' };
-    if (progressPercentage >= 75) return { icon: Star, color: 'text-purple-500', label: 'Excellent progrès' };
-    if (progressPercentage >= 50) return { icon: Target, color: 'text-blue-500', label: 'Bon rythme' };
-    if (progressPercentage >= 25) return { icon: TrendingUp, color: 'text-green-500', label: 'En progression' };
+    if (progressPercentage >= 100)
+      return { icon: Trophy, color: 'text-yellow-500', label: 'Objectif atteint !' };
+    if (progressPercentage >= 75)
+      return { icon: Star, color: 'text-purple-500', label: 'Excellent progrès' };
+    if (progressPercentage >= 50)
+      return { icon: Target, color: 'text-blue-500', label: 'Bon rythme' };
+    if (progressPercentage >= 25)
+      return { icon: TrendingUp, color: 'text-green-500', label: 'En progression' };
     return { icon: Zap, color: 'text-orange-500', label: 'Commencez maintenant' };
   };
 
@@ -208,7 +214,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   const BadgeIcon = badge.icon;
 
   return (
-    <div 
+    <div
       className={`
         relative overflow-hidden rounded-2xl ${bgGradient} text-white shadow-2xl
         transform transition-all duration-500 
@@ -220,14 +226,17 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         <div className="absolute top-0 right-0 w-64 h-64 transform rotate-45 translate-x-32 -translate-y-32 animate-pulse">
           <div className="w-full h-full bg-white rounded-full"></div>
         </div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 transform -rotate-45 -translate-x-24 translate-y-24 animate-pulse" style={{ animationDelay: '0.5s' }}>
+        <div
+          className="absolute bottom-0 left-0 w-48 h-48 transform -rotate-45 -translate-x-24 translate-y-24 animate-pulse"
+          style={{ animationDelay: '0.5s' }}
+        >
           <div className="w-full h-full bg-white rounded-full"></div>
         </div>
       </div>
 
       <div className="relative z-10 p-6">
         {/* Header supérieur avec animation */}
-        <div 
+        <div
           className={`
             flex items-center justify-between mb-6 
             transform transition-all duration-700 delay-200
@@ -235,7 +244,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
           `}
         >
           <div className="flex items-center gap-4">
-            <div 
+            <div
               className="p-3 bg-white bg-opacity-20 rounded-2xl backdrop-blur-sm transition-transform duration-300 hover:scale-110"
               onClick={clickVibration}
             >
@@ -244,7 +253,9 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
                 {title}
-                <span className="text-3xl animate-bounce" style={{ animationDelay: '1s' }}>{emoji}</span>
+                <span className="text-3xl animate-bounce" style={{ animationDelay: '1s' }}>
+                  {emoji}
+                </span>
               </h1>
               <p className="text-white text-opacity-90 text-sm">
                 {motivationalMessage || `Optimisez votre ${title.toLowerCase()}`}
@@ -276,13 +287,11 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
               <span className="text-sm font-bold">
                 {currentValue} / {targetValue} {unit}
               </span>
-              <span className="text-sm font-bold">
-                {Math.round(progressPercentage)}%
-              </span>
+              <span className="text-sm font-bold">{Math.round(progressPercentage)}%</span>
             </div>
           </div>
           <div className="w-full bg-white bg-opacity-20 rounded-full h-3 backdrop-blur-sm">
-            <div 
+            <div
               className="bg-white h-3 rounded-full transition-all duration-1000 ease-out shadow-lg"
               style={{ width: `${progressPercentage}%` }}
             ></div>
@@ -299,7 +308,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
             <p className="text-2xl font-bold">{streak}</p>
             <p className="text-xs text-white text-opacity-70">jours consécutifs</p>
           </div>
-          
+
           <div className="bg-white bg-opacity-20 p-4 rounded-xl backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-1">
               <Calendar size={16} className="text-blue-300" />
@@ -316,14 +325,17 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
             <div className="flex items-center gap-2 mb-2">
               <Brain size={16} className="text-purple-300" />
               <span className="text-sm font-medium text-white text-opacity-80">Conseil IA</span>
-              <div className={`w-2 h-2 rounded-full ${
-                aiRecommendation.priority === 'high' ? 'bg-red-400' : 
-                aiRecommendation.priority === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
-              }`}></div>
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  aiRecommendation.priority === 'high'
+                    ? 'bg-red-400'
+                    : aiRecommendation.priority === 'medium'
+                      ? 'bg-yellow-400'
+                      : 'bg-green-400'
+                }`}
+              ></div>
             </div>
-            <p className="text-sm text-white text-opacity-95 mb-2">
-              {aiRecommendation.message}
-            </p>
+            <p className="text-sm text-white text-opacity-95 mb-2">{aiRecommendation.message}</p>
             <div className="flex items-center justify-between">
               <span className="text-xs text-white text-opacity-70">
                 {new Date(aiRecommendation.created_at).toLocaleDateString('fr-FR')}

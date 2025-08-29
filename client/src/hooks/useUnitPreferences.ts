@@ -30,7 +30,7 @@ export const useUnitPreferences = () => {
     const newPreferences = getPreferencesForLocale(i18n.language);
     setPreferences((prev: UnitPreferences) => ({
       ...prev,
-      ...newPreferences
+      ...newPreferences,
     }));
   }, [i18n.language]);
 
@@ -46,6 +46,6 @@ export const useUnitPreferences = () => {
   return {
     preferences,
     updatePreferences,
-    resetToDefault
+    resetToDefault,
   };
 };

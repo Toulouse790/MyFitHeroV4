@@ -7,11 +7,7 @@ import { useWorkoutTimer } from '@/features/workout/hooks/useWorkoutTimer';
 import { useWorkoutExercises } from '@/features/workout/hooks/useWorkoutExercises';
 
 // Store unifié
-import { 
-  useWorkoutSession, 
-  useWorkoutSettings, 
-  useWorkoutStats 
-} from '@/store/index';
+import { useWorkoutSession, useWorkoutSettings, useWorkoutStats } from '@/store/index';
 
 // Services
 import { WorkoutService } from '@/services/workout.service';
@@ -36,17 +32,17 @@ interface WorkoutPageProps {
 // Helpers
 const getCurrentTip = () => ({
   title: "Conseil d'entraînement",
-  description: "Gardez une bonne posture pendant tous vos exercices pour éviter les blessures.",
-  category: "Sécurité",
-  importance: 'medium' as const
+  description: 'Gardez une bonne posture pendant tous vos exercices pour éviter les blessures.',
+  category: 'Sécurité',
+  importance: 'medium' as const,
 });
 
 export const WorkoutPage: React.FC<WorkoutPageProps> = ({
   initialExercises = [],
-  workoutName = 'Entraînement'
+  workoutName = 'Entraînement',
 }) => {
   const [location, setLocation] = useLocation();
-  
+
   // Store hooks
   const {
     currentSession,
@@ -55,18 +51,12 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
     pauseWorkoutSession,
     resumeWorkoutSession,
     completeWorkoutSession,
-    cancelWorkoutSession
+    cancelWorkoutSession,
   } = useWorkoutSession();
 
-  const {
-    quickModeEnabled,
-    setQuickMode
-  } = useWorkoutSettings();
+  const { quickModeEnabled, setQuickMode } = useWorkoutSettings();
 
-  const {
-    addTimeSpent,
-    addCaloriesBurned
-  } = useWorkoutStats();
+  const { addTimeSpent, addCaloriesBurned } = useWorkoutStats();
 
   // Hooks refactorisés
   const timer = useWorkoutTimer();
@@ -93,7 +83,7 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
   const estimatedCalories = useMemo(() => {
     return WorkoutService.calculateCalories({
       type: 'strength',
-      totalTime: timer.workoutTime
+      totalTime: timer.workoutTime,
     } as any);
   }, [timer.workoutTime]);
 
@@ -104,9 +94,8 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
   // Actions de session
   const handleStartWorkout = useCallback(async () => {
     try {
-      const exercises = initialExercises.length > 0 
-        ? initialExercises 
-        : await loadDefaultExercises();
+      const exercises =
+        initialExercises.length > 0 ? initialExercises : await loadDefaultExercises();
 
       startWorkoutSession(workoutName, exercises);
       exerciseManager.setExercises(exercises);
@@ -115,7 +104,7 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
       toast.success('Entraînement commencé !');
     } catch (error) {
       console.error('Erreur lors du démarrage:', error);
-      toast.error('Impossible de commencer l\'entraînement');
+      toast.error("Impossible de commencer l'entraînement");
     }
   }, [initialExercises, workoutName, startWorkoutSession, exerciseManager, timer]);
 
@@ -140,7 +129,7 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
           endTime: new Date(),
           totalTime: timer.workoutTime,
           actualCalories: estimatedCalories,
-          exercises: exerciseManager.exercises
+          exercises: exerciseManager.exercises,
         });
       }
 
@@ -157,7 +146,16 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
       console.error('Erreur lors de la finalisation:', error);
       toast.error('Erreur lors de la sauvegarde');
     }
-  }, [currentSession, timer.workoutTime, estimatedCalories, exerciseManager.exercises, addTimeSpent, addCaloriesBurned, completeWorkoutSession, timer]);
+  }, [
+    currentSession,
+    timer.workoutTime,
+    estimatedCalories,
+    exerciseManager.exercises,
+    addTimeSpent,
+    addCaloriesBurned,
+    completeWorkoutSession,
+    timer,
+  ]);
 
   const handleCancelWorkout = useCallback(() => {
     cancelWorkoutSession();
@@ -167,29 +165,44 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
   }, [cancelWorkoutSession, timer, setLocation]);
 
   // Actions d'exercices
-  const handleToggleExerciseExpanded = useCallback((exerciseId: string) => {
-    const newExpanded = exerciseManager.expandedExercise === exerciseId ? null : exerciseId;
-    exerciseManager.setExpandedExercise(newExpanded);
-  }, [exerciseManager]);
+  const handleToggleExerciseExpanded = useCallback(
+    (exerciseId: string) => {
+      const newExpanded = exerciseManager.expandedExercise === exerciseId ? null : exerciseId;
+      exerciseManager.setExpandedExercise(newExpanded);
+    },
+    [exerciseManager]
+  );
 
-  const handleExerciseComplete = useCallback((exerciseId: string) => {
-    exerciseManager.completeExercise(exerciseId);
-    toast.success('Exercice terminé !');
-  }, [exerciseManager]);
+  const handleExerciseComplete = useCallback(
+    (exerciseId: string) => {
+      exerciseManager.completeExercise(exerciseId);
+      toast.success('Exercice terminé !');
+    },
+    [exerciseManager]
+  );
 
-  const handleSetUpdate = useCallback((exerciseId: string, setIndex: number, updates: any) => {
-    exerciseManager.updateExerciseSet(exerciseId, setIndex, updates);
-  }, [exerciseManager]);
+  const handleSetUpdate = useCallback(
+    (exerciseId: string, setIndex: number, updates: any) => {
+      exerciseManager.updateExerciseSet(exerciseId, setIndex, updates);
+    },
+    [exerciseManager]
+  );
 
-  const handleAddSet = useCallback((exerciseId: string) => {
-    exerciseManager.addSetToExercise(exerciseId);
-    toast.info('Série ajoutée');
-  }, [exerciseManager]);
+  const handleAddSet = useCallback(
+    (exerciseId: string) => {
+      exerciseManager.addSetToExercise(exerciseId);
+      toast.info('Série ajoutée');
+    },
+    [exerciseManager]
+  );
 
-  const handleRemoveSet = useCallback((exerciseId: string, setIndex: number) => {
-    exerciseManager.removeSetFromExercise(exerciseId, setIndex);
-    toast.info('Série supprimée');
-  }, [exerciseManager]);
+  const handleRemoveSet = useCallback(
+    (exerciseId: string, setIndex: number) => {
+      exerciseManager.removeSetFromExercise(exerciseId, setIndex);
+      toast.info('Série supprimée');
+    },
+    [exerciseManager]
+  );
 
   // Chargement des exercices par défaut
   const loadDefaultExercises = useCallback(async (): Promise<WorkoutExercise[]> => {
@@ -203,11 +216,11 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
         sets: [
           { reps: 10, completed: false },
           { reps: 10, completed: false },
-          { reps: 10, completed: false }
+          { reps: 10, completed: false },
         ],
         muscleGroups: ['chest', 'shoulders', 'triceps'],
         difficulty: 'beginner',
-        completed: false
+        completed: false,
       },
       {
         id: 'ex2',
@@ -217,12 +230,12 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
         sets: [
           { reps: 15, completed: false },
           { reps: 15, completed: false },
-          { reps: 15, completed: false }
+          { reps: 15, completed: false },
         ],
         muscleGroups: ['quadriceps', 'glutes'],
         difficulty: 'beginner',
-        completed: false
-      }
+        completed: false,
+      },
     ];
   }, []);
 
@@ -279,7 +292,7 @@ export const WorkoutPage: React.FC<WorkoutPageProps> = ({
 
         {/* Liste des exercices */}
         <div className="space-y-3">
-          {exerciseManager.exercises.map((exercise) => (
+          {exerciseManager.exercises.map(exercise => (
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}

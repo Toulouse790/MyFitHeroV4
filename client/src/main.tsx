@@ -7,7 +7,9 @@ import './index.css';
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
-  throw new Error('Élément root introuvable. Assurez-vous que votre fichier HTML contient un div avec id="root".');
+  throw new Error(
+    'Élément root introuvable. Assurez-vous que votre fichier HTML contient un div avec id="root".'
+  );
 }
 
 const root = createRoot(rootElement);

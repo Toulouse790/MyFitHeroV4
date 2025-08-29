@@ -1,5 +1,15 @@
 // client/src/data/sportsWorkoutConfig.ts
-export type Sport = 'basketball' | 'football' | 'american_football' | 'tennis' | 'rugby' | 'volleyball' | 'swimming' | 'running' | 'cycling' | 'musculation';
+export type Sport =
+  | 'basketball'
+  | 'football'
+  | 'american_football'
+  | 'tennis'
+  | 'rugby'
+  | 'volleyball'
+  | 'swimming'
+  | 'running'
+  | 'cycling'
+  | 'musculation';
 
 export interface CategoryInterface {
   id: string;
@@ -34,7 +44,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
       { id: 'power', name: 'Puissance', count: 1 },
       { id: 'skills', name: 'Dribble & Tir', count: 1 },
       { id: 'agility', name: 'Agilité', count: 1 },
-      { id: 'conditioning', name: 'Condition', count: 1 }
+      { id: 'conditioning', name: 'Condition', count: 1 },
     ],
     workouts: [
       {
@@ -45,7 +55,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'power',
         tags: ['Détente', 'Explosivité'],
         description: 'Augmentez votre détente pour les dunks et les contres.',
-        exerciseList: ['Jump Squats', 'Box Jumps', 'Depth Jumps', 'Plyometric Push-ups']
+        exerciseList: ['Jump Squats', 'Box Jumps', 'Depth Jumps', 'Plyometric Push-ups'],
       },
       {
         title: 'Maîtrise du Dribble',
@@ -55,7 +65,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'skills',
         tags: ['Contrôle', 'Vitesse'],
         description: 'Devenez inarrêtable avec un contrôle de balle parfait.',
-        exerciseList: ['Dribble bas', 'Crossovers', 'Spider Dribbling', 'Entre les jambes']
+        exerciseList: ['Dribble bas', 'Crossovers', 'Spider Dribbling', 'Entre les jambes'],
       },
       {
         title: 'Agilité Défensive',
@@ -65,7 +75,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'agility',
         tags: ['Défense', 'Rapidité'],
         description: 'Améliorez vos déplacements pour une défense de fer.',
-        exerciseList: ['Defensive Slides', 'Ladder Drills', 'Reaction Sprints', 'Cone Weaving']
+        exerciseList: ['Defensive Slides', 'Ladder Drills', 'Reaction Sprints', 'Cone Weaving'],
       },
       {
         title: 'Condition Basketball',
@@ -75,9 +85,9 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'conditioning',
         tags: ['Endurance', 'Match'],
         description: 'Tenez la distance pendant 4 quart-temps.',
-        exerciseList: ['Suicides', 'Full Court Sprints', 'Burpees', 'Mountain Climbers']
-      }
-    ]
+        exerciseList: ['Suicides', 'Full Court Sprints', 'Burpees', 'Mountain Climbers'],
+      },
+    ],
   },
 
   football: {
@@ -88,7 +98,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
       { id: 'endurance', name: 'Endurance', count: 1 },
       { id: 'skills', name: 'Technique', count: 1 },
       { id: 'speed', name: 'Vitesse', count: 1 },
-      { id: 'strength', name: 'Force', count: 1 }
+      { id: 'strength', name: 'Force', count: 1 },
     ],
     workouts: [
       {
@@ -99,7 +109,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'skills',
         tags: ['Précision', 'Puissance'],
         description: 'Améliorez la précision et la puissance de vos tirs.',
-        exerciseList: ['Frappes enroulées', 'Tirs à l\'arrêt', 'Volées', 'Penalties']
+        exerciseList: ['Frappes enroulées', "Tirs à l'arrêt", 'Volées', 'Penalties'],
       },
       {
         title: 'Intervalles de Sprint',
@@ -109,7 +119,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'speed',
         tags: ['Explosivité', 'VMA'],
         description: 'Développez une vitesse de pointe pour dépasser les défenseurs.',
-        exerciseList: ['Sprints 30m', 'Hill Sprints', 'Accélérations', 'Changements direction']
+        exerciseList: ['Sprints 30m', 'Hill Sprints', 'Accélérations', 'Changements direction'],
       },
       {
         title: 'Endurance de Milieu',
@@ -119,7 +129,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'endurance',
         tags: ['Cardio', 'Volume'],
         description: 'Tenez la distance pendant 90 minutes.',
-        exerciseList: ['Course longue', 'Fartlek', 'Box-to-Box', 'Récupération active']
+        exerciseList: ['Course longue', 'Fartlek', 'Box-to-Box', 'Récupération active'],
       },
       {
         title: 'Force Fonctionnelle',
@@ -129,9 +139,9 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'strength',
         tags: ['Puissance', 'Contact'],
         description: 'Renforcez votre corps pour les duels.',
-        exerciseList: ['Squats', 'Deadlifts', 'Bulgarian Split', 'Core Training']
-      }
-    ]
+        exerciseList: ['Squats', 'Deadlifts', 'Bulgarian Split', 'Core Training'],
+      },
+    ],
   },
 
   musculation: {
@@ -143,7 +153,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
       { id: 'pull', name: 'Tirage', count: 1 },
       { id: 'legs', name: 'Jambes', count: 1 },
       { id: 'full_body', name: 'Full Body', count: 1 },
-      { id: 'core', name: 'Core', count: 1 }
+      { id: 'core', name: 'Core', count: 1 },
     ],
     workouts: [
       {
@@ -154,7 +164,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'push',
         tags: ['Pectoraux', 'Épaules', 'Triceps'],
         description: 'Développez votre haut du corps avec ce push intensif.',
-        exerciseList: ['Bench Press', 'Military Press', 'Dips', 'Lateral Raises']
+        exerciseList: ['Bench Press', 'Military Press', 'Dips', 'Lateral Raises'],
       },
       {
         title: 'Pull Day Complet',
@@ -164,7 +174,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'pull',
         tags: ['Dos', 'Biceps'],
         description: 'Sculptez un dos puissant et des biceps définis.',
-        exerciseList: ['Pull-ups', 'Rows', 'Deadlifts', 'Bicep Curls']
+        exerciseList: ['Pull-ups', 'Rows', 'Deadlifts', 'Bicep Curls'],
       },
       {
         title: 'Leg Day Massacre',
@@ -173,8 +183,8 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         calories: 500,
         category: 'legs',
         tags: ['Quadriceps', 'Ischio', 'Fessiers'],
-        description: 'Le leg day qui forge des jambes d\'acier.',
-        exerciseList: ['Squats', 'Romanian DL', 'Leg Press', 'Calf Raises']
+        description: "Le leg day qui forge des jambes d'acier.",
+        exerciseList: ['Squats', 'Romanian DL', 'Leg Press', 'Calf Raises'],
       },
       {
         title: 'Full Body Power',
@@ -184,7 +194,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'full_body',
         tags: ['Fonctionnel', 'Explosivité'],
         description: 'Un entraînement complet pour tout le corps.',
-        exerciseList: ['Thrusters', 'Pull-ups', 'Push-ups', 'Burpees']
+        exerciseList: ['Thrusters', 'Pull-ups', 'Push-ups', 'Burpees'],
       },
       {
         title: 'Core Destroyer',
@@ -193,10 +203,10 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         calories: 280,
         category: 'core',
         tags: ['Abdos', 'Stabilité'],
-        description: 'Forgez un core d\'acier en 30 minutes.',
-        exerciseList: ['Planks', 'Russian Twists', 'Dead Bugs', 'Hanging Knee Raises']
-      }
-    ]
+        description: "Forgez un core d'acier en 30 minutes.",
+        exerciseList: ['Planks', 'Russian Twists', 'Dead Bugs', 'Hanging Knee Raises'],
+      },
+    ],
   },
 
   running: {
@@ -207,7 +217,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
       { id: 'speed', name: 'Vitesse', count: 1 },
       { id: 'endurance', name: 'Endurance', count: 1 },
       { id: 'intervals', name: 'Fractionné', count: 1 },
-      { id: 'recovery', name: 'Récupération', count: 1 }
+      { id: 'recovery', name: 'Récupération', count: 1 },
     ],
     workouts: [
       {
@@ -218,7 +228,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'speed',
         tags: ['VMA', 'Explosivité'],
         description: 'Améliorez votre vitesse maximale.',
-        exerciseList: ['400m rapides', 'Récup 200m', '8 répétitions', 'Cool down']
+        exerciseList: ['400m rapides', 'Récup 200m', '8 répétitions', 'Cool down'],
       },
       {
         title: 'Run Longue Distance',
@@ -228,7 +238,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'endurance',
         tags: ['Base', 'Résistance'],
         description: 'Développez votre endurance fondamentale.',
-        exerciseList: ['Échauffement 10min', 'Allure modérée 70min', 'Cool down 10min']
+        exerciseList: ['Échauffement 10min', 'Allure modérée 70min', 'Cool down 10min'],
       },
       {
         title: 'Intervalles Pyramide',
@@ -238,7 +248,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'intervals',
         tags: ['VO2max', 'Lactique'],
         description: 'Repoussez vos limites avec cette pyramide.',
-        exerciseList: ['1min-2min-3min-2min-1min', 'Récup égale effort', 'Intensité 90%']
+        exerciseList: ['1min-2min-3min-2min-1min', 'Récup égale effort', 'Intensité 90%'],
       },
       {
         title: 'Footing Récupération',
@@ -248,9 +258,9 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'recovery',
         tags: ['Récup', 'Easy'],
         description: 'Course de récupération en douceur.',
-        exerciseList: ['Allure très facile', 'Conversation possible', 'Détente musculaire']
-      }
-    ]
+        exerciseList: ['Allure très facile', 'Conversation possible', 'Détente musculaire'],
+      },
+    ],
   },
 
   tennis: {
@@ -260,7 +270,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
       { id: 'all', name: 'Tous', count: 3 },
       { id: 'agility', name: 'Agilité', count: 1 },
       { id: 'power', name: 'Puissance', count: 1 },
-      { id: 'endurance', name: 'Endurance', count: 1 }
+      { id: 'endurance', name: 'Endurance', count: 1 },
     ],
     workouts: [
       {
@@ -271,7 +281,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'agility',
         tags: ['Déplacements', 'Réactivité'],
         description: 'Couvrez le court plus rapidement.',
-        exerciseList: ['Lateral Lunges', 'Spider Drills', 'Split Steps', 'Cone Drills']
+        exerciseList: ['Lateral Lunges', 'Spider Drills', 'Split Steps', 'Cone Drills'],
       },
       {
         title: 'Puissance Service',
@@ -281,7 +291,7 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'power',
         tags: ['Service', 'Rotation'],
         description: 'Un service qui fait la différence.',
-        exerciseList: ['Medicine Ball', 'Résistance épaules', 'Rotation trunk', 'Services répétés']
+        exerciseList: ['Medicine Ball', 'Résistance épaules', 'Rotation trunk', 'Services répétés'],
       },
       {
         title: 'Endurance Match',
@@ -291,18 +301,16 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'endurance',
         tags: ['Match', '3 sets'],
         description: 'Tenez 3 sets sans faiblir.',
-        exerciseList: ['Cardio tennis', 'Recovery drills', 'Match simulation', 'Mental training']
-      }
-    ]
+        exerciseList: ['Cardio tennis', 'Recovery drills', 'Match simulation', 'Mental training'],
+      },
+    ],
   },
 
   // Sports avec configuration basique (à compléter selon besoins)
   american_football: {
     emoji: '🏈',
     motivationalMessage: 'Chaque yard se gagne.',
-    categories: [
-      { id: 'all', name: 'Tous', count: 1 }
-    ],
+    categories: [{ id: 'all', name: 'Tous', count: 1 }],
     workouts: [
       {
         title: 'Entraînement Football Américain',
@@ -312,17 +320,15 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'all',
         tags: ['Force', 'Contact'],
         description: 'Entraînement complet pour le football américain.',
-        exerciseList: ['Tackling', 'Sprint', 'Blocking', 'Agility']
-      }
-    ]
+        exerciseList: ['Tackling', 'Sprint', 'Blocking', 'Agility'],
+      },
+    ],
   },
 
   rugby: {
     emoji: '🏉',
-    motivationalMessage: 'Prêt pour l\'impact.',
-    categories: [
-      { id: 'all', name: 'Tous', count: 1 }
-    ],
+    motivationalMessage: "Prêt pour l'impact.",
+    categories: [{ id: 'all', name: 'Tous', count: 1 }],
     workouts: [
       {
         title: 'Entraînement Rugby',
@@ -332,17 +338,15 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'all',
         tags: ['Contact', 'Endurance'],
         description: 'Entraînement physique pour le rugby.',
-        exerciseList: ['Scrums', 'Rucks', 'Sprint', 'Force fonctionnelle']
-      }
-    ]
+        exerciseList: ['Scrums', 'Rucks', 'Sprint', 'Force fonctionnelle'],
+      },
+    ],
   },
 
   volleyball: {
     emoji: '🏐',
     motivationalMessage: 'Visez au-dessus du filet.',
-    categories: [
-      { id: 'all', name: 'Tous', count: 1 }
-    ],
+    categories: [{ id: 'all', name: 'Tous', count: 1 }],
     workouts: [
       {
         title: 'Entraînement Volleyball',
@@ -352,17 +356,15 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'all',
         tags: ['Saut', 'Réflexes'],
         description: 'Améliorez votre jeu de volleyball.',
-        exerciseList: ['Jump training', 'Reflexes', 'Spike practice', 'Blocking']
-      }
-    ]
+        exerciseList: ['Jump training', 'Reflexes', 'Spike practice', 'Blocking'],
+      },
+    ],
   },
 
   swimming: {
     emoji: '🏊‍♂️',
-    motivationalMessage: 'Fendez l\'eau.',
-    categories: [
-      { id: 'all', name: 'Tous', count: 1 }
-    ],
+    motivationalMessage: "Fendez l'eau.",
+    categories: [{ id: 'all', name: 'Tous', count: 1 }],
     workouts: [
       {
         title: 'Entraînement Natation',
@@ -372,17 +374,15 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'all',
         tags: ['Endurance', 'Technique'],
         description: 'Perfectionnez votre technique de nage.',
-        exerciseList: ['Freestyle', 'Backstroke', 'Butterfly', 'Breaststroke']
-      }
-    ]
+        exerciseList: ['Freestyle', 'Backstroke', 'Butterfly', 'Breaststroke'],
+      },
+    ],
   },
 
   cycling: {
     emoji: '🚴‍♂️',
     motivationalMessage: 'Pédalez vers la victoire.',
-    categories: [
-      { id: 'all', name: 'Tous', count: 1 }
-    ],
+    categories: [{ id: 'all', name: 'Tous', count: 1 }],
     workouts: [
       {
         title: 'Entraînement Cyclisme',
@@ -392,28 +392,28 @@ export const sportsWorkoutConfig: Record<Sport, SportConfig> = {
         category: 'all',
         tags: ['Endurance', 'Vitesse'],
         description: 'Améliorez vos performances à vélo.',
-        exerciseList: ['Intervalles', 'Côtes', 'Sprint', 'Endurance']
-      }
-    ]
-  }
+        exerciseList: ['Intervalles', 'Côtes', 'Sprint', 'Endurance'],
+      },
+    ],
+  },
 };
 
 export const getSportMapping = (sport: string): Sport => {
   const mappings: Record<string, Sport> = {
-    'basketball': 'basketball',
-    'football': 'football',
-    'american_football': 'american_football',
-    'tennis': 'tennis',
-    'rugby': 'rugby',
-    'volleyball': 'volleyball',
-    'swimming': 'swimming',
-    'running': 'running',
+    basketball: 'basketball',
+    football: 'football',
+    american_football: 'american_football',
+    tennis: 'tennis',
+    rugby: 'rugby',
+    volleyball: 'volleyball',
+    swimming: 'swimming',
+    running: 'running',
     'course à pied': 'running',
-    'cycling': 'cycling',
-    'musculation': 'musculation',
-    'powerlifting': 'musculation',
-    'crossfit': 'musculation',
-    'weightlifting': 'musculation'
+    cycling: 'cycling',
+    musculation: 'musculation',
+    powerlifting: 'musculation',
+    crossfit: 'musculation',
+    weightlifting: 'musculation',
   };
   return mappings[sport?.toLowerCase()] || 'musculation';
 };

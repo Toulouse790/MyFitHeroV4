@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  CreditCard, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  CreditCard,
+  DollarSign,
+  TrendingUp,
   Users,
   Search,
   Filter,
@@ -16,7 +16,7 @@ import {
   Eye,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 
 interface PaymentData {
@@ -52,7 +52,7 @@ const AdminPayments: React.FC = () => {
     totalSubscriptions: 0,
     activeSubscriptions: 0,
     churnRate: 0,
-    averageRevenuePerUser: 0
+    averageRevenuePerUser: 0,
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,7 +68,7 @@ const AdminPayments: React.FC = () => {
     try {
       // Simuler le chargement des données de paiement
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const mockPayments: PaymentData[] = [
         {
           id: '1',
@@ -82,7 +82,7 @@ const AdminPayments: React.FC = () => {
           payment_method: 'card',
           created_at: '2024-01-15T10:30:00Z',
           expires_at: '2024-02-15T10:30:00Z',
-          transaction_id: 'txn_1234567890'
+          transaction_id: 'txn_1234567890',
         },
         {
           id: '2',
@@ -96,7 +96,7 @@ const AdminPayments: React.FC = () => {
           payment_method: 'paypal',
           created_at: '2024-01-14T15:45:00Z',
           expires_at: '2024-02-14T15:45:00Z',
-          transaction_id: 'txn_0987654321'
+          transaction_id: 'txn_0987654321',
         },
         {
           id: '3',
@@ -110,17 +110,17 @@ const AdminPayments: React.FC = () => {
           payment_method: 'card',
           created_at: '2024-01-13T09:20:00Z',
           expires_at: '2024-02-13T09:20:00Z',
-          transaction_id: 'txn_1122334455'
-        }
+          transaction_id: 'txn_1122334455',
+        },
       ];
 
       const mockStats: PaymentStats = {
-        totalRevenue: 125430.50,
+        totalRevenue: 125430.5,
         monthlyRevenue: 15670.25,
         totalSubscriptions: 1250,
         activeSubscriptions: 980,
         churnRate: 5.2,
-        averageRevenuePerUser: 127.99
+        averageRevenuePerUser: 127.99,
       };
 
       setPayments(mockPayments);
@@ -176,11 +176,11 @@ const AdminPayments: React.FC = () => {
   };
 
   const filteredPayments = payments.filter(payment => {
-    const matchesSearch = 
+    const matchesSearch =
       payment.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.transaction_id.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = filterStatus === 'all' || payment.status === filterStatus;
     const matchesPlan = filterPlan === 'all' || payment.plan_type === filterPlan;
 
@@ -189,7 +189,7 @@ const AdminPayments: React.FC = () => {
 
   const exportPayments = () => {
     // Simuler l'export des paiements
-    const csvData = "User,Email,Amount,Status,Plan,Date\n";
+    const csvData = 'User,Email,Amount,Status,Plan,Date\n';
     console.log('Export des paiements:', csvData);
   };
 
@@ -206,24 +206,15 @@ const AdminPayments: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {t('admin.payments')}
-        </h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900">{t('admin.payments')}</h2>
+
         <div className="flex items-center space-x-4">
-          <Button
-            onClick={loadPaymentsData}
-            variant="outline"
-            className="flex items-center"
-          >
+          <Button onClick={loadPaymentsData} variant="outline" className="flex items-center">
             <RefreshCw className="h-4 w-4 mr-2" />
             {t('admin.refresh')}
           </Button>
 
-          <Button
-            onClick={exportPayments}
-            className="flex items-center"
-          >
+          <Button onClick={exportPayments} className="flex items-center">
             <Download className="h-4 w-4 mr-2" />
             {t('admin.export')}
           </Button>
@@ -296,7 +287,7 @@ const AdminPayments: React.FC = () => {
               type="text"
               placeholder={t('admin.searchPayments')}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -307,7 +298,7 @@ const AdminPayments: React.FC = () => {
             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={e => setFilterStatus(e.target.value)}
               className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
             >
               <option value="all">{t('admin.allStatuses')}</option>
@@ -320,7 +311,7 @@ const AdminPayments: React.FC = () => {
 
           <select
             value={filterPlan}
-            onChange={(e) => setFilterPlan(e.target.value)}
+            onChange={e => setFilterPlan(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
           >
             <option value="all">{t('admin.allPlans')}</option>
@@ -369,28 +360,24 @@ const AdminPayments: React.FC = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredPayments.map((payment) => (
+                  filteredPayments.map(payment => (
                     <tr key={payment.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
                             {payment.user_name}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {payment.user_email}
-                          </div>
+                          <div className="text-sm text-gray-500">{payment.user_email}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          ${payment.amount}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {payment.currency}
-                        </div>
+                        <div className="text-sm font-medium text-gray-900">${payment.amount}</div>
+                        <div className="text-sm text-gray-500">{payment.currency}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge className={`inline-flex items-center ${getStatusColor(payment.status)}`}>
+                        <Badge
+                          className={`inline-flex items-center ${getStatusColor(payment.status)}`}
+                        >
                           {getStatusIcon(payment.status)}
                           <span className="ml-1">{payment.status}</span>
                         </Badge>

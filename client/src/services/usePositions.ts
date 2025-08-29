@@ -45,9 +45,7 @@ const POSITIONS: Record<Sport, Position[]> = {
     { value: 'simple', label: 'Simple' },
     { value: 'double', label: 'Double' },
   ],
-  autre: [
-    { value: 'autre', label: 'Autre' },
-  ],
+  autre: [{ value: 'autre', label: 'Autre' }],
 };
 
 export function usePositions(sport: Sport = 'football') {

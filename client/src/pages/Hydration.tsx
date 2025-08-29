@@ -23,7 +23,7 @@ import {
   Settings,
   ChevronRight,
   Brain,
-  Info
+  Info,
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
@@ -36,7 +36,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Database } from '../types/database';
 
@@ -74,13 +80,14 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
   endurance: {
     emoji: '🏃‍♂️',
     goalModifierMl: 1000,
-    contextualReminder: "Hydratez-vous toutes les 15-20 minutes pendant l'effort pour maintenir vos performances.",
-    recommendedDrink: { 
-      type: 'sports_drink', 
-      name: "Boisson Sport", 
-      icon: Zap, 
+    contextualReminder:
+      "Hydratez-vous toutes les 15-20 minutes pendant l'effort pour maintenir vos performances.",
+    recommendedDrink: {
+      type: 'sports_drink',
+      name: 'Boisson Sport',
+      icon: Zap,
       amount: 250,
-      color: 'bg-orange-500'
+      color: 'bg-orange-500',
     },
     tips: [
       {
@@ -88,103 +95,108 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
         title: 'Pré-hydratation',
         // Utilisation de guillemets doubles pour encapsuler l'apostrophe dans "l'effort"
         description: "Buvez 500ml 2-3h avant l'effort et 250ml 15min avant le départ.",
-        priority: 'high'
+        priority: 'high',
       },
       {
         icon: Clock,
         // Utilisation de guillemets doubles pour encapsuler l'apostrophe
         title: "Pendant l'effort",
         description: "150-250ml toutes les 15-20min selon l'intensité et la température.",
-        priority: 'high'
+        priority: 'high',
       },
       {
         icon: Thermometer,
         title: 'Post-effort',
         // Utilisation de guillemets doubles pour encapsuler l'apostrophe
         description: "Buvez 150% du poids perdu en sueur dans les 6h suivant l'effort.",
-        priority: 'medium'
+        priority: 'medium',
       },
-    ]
+    ],
   },
   contact: {
     emoji: '🏈',
     goalModifierMl: 750,
-    contextualReminder: "Compensez les pertes intenses en sels minéraux avec des électrolytes.",
-    recommendedDrink: { 
-      type: 'electrolytes', 
-      name: "Électrolytes", 
-      icon: Shield, 
+    contextualReminder: 'Compensez les pertes intenses en sels minéraux avec des électrolytes.',
+    recommendedDrink: {
+      type: 'electrolytes',
+      name: 'Électrolytes',
+      icon: Shield,
       amount: 500,
-      color: 'bg-purple-500'
+      color: 'bg-purple-500',
     },
     tips: [
       {
         icon: Shield,
         // Utilisation de guillemets doubles pour encapsuler l'apostrophe dans "l'équipement"
         title: 'Électrolytes cruciaux',
-        description: "La sueur sous l'équipement fait perdre beaucoup de sodium. Compensez avec des boissons enrichies.",
-        priority: 'high'
+        description:
+          "La sueur sous l'équipement fait perdre beaucoup de sodium. Compensez avec des boissons enrichies.",
+        priority: 'high',
       },
-      { 
-        icon: Dumbbell, 
-        title: 'Récupération accélérée', 
-        description: 'Une hydratation optimale réduit les courbatures et accélère la réparation musculaire.', 
-        priority: 'medium' 
+      {
+        icon: Dumbbell,
+        title: 'Récupération accélérée',
+        description:
+          'Une hydratation optimale réduit les courbatures et accélère la réparation musculaire.',
+        priority: 'medium',
       },
-    ]
+    ],
   },
   court: {
     emoji: '🎾',
     goalModifierMl: 500,
-    contextualReminder: "Profitez de chaque pause pour boire 150-200ml et maintenir votre niveau.",
-    recommendedDrink: { 
-      type: 'water', 
-      name: "Eau Pure", 
-      icon: Droplets, 
+    contextualReminder: 'Profitez de chaque pause pour boire 150-200ml et maintenir votre niveau.',
+    recommendedDrink: {
+      type: 'water',
+      name: 'Eau Pure',
+      icon: Droplets,
       amount: 250,
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
     },
     tips: [
-      { 
-        icon: Trophy, 
-        title: 'Concentration optimale', 
-        description: 'Même 2% de déshydratation réduit significativement vos réflexes et votre précision.', 
-        priority: 'high' 
+      {
+        icon: Trophy,
+        title: 'Concentration optimale',
+        description:
+          'Même 2% de déshydratation réduit significativement vos réflexes et votre précision.',
+        priority: 'high',
       },
-      { 
-        icon: Zap, 
-        title: 'Énergie constante', 
-        description: 'Pour les matchs >1h, alternez eau pure et boisson isotonique toutes les 2 pauses.', 
-        priority: 'medium' 
+      {
+        icon: Zap,
+        title: 'Énergie constante',
+        description:
+          'Pour les matchs >1h, alternez eau pure et boisson isotonique toutes les 2 pauses.',
+        priority: 'medium',
       },
-    ]
+    ],
   },
   strength: {
     emoji: '💪',
     goalModifierMl: 250,
-    contextualReminder: "Hydratez-vous entre chaque série pour maintenir force et concentration.",
-    recommendedDrink: { 
-      type: 'water', 
-      name: "Eau Fraîche", 
-      icon: Droplets, 
+    contextualReminder: 'Hydratez-vous entre chaque série pour maintenir force et concentration.',
+    recommendedDrink: {
+      type: 'water',
+      name: 'Eau Fraîche',
+      icon: Droplets,
       amount: 300,
-      color: 'bg-blue-600'
+      color: 'bg-blue-600',
     },
     tips: [
-      { 
-        icon: Dumbbell, 
-        title: 'Performance musculaire', 
-        description: '3% de déshydratation = 10-15% de perte de force. Hydratez-vous régulièrement.', 
-        priority: 'high' 
+      {
+        icon: Dumbbell,
+        title: 'Performance musculaire',
+        description:
+          '3% de déshydratation = 10-15% de perte de force. Hydratez-vous régulièrement.',
+        priority: 'high',
       },
-      { 
-        icon: Coffee, 
-        title: 'Pré-workout et caféine', 
-        description: 'Si vous prenez des stimulants, augmentez votre apport hydrique de 500ml.', 
-        priority: 'medium' 
+      {
+        icon: Coffee,
+        title: 'Pré-workout et caféine',
+        description: 'Si vous prenez des stimulants, augmentez votre apport hydrique de 500ml.',
+        priority: 'medium',
       },
-    ]
-  }
+    ],
+  },
 };
 
 // --- COMPOSANT PRINCIPAL ---
@@ -193,7 +205,7 @@ const Hydration: React.FC = () => {
   const navigate = useNavigate();
   const { appStoreUser } = useAppStore();
   const { toast } = useToast();
-  
+
   const [currentMl, setCurrentMl] = useState(0);
   const [selectedAmount, setSelectedAmount] = useState(250);
   const [isLoading, setIsLoading] = useState(true);
@@ -209,25 +221,25 @@ const Hydration: React.FC = () => {
   // --- LOGIQUE DE PERSONNALISATION ---
   const getSportCategory = useCallback((sport: string | null | undefined): SportCategory => {
     const sportMappings: Record<string, SportCategory> = {
-      'basketball': 'court',
-      'tennis': 'court',
-      'volleyball': 'court',
-      'badminton': 'court',
-      'american_football': 'contact',
-      'rugby': 'contact',
-      'hockey': 'contact',
-      'football': 'endurance',
-      'running': 'endurance',
-      'cycling': 'endurance',
-      'swimming': 'endurance',
-      'triathlon': 'endurance',
+      basketball: 'court',
+      tennis: 'court',
+      volleyball: 'court',
+      badminton: 'court',
+      american_football: 'contact',
+      rugby: 'contact',
+      hockey: 'contact',
+      football: 'endurance',
+      running: 'endurance',
+      cycling: 'endurance',
+      swimming: 'endurance',
+      triathlon: 'endurance',
       'course à pied': 'endurance',
-      'musculation': 'strength',
-      'powerlifting': 'strength',
-      'crossfit': 'strength',
-      'weightlifting': 'strength'
+      musculation: 'strength',
+      powerlifting: 'strength',
+      crossfit: 'strength',
+      weightlifting: 'strength',
     };
-    
+
     return sportMappings[sport?.toLowerCase() || ''] || 'strength';
   }, []);
 
@@ -238,31 +250,31 @@ const Hydration: React.FC = () => {
   const personalizedGoalMl = useMemo(() => {
     const weight = appStoreUser?.weight ?? 70;
     const baseGoalMl = weight * 35;
-    
+
     let adjustments = 0;
     adjustments += sportConfig.goalModifierMl;
-    
+
     if (appStoreUser?.age) {
       if (appStoreUser.age > 50) adjustments += 200;
       if (appStoreUser.age < 25) adjustments += 300;
     }
-    
+
     if (appStoreUser?.gender === 'male') {
       adjustments += 300;
     }
-    
+
     if (appStoreUser?.primary_goals?.includes('weight_loss')) {
       adjustments += 500;
     }
-    
+
     if (appStoreUser?.primary_goals?.includes('muscle_gain')) {
       adjustments += 300;
     }
-    
+
     const activityLevel = appStoreUser?.activity_level;
     if (activityLevel === 'extra_active') adjustments += 500;
     else if (activityLevel === 'moderately_active') adjustments += 300;
-    
+
     return Math.round(baseGoalMl + adjustments);
   }, [appStoreUser, sportConfig.goalModifierMl]);
 
@@ -272,7 +284,7 @@ const Hydration: React.FC = () => {
 
     try {
       setIsLoading(true);
-      
+
       const today = new Date().toISOString().split('T')[0];
 
       const { data: statsData, error: statsError } = await supabase
@@ -291,12 +303,12 @@ const Hydration: React.FC = () => {
 
       if (statsError && statsError.code !== 'PGRST116') {
         console.error('Error fetching daily stats:', statsError);
-        toast({ title: "Erreur de chargement des stats", variant: "destructive" });
+        toast({ title: 'Erreur de chargement des stats', variant: 'destructive' });
       }
-      
+
       if (logsError) {
         console.error('Error fetching hydration logs:', logsError);
-        toast({ title: "Erreur de chargement des logs", variant: "destructive" });
+        toast({ title: 'Erreur de chargement des logs', variant: 'destructive' });
       }
 
       const currentStats = statsData as DailyStats | null;
@@ -314,82 +326,86 @@ const Hydration: React.FC = () => {
       if (currentLogs && currentLogs.length > 0) {
         setLastDrinkTime(new Date(currentLogs[0].logged_at));
       }
-
     } catch (error) {
       console.error('Erreur chargement hydratation:', error);
-      toast({ title: "Erreur inattendue", description: "Impossible de charger les données d'hydratation.", variant: "destructive" });
+      toast({
+        title: 'Erreur inattendue',
+        description: "Impossible de charger les données d'hydratation.",
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   }, [appStoreUser?.id, toast]);
 
   // --- HANDLERS ---
-  const handleAddWater = useCallback(async (amount: number, type: DrinkType = 'water', context: HydrationContext = 'normal') => {
-    if (!appStoreUser?.id) return;
+  const handleAddWater = useCallback(
+    async (amount: number, type: DrinkType = 'water', context: HydrationContext = 'normal') => {
+      if (!appStoreUser?.id) return;
 
-    try {
-      const newTotal = currentMl + amount;
-      const now = new Date();
-      
-      setCurrentMl(newTotal);
-      setLastDrinkTime(now);
-      
-      const { error: logError } = await (supabase as any)
-        .from('hydration_logs')
-        .insert({
+      try {
+        const newTotal = currentMl + amount;
+        const now = new Date();
+
+        setCurrentMl(newTotal);
+        setLastDrinkTime(now);
+
+        const { error: logError } = await (supabase as any).from('hydration_logs').insert({
           user_id: appStoreUser.id,
           amount_ml: amount,
           drink_type: type,
           logged_at: now.toISOString(),
           log_date: todayDate,
-          hydration_context: context
+          hydration_context: context,
         });
 
-      if (logError) throw logError;
+        if (logError) throw logError;
 
-      const { error: statsError } = await (supabase as any)
-        .from('daily_stats')
-        .upsert({
-          user_id: appStoreUser.id,
-          stat_date: todayDate,
-          water_intake_ml: newTotal,
-          hydration_goal_ml: personalizedGoalMl,
-          updated_at: now.toISOString()
-        }, {
-          onConflict: 'user_id,stat_date'
+        const { error: statsError } = await (supabase as any).from('daily_stats').upsert(
+          {
+            user_id: appStoreUser.id,
+            stat_date: todayDate,
+            water_intake_ml: newTotal,
+            hydration_goal_ml: personalizedGoalMl,
+            updated_at: now.toISOString(),
+          },
+          {
+            onConflict: 'user_id,stat_date',
+          }
+        );
+
+        if (statsError) throw statsError;
+
+        const userName = appStoreUser.first_name || appStoreUser.username || 'Champion';
+        const progress = (newTotal / personalizedGoalMl) * 100;
+
+        let message = `+${amount}ml ajoutés ! `;
+        if (progress >= 100) {
+          message += `🎉 Objectif atteint ${userName} !`;
+        } else if (progress >= 75) {
+          message += `💪 Excellent ${userName}, presque fini !`;
+        } else {
+          message += `Continue ${userName} !`;
+        }
+
+        toast({
+          title: 'Hydratation ajoutée',
+          description: message,
         });
 
-      if (statsError) throw statsError;
-
-      const userName = appStoreUser.first_name || appStoreUser.username || 'Champion';
-      const progress = (newTotal / personalizedGoalMl) * 100;
-      
-      let message = `+${amount}ml ajoutés ! `;
-      if (progress >= 100) {
-        message += `🎉 Objectif atteint ${userName} !`;
-      } else if (progress >= 75) {
-        message += `💪 Excellent ${userName}, presque fini !`;
-      } else {
-        message += `Continue ${userName} !`;
+        await loadHydrationData();
+      } catch (error) {
+        console.error('Erreur ajout hydratation:', error);
+        setCurrentMl(prev => prev - amount);
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de sauvegarder. Réessayez.',
+          variant: 'destructive',
+        });
       }
-      
-      toast({
-        title: "Hydratation ajoutée",
-        description: message,
-      });
-
-      await loadHydrationData();
-
-    } catch (error) {
-      console.error('Erreur ajout hydratation:', error);
-      setCurrentMl(prev => prev - amount);
-      toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder. Réessayez.",
-        variant: "destructive"
-      });
-    }
-  }, [appStoreUser?.id, currentMl, personalizedGoalMl, todayDate, loadHydrationData, toast]);
+    },
+    [appStoreUser?.id, currentMl, personalizedGoalMl, todayDate, loadHydrationData, toast]
+  );
 
   const handleRemoveLast = useCallback(async () => {
     if (dailyLogs.length === 0) return;
@@ -407,57 +423,66 @@ const Hydration: React.FC = () => {
 
       if (deleteError) throw deleteError;
 
-      const { error: statsError } = await (supabase as any)
-        .from('daily_stats')
-        .upsert({
-          user_id: appStoreUser?.id!,
-          stat_date: todayDate,
-          water_intake_ml: newTotal,
-          hydration_goal_ml: personalizedGoalMl,
-          updated_at: new Date().toISOString()
-        });
+      const { error: statsError } = await (supabase as any).from('daily_stats').upsert({
+        user_id: appStoreUser?.id!,
+        stat_date: todayDate,
+        water_intake_ml: newTotal,
+        hydration_goal_ml: personalizedGoalMl,
+        updated_at: new Date().toISOString(),
+      });
 
       if (statsError) throw statsError;
 
       toast({
-        title: "Dernière entrée supprimée",
+        title: 'Dernière entrée supprimée',
         description: `-${lastLog.amount_ml}ml`,
       });
 
       await loadHydrationData();
-
     } catch (error) {
       console.error('Erreur suppression:', error);
       setCurrentMl(prev => prev + lastLog.amount_ml);
       toast({
-        title: "Erreur",
+        title: 'Erreur',
         description: "Impossible de supprimer l'entrée",
-        variant: "destructive"
+        variant: 'destructive',
       });
     }
-  }, [dailyLogs, currentMl, appStoreUser?.id, personalizedGoalMl, todayDate, loadHydrationData, toast]);
+  }, [
+    dailyLogs,
+    currentMl,
+    appStoreUser?.id,
+    personalizedGoalMl,
+    todayDate,
+    loadHydrationData,
+    toast,
+  ]);
 
   // --- SYNCHRONISATION TEMPS RÉEL ---
-  const { } = useRealtimeSync({
+  const {} = useRealtimeSync({
     pillar: 'hydration',
-    onUpdate: (payload) => {
-      if (payload.userId !== appStoreUser?.id && (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')) {
+    onUpdate: payload => {
+      if (
+        payload.userId !== appStoreUser?.id &&
+        (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE')
+      ) {
         loadHydrationData();
       }
-    }
+    },
   });
 
   // --- CALCULS ---
   const currentHydrationL = currentMl / 1000;
   const goalHydrationL = personalizedGoalMl / 1000;
   const remaining = Math.max(0, personalizedGoalMl - currentMl);
-  const percentage = personalizedGoalMl > 0 ? Math.min((currentMl / personalizedGoalMl) * 100, 100) : 0;
+  const percentage =
+    personalizedGoalMl > 0 ? Math.min((currentMl / personalizedGoalMl) * 100, 100) : 0;
   const isGoalReached = percentage >= 100;
 
   // --- MESSAGES PERSONNALISÉS ---
   const getPersonalizedMessage = useCallback(() => {
     const userName = appStoreUser?.first_name || appStoreUser?.username || 'Champion';
-    
+
     if (isGoalReached) {
       return `🎉 Excellent ${userName} ! Objectif atteint !`;
     } else if (percentage >= 75) {
@@ -477,7 +502,10 @@ const Hydration: React.FC = () => {
 
   // Afficher le rappel contextuel seulement si pertinent
   const shouldShowContextualReminder = useCallback(() => {
-    return percentage < 80 && (!lastDrinkTime || (new Date().getTime() - lastDrinkTime.getTime()) > 2 * 60 * 60 * 1000);
+    return (
+      percentage < 80 &&
+      (!lastDrinkTime || new Date().getTime() - lastDrinkTime.getTime() > 2 * 60 * 60 * 1000)
+    );
   }, [percentage, lastDrinkTime]);
 
   // --- EFFECTS ---
@@ -507,7 +535,6 @@ const Hydration: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="px-4 py-6 space-y-6 max-w-2xl mx-auto">
-
         {/* Header Uniforme */}
         <UniformHeader
           title="Hydratation"
@@ -548,21 +575,30 @@ const Hydration: React.FC = () => {
                     </DialogHeader>
                     <div className="space-y-3 text-sm">
                       <p>
-                        En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de {appStoreUser?.age || '?'} ans 
-                        ({appStoreUser?.weight || '?'}kg) pratiquant le {appStoreUser?.sport || 'sport'}, 
-                        votre objectif de {goalHydrationL.toFixed(1)}L est adapté à vos besoins.
+                        En tant que {appStoreUser?.gender === 'male' ? 'homme' : 'femme'} de{' '}
+                        {appStoreUser?.age || '?'} ans ({appStoreUser?.weight || '?'}kg) pratiquant
+                        le {appStoreUser?.sport || 'sport'}, votre objectif de{' '}
+                        {goalHydrationL.toFixed(1)}L est adapté à vos besoins.
                       </p>
                       <div className="space-y-1 text-xs text-gray-600">
                         <p>• Base: {Math.round((appStoreUser?.weight || 70) * 35)}ml (35ml/kg)</p>
-                        <p>• Bonus sport {userSportCategory}: +{sportConfig.goalModifierMl}ml</p>
-                        <p>• Ajustements profil: +{personalizedGoalMl - Math.round((appStoreUser?.weight || 70) * 35) - sportConfig.goalModifierMl}ml</p>
+                        <p>
+                          • Bonus sport {userSportCategory}: +{sportConfig.goalModifierMl}ml
+                        </p>
+                        <p>
+                          • Ajustements profil: +
+                          {personalizedGoalMl -
+                            Math.round((appStoreUser?.weight || 70) * 35) -
+                            sportConfig.goalModifierMl}
+                          ml
+                        </p>
                       </div>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
             </div>
-            
+
             <div className="text-center mb-4">
               <div className="text-4xl font-bold mb-1">
                 {currentHydrationL.toFixed(2).replace(/\.?0+$/, '')}L
@@ -574,20 +610,23 @@ const Hydration: React.FC = () => {
                 Objectif {userSportCategory} {sportConfig.emoji}
               </Badge>
               <div className="text-sm text-white/70 mt-2">
-                {remaining > 0 
-                  ? `${(remaining/1000).toFixed(2).replace(/\.?0+$/, '')}L restants` 
-                  : 'Objectif atteint ! 🎉'
-                }
+                {remaining > 0
+                  ? `${(remaining / 1000).toFixed(2).replace(/\.?0+$/, '')}L restants`
+                  : 'Objectif atteint ! 🎉'}
               </div>
             </div>
-            
+
             <Progress value={percentage} className="h-3 mb-4 bg-white/20" />
-            
+
             <div className="flex items-center justify-between text-sm">
               <span className="text-white/90">{Math.round(percentage)}% complété</span>
               {lastDrinkTime && (
                 <span className="text-white/70">
-                  Dernier: {lastDrinkTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                  Dernier:{' '}
+                  {lastDrinkTime.toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
                 </span>
               )}
             </div>
@@ -600,10 +639,10 @@ const Hydration: React.FC = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex space-x-2 mb-4">
-                {[150, 250, 350, 500].map((amount) => (
+                {[150, 250, 350, 500].map(amount => (
                   <Button
                     key={amount}
-                    variant={selectedAmount === amount ? "default" : "outline"}
+                    variant={selectedAmount === amount ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedAmount(amount)}
                     className="flex-1"
@@ -612,7 +651,7 @@ const Hydration: React.FC = () => {
                   </Button>
                 ))}
               </div>
-              
+
               {/* Actions principales */}
               <div className="grid grid-cols-2 gap-3">
                 <Button
@@ -623,13 +662,15 @@ const Hydration: React.FC = () => {
                   <Plus size={20} />
                   <span className="text-sm">Eau {selectedAmount}ml</span>
                 </Button>
-                
+
                 <Button
-                  onClick={() => handleAddWater(
-                    sportConfig.recommendedDrink.amount, 
-                    sportConfig.recommendedDrink.type, 
-                    'workout'
-                  )}
+                  onClick={() =>
+                    handleAddWater(
+                      sportConfig.recommendedDrink.amount,
+                      sportConfig.recommendedDrink.type,
+                      'workout'
+                    )
+                  }
                   size="lg"
                   variant="outline"
                   className={`h-16 flex flex-col space-y-1 border-2 ${sportConfig.recommendedDrink.color.replace('bg-', 'border-')} hover:${sportConfig.recommendedDrink.color.replace('bg-', 'bg-')}/10`}
@@ -638,7 +679,7 @@ const Hydration: React.FC = () => {
                   <span className="text-sm">{sportConfig.recommendedDrink.name}</span>
                 </Button>
               </div>
-              
+
               {/* Actions secondaires */}
               <div className="grid grid-cols-2 gap-3 mt-3">
                 <Button
@@ -651,7 +692,7 @@ const Hydration: React.FC = () => {
                   <Minus size={16} />
                   <span>Annuler</span>
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -677,7 +718,7 @@ const Hydration: React.FC = () => {
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="space-y-2">
-                {dailyLogs.slice(0, 3).map((log) => (
+                {dailyLogs.slice(0, 3).map(log => (
                   <div key={log.id} className="flex items-center justify-between text-sm">
                     <span className="flex items-center space-x-2">
                       <Droplets className="h-3 w-3 text-blue-500" />
@@ -687,18 +728,18 @@ const Hydration: React.FC = () => {
                       </Badge>
                     </span>
                     <span className="text-gray-500">
-                      {new Date(log.logged_at).toLocaleTimeString('fr-FR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {new Date(log.logged_at).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
                       })}
                     </span>
                   </div>
                 ))}
               </div>
               {dailyLogs.length > 3 && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="w-full mt-2 text-xs"
                   onClick={() => navigate('/hydration/history')}
                 >
@@ -713,14 +754,13 @@ const Hydration: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
-              {React.createElement(todayTip.icon, { size: 20, className: "text-blue-600 mt-0.5 flex-shrink-0" })}
+              {React.createElement(todayTip.icon, {
+                size: 20,
+                className: 'text-blue-600 mt-0.5 flex-shrink-0',
+              })}
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-800 text-sm mb-1">
-                  {todayTip.title}
-                </h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  {todayTip.description}
-                </p>
+                <h3 className="font-semibold text-gray-800 text-sm mb-1">{todayTip.title}</h3>
+                <p className="text-xs text-gray-600 mb-2">{todayTip.description}</p>
                 <Collapsible>
                   <CollapsibleTrigger asChild>
                     <Button variant="ghost" size="sm" className="text-xs p-0 h-auto">
@@ -735,7 +775,9 @@ const Hydration: React.FC = () => {
                           <div className="flex items-start space-x-2">
                             <TipIcon size={16} className="text-gray-600 mt-0.5 flex-shrink-0" />
                             <div>
-                              <h4 className="font-medium text-gray-800 text-xs mb-1">{tip.title}</h4>
+                              <h4 className="font-medium text-gray-800 text-xs mb-1">
+                                {tip.title}
+                              </h4>
                               <p className="text-xs text-gray-600">{tip.description}</p>
                             </div>
                           </div>

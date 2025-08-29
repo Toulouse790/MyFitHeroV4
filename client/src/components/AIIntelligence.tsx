@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { aiService, type AIAnalysis, type CoachingResponse, type ContextualRecommendation } from '@/services/aiService';
+import {
+  aiService,
+  type AIAnalysis,
+  type CoachingResponse,
+  type ContextualRecommendation,
+} from '@/services/aiService';
 import { useAppStore } from '@/store/useAppStore';
 import { useAnimateOnMount } from '@/hooks/useAnimations';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
@@ -17,7 +22,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
   showPredictions = true,
   showCoaching = true,
   showRecommendations = true,
-  className = ''
+  className = '',
 }) => {
   const { appStoreUser } = useAppStore();
   const adaptiveColors = useAdaptiveColors();
@@ -61,11 +66,11 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
       if (showRecommendations) {
         promises.push(
           aiService.getContextualRecommendations(
-            { 
+            {
               time_of_day: new Date().getHours(),
               day_of_week: new Date().getDay(),
               weather: 'sunny', // À connecter à une API météo
-              location: 'home'
+              location: 'home',
             },
             appStoreUser
           )
@@ -73,7 +78,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
       }
 
       const results = await Promise.all(promises);
-      
+
       setAiAnalysis(results[0]);
       if (showCoaching && results[1]) setCoaching(results[1]);
       if (showRecommendations && results[2]) setRecommendations(results[2].recommendations || []);
@@ -81,7 +86,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
       // Toast de succès simplifié
       console.log('Intelligence AI mise à jour');
     } catch (err) {
-      setError('Erreur lors du chargement de l\'intelligence AI');
+      setError("Erreur lors du chargement de l'intelligence AI");
       console.error('AI Intelligence error:', err);
     } finally {
       setLoading(false);
@@ -94,19 +99,27 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
 
   const getTrendColor = (trend: string) => {
     switch (trend) {
-      case 'improving': return '#22c55e'; // success
-      case 'stable': return '#f59e0b'; // warning
-      case 'declining': return '#ef4444'; // error
-      default: return adaptiveColors.text;
+      case 'improving':
+        return '#22c55e'; // success
+      case 'stable':
+        return '#f59e0b'; // warning
+      case 'declining':
+        return '#ef4444'; // error
+      default:
+        return adaptiveColors.text;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return '#ef4444'; // error
-      case 'medium': return '#f59e0b'; // warning
-      case 'low': return '#22c55e'; // success
-      default: return adaptiveColors.text;
+      case 'high':
+        return '#ef4444'; // error
+      case 'medium':
+        return '#f59e0b'; // warning
+      case 'low':
+        return '#22c55e'; // success
+      default:
+        return adaptiveColors.text;
     }
   };
 
@@ -135,7 +148,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
   }
 
   return (
-    <div 
+    <div
       className={`ai-intelligence ${isAnimated ? 'animated' : ''} ${className}`}
       style={{ borderColor: adaptiveColors.border }}
     >
@@ -143,7 +156,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
       <div className="ai-header">
         <div className="ai-title">
           <h3 style={{ color: adaptiveColors.text }}>🧠 Intelligence AI</h3>
-          <button 
+          <button
             onClick={handleRefreshAI}
             className="refresh-btn"
             style={{ color: adaptiveColors.accent }}
@@ -151,39 +164,40 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
             ↻
           </button>
         </div>
-        
+
         <div className="ai-tabs">
           <button
             className={`tab ${activeTab === 'insights' ? 'active' : ''}`}
             onClick={() => setActiveTab('insights')}
-            style={{ 
+            style={{
               backgroundColor: activeTab === 'insights' ? adaptiveColors.accent : 'transparent',
-              color: activeTab === 'insights' ? 'white' : adaptiveColors.text
+              color: activeTab === 'insights' ? 'white' : adaptiveColors.text,
             }}
           >
             Insights
           </button>
-          
+
           {showCoaching && (
             <button
               className={`tab ${activeTab === 'coaching' ? 'active' : ''}`}
               onClick={() => setActiveTab('coaching')}
-              style={{ 
+              style={{
                 backgroundColor: activeTab === 'coaching' ? adaptiveColors.accent : 'transparent',
-                color: activeTab === 'coaching' ? 'white' : adaptiveColors.text
+                color: activeTab === 'coaching' ? 'white' : adaptiveColors.text,
               }}
             >
               Coaching
             </button>
           )}
-          
+
           {showPredictions && (
             <button
               className={`tab ${activeTab === 'predictions' ? 'active' : ''}`}
               onClick={() => setActiveTab('predictions')}
-              style={{ 
-                backgroundColor: activeTab === 'predictions' ? adaptiveColors.accent : 'transparent',
-                color: activeTab === 'predictions' ? 'white' : adaptiveColors.text
+              style={{
+                backgroundColor:
+                  activeTab === 'predictions' ? adaptiveColors.accent : 'transparent',
+                color: activeTab === 'predictions' ? 'white' : adaptiveColors.text,
               }}
             >
               Prédictions
@@ -199,14 +213,20 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
             <div className="trend-analysis">
               <h4 style={{ color: adaptiveColors.text }}>Analyse de tendance</h4>
               <div className="trend-info">
-                <span 
+                <span
                   className="trend-indicator"
                   style={{ color: getTrendColor(aiAnalysis.trend) }}
                 >
-                  {aiAnalysis.trend === 'improving' ? '📈' : 
-                   aiAnalysis.trend === 'stable' ? '➡️' : '📉'}
-                  {aiAnalysis.trend === 'improving' ? 'En progression' :
-                   aiAnalysis.trend === 'stable' ? 'Stable' : 'En baisse'}
+                  {aiAnalysis.trend === 'improving'
+                    ? '📈'
+                    : aiAnalysis.trend === 'stable'
+                      ? '➡️'
+                      : '📉'}
+                  {aiAnalysis.trend === 'improving'
+                    ? 'En progression'
+                    : aiAnalysis.trend === 'stable'
+                      ? 'Stable'
+                      : 'En baisse'}
                 </span>
                 <span className="confidence">
                   Confiance: {Math.round(aiAnalysis.confidence * 100)}%
@@ -217,10 +237,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
             <div className="consistency-score">
               <h4 style={{ color: adaptiveColors.text }}>Score de consistance</h4>
               <div className="score-display">
-                <div 
-                  className="score-circle"
-                  style={{ borderColor: adaptiveColors.accent }}
-                >
+                <div className="score-circle" style={{ borderColor: adaptiveColors.accent }}>
                   <span style={{ color: adaptiveColors.accent }}>
                     {Math.round(aiAnalysis.consistency_score)}%
                   </span>
@@ -231,8 +248,8 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
             <div className="recommendations-list">
               <h4 style={{ color: adaptiveColors.text }}>Recommandations AI</h4>
               {aiAnalysis.recommendations.map((rec, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="recommendation-item"
                   style={{ borderLeft: `3px solid ${adaptiveColors.accent}` }}
                 >
@@ -246,7 +263,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
         {activeTab === 'coaching' && coaching && (
           <div className="coaching-panel">
             <div className="coaching-message">
-              <div 
+              <div
                 className="priority-badge"
                 style={{ backgroundColor: getPriorityColor(coaching.priority) }}
               >
@@ -259,8 +276,8 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
             <div className="action-items">
               <h4 style={{ color: adaptiveColors.text }}>Actions recommandées</h4>
               {coaching.actions.map((action, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="action-item"
                   style={{ backgroundColor: adaptiveColors.surface }}
                 >
@@ -284,13 +301,10 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
         {activeTab === 'predictions' && (
           <div className="predictions-panel">
             <div className="prediction-cards">
-              <div 
-                className="prediction-card"
-                style={{ backgroundColor: adaptiveColors.surface }}
-              >
+              <div className="prediction-card" style={{ backgroundColor: adaptiveColors.surface }}>
                 <h4 style={{ color: adaptiveColors.text }}>Performance prédite</h4>
                 <div className="prediction-chart">
-                  <div 
+                  <div
                     className="chart-bar"
                     style={{ backgroundColor: adaptiveColors.accent }}
                   ></div>
@@ -300,10 +314,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
                 </p>
               </div>
 
-              <div 
-                className="prediction-card"
-                style={{ backgroundColor: adaptiveColors.surface }}
-              >
+              <div className="prediction-card" style={{ backgroundColor: adaptiveColors.surface }}>
                 <h4 style={{ color: adaptiveColors.text }}>Risques identifiés</h4>
                 <div className="risk-indicators">
                   <span className="risk-low">Fatigue: Faible</span>
@@ -316,24 +327,24 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
               <div className="contextual-recommendations">
                 <h4 style={{ color: adaptiveColors.text }}>Recommandations contextuelles</h4>
                 {recommendations.map((rec, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="context-rec"
-                    style={{ 
+                    style={{
                       backgroundColor: adaptiveColors.surface,
-                      borderLeft: `3px solid ${getPriorityColor(rec.priority)}`
+                      borderLeft: `3px solid ${getPriorityColor(rec.priority)}`,
                     }}
                   >
                     <h5 style={{ color: adaptiveColors.accent }}>{rec.title}</h5>
                     <p style={{ color: adaptiveColors.text }}>{rec.message}</p>
                     <div className="rec-actions">
                       {rec.actions.map((action, idx) => (
-                        <button 
+                        <button
                           key={idx}
                           className="action-btn"
-                          style={{ 
+                          style={{
                             backgroundColor: adaptiveColors.accent,
-                            color: 'white'
+                            color: 'white',
                           }}
                         >
                           {action}
@@ -349,8 +360,9 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
       </div>
 
       {/* CSS intégré directement dans le composant */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         .ai-intelligence {
           background: ${adaptiveColors.surface};
           border-radius: 12px;
@@ -464,7 +476,9 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
             transform: translateY(0);
           }
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 };

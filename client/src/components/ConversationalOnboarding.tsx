@@ -8,13 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  ChevronRight, 
-  ChevronLeft, 
-  Clock, 
-  Star, 
-  Check, 
-  AlertCircle, 
+import {
+  ChevronRight,
+  ChevronLeft,
+  Clock,
+  Star,
+  Check,
+  AlertCircle,
   User,
   Target,
   Zap,
@@ -27,24 +27,24 @@ import {
   Moon,
   Droplets,
   Brain,
-  Package
+  Package,
 } from 'lucide-react';
 import { supabase } from '../config/supabaseClient';
 import { useToast } from '../hooks/use-toast';
-import { 
-  ConversationalStep, 
+import {
+  ConversationalStep,
   OnboardingData,
   ValidationRule,
-  QuestionOption
+  QuestionOption,
 } from '../types/conversationalOnboarding';
-import { 
+import {
   CONVERSATIONAL_ONBOARDING_FLOW,
   getConditionalNextStep,
-  calculateEstimatedTime
+  calculateEstimatedTime,
 } from '../data/conversationalFlow';
-import { 
-  AVAILABLE_SPORTS, 
-  MAIN_OBJECTIVES, 
+import {
+  AVAILABLE_SPORTS,
+  MAIN_OBJECTIVES,
   AVAILABLE_MODULES,
   LIFESTYLE_OPTIONS,
   DIETARY_PREFERENCES,
@@ -55,14 +55,14 @@ import {
   SPORT_LEVELS,
   SEASON_PERIODS,
   TRAINING_AVAILABILITY,
-  HEALTH_CONDITIONS
+  HEALTH_CONDITIONS,
 } from '../data/onboardingData';
-import { 
-  SMART_PACKS, 
-  getQuestionsForPack, 
+import {
+  SMART_PACKS,
+  getQuestionsForPack,
   shouldAskQuestion,
   getRecommendedPacks,
-  getEstimatedTimeForPack 
+  getEstimatedTimeForPack,
 } from '../data/smartPacks';
 import SportSelector from './SportSelector';
 import PositionSelector from './PositionSelector';
@@ -98,11 +98,11 @@ interface OnboardingState {
   availableSteps: string[]; // Étapes disponibles selon le pack
 }
 
-export default function ConversationalOnboarding({ 
-  onComplete, 
-  onSkip, 
+export default function ConversationalOnboarding({
+  onComplete,
+  onSkip,
   initialData = {},
-  debug = false 
+  debug = false,
 }: ConversationalOnboardingProps) {
   const { toast } = useToast();
   const { sports: dynamicSports, loading: sportsLoading } = useSports();
@@ -132,17 +132,17 @@ export default function ConversationalOnboarding({
           nutrition: { steps: [], completed: [], skipped: [], timeSpent: 0 },
           hydration: { steps: [], completed: [], skipped: [], timeSpent: 0 },
           sleep: { steps: [], completed: [], skipped: [], timeSpent: 0 },
-          wellness: { steps: [], completed: [], skipped: [], timeSpent: 0 }
+          wellness: { steps: [], completed: [], skipped: [], timeSpent: 0 },
         },
         userPreferences: {
           preferredInputTypes: [],
           skipsTendency: 0,
           detailLevel: 'standard',
-          pace: 'normal'
+          pace: 'normal',
         },
         completionQuality: 0,
         validationScore: 100,
-        consistencyScore: 100
+        consistencyScore: 100,
       },
       version: '1.0',
       startedAt: new Date(),
@@ -179,7 +179,7 @@ export default function ConversationalOnboarding({
       fitnessGoals: initialData.fitnessGoals || [],
       currentWeight: initialData.currentWeight || null,
       targetWeight: initialData.targetWeight || null,
-      height: initialData.height || null
+      height: initialData.height || null,
     },
     currentResponse: null,
     validationErrors: [],
@@ -190,7 +190,7 @@ export default function ConversationalOnboarding({
     completedModuleSteps: {},
     skipCount: 0,
     startTime: new Date(),
-    availableSteps: [] // Sera mis à jour selon le pack
+    availableSteps: [], // Sera mis à jour selon le pack
   }));
 
   // Mise à jour des étapes disponibles selon le pack
@@ -198,7 +198,7 @@ export default function ConversationalOnboarding({
     if (state.data.selectedPack) {
       const steps = getQuestionsForPack(state.data.selectedPack, state.data.selectedModules);
       setState(prev => ({ ...prev, availableSteps: steps }));
-      
+
       // Mettre à jour le nombre total d'étapes
       setState(prev => ({
         ...prev,
@@ -206,9 +206,9 @@ export default function ConversationalOnboarding({
           ...prev.data,
           progress: {
             ...prev.data.progress,
-            totalSteps: steps.length
-          }
-        }
+            totalSteps: steps.length,
+          },
+        },
       }));
     }
   }, [state.data.selectedPack, state.data.selectedModules]);
@@ -219,18 +219,23 @@ export default function ConversationalOnboarding({
     if (state.data.selectedPack && !state.availableSteps.includes(state.currentStepId)) {
       // Trouver la prochaine étape valide
       const validSteps = state.availableSteps;
-      const nextValidStep = validSteps.find(stepId => 
-        !state.data.progress.completedSteps.includes(stepId)
+      const nextValidStep = validSteps.find(
+        stepId => !state.data.progress.completedSteps.includes(stepId)
       );
-      
+
       if (nextValidStep && nextValidStep !== state.currentStepId) {
         setState(prev => ({ ...prev, currentStepId: nextValidStep }));
         return CONVERSATIONAL_ONBOARDING_FLOW.steps.find(step => step.id === nextValidStep);
       }
     }
-    
+
     return CONVERSATIONAL_ONBOARDING_FLOW.steps.find(step => step.id === state.currentStepId);
-  }, [state.currentStepId, state.data.selectedPack, state.availableSteps, state.data.progress.completedSteps]);
+  }, [
+    state.currentStepId,
+    state.data.selectedPack,
+    state.availableSteps,
+    state.data.progress.completedSteps,
+  ]);
 
   // Calcul du pourcentage de progression
   const progressPercentage = useMemo(() => {
@@ -247,16 +252,16 @@ export default function ConversationalOnboarding({
       const remaining = state.data.progress.totalSteps - completed;
       const avgTimePerStep = completed > 0 ? elapsed / completed : 1.5;
       const estimatedRemaining = Math.max(2, Math.round(remaining * avgTimePerStep));
-      
+
       setState(prev => ({
         ...prev,
         data: {
           ...prev.data,
           progress: {
             ...prev.data.progress,
-            estimatedTimeLeft: estimatedRemaining
-          }
-        }
+            estimatedTimeLeft: estimatedRemaining,
+          },
+        },
       }));
     };
 
@@ -265,232 +270,243 @@ export default function ConversationalOnboarding({
   }, [state.startTime, state.data.progress.completedSteps.length, state.data.progress.totalSteps]);
 
   // Validation des réponses
-  const validateResponse = useCallback((step: ConversationalStep, response: any): string[] => {
-    const errors: string[] = [];
-    
-    if (!step.validation) return errors;
-    
-    step.validation.forEach((rule: ValidationRule) => {
-      switch (rule.type) {
-        case 'required':
-          if (!response || 
+  const validateResponse = useCallback(
+    (step: ConversationalStep, response: any): string[] => {
+      const errors: string[] = [];
+
+      if (!step.validation) return errors;
+
+      step.validation.forEach((rule: ValidationRule) => {
+        switch (rule.type) {
+          case 'required':
+            if (
+              !response ||
               (Array.isArray(response) && response.length === 0) ||
-              (typeof response === 'string' && response.trim() === '')) {
-            errors.push(rule.message);
-          }
-          break;
-          
-        case 'min':
-          if (typeof response === 'string' && response.length < rule.value) {
-            errors.push(rule.message);
-          } else if (typeof response === 'number' && response < rule.value) {
-            errors.push(rule.message);
-          } else if (Array.isArray(response) && response.length < rule.value) {
-            errors.push(rule.message);
-          }
-          break;
-          
-        case 'max':
-          if (typeof response === 'string' && response.length > rule.value) {
-            errors.push(rule.message);
-          } else if (typeof response === 'number' && response > rule.value) {
-            errors.push(rule.message);
-          } else if (Array.isArray(response) && response.length > rule.value) {
-            errors.push(rule.message);
-          }
-          break;
-          
-        case 'email':
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (typeof response === 'string' && !emailRegex.test(response)) {
-            errors.push(rule.message);
-          }
-          break;
-          
-        case 'range':
-          if (typeof response === 'number' && 
-              (response < rule.min || response > rule.max)) {
-            errors.push(rule.message);
-          }
-          break;
-          
-        case 'custom':
-          if (rule.validator && !rule.validator(response, state.data)) {
-            errors.push(rule.message);
-          }
-          break;
-          
-        default:
-          console.warn(`Type de validation non reconnu: ${rule.type}`);
-      }
-    });
-    
-    return errors;
-  }, [state.data]);
+              (typeof response === 'string' && response.trim() === '')
+            ) {
+              errors.push(rule.message);
+            }
+            break;
+
+          case 'min':
+            if (typeof response === 'string' && response.length < rule.value) {
+              errors.push(rule.message);
+            } else if (typeof response === 'number' && response < rule.value) {
+              errors.push(rule.message);
+            } else if (Array.isArray(response) && response.length < rule.value) {
+              errors.push(rule.message);
+            }
+            break;
+
+          case 'max':
+            if (typeof response === 'string' && response.length > rule.value) {
+              errors.push(rule.message);
+            } else if (typeof response === 'number' && response > rule.value) {
+              errors.push(rule.message);
+            } else if (Array.isArray(response) && response.length > rule.value) {
+              errors.push(rule.message);
+            }
+            break;
+
+          case 'email':
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (typeof response === 'string' && !emailRegex.test(response)) {
+              errors.push(rule.message);
+            }
+            break;
+
+          case 'range':
+            if (typeof response === 'number' && (response < rule.min || response > rule.max)) {
+              errors.push(rule.message);
+            }
+            break;
+
+          case 'custom':
+            if (rule.validator && !rule.validator(response, state.data)) {
+              errors.push(rule.message);
+            }
+            break;
+
+          default:
+            console.warn(`Type de validation non reconnu: ${rule.type}`);
+        }
+      });
+
+      return errors;
+    },
+    [state.data]
+  );
 
   // Fonction utilitaire pour obtenir la clé de données
   const getDataKeyForStep = useCallback((stepId: string): keyof OnboardingData => {
     const keyMap: Record<string, keyof OnboardingData> = {
-      'welcome': 'firstName',
-      'get_name': 'firstName',
-      'main_objective': 'mainObjective',
-      'pack_selection': 'selectedPack',
-      'module_selection': 'selectedModules',
-      'personal_info': 'age',
-      'sport_selection': 'sport',
-      'sport_position': 'sportPosition',
-      'sport_level': 'sportLevel',
-      'sport_equipment': 'equipmentLevel',
-      'season_period': 'seasonPeriod',
-      'training_frequency': 'trainingFrequency',
-      'strength_setup': 'strengthObjective',
-      'strength_experience': 'strengthExperience',
-      'nutrition_setup': 'dietaryPreference',
-      'nutrition_objective': 'nutritionObjective',
-      'nutrition_allergies': 'foodAllergies',
-      'sleep_setup': 'averageSleepHours',
-      'sleep_difficulties': 'sleepDifficulties',
-      'hydration_setup': 'hydrationGoal',
-      'hydration_reminders': 'hydrationReminders',
-      'wellness_assessment': 'healthConditions',
-      'final_questions': 'motivation',
-      'privacy_consent': 'privacyConsent',
-      'marketing_consent': 'marketingConsent',
-      'body_composition': 'currentWeight',
-      'fitness_goals': 'fitnessGoals'
+      welcome: 'firstName',
+      get_name: 'firstName',
+      main_objective: 'mainObjective',
+      pack_selection: 'selectedPack',
+      module_selection: 'selectedModules',
+      personal_info: 'age',
+      sport_selection: 'sport',
+      sport_position: 'sportPosition',
+      sport_level: 'sportLevel',
+      sport_equipment: 'equipmentLevel',
+      season_period: 'seasonPeriod',
+      training_frequency: 'trainingFrequency',
+      strength_setup: 'strengthObjective',
+      strength_experience: 'strengthExperience',
+      nutrition_setup: 'dietaryPreference',
+      nutrition_objective: 'nutritionObjective',
+      nutrition_allergies: 'foodAllergies',
+      sleep_setup: 'averageSleepHours',
+      sleep_difficulties: 'sleepDifficulties',
+      hydration_setup: 'hydrationGoal',
+      hydration_reminders: 'hydrationReminders',
+      wellness_assessment: 'healthConditions',
+      final_questions: 'motivation',
+      privacy_consent: 'privacyConsent',
+      marketing_consent: 'marketingConsent',
+      body_composition: 'currentWeight',
+      fitness_goals: 'fitnessGoals',
     };
-    
+
     return keyMap[stepId] || 'firstName';
   }, []);
 
   // Sauvegarde des données en base
-  const saveProgress = useCallback(async (data: OnboardingData) => {
-    if (debug) {
-      console.log('🟡 [DEBUG] Début de saveProgress avec data:', data);
-    }
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        if (debug) {
-          console.error('🔴 [DEBUG] Aucun utilisateur connecté');
-        }
-        return;
-      }
-
-      // Mapping des valeurs pour la base de données
-      const mapFitnessGoal = (mainObjective: string): string => {
-        const mapping: Record<string, string> = {
-          'performance': 'performance',
-          'health_wellness': 'general_health',
-          'body_composition': 'muscle_gain',
-          'energy_sleep': 'energy',
-          'strength_building': 'strength',
-          'endurance_cardio': 'endurance',
-          'recovery_focus': 'recovery',
-          'weight_management': 'maintenance',
-          'weight_loss': 'weight_loss',
-          'muscle_gain': 'muscle_gain',
-          'holistic': 'general'
-        };
-        return mapping[mainObjective] || 'general';
-      };
-
-      const mapSportLevel = (sportLevel: string): string => {
-        const mapping: Record<string, string> = {
-          'recreational': 'recreational',
-          'amateur_competitive': 'amateur_competitive',
-          'club_competitive': 'amateur_competitive',
-          'semi_professional': 'semi_professional',
-          'professional': 'professional',
-          'beginner': 'recreational',
-          'intermediate': 'amateur_competitive',
-          'advanced': 'semi_professional',
-          'expert': 'professional'
-        };
-        return mapping[sportLevel] || 'recreational';
-      };
-
-      const upsertData = {
-        id: user.id,
-        first_name: data.firstName || null,
-        age: data.age || null,
-        gender: data.gender || null,
-        height: data.height || null,
-        current_weight: data.currentWeight || null,
-        target_weight: data.targetWeight || null,
-        lifestyle: data.lifestyle || null,
-        fitness_goal: mapFitnessGoal(data.mainObjective || ''),
-        fitness_goals: data.fitnessGoals || [],
-        modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'],
-        active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'],
-        sport: data.sport || null,
-        sport_position: data.sportPosition || null,
-        sport_level: mapSportLevel(data.sportLevel || ''),
-        season_period: data.seasonPeriod || null,
-        training_frequency: data.trainingFrequency || null,
-        available_time_per_day: data.availableTimePerDay || 60,
-        equipment_level: data.equipmentLevel || null,
-        strength_objective: data.strengthObjective || null,
-        strength_experience: data.strengthExperience || null,
-        dietary_preference: data.dietaryPreference || null,
-        food_allergies: data.foodAllergies || [],
-        nutrition_objective: data.nutritionObjective || null,
-        dietary_restrictions: data.dietaryRestrictions || [],
-        sleep_hours_average: data.averageSleepHours || 8,
-        sleep_difficulties: data.sleepDifficulties || [],
-        water_intake_goal: data.hydrationGoal || 2.5,
-        hydration_reminders: data.hydrationReminders !== undefined ? data.hydrationReminders : true,
-        health_conditions: data.healthConditions || [],
-        motivation: data.motivation || null,
-        privacy_consent: data.privacyConsent || false,
-        marketing_consent: data.marketingConsent || false,
-        onboarding_completed: false,
-        updated_at: new Date().toISOString()
-      };
-      
+  const saveProgress = useCallback(
+    async (data: OnboardingData) => {
       if (debug) {
-        console.log('🟡 [DEBUG] Données préparées pour upsert:', upsertData);
+        console.log('🟡 [DEBUG] Début de saveProgress avec data:', data);
       }
-      
-      const { data: insertedData, error } = await (supabase as any)
-        .from('user_profiles')
-        .upsert(upsertData, {
-          onConflict: 'id'
-        });
-      
-      if (error) {
-        console.error('🔴 Erreur sauvegarde Supabase:', error);
-        throw error;
-      } else {
-        if (debug) {
-          console.log('🟢 [DEBUG] Sauvegarde Supabase réussie:', insertedData);
+
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          if (debug) {
+            console.error('🔴 [DEBUG] Aucun utilisateur connecté');
+          }
+          return;
         }
+
+        // Mapping des valeurs pour la base de données
+        const mapFitnessGoal = (mainObjective: string): string => {
+          const mapping: Record<string, string> = {
+            performance: 'performance',
+            health_wellness: 'general_health',
+            body_composition: 'muscle_gain',
+            energy_sleep: 'energy',
+            strength_building: 'strength',
+            endurance_cardio: 'endurance',
+            recovery_focus: 'recovery',
+            weight_management: 'maintenance',
+            weight_loss: 'weight_loss',
+            muscle_gain: 'muscle_gain',
+            holistic: 'general',
+          };
+          return mapping[mainObjective] || 'general';
+        };
+
+        const mapSportLevel = (sportLevel: string): string => {
+          const mapping: Record<string, string> = {
+            recreational: 'recreational',
+            amateur_competitive: 'amateur_competitive',
+            club_competitive: 'amateur_competitive',
+            semi_professional: 'semi_professional',
+            professional: 'professional',
+            beginner: 'recreational',
+            intermediate: 'amateur_competitive',
+            advanced: 'semi_professional',
+            expert: 'professional',
+          };
+          return mapping[sportLevel] || 'recreational';
+        };
+
+        const upsertData = {
+          id: user.id,
+          first_name: data.firstName || null,
+          age: data.age || null,
+          gender: data.gender || null,
+          height: data.height || null,
+          current_weight: data.currentWeight || null,
+          target_weight: data.targetWeight || null,
+          lifestyle: data.lifestyle || null,
+          fitness_goal: mapFitnessGoal(data.mainObjective || ''),
+          fitness_goals: data.fitnessGoals || [],
+          modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'],
+          active_modules: data.selectedModules || ['sport', 'nutrition', 'sleep', 'hydration'],
+          sport: data.sport || null,
+          sport_position: data.sportPosition || null,
+          sport_level: mapSportLevel(data.sportLevel || ''),
+          season_period: data.seasonPeriod || null,
+          training_frequency: data.trainingFrequency || null,
+          available_time_per_day: data.availableTimePerDay || 60,
+          equipment_level: data.equipmentLevel || null,
+          strength_objective: data.strengthObjective || null,
+          strength_experience: data.strengthExperience || null,
+          dietary_preference: data.dietaryPreference || null,
+          food_allergies: data.foodAllergies || [],
+          nutrition_objective: data.nutritionObjective || null,
+          dietary_restrictions: data.dietaryRestrictions || [],
+          sleep_hours_average: data.averageSleepHours || 8,
+          sleep_difficulties: data.sleepDifficulties || [],
+          water_intake_goal: data.hydrationGoal || 2.5,
+          hydration_reminders:
+            data.hydrationReminders !== undefined ? data.hydrationReminders : true,
+          health_conditions: data.healthConditions || [],
+          motivation: data.motivation || null,
+          privacy_consent: data.privacyConsent || false,
+          marketing_consent: data.marketingConsent || false,
+          onboarding_completed: false,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (debug) {
+          console.log('🟡 [DEBUG] Données préparées pour upsert:', upsertData);
+        }
+
+        const { data: insertedData, error } = await (supabase as any)
+          .from('user_profiles')
+          .upsert(upsertData, {
+            onConflict: 'id',
+          });
+
+        if (error) {
+          console.error('🔴 Erreur sauvegarde Supabase:', error);
+          throw error;
+        } else {
+          if (debug) {
+            console.log('🟢 [DEBUG] Sauvegarde Supabase réussie:', insertedData);
+          }
+        }
+      } catch (error) {
+        console.error('🔴 Erreur lors de la sauvegarde:', error);
+        toast({
+          title: 'Erreur de sauvegarde',
+          description:
+            'Impossible de sauvegarder vos données. Vos réponses sont conservées temporairement.',
+          variant: 'destructive',
+        });
       }
-    } catch (error) {
-      console.error('🔴 Erreur lors de la sauvegarde:', error);
-      toast({
-        title: "Erreur de sauvegarde",
-        description: "Impossible de sauvegarder vos données. Vos réponses sont conservées temporairement.",
-        variant: "destructive",
-      });
-    }
-  }, [debug, toast]);
+    },
+    [debug, toast]
+  );
 
   // Navigation vers l'étape suivante
   const goToNextStep = useCallback(async () => {
     if (!currentStep) return;
-    
+
     // Validation
     const errors = validateResponse(currentStep, state.currentResponse);
     if (errors.length > 0) {
       setState(prev => ({ ...prev, validationErrors: errors }));
       return;
     }
-    
+
     setState(prev => ({ ...prev, validationErrors: [], isLoading: true }));
-    
+
     try {
       // Mise à jour des données
       const dataKey = getDataKeyForStep(currentStep.id);
@@ -501,14 +517,14 @@ export default function ConversationalOnboarding({
         progress: {
           ...state.data.progress,
           completedSteps: [...state.data.progress.completedSteps, currentStep.id],
-          currentStep: currentStep.id
-        }
+          currentStep: currentStep.id,
+        },
       };
 
       // Logique spéciale selon le type d'étape
       if (currentStep.id === 'pack_selection') {
         updatedData.selectedPack = state.currentResponse;
-        
+
         // Si pack différent de custom, définir les modules automatiquement
         const selectedPack = SMART_PACKS.find(p => p.id === state.currentResponse);
         if (selectedPack && selectedPack.id !== 'custom') {
@@ -528,34 +544,41 @@ export default function ConversationalOnboarding({
 
       // Gestion de la sélection de sport
       if (currentStep.id === 'sport_selection') {
-        const selectedSportData = (dynamicSports as any[]).find(sport => sport.id === state.currentResponse) || 
-                                 AVAILABLE_SPORTS.find(sport => sport.id === state.currentResponse);
-        
+        const selectedSportData =
+          (dynamicSports as any[]).find(sport => sport.id === state.currentResponse) ||
+          AVAILABLE_SPORTS.find(sport => sport.id === state.currentResponse);
+
         if (selectedSportData) {
           setState(prev => ({ ...prev, selectedSport: selectedSportData }));
-          
+
           // Mise à jour des options pour l'étape position si nécessaire
-          const positionStep = CONVERSATIONAL_ONBOARDING_FLOW.steps.find(s => s.id === 'sport_position');
-          if (positionStep && selectedSportData.positions && selectedSportData.positions.length > 0) {
+          const positionStep = CONVERSATIONAL_ONBOARDING_FLOW.steps.find(
+            s => s.id === 'sport_position'
+          );
+          if (
+            positionStep &&
+            selectedSportData.positions &&
+            selectedSportData.positions.length > 0
+          ) {
             positionStep.options = selectedSportData.positions.map(pos => ({
               id: pos.toLowerCase().replace(/\s+/g, '_'),
               label: pos,
               value: pos,
               description: undefined,
-              icon: undefined
+              icon: undefined,
             }));
           }
         }
       }
-      
+
       // Détermination de l'étape suivante selon le pack
       let nextStepId: string;
-      
+
       if (state.data.selectedPack && state.data.selectedPack !== 'custom') {
         // Si un pack est sélectionné, suivre son flow
         const packSteps = state.availableSteps;
         const currentIndex = packSteps.indexOf(currentStep.id);
-        
+
         if (currentIndex !== -1 && currentIndex < packSteps.length - 1) {
           nextStepId = packSteps[currentIndex + 1];
         } else {
@@ -564,35 +587,42 @@ export default function ConversationalOnboarding({
       } else {
         // Logique standard
         if (typeof currentStep.nextStep === 'function') {
-          nextStepId = (currentStep.nextStep(state.currentResponse, updatedData) as string);
+          nextStepId = currentStep.nextStep(state.currentResponse, updatedData) as string;
         } else {
           nextStepId = currentStep.nextStep || 'completion';
         }
-        
+
         // Utilisation de la logique conditionnelle
-        nextStepId = (getConditionalNextStep(currentStep.id, state.currentResponse, updatedData) as string) || nextStepId;
+        nextStepId =
+          (getConditionalNextStep(currentStep.id, state.currentResponse, updatedData) as string) ||
+          nextStepId;
       }
-      
+
       setState(prev => ({
         ...prev,
         data: updatedData,
         currentStepId: nextStepId,
         currentResponse: null,
-        stepHistory: [...prev.stepHistory, currentStep.id]
+        stepHistory: [...prev.stepHistory, currentStep.id],
       }));
-      
+
       // Sauvegarde automatique à certaines étapes importantes
-      const importantSteps = ['pack_selection', 'module_selection', 'sport_selection', 'personal_info', 'nutrition_setup'];
+      const importantSteps = [
+        'pack_selection',
+        'module_selection',
+        'sport_selection',
+        'personal_info',
+        'nutrition_setup',
+      ];
       if (importantSteps.includes(currentStep.id)) {
         await saveProgress(updatedData);
       }
-      
     } catch (error) {
       console.error('🔴 Erreur lors de la navigation:', error);
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue. Veuillez réessayer.",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Une erreur est survenue. Veuillez réessayer.',
+        variant: 'destructive',
       });
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
@@ -602,10 +632,10 @@ export default function ConversationalOnboarding({
   // Navigation vers l'étape précédente
   const goToPreviousStep = useCallback(() => {
     if (state.stepHistory.length === 0) return;
-    
+
     const previousStepId = state.stepHistory[state.stepHistory.length - 1];
     const newHistory = state.stepHistory.slice(0, -1);
-    
+
     setState(prev => ({
       ...prev,
       currentStepId: previousStepId,
@@ -616,16 +646,16 @@ export default function ConversationalOnboarding({
         ...prev.data,
         progress: {
           ...prev.data.progress,
-          completedSteps: prev.data.progress.completedSteps.filter(id => id !== prev.currentStepId)
-        }
-      }
+          completedSteps: prev.data.progress.completedSteps.filter(id => id !== prev.currentStepId),
+        },
+      },
     }));
   }, [state.stepHistory]);
 
   // Ignorer l'étape courante
   const skipCurrentStep = useCallback(() => {
     if (!currentStep || !currentStep.skippable) return;
-    
+
     setState(prev => ({
       ...prev,
       data: {
@@ -633,12 +663,12 @@ export default function ConversationalOnboarding({
         progress: {
           ...prev.data.progress,
           skipCount: prev.data.progress.skipCount + 1,
-          skippedSteps: [...prev.data.progress.skippedSteps, currentStep.id]
-        }
+          skippedSteps: [...prev.data.progress.skippedSteps, currentStep.id],
+        },
       },
-      skipCount: prev.skipCount + 1
+      skipCount: prev.skipCount + 1,
     }));
-    
+
     // Continuer avec une réponse vide ou par défaut
     setState(prev => ({ ...prev, currentResponse: currentStep.defaultValue || null }));
     goToNextStep();
@@ -648,49 +678,50 @@ export default function ConversationalOnboarding({
   const completeOnboarding = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true }));
-      
+
       if (debug) {
         console.log('🟡 [DEBUG] Début de completeOnboarding');
       }
-      
+
       const finalData = {
         ...state.data,
         completedAt: new Date(),
         progress: {
           ...state.data.progress,
-          completedSteps: [...state.data.progress.completedSteps, 'completion']
-        }
+          completedSteps: [...state.data.progress.completedSteps, 'completion'],
+        },
       };
-      
+
       // Sauvegarde finale
       await saveProgress(finalData);
-      
+
       // Marquer l'onboarding comme terminé
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         await (supabase as any)
           .from('user_profiles')
           .update({ onboarding_completed: true })
           .eq('id', user.id);
       }
-      
+
       if (debug) {
         console.log('🟢 [DEBUG] Onboarding terminé avec succès');
       }
-      
+
       toast({
-        title: "Configuration terminée !",
-        description: "Votre profil MyFitHero est maintenant configuré.",
+        title: 'Configuration terminée !',
+        description: 'Votre profil MyFitHero est maintenant configuré.',
       });
-      
+
       onComplete(finalData);
-      
     } catch (error) {
       console.error('🔴 Erreur lors de la finalisation:', error);
       toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la finalisation.",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la finalisation.',
+        variant: 'destructive',
       });
     } finally {
       setState(prev => ({ ...prev, isLoading: false }));
@@ -704,7 +735,7 @@ export default function ConversationalOnboarding({
     const commonInputProps = {
       value: state.currentResponse || '',
       onChange: (value: any) => setState(prev => ({ ...prev, currentResponse: value })),
-      disabled: state.isLoading
+      disabled: state.isLoading,
     };
 
     switch (currentStep.inputType) {
@@ -714,8 +745,8 @@ export default function ConversationalOnboarding({
             <Input
               type="text"
               value={state.currentResponse || ''}
-              onChange={(e) => setState(prev => ({ ...prev, currentResponse: e.target.value }))}
-              placeholder={currentStep.placeholder || "Votre réponse..."}
+              onChange={e => setState(prev => ({ ...prev, currentResponse: e.target.value }))}
+              placeholder={currentStep.placeholder || 'Votre réponse...'}
               className="text-lg p-4 h-12"
               disabled={state.isLoading}
               maxLength={currentStep.maxLength || 100}
@@ -733,8 +764,8 @@ export default function ConversationalOnboarding({
           <div className="space-y-4">
             <Textarea
               value={state.currentResponse || ''}
-              onChange={(e) => setState(prev => ({ ...prev, currentResponse: e.target.value }))}
-              placeholder={currentStep.placeholder || "Décrivez votre réponse..."}
+              onChange={e => setState(prev => ({ ...prev, currentResponse: e.target.value }))}
+              placeholder={currentStep.placeholder || 'Décrivez votre réponse...'}
               className="min-h-[120px] text-base"
               disabled={state.isLoading}
               maxLength={currentStep.maxLength || 500}
@@ -753,11 +784,13 @@ export default function ConversationalOnboarding({
             <Input
               type="number"
               value={state.currentResponse || ''}
-              onChange={(e) => setState(prev => ({ 
-                ...prev, 
-                currentResponse: e.target.value ? Number(e.target.value) : null 
-              }))}
-              placeholder={currentStep.placeholder || "Votre réponse..."}
+              onChange={e =>
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: e.target.value ? Number(e.target.value) : null,
+                }))
+              }
+              placeholder={currentStep.placeholder || 'Votre réponse...'}
               className="text-lg p-4 h-12"
               disabled={state.isLoading}
               min={currentStep.min}
@@ -774,20 +807,22 @@ export default function ConversationalOnboarding({
           </div>
         );
 
-     case 'slider':
+      case 'slider':
         const sliderValue = state.currentResponse || currentStep.defaultValue || 7;
         const sliderMin = currentStep.min || 1;
         const sliderMax = currentStep.max || 10;
-        
+
         return (
           <div className="space-y-6">
             <div className="px-4">
               <Slider
                 value={[sliderValue]}
-                onValueChange={(value) => setState(prev => ({ 
-                  ...prev, 
-                  currentResponse: value[0] 
-                }))}
+                onValueChange={value =>
+                  setState(prev => ({
+                    ...prev,
+                    currentResponse: value[0],
+                  }))
+                }
                 min={sliderMin}
                 max={sliderMax}
                 step={currentStep.step || 1}
@@ -818,18 +853,18 @@ export default function ConversationalOnboarding({
                 onClick={() => setState(prev => ({ ...prev, currentResponse: option.value }))}
                 disabled={state.isLoading}
                 className={cn(
-                  "w-full p-4 rounded-lg border-2 text-left transition-all duration-200",
-                  "hover:border-blue-300 hover:bg-blue-50",
+                  'w-full p-4 rounded-lg border-2 text-left transition-all duration-200',
+                  'hover:border-blue-300 hover:bg-blue-50',
                   state.currentResponse === option.value
-                    ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                    : "border-gray-200 bg-white"
+                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                    : 'border-gray-200 bg-white'
                 )}
               >
                 <div className="flex items-center space-x-3">
                   {option.icon && (
                     <div className="flex-shrink-0">
-                      {React.createElement(option.icon, { 
-                        className: "w-5 h-5 text-gray-600" 
+                      {React.createElement(option.icon, {
+                        className: 'w-5 h-5 text-gray-600',
                       })}
                     </div>
                   )}
@@ -850,12 +885,12 @@ export default function ConversationalOnboarding({
 
       case 'multiple_choice':
         const selectedValues = Array.isArray(state.currentResponse) ? state.currentResponse : [];
-        
+
         return (
           <div className="space-y-3">
             {currentStep.options?.map((option: QuestionOption) => {
               const isSelected = selectedValues.includes(option.value);
-              
+
               return (
                 <button
                   key={option.id}
@@ -867,18 +902,18 @@ export default function ConversationalOnboarding({
                   }}
                   disabled={state.isLoading}
                   className={cn(
-                    "w-full p-4 rounded-lg border-2 text-left transition-all duration-200",
-                    "hover:border-blue-300 hover:bg-blue-50",
+                    'w-full p-4 rounded-lg border-2 text-left transition-all duration-200',
+                    'hover:border-blue-300 hover:bg-blue-50',
                     isSelected
-                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200"
-                      : "border-gray-200 bg-white"
+                      ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                      : 'border-gray-200 bg-white'
                   )}
                 >
                   <div className="flex items-center space-x-3">
                     {option.icon && (
                       <div className="flex-shrink-0">
-                        {React.createElement(option.icon, { 
-                          className: "w-5 h-5 text-gray-600" 
+                        {React.createElement(option.icon, {
+                          className: 'w-5 h-5 text-gray-600',
                         })}
                       </div>
                     )}
@@ -888,9 +923,7 @@ export default function ConversationalOnboarding({
                         <div className="text-sm text-gray-500 mt-1">{option.description}</div>
                       )}
                     </div>
-                    {isSelected && (
-                      <Check className="w-5 h-5 text-blue-500" />
-                    )}
+                    {isSelected && <Check className="w-5 h-5 text-blue-500" />}
                   </div>
                 </button>
               );
@@ -907,17 +940,21 @@ export default function ConversationalOnboarding({
         return (
           <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div className="flex-1">
-              <div className="font-medium text-gray-900">{currentStep.switchLabel || currentStep.title}</div>
+              <div className="font-medium text-gray-900">
+                {currentStep.switchLabel || currentStep.title}
+              </div>
               {currentStep.switchDescription && (
                 <div className="text-sm text-gray-500 mt-1">{currentStep.switchDescription}</div>
               )}
             </div>
             <Switch
               checked={state.currentResponse || false}
-              onCheckedChange={(checked) => setState(prev => ({ 
-                ...prev, 
-                currentResponse: checked 
-              }))}
+              onCheckedChange={checked =>
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: checked,
+                }))
+              }
               disabled={state.isLoading}
             />
           </div>
@@ -929,11 +966,12 @@ export default function ConversationalOnboarding({
             {...({
               sports: [...AVAILABLE_SPORTS, ...(dynamicSports as any[])],
               selectedSport: state.currentResponse,
-              onSportSelect: (sportId) => setState(prev => ({ 
-                ...prev, 
-                currentResponse: sportId 
-              })),
-              isLoading: sportsLoading || state.isLoading
+              onSportSelect: sportId =>
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: sportId,
+                })),
+              isLoading: sportsLoading || state.isLoading,
             } as any)}
           />
         );
@@ -943,10 +981,12 @@ export default function ConversationalOnboarding({
           <PositionSelector
             sport={state.selectedSport}
             selectedPositions={Array.isArray(state.currentResponse) ? state.currentResponse : []}
-            onPositionChange={(positions) => setState(prev => ({ 
-              ...prev, 
-              currentResponse: positions 
-            }))}
+            onPositionChange={positions =>
+              setState(prev => ({
+                ...prev,
+                currentResponse: positions,
+              }))
+            }
           />
         );
 
@@ -955,11 +995,12 @@ export default function ConversationalOnboarding({
           <PersonalInfoForm
             {...({
               data: state.currentResponse || {},
-              onChange: (data) => setState(prev => ({ 
-                ...prev, 
-                currentResponse: data 
-              })),
-              isLoading: state.isLoading
+              onChange: data =>
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: data,
+                })),
+              isLoading: state.isLoading,
             } as any)}
           />
         );
@@ -970,11 +1011,12 @@ export default function ConversationalOnboarding({
             {...({
               packs: SMART_PACKS,
               selectedPack: state.currentResponse,
-              onPackSelect: (packId) => setState(prev => ({ 
-                ...prev, 
-                currentResponse: packId 
-              })),
-              isLoading: state.isLoading
+              onPackSelect: packId =>
+                setState(prev => ({
+                  ...prev,
+                  currentResponse: packId,
+                })),
+              isLoading: state.isLoading,
             } as any)}
           />
         );
@@ -1014,15 +1056,9 @@ export default function ConversationalOnboarding({
         <Card className="w-full max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Erreur de configuration
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Impossible de charger l'étape de configuration.
-            </p>
-            <Button onClick={() => window.location.reload()}>
-              Recharger la page
-            </Button>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Erreur de configuration</h3>
+            <p className="text-gray-600 mb-4">Impossible de charger l'étape de configuration.</p>
+            <Button onClick={() => window.location.reload()}>Recharger la page</Button>
           </CardContent>
         </Card>
       </div>
@@ -1042,11 +1078,12 @@ export default function ConversationalOnboarding({
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Configuration MyFitHero</h1>
                 <p className="text-sm text-gray-500">
-                  Étape {state.data.progress.completedSteps.length + 1} sur {state.data.progress.totalSteps}
+                  Étape {state.data.progress.completedSteps.length + 1} sur{' '}
+                  {state.data.progress.totalSteps}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm text-gray-500">
                 <Clock className="w-4 h-4" />
@@ -1059,7 +1096,7 @@ export default function ConversationalOnboarding({
               )}
             </div>
           </div>
-          
+
           <Progress value={progressPercentage} className="h-2" />
         </div>
       </div>
@@ -1071,8 +1108,8 @@ export default function ConversationalOnboarding({
             <div className="flex items-start space-x-4">
               {currentStep.icon && (
                 <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  {React.createElement(currentStep.icon, { 
-                    className: "w-6 h-6 text-blue-600" 
+                  {React.createElement(currentStep.icon, {
+                    className: 'w-6 h-6 text-blue-600',
                   })}
                 </div>
               )}
@@ -1081,9 +1118,7 @@ export default function ConversationalOnboarding({
                   {currentStep.title}
                 </CardTitle>
                 {currentStep.description && (
-                  <p className="text-gray-600 leading-relaxed">
-                    {currentStep.description}
-                  </p>
+                  <p className="text-gray-600 leading-relaxed">{currentStep.description}</p>
                 )}
               </div>
             </div>
@@ -1114,10 +1149,9 @@ export default function ConversationalOnboarding({
                 >
                   <Star className="w-4 h-4" />
                   <span>Conseils</span>
-                  <ChevronRight className={cn(
-                    "w-4 h-4 transition-transform",
-                    state.showTips && "rotate-90"
-                  )} />
+                  <ChevronRight
+                    className={cn('w-4 h-4 transition-transform', state.showTips && 'rotate-90')}
+                  />
                 </button>
                 {state.showTips && (
                   <ul className="space-y-2 text-sm text-blue-700">
@@ -1133,9 +1167,7 @@ export default function ConversationalOnboarding({
             )}
 
             {/* Rendu de la question */}
-            <div className="space-y-4">
-              {renderQuestionInput()}
-            </div>
+            <div className="space-y-4">{renderQuestionInput()}</div>
 
             {/* Boutons de navigation */}
             <div className="flex items-center justify-between pt-6 border-t">
@@ -1151,7 +1183,7 @@ export default function ConversationalOnboarding({
                     <span>Précédent</span>
                   </Button>
                 )}
-                
+
                 {currentStep.skippable && (
                   <Button
                     variant="ghost"
@@ -1166,10 +1198,11 @@ export default function ConversationalOnboarding({
 
               <Button
                 onClick={goToNextStep}
-                disabled={state.isLoading || (
-                  currentStep.validation?.some(rule => rule.type === 'required') && 
-                  !state.currentResponse
-                )}
+                disabled={
+                  state.isLoading ||
+                  (currentStep.validation?.some(rule => rule.type === 'required') &&
+                    !state.currentResponse)
+                }
                 className="flex items-center space-x-2 min-w-[120px]"
               >
                 {state.isLoading ? (
@@ -1196,12 +1229,24 @@ export default function ConversationalOnboarding({
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-xs font-mono">
-                <div><strong>Current Step:</strong> {state.currentStepId}</div>
-                <div><strong>Response:</strong> {JSON.stringify(state.currentResponse)}</div>
-                <div><strong>Selected Pack:</strong> {state.data.selectedPack}</div>
-                <div><strong>Available Steps:</strong> {state.availableSteps.join(', ')}</div>
-                <div><strong>Completed:</strong> {state.data.progress.completedSteps.join(', ')}</div>
-                <div><strong>History:</strong> {state.stepHistory.join(' → ')}</div>
+                <div>
+                  <strong>Current Step:</strong> {state.currentStepId}
+                </div>
+                <div>
+                  <strong>Response:</strong> {JSON.stringify(state.currentResponse)}
+                </div>
+                <div>
+                  <strong>Selected Pack:</strong> {state.data.selectedPack}
+                </div>
+                <div>
+                  <strong>Available Steps:</strong> {state.availableSteps.join(', ')}
+                </div>
+                <div>
+                  <strong>Completed:</strong> {state.data.progress.completedSteps.join(', ')}
+                </div>
+                <div>
+                  <strong>History:</strong> {state.stepHistory.join(' → ')}
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, Trophy, Target, Share2, Heart, MessageCircle,
-  Bookmark, Filter, Zap, Crown
+import {
+  Users,
+  Trophy,
+  Target,
+  Share2,
+  Heart,
+  MessageCircle,
+  Bookmark,
+  Filter,
+  Zap,
+  Crown,
 } from 'lucide-react';
 import { socialService, Challenge, SocialPost, LeaderboardEntry } from '@/services/socialService';
 import { useToast } from '@/hooks/use-toast';
@@ -12,10 +20,12 @@ interface SocialDashboardProps {
 
 const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
   const { toast } = useToast();
-  
-  const [activeTab, setActiveTab] = useState<'feed' | 'challenges' | 'leaderboard' | 'friends'>('feed');
+
+  const [activeTab, setActiveTab] = useState<'feed' | 'challenges' | 'leaderboard' | 'friends'>(
+    'feed'
+  );
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // États pour les données sociales
   const [socialFeed, setSocialFeed] = useState<SocialPost[]>([]);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -27,7 +37,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
   const [challengeFilter, setChallengeFilter] = useState({
     pillar: '',
     difficulty: '',
-    type: ''
+    type: '',
   });
 
   useEffect(() => {
@@ -69,7 +79,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
       toast({
         title: 'Erreur',
         description: 'Impossible de charger les données sociales',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -79,12 +89,18 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
   const handleLikePost = async (postId: string) => {
     try {
       await socialService.likePost(postId, userId);
-      setSocialFeed(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, is_liked: !post.is_liked, likes_count: post.is_liked ? post.likes_count - 1 : post.likes_count + 1 }
-          : post
-      ));
-      
+      setSocialFeed(prev =>
+        prev.map(post =>
+          post.id === postId
+            ? {
+                ...post,
+                is_liked: !post.is_liked,
+                likes_count: post.is_liked ? post.likes_count - 1 : post.likes_count + 1,
+              }
+            : post
+        )
+      );
+
       toast({
         title: 'Post aimé !',
         description: 'Votre réaction a été enregistrée',
@@ -92,8 +108,8 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
     } catch (error) {
       toast({
         title: 'Erreur',
-        description: 'Impossible d\'aimer ce post',
-        variant: 'destructive'
+        description: "Impossible d'aimer ce post",
+        variant: 'destructive',
       });
     }
   };
@@ -102,12 +118,14 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
     try {
       const success = await socialService.joinChallenge(challengeId, userId);
       if (success) {
-        setChallenges(prev => prev.map(challenge =>
-          challenge.id === challengeId
-            ? { ...challenge, participants_count: challenge.participants_count + 1 }
-            : challenge
-        ));
-        
+        setChallenges(prev =>
+          prev.map(challenge =>
+            challenge.id === challengeId
+              ? { ...challenge, participants_count: challenge.participants_count + 1 }
+              : challenge
+          )
+        );
+
         toast({
           title: 'Défi rejoint !',
           description: 'Bonne chance pour relever ce défi !',
@@ -117,12 +135,17 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
       toast({
         title: 'Erreur',
         description: 'Impossible de rejoindre ce défi',
-        variant: 'destructive'
+        variant: 'destructive',
       });
     }
   };
 
-  const TabButton = ({ tab, icon: Icon, label, count }: {
+  const TabButton = ({
+    tab,
+    icon: Icon,
+    label,
+    count,
+  }: {
     tab: string;
     icon: any;
     label: string;
@@ -131,17 +154,17 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
     <button
       onClick={() => setActiveTab(tab as any)}
       className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-        activeTab === tab
-          ? 'bg-blue-600 text-white'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        activeTab === tab ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
       }`}
     >
       <Icon size={16} />
       <span>{label}</span>
       {count !== undefined && (
-        <span className={`px-2 py-1 rounded-full text-xs ${
-          activeTab === tab ? 'bg-blue-500' : 'bg-gray-300'
-        }`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs ${
+            activeTab === tab ? 'bg-blue-500' : 'bg-gray-300'
+          }`}
+        >
           {count}
         </span>
       )}
@@ -193,7 +216,9 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500">{new Date(post.created_at).toLocaleDateString('fr-FR')}</p>
+          <p className="text-sm text-gray-500">
+            {new Date(post.created_at).toLocaleDateString('fr-FR')}
+          </p>
         </div>
       </div>
 
@@ -207,7 +232,8 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           </div>
           {post.achievements.map((achievement, index) => (
             <div key={index} className="text-sm text-yellow-600 mt-1">
-              {achievement.value} {achievement.unit} - {achievement.milestone ? '🏆 Milestone!' : 'PR!'}
+              {achievement.value} {achievement.unit} -{' '}
+              {achievement.milestone ? '🏆 Milestone!' : 'PR!'}
             </div>
           ))}
         </div>
@@ -266,12 +292,17 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
             <Target size={16} className="text-blue-600" />
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              challenge.difficulty === 'easy' ? 'bg-green-100 text-green-600' :
-              challenge.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-              challenge.difficulty === 'hard' ? 'bg-orange-100 text-orange-600' :
-              'bg-red-100 text-red-600'
-            }`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                challenge.difficulty === 'easy'
+                  ? 'bg-green-100 text-green-600'
+                  : challenge.difficulty === 'medium'
+                    ? 'bg-yellow-100 text-yellow-600'
+                    : challenge.difficulty === 'hard'
+                      ? 'bg-orange-100 text-orange-600'
+                      : 'bg-red-100 text-red-600'
+              }`}
+            >
               {challenge.difficulty}
             </span>
             <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs">
@@ -280,9 +311,11 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           </div>
           <h3 className="font-semibold text-gray-800 mb-2">{challenge.title}</h3>
           <p className="text-gray-600 text-sm mb-3">{challenge.description}</p>
-          
+
           <div className="text-sm text-gray-500 space-y-1">
-            <div>Objectif: {challenge.target_value} {challenge.target_unit}</div>
+            <div>
+              Objectif: {challenge.target_value} {challenge.target_unit}
+            </div>
             <div>Durée: {challenge.duration_days} jours</div>
             <div>Participants: {challenge.participants_count}</div>
             <div>Récompense: {challenge.reward_points} points</div>
@@ -291,9 +324,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="text-xs text-gray-500">
-          Par {challenge.creator_profile.username}
-        </div>
+        <div className="text-xs text-gray-500">Par {challenge.creator_profile.username}</div>
         <button
           onClick={() => handleJoinChallenge(challenge.id)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
@@ -306,21 +337,26 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
 
   const LeaderboardCard = ({ entry }: { entry: LeaderboardEntry }) => (
     <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-        entry.rank === 1 ? 'bg-yellow-100 text-yellow-600' :
-        entry.rank === 2 ? 'bg-gray-100 text-gray-600' :
-        entry.rank === 3 ? 'bg-orange-100 text-orange-600' :
-        'bg-blue-100 text-blue-600'
-      }`}>
+      <div
+        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+          entry.rank === 1
+            ? 'bg-yellow-100 text-yellow-600'
+            : entry.rank === 2
+              ? 'bg-gray-100 text-gray-600'
+              : entry.rank === 3
+                ? 'bg-orange-100 text-orange-600'
+                : 'bg-blue-100 text-blue-600'
+        }`}
+      >
         #{entry.rank}
       </div>
-      
+
       <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
         <span className="text-white font-bold text-sm">
           {entry.username.charAt(0).toUpperCase()}
         </span>
       </div>
-      
+
       <div className="flex-1">
         <div className="flex items-center space-x-2">
           <h4 className="font-semibold text-gray-800">{entry.username}</h4>
@@ -335,17 +371,19 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           {entry.total_points.toLocaleString()} pts • Série: {entry.current_streak} jours
         </div>
       </div>
-      
+
       <div className="text-right">
-        <div className="text-sm font-medium text-gray-800">
-          +{entry.weekly_points} pts
-        </div>
-        <div className={`text-xs ${
-          entry.change_from_last_week > 0 ? 'text-green-600' : 
-          entry.change_from_last_week < 0 ? 'text-red-600' : 
-          'text-gray-500'
-        }`}>
-          {entry.change_from_last_week > 0 ? '↗' : entry.change_from_last_week < 0 ? '↘' : '→'} 
+        <div className="text-sm font-medium text-gray-800">+{entry.weekly_points} pts</div>
+        <div
+          className={`text-xs ${
+            entry.change_from_last_week > 0
+              ? 'text-green-600'
+              : entry.change_from_last_week < 0
+                ? 'text-red-600'
+                : 'text-gray-500'
+          }`}
+        >
+          {entry.change_from_last_week > 0 ? '↗' : entry.change_from_last_week < 0 ? '↘' : '→'}
           {Math.abs(entry.change_from_last_week)}
         </div>
       </div>
@@ -371,7 +409,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           <Filter size={16} className="text-gray-500" />
           <select
             value={feedFilter}
-            onChange={(e) => setFeedFilter(e.target.value as any)}
+            onChange={e => setFeedFilter(e.target.value as any)}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
           >
             <option value="friends">Amis</option>
@@ -386,7 +424,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           <Filter size={16} className="text-gray-500" />
           <select
             value={challengeFilter.pillar}
-            onChange={(e) => setChallengeFilter(prev => ({ ...prev, pillar: e.target.value }))}
+            onChange={e => setChallengeFilter(prev => ({ ...prev, pillar: e.target.value }))}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
           >
             <option value="">Tous les piliers</option>
@@ -397,7 +435,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           </select>
           <select
             value={challengeFilter.difficulty}
-            onChange={(e) => setChallengeFilter(prev => ({ ...prev, difficulty: e.target.value }))}
+            onChange={e => setChallengeFilter(prev => ({ ...prev, difficulty: e.target.value }))}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
           >
             <option value="">Toutes difficultés</option>
@@ -434,7 +472,9 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
             <>
               {challenges.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {challenges.map(challenge => <ChallengeCard key={challenge.id} challenge={challenge} />)}
+                  {challenges.map(challenge => (
+                    <ChallengeCard key={challenge.id} challenge={challenge} />
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-12 text-gray-500">
@@ -450,7 +490,9 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
             <>
               {leaderboard.length > 0 ? (
                 <div className="space-y-3">
-                  {leaderboard.map(entry => <LeaderboardCard key={entry.user_id} entry={entry} />)}
+                  {leaderboard.map(entry => (
+                    <LeaderboardCard key={entry.user_id} entry={entry} />
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-12 text-gray-500">

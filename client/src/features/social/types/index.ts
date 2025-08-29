@@ -152,12 +152,12 @@ export interface SocialStore {
   challenges: Challenge[];
   notifications: Notification[];
   leaderboard: LeaderboardEntry[];
-  
+
   // Filtres et recherche
   searchQuery: string;
   selectedFilters: string[];
   activeChallengeId: string | null;
-  
+
   // UI State
   isLoading: boolean;
   error: string | null;
@@ -177,14 +177,18 @@ export interface SocialStore {
 
   // Actions - Posts
   loadPosts: () => Promise<void>;
-  createPost: (postData: Omit<ActivityPost, 'id' | 'userId' | 'created_at' | 'updated_at'>) => Promise<void>;
+  createPost: (
+    postData: Omit<ActivityPost, 'id' | 'userId' | 'created_at' | 'updated_at'>
+  ) => Promise<void>;
   likePost: (postId: string) => Promise<void>;
   commentOnPost: (postId: string, content: string) => Promise<void>;
   sharePost: (postId: string) => Promise<void>;
 
   // Actions - Challenges
   loadChallenges: () => Promise<void>;
-  createChallenge: (challengeData: Omit<Challenge, 'id' | 'creatorId' | 'created_at'>) => Promise<void>;
+  createChallenge: (
+    challengeData: Omit<Challenge, 'id' | 'creatorId' | 'created_at'>
+  ) => Promise<void>;
   joinChallenge: (challengeId: string) => Promise<void>;
   updateChallengeProgress: (challengeId: string, progress: number) => Promise<void>;
 
