@@ -21,7 +21,7 @@ jobs:
         cache: 'npm'   # <<< on force npm
 
     - name: Install dependencies 📥
-      run: npm ci     # <<< npm au lieu de pnpm
+      run: npm install
 
     - name: TypeScript Check 🔍
       run: cd client && npx tsc --noEmit --skipLibCheck
