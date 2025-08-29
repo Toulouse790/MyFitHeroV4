@@ -11,8 +11,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    
-    // Strict TypeScript Configuration
+
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -21,8 +20,7 @@
     "noImplicitOverride": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
-    
-    // Path mapping optimisé
+
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
@@ -34,12 +32,11 @@
       "@/lib/*": ["./src/lib/*"],
       "@/utils/*": ["./src/utils/*"],
       "@/types/*": ["./src/types/*"]
-    }
+    },
+
+    "types": ["node", "vite/client"]   // <---- AJOUT
   },
-  "include": [
-    "src",
-    "src/**/*"
-  ],
+  "include": ["src", "src/**/*"],
   "exclude": [
     "node_modules",
     "dist",
@@ -51,4 +48,3 @@
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
-  
