@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write   # 👈 nécessaire pour pousser sur gh-pages
+
 defaults:
   run:
     working-directory: client   # toutes les commandes s’exécutent dans client/
@@ -27,8 +30,7 @@ jobs:
       - name: Install dependencies 📥
         run: npm ci
 
-      # ⚠️ on commente temporairement le check TypeScript
-      # quand les erreurs d'alias seront réglées, on pourra le remettre
+      # ⚠️ à réactiver une fois les erreurs TS corrigées
       # - name: TypeScript Check 🔍
       #   run: npx tsc --noEmit --skipLibCheck
 
@@ -38,7 +40,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_APP_NAME: MyFitHero
-          VITE_APP_VERSION: 4.0.0
+          VITE_APP_VERSION: 1.0.0
           VITE_APP_ENV: production
 
       - name: Deploy to GitHub Pages 🚀
@@ -46,8 +48,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: dist          # ⚠️ déjà dans client/, donc juste dist
+          publish_dir: dist          # on est déjà dans client/, donc dist/
+          publish_branch: gh-pages   # branche cible
           cname: myfithero.com
+          force_orphan: true         # init propre de gh-pages
 
       - name: Upload artifacts 📋
         uses: actions/upload-artifact@v4
