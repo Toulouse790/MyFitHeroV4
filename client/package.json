@@ -8,37 +8,38 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "cd client && vite",
-    "dev:full": "vite",
-    "build": "cd client && vite build",
-    "vercel-build": "cd client && vite build",
-    "preview": "cd client && vite preview",
-    "start": "cd client && vite preview",
+  "dev": "vite",
+  "dev:full": "vite",
+  "build": "vite build",
+  "vercel-build": "vite build",
+  "preview": "vite preview",
+  "start": "vite preview",
 
-    "check": "tsc",
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch",
+  "check": "tsc",
+  "type-check": "tsc --noEmit",
+  "type-check:watch": "tsc --noEmit --watch",
 
-    "prepare": "echo 'Ready'",
+  "prepare": "echo 'Ready'",
 
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --coverage --watchAll=false",
-    "test:debug": "jest --detectOpenHandles --forceExit",
+  "test": "jest --config ./jest.config.cjs",
+  "test:watch": "jest --config ./jest.config.cjs --watch",
+  "test:coverage": "jest --config ./jest.config.cjs --coverage",
+  "test:ci": "jest --config ./jest.config.cjs --ci --coverage --watchAll=false",
+  "test:debug": "jest --config ./jest.config.cjs --detectOpenHandles --forceExit",
 
-    "lint": "eslint client/src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint client/src --ext .ts,.tsx --fix",
+  "lint": "eslint src --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+  "lint:fix": "eslint src --ext .ts,.tsx --fix",
 
-    "format": "prettier --write \"client/src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"client/src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+  "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+  "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
 
-    "analyze": "npm run build && npx webpack-bundle-analyzer client/dist/assets/*.js",
-    "analyze:source-map": "npm run build && npx source-map-explorer 'client/dist/assets/*.js'",
+  "analyze": "npm run build && npx webpack-bundle-analyzer dist/assets/*.js",
+  "analyze:source-map": "npm run build && npx source-map-explorer 'dist/assets/*.js'",
 
-    "duplicates": "jscpd client/src --threshold 1 --format html --output ./reports/duplicates",
+  "duplicates": "jscpd src --threshold 1 --format html --output ../reports/duplicates",
 
-    "pre-commit": "npm run format:check && npm run lint && npm run type-check && npm run test:ci"
+  "pre-commit": "npm run format:check && npm run lint && npm run type-check && npm run test:ci"
+}
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
