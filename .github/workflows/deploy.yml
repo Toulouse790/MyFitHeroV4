@@ -6,46 +6,49 @@ on:
   pull_request:
     branches: [ main ]
 
+defaults:
+  run:
+    working-directory: client   # <<< toutes les commandes se lancent dans client/
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout 🛎️
-      uses: actions/checkout@v4
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js 📦
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.x'
-        cache: 'npm'   # <<< important : npm (pas pnpm)
-        cache-dependency-path: package-lock.json  # <<< indique où est le lockfile
+      - name: Setup Node.js 📦
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json  # <<< lockfile dans client/
 
-    - name: Install dependencies 📥
-      run: npm ci     # <<< plus fiable avec ton package-lock.json
+      - name: Install dependencies 📥
+        run: npm ci
 
-    - name: TypeScript Check 🔍
-      run: cd client && npx tsc --noEmit --skipLibCheck
+      - name: TypeScript Check 🔍
+        run: npx tsc --noEmit --skipLibCheck
 
-    - name: Build 🔨
-      run: npm run build
-      env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        VITE_APP_NAME: MyFitHero
-        VITE_APP_VERSION: 1.0.0
-        VITE_APP_ENV: production
+      - name: Build 🔨
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_APP_NAME: MyFitHero
+          VITE_APP_VERSION: 4.0.0
+          VITE_APP_ENV: production
 
-    - name: Deploy to GitHub Pages 🚀
-      uses: peaceiris/actions-gh-pages@v3
-      if: github.ref == 'refs/heads/main'
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./client/dist
-        cname: myfithero.com
+      - name: Deploy to GitHub Pages 🚀
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: client/dist      # <<< le build sort dans client/dist
+          cname: myfithero.com
 
-    - name: Upload artifacts 📋
-      uses: actions/upload-artifact@v4.6.2
-      with:
-        name: build-files
-        path: client/dist/
+      - name: Upload artifacts 📋
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: client/dist/
