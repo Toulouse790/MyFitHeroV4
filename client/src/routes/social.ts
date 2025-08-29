@@ -3,7 +3,7 @@ import { lazy } from 'react';
 import { RouteConfig } from './types';
 
 // Lazy loading des composants sociaux
-const Social = lazy(() => import('@/pages/Social'));
+const Social = lazy(() => import('@/features/social/pages/SocialPage'));
 
 export const socialRoutes: RouteConfig[] = [
   {

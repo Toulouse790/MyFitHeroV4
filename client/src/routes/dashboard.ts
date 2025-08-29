@@ -3,10 +3,10 @@ import { lazy } from 'react';
 import { RouteConfig } from './types';
 
 // Lazy loading des composants dashboard
-const Analytics = lazy(() => import('@/pages/Analytics'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
-const ProfileComplete = lazy(() => import('@/pages/ProfileComplete'));
-const Settings = lazy(() => import('@/pages/settings'));
+const Analytics = lazy(() => import('@/features/analytics/pages/AnalyticsPage'));
+const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'));
+const ProfileComplete = lazy(() => import('@/features/auth/pages/ProfileComplete'));
+const Settings = lazy(() => import('@/features/profile/pages/SettingsPage'));
 
 export const dashboardRoutes: RouteConfig[] = [
   {

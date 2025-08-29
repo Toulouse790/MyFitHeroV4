@@ -3,15 +3,15 @@ import { lazy } from 'react';
 import { RouteConfig } from './types';
 
 // Lazy loading des composants fitness
-const WorkoutPage = lazy(() => import('@/pages/WorkoutPage'));
-const WorkoutDetailPage = lazy(() => import('@/pages/WorkoutDetailPage'));
-const ExercisesPage = lazy(() => import('@/pages/ExercisesPage'));
-const ExerciseDetailPage = lazy(() => import('@/pages/ExerciseDetailPage'));
-const ChallengesPage = lazy(() => import('@/pages/ChallengesPage'));
+const WorkoutPage = lazy(() => import('@/features/workout/pages/WorkoutPage'));
+const WorkoutDetailPage = lazy(() => import('@/features/workout/pages/WorkoutDetailPage'));
+const ExercisesPage = lazy(() => import('@/features/workout/pages/ExercisesPage'));
+const ExerciseDetailPage = lazy(() => import('@/features/workout/pages/ExerciseDetailPage'));
+const ChallengesPage = lazy(() => import('@/features/social/pages/ChallengesPage'));
 const RecoveryPage = lazy(() =>
-  import('@/pages/RecoveryPage').then(module => ({ default: module.RecoveryPage }))
+  import('@/features/recovery/pages/RecoveryPage')
 );
-const AICoachPage = lazy(() => import('@/pages/AICoachPage'));
+const AICoachPage = lazy(() => import('@/features/ai-coach/pages/AICoachPage'));
 
 export const fitnessRoutes: RouteConfig[] = [
   {

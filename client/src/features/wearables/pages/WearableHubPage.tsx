@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import WearableStats from '@/components/WearableStats';
 import WearableNotificationCenter from '@/components/WearableNotificationCenter';
-import Settings from '@/pages/settings';
+import Settings from '@/features/profile/pages/SettingsPage';
 import { useAppStore } from '@/store/useAppStore';
 
 interface WearableDevice {

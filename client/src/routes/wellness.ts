@@ -3,10 +3,10 @@ import { lazy } from 'react';
 import { RouteConfig } from './types';
 
 // Lazy loading des composants bien-être
-const Nutrition = lazy(() => import('@/pages/Nutrition'));
-const Hydration = lazy(() => import('@/pages/Hydration'));
-const Sleep = lazy(() => import('@/pages/Sleep'));
-const WearableHub = lazy(() => import('@/pages/WearableHub'));
+const Nutrition = lazy(() => import('@/features/nutrition/pages/NutritionPage'));
+const Hydration = lazy(() => import('@/features/hydration/pages/HydrationPage'));
+const Sleep = lazy(() => import('@/features/sleep/pages/SleepPage'));
+const WearableHub = lazy(() => import('@/features/wearables/pages/WearableHubPage'));
 
 export const wellnessRoutes: RouteConfig[] = [
   {

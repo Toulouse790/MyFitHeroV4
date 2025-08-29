@@ -4,8 +4,8 @@ import { RouteConfig } from './types';
 
 // Lazy loading des composants d'authentification
 const IndexPage = lazy(() => import('@/pages/index'));
-const AuthPage = lazy(() => import('@/pages/AuthPage'));
-const LandingPage = lazy(() => import('@/pages/LandingPage'));
+const AuthPage = lazy(() => import('@/features/auth/pages/AuthPage'));
+const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'));
 
 export const authRoutes: RouteConfig[] = [
   {

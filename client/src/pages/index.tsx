@@ -1397,17 +1397,8 @@ const useOfflineSync = () => {
 // ====================================================================
 
 // Pages principales
-const OnboardingPage = lazy(() => import('./ProfileComplete'));
-const DashboardPage = lazy(() => import('./Admin'));
-const WorkoutPage = lazy(() => import('./WorkoutPage'));
-const NutritionPage = lazy(() => import('./Nutrition'));
-const SleepPage = lazy(() => import('./Sleep'));
-const HydrationPage = lazy(() => import('./Hydration'));
-const WellnessPage = lazy(() => import('./RecoveryPage').then(m => ({ default: m.RecoveryPage })));
-const SocialPage = lazy(() => import('./Social'));
-const AnalyticsPage = lazy(() => import('./Analytics'));
-const SettingsPage = lazy(() => import('./settings'));
-const ProfilePage = lazy(() => import('./ProfilePage'));
+const OnboardingPage = lazy(() => import('../features/auth/pages/ProfileComplete'));
+const DashboardPage = lazy(() => import('../features/admin/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('./NotFound'));
 
 // Composants spécialisés
@@ -1434,15 +1425,6 @@ const AppErrorBoundary = lazy(() => import('../components/AppErrorBoundary'));
 const routes = {
   '/': OnboardingPage,
   '/dashboard': DashboardPage,
-  '/workout': WorkoutPage,
-  '/nutrition': NutritionPage,
-  '/sleep': SleepPage,
-  '/hydration': HydrationPage,
-  '/wellness': WellnessPage,
-  '/social': SocialPage,
-  '/analytics': AnalyticsPage,
-  '/settings': SettingsPage,
-  '/profile': ProfilePage,
   '/us-onboarding': USOnboardingFlow,
   '/chat': ConversationalChat,
   '/workout-tracker': WorkoutTracker,
@@ -1476,7 +1458,7 @@ const appRoutes: RouteConfig[] = [
   // Routes publiques
   {
     path: '/',
-    component: lazy(() => import('./LandingPage')),
+    component: lazy(() => import('../features/landing/pages/LandingPage')),
     exact: true,
     title: 'MyFitHero - AI-Powered Fitness for Americans',
     description:
@@ -1484,13 +1466,13 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/login',
-    component: lazy(() => import('./AuthPage')),
+    component: lazy(() => import('../features/auth/pages/AuthPage')),
     title: 'Sign In - MyFitHero',
     description: 'Sign in to your MyFitHero account and continue your fitness journey.',
   },
   {
     path: '/register',
-    component: lazy(() => import('./AuthPage')),
+    component: lazy(() => import('../features/auth/pages/AuthPage')),
     title: 'Create Account - MyFitHero',
     description: 'Join thousands of Americans achieving their fitness goals with MyFitHero.',
   },
@@ -1522,7 +1504,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/workouts',
-    component: WorkoutPage,
+    component: lazy(() => import('../features/workout/pages/WorkoutPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Workouts - MyFitHero',
@@ -1530,14 +1512,14 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/workouts/:id',
-    component: lazy(() => import('./WorkoutDetailPage')),
+    component: lazy(() => import('../features/workout/pages/WorkoutDetailPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Workout Details - MyFitHero',
   },
   {
     path: '/nutrition',
-    component: NutritionPage,
+    component: lazy(() => import('../features/nutrition/pages/NutritionPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Nutrition - MyFitHero',
@@ -1545,7 +1527,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/sleep',
-    component: SleepPage,
+    component: lazy(() => import('../features/sleep/pages/SleepPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Sleep Tracking - MyFitHero',
@@ -1553,7 +1535,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/hydration',
-    component: HydrationPage,
+    component: lazy(() => import('../features/hydration/pages/HydrationPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Hydration - MyFitHero',
@@ -1561,7 +1543,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/wellness',
-    component: WellnessPage,
+    component: lazy(() => import('../features/recovery/pages/RecoveryPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Mental Wellness - MyFitHero',
@@ -1569,7 +1551,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/social',
-    component: SocialPage,
+    component: lazy(() => import('../features/social/pages/SocialPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Community - MyFitHero',
@@ -1577,7 +1559,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/social/challenges',
-    component: lazy(() => import('./ChallengesPage')),
+    component: lazy(() => import('../features/social/pages/ChallengesPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Fitness Challenges - MyFitHero',
@@ -1585,7 +1567,7 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/analytics',
-    component: AnalyticsPage,
+    component: lazy(() => import('../features/analytics/pages/AnalyticsPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'Progress Analytics - MyFitHero',
@@ -1593,14 +1575,14 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/profile',
-    component: ProfilePage,
+    component: lazy(() => import('../features/profile/pages/ProfilePage')),
     requiresAuth: true,
     title: 'Your Profile - MyFitHero',
     description: 'Manage your profile, preferences, and fitness goals.',
   },
   {
     path: '/settings',
-    component: SettingsPage,
+    component: lazy(() => import('../features/profile/pages/SettingsPage')),
     requiresAuth: true,
     title: 'Settings - MyFitHero',
     description: 'Customize your MyFitHero experience, privacy, and notifications.',
@@ -1609,7 +1591,7 @@ const appRoutes: RouteConfig[] = [
   // Routes spécialisées
   {
     path: '/ai-coach',
-    component: lazy(() => import('./AICoachPage')),
+    component: lazy(() => import('../features/ai-coach/pages/AICoachPage')),
     requiresAuth: true,
     requiresOnboarding: true,
     title: 'AI Coach - MyFitHero',
@@ -1617,16 +1599,39 @@ const appRoutes: RouteConfig[] = [
   },
   {
     path: '/exercises',
-    component: lazy(() => import('./ExercisesPage')),
+    component: lazy(() => import('../features/workout/pages/ExercisesPage')),
     requiresAuth: true,
     title: 'Exercise Library - MyFitHero',
     description: 'Comprehensive exercise library with 450+ video-guided workouts.',
   },
   {
     path: '/exercises/:id',
-    component: lazy(() => import('./ExerciseDetailPage')),
+    component: lazy(() => import('../features/workout/pages/ExerciseDetailPage')),
     requiresAuth: true,
     title: 'Exercise Details - MyFitHero',
+  },
+  {
+    path: '/recovery',
+    component: lazy(() => import('../features/recovery/pages/RecoveryPage')),
+    requiresAuth: true,
+    requiresOnboarding: true,
+    title: 'Recovery - MyFitHero',
+    description: 'Optimize your recovery with personalized insights and recommendations.',
+  },
+  {
+    path: '/wearables',
+    component: lazy(() => import('../features/wearables/pages/WearableHubPage')),
+    requiresAuth: true,
+    requiresOnboarding: true,
+    title: 'Wearable Hub - MyFitHero',
+    description: 'Connect and sync your fitness devices for comprehensive tracking.',
+  },
+  {
+    path: '/admin',
+    component: lazy(() => import('../features/admin/pages/AdminPage')),
+    requiresAuth: true,
+    title: 'Admin - MyFitHero',
+    description: 'Administrative interface for MyFitHero management.',
   },
 
   // Routes utilitaires

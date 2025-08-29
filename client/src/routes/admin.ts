@@ -3,7 +3,7 @@ import { lazy } from 'react';
 import { RouteConfig } from './types';
 
 // Lazy loading des composants admin et légaux
-const Admin = lazy(() => import('@/pages/Admin'));
+const Admin = lazy(() => import('@/features/admin/pages/AdminPage'));
 const SupportPage = lazy(() => import('@/pages/SupportPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));

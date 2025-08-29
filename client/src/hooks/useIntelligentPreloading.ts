@@ -32,19 +32,19 @@ export const useIntelligentPreloading = () => {
         try {
           switch (route) {
             case '/workout':
-              await import('@/pages/WorkoutPage'); // ✅ Corrigé: WorkoutPage au lieu de Workout
+              await import('@/features/workout/pages/WorkoutPage'); // ✅ Corrigé: nouvelle architecture modulaire
               break;
             case '/nutrition':
-              await import('@/pages/Nutrition'); // ✅ Correct
+              await import('@/features/nutrition/pages/NutritionPage'); // ✅ Nouvelle architecture modulaire
               break;
             case '/hydration':
-              await import('@/pages/Hydration'); // ✅ Correct
+              await import('@/features/hydration/pages/HydrationPage'); // ✅ Nouvelle architecture modulaire
               break;
             case '/sleep':
-              await import('@/pages/Sleep'); // ✅ Correct
+              await import('@/features/sleep/pages/SleepPage'); // ✅ Nouvelle architecture modulaire
               break;
             case '/profile':
-              await import('@/pages/ProfileComplete'); // ✅ Corrigé: ProfileComplete au lieu de Profile
+              await import('@/features/auth/pages/ProfileComplete'); // ✅ Nouvelle architecture modulaire
               break;
             case '/':
               await import('@/pages/index'); // ✅ Corrigé:

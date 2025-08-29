@@ -6,36 +6,31 @@
 // RTL assertions (toBeInTheDocument, etc.)
 import '@testing-library/jest-dom';
 
-// MSW - Temporairement désactivé pour stabiliser la config
-// import { server } from './test-utils/mocks/server';
+// MSW - Réactivé avec polyfills corrects
+import { server } from './test-utils/mocks/server';
 
 // ---- MSW lifecycle ---- 
-// Temporairement commenté jusqu'à résolution des polyfills
-/*
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: 'warn' });
+  // Démarrer le serveur MSW avant tous les tests
+  server.listen({ 
+    onUnhandledRequest: 'warn'
+  });
 });
 
 afterEach(() => {
+  // Réinitialiser les handlers MSW après chaque test
   server.resetHandlers();
 
   // Nettoyage storage & timers entre tests
   localStorage.clear();
   sessionStorage.clear();
   jest.clearAllTimers();
+  jest.clearAllMocks();
 });
 
 afterAll(() => {
+  // Fermer le serveur MSW après tous les tests
   server.close();
-});
-*/
-
-// Nettoyage simple pour les tests sans MSW
-afterEach(() => {
-  // Nettoyage storage & timers entre tests
-  localStorage.clear();
-  sessionStorage.clear();
-  jest.clearAllTimers();
 });
 
 // ---- Mocks d’APIs navigateur manquantes dans JSDOM ----
