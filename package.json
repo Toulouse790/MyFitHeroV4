@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "lint": "npm --prefix client run lint",
+    "format:check": "npm --prefix client run format:check",
+    "depcheck": "depcheck .; depcheck client"
+  },
   "devDependencies": {
     "depcheck": "^1.4.7",
     "eslint-plugin-react-refresh": "^0.4.20"

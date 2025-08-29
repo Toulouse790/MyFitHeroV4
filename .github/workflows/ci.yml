@@ -2,33 +2,54 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [staging]
   pull_request:
+    branches: [staging]
 
 jobs:
-  lint-and-format:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 📦
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
           cache: npm
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix client
+      - run: npm run lint
+      - run: npm run format:check
 
-      - name: Install client dependencies 📥
-        run: cd client && npm ci
-
-      - name: Lint Action 🔎
-        uses: wearerequired/lint-action@v2.3.0
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          eslint: true
-          prettier: true
-          eslint_dir: client
-          prettier_dir: client
-          eslint_extensions: ts,tsx,js,jsx
-          prettier_extensions: ts,tsx,js,jsx,css,md,json
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix client
+      - run: npm --prefix client run build
+
+  depcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix client
+      - run: npm run depcheck
+
