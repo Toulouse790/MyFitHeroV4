@@ -1,8 +1,17 @@
+<<<<<<< HEAD:client/jest.config.js
 
 export default {
   preset: 'ts-jest',
+=======
+/** @type {import('jest').Config} */
+module.exports = {
+>>>>>>> 6eb05951e33be558c27f306f45a77f0c767e4d9c:client/jest.config.cjs
   testEnvironment: 'jsdom',
+  roots: ['<rootDir>/src'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  transform: {
+    '^.+\\.(ts|tsx|js|jsx)$': 'babel-jest',
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
@@ -14,32 +23,11 @@ export default {
     '^@/store/(.*)$': '<rootDir>/src/store/$1',
     '^@/test-utils/(.*)$': '<rootDir>/src/test-utils/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__mocks__/fileMock.js'
+    '\\.(jpg|jpeg|png|gif|webp|svg)$': '<rootDir>/src/__mocks__/fileMock.js',
   },
-  transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true,
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true
-      }
-    }],
-    '^.+\\.(js|jsx)$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-        ['@babel/preset-react', { runtime: 'automatic' }]
-      ]
-    }]
-  },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.(mjs|esm|js)$|@supabase|msw|@testing-library))'
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  transformIgnorePatterns: ['/node_modules/(?!(.*))'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-  testMatch: [
-    '<rootDir>/src/**/__tests__/**/*.(ts|tsx|js|jsx)',
-    '<rootDir>/src/**/*.(test|spec).(ts|tsx|js|jsx)'
-  ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
@@ -52,25 +40,10 @@ export default {
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
-    global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70
-    }
+    global: { branches: 70, functions: 70, lines: 70, statements: 70 },
   },
   testTimeout: 10000,
   maxWorkers: '50%',
   clearMocks: true,
   restoreMocks: true,
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
-  },
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname'
-  ]
 };
