@@ -48,7 +48,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: dist          # on est déjà dans client/, donc dist/
+          publish_dir: client/dist   # dossier dist dans client/
           publish_branch: gh-pages   # branche cible
           cname: myfithero.com
           force_orphan: true         # init propre de gh-pages
@@ -57,4 +57,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-files
-          path: dist/
+          path: client/dist/
