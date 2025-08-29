@@ -3,73 +3,72 @@
  * Setup global pour Jest, React Testing Library et MSW
  */
 
-// import '@testing-library/jest-dom';
+// RTL assertions (toBeInTheDocument, etc.)
+import '@testing-library/jest-dom';
+
+// fetch pour JSDOM + MSW
+import 'whatwg-fetch';
+
+// Polyfills Node pour JSDOM (MSW a besoin de TextEncoder/Decoder)
+import { TextEncoder, TextDecoder } from 'util';
+if (!(globalThis as any).TextEncoder) (globalThis as any).TextEncoder = TextEncoder as any;
+if (!(globalThis as any).TextDecoder) (globalThis as any).TextDecoder = TextDecoder as any;
+
+// MSW
 import { server } from './test-utils/mocks/server';
 
-// Configuration MSW pour mocker les API
+// ---- MSW lifecycle ----
 beforeAll(() => {
-  // Démarrer le serveur MSW avant tous les tests
-  server.listen({
-    onUnhandledRequest: 'warn',
-  });
+  server.listen({ onUnhandledRequest: 'warn' });
 });
 
 afterEach(() => {
-  // Reset des handlers après chaque test pour éviter les interférences
   server.resetHandlers();
 
-  // Nettoyage du localStorage et sessionStorage
+  // Nettoyage storage & timers entre tests
   localStorage.clear();
   sessionStorage.clear();
-
-  // Reset des timers si utilisés
   jest.clearAllTimers();
 });
 
 afterAll(() => {
-  // Fermer le serveur MSW après tous les tests
   server.close();
 });
 
-// Mock des API du navigateur non disponibles en environnement test
+// ---- Mocks d’APIs navigateur manquantes dans JSDOM ----
 global.matchMedia =
   global.matchMedia ||
-  function (query) {
+  (function (query: string) {
     return {
       matches: false,
       media: query,
       onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
+      addListener: jest.fn(), // deprecated
+      removeListener: jest.fn(), // deprecated
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
-    };
-  };
+    } as any;
+  } as any);
 
-// Mock de ResizeObserver pour les composants qui l'utilisent
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
+// ResizeObserver
+(global as any).ResizeObserver = (global as any).ResizeObserver || jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
 
-// Mock de IntersectionObserver
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+// IntersectionObserver
+(global as any).IntersectionObserver = (global as any).IntersectionObserver || jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
 
-// Mock du fetch global si pas déjà présent
-if (!global.fetch) {
-  global.fetch = jest.fn();
-}
-
-// Configuration de timeouts pour les tests async
+// Timeout global des tests async
 jest.setTimeout(10000);
 
-// Suppress console errors dans les tests pour un output plus propre
+// ---- Filtrage de certains warnings de test ----
 const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: any[]) => {
