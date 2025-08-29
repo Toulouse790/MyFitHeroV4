@@ -16,5 +16,4 @@ export const WorkoutPageLegacy = lazy(() => import('@/pages/WorkoutPage'));
 export const HydrationPage = lazy(() => import('@/pages/Hydration'));
 export const SleepPage = lazy(() => import('@/pages/Sleep'));
 export const WearableHubPage = lazy(() => import('@/pages/WearableHub'));
-export const USMarketPage = lazy(() => import('@/pages/USMarket'));
 export const AICoachPage = lazy(() => import('@/pages/AICoachPage'));
