@@ -22,7 +22,7 @@ import {
   AlertCircle,
   ArrowRight,
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useLocation } from 'wouter';
 import { useAppStore } from '@/store/useAppStore';
 import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';

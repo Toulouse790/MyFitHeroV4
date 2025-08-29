@@ -20,7 +20,7 @@ import {
   Info,
 } from 'lucide-react';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
-import { useWorkoutSession } from '../hooks/workout/useWorkoutSession';
+import { useWorkoutSession } from '@/hooks/workout/useWorkoutSession';
 import type { WorkoutExercise } from '@/types/workout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -28,7 +28,7 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import AIIntelligence from '@/components/AIIntelligence';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { UniformHeader } from '@/components/UniformHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,7 +44,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Database } from '../types/database';
+import { Database } from '@/types/database';
 
 // --- TYPES & INTERFACES ---
 type DrinkType = Database['public']['Tables']['hydration_logs']['Row']['drink_type'];
