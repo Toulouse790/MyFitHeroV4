@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { create } from 'zustand';
-import toast from 'sonner';
+import { toast } from 'sonner';
 
 // ---- Supabase client ----
 const supabaseUrl = 'https://zfmlzxhxhaezdkzjanbc.supabase.co';
