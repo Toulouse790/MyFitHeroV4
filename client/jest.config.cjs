@@ -30,7 +30,7 @@ module.exports = {
     '!src/test-utils/**',
     '!src/__tests__/**',
     '!src/**/*.stories.{ts,tsx}',
-    '!src/**/index.ts',
+    '!src/**/index.ts'
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
