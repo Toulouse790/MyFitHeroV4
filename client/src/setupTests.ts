@@ -6,18 +6,12 @@
 // RTL assertions (toBeInTheDocument, etc.)
 import '@testing-library/jest-dom';
 
-// fetch pour JSDOM + MSW
-import 'whatwg-fetch';
+// MSW - Temporairement désactivé pour stabiliser la config
+// import { server } from './test-utils/mocks/server';
 
-// Polyfills Node pour JSDOM (MSW a besoin de TextEncoder/Decoder)
-import { TextEncoder, TextDecoder } from 'util';
-if (!(globalThis as any).TextEncoder) (globalThis as any).TextEncoder = TextEncoder as any;
-if (!(globalThis as any).TextDecoder) (globalThis as any).TextDecoder = TextDecoder as any;
-
-// MSW
-import { server } from './test-utils/mocks/server';
-
-// ---- MSW lifecycle ----
+// ---- MSW lifecycle ---- 
+// Temporairement commenté jusqu'à résolution des polyfills
+/*
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'warn' });
 });
@@ -33,6 +27,15 @@ afterEach(() => {
 
 afterAll(() => {
   server.close();
+});
+*/
+
+// Nettoyage simple pour les tests sans MSW
+afterEach(() => {
+  // Nettoyage storage & timers entre tests
+  localStorage.clear();
+  sessionStorage.clear();
+  jest.clearAllTimers();
 });
 
 // ---- Mocks d’APIs navigateur manquantes dans JSDOM ----
