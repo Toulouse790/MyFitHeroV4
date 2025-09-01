@@ -11,5 +11,5 @@
 export const HydrationModule = {
   name: 'hydration',
   status: 'planned',
-  description: 'Module hydration - À implémenter'
+  description: 'Module hydration - À implémenter',
 };

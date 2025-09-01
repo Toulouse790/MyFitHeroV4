@@ -8,20 +8,20 @@ import { Loader2 } from 'lucide-react';
 export interface UnifiedLoadingProps {
   // Tailles disponibles
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  
+
   // Variantes de loading
   variant?: 'spinner' | 'dots' | 'pulse' | 'progress';
-  
+
   // Texte d'accompagnement
   message?: string;
-  
+
   // Modes d'affichage
   fullScreen?: boolean;
   overlay?: boolean;
-  
+
   // Style personnalisé
   className?: string;
-  
+
   // Props de progression (compatible AppLoadingSpinner)
   showProgress?: boolean;
   progressPercent?: number;
@@ -29,7 +29,7 @@ export interface UnifiedLoadingProps {
 
 const loadingSizes = {
   sm: 'h-4 w-4',
-  md: 'h-6 w-6', 
+  md: 'h-6 w-6',
   lg: 'h-8 w-8',
   xl: 'h-12 w-12',
 };
@@ -77,7 +77,12 @@ const UnifiedLoading: React.FC<UnifiedLoadingProps> = ({
       case 'progress':
         return (
           <div className="w-48">
-            <div className={cn('animate-spin rounded-full border-b-2 border-blue-600 mx-auto mb-2', loadingSizes[size])} />
+            <div
+              className={cn(
+                'animate-spin rounded-full border-b-2 border-blue-600 mx-auto mb-2',
+                loadingSizes[size]
+              )}
+            />
             {showProgress && (
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
@@ -98,13 +103,15 @@ const UnifiedLoading: React.FC<UnifiedLoadingProps> = ({
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       {renderLoadingElement()}
       {message && (
-        <p className={cn(
-          'text-gray-600 animate-pulse font-medium',
-          size === 'sm' && 'text-xs',
-          size === 'md' && 'text-sm',
-          size === 'lg' && 'text-base',
-          size === 'xl' && 'text-lg'
-        )}>
+        <p
+          className={cn(
+            'text-gray-600 animate-pulse font-medium',
+            size === 'sm' && 'text-xs',
+            size === 'md' && 'text-sm',
+            size === 'lg' && 'text-base',
+            size === 'xl' && 'text-lg'
+          )}
+        >
           {message}
         </p>
       )}
@@ -120,7 +127,7 @@ const UnifiedLoading: React.FC<UnifiedLoadingProps> = ({
     );
   }
 
-  // Mode overlay 
+  // Mode overlay
   if (overlay) {
     return (
       <div className="absolute inset-0 bg-white bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-10">
@@ -130,11 +137,7 @@ const UnifiedLoading: React.FC<UnifiedLoadingProps> = ({
   }
 
   // Mode inline (par défaut)
-  return (
-    <div className="flex items-center justify-center p-4">
-      {content}
-    </div>
-  );
+  return <div className="flex items-center justify-center p-4">{content}</div>;
 };
 
 export default UnifiedLoading;
@@ -144,7 +147,7 @@ export const AppLoadingSpinner: React.FC<{
   message?: string;
   showProgress?: boolean;
 }> = ({ message = 'Chargement...', showProgress = false }) => (
-  <UnifiedLoading 
+  <UnifiedLoading
     variant="progress"
     message={message}
     showProgress={showProgress}
@@ -160,9 +163,4 @@ export const Loading: React.FC<{
   text?: string;
   fullScreen?: boolean;
   className?: string;
-}> = ({ text = 'Chargement...', ...props }) => (
-  <UnifiedLoading 
-    {...props}
-    message={text}
-  />
-);
+}> = ({ text = 'Chargement...', ...props }) => <UnifiedLoading {...props} message={text} />;

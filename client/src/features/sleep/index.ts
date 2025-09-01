@@ -11,5 +11,5 @@
 export const SleepModule = {
   name: 'sleep',
   status: 'planned',
-  description: 'Module sleep - À implémenter'
+  description: 'Module sleep - À implémenter',
 };

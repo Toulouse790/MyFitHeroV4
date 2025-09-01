@@ -11,5 +11,5 @@
 export const AnalyticsModule = {
   name: 'analytics',
   status: 'planned',
-  description: 'Module analytics - À implémenter'
+  description: 'Module analytics - À implémenter',
 };

@@ -72,11 +72,22 @@ export interface Equipment {
   description?: string;
 }
 
-export type MuscleGroup = 
-  | 'chest' | 'back' | 'shoulders' | 'biceps' | 'triceps' | 'forearms'
-  | 'abs' | 'obliques' | 'lower_back'
-  | 'quadriceps' | 'hamstrings' | 'glutes' | 'calves'
-  | 'full_body' | 'core';
+export type MuscleGroup =
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'biceps'
+  | 'triceps'
+  | 'forearms'
+  | 'abs'
+  | 'obliques'
+  | 'lower_back'
+  | 'quadriceps'
+  | 'hamstrings'
+  | 'glutes'
+  | 'calves'
+  | 'full_body'
+  | 'core';
 
 export interface WorkoutStats {
   totalWorkouts: number;

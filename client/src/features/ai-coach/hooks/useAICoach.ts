@@ -8,40 +8,43 @@ export const useAICoach = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim()) return;
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim()) return;
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    // Ajouter le message de l'utilisateur immédiatement
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: content.trim(),
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-
-    try {
-      // Implementation à venir
-      console.log('Sending message to AI Coach:', content);
-      // const response = await AICoachService.submitQuestion(content, session?.context);
-      
-      // Simuler une réponse de l'IA (à remplacer par l'appel au service)
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Réponse simulée de l\'IA Coach...',
+      // Ajouter le message de l'utilisateur immédiatement
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: content.trim(),
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'envoi du message');
-    } finally {
-      setLoading(false);
-    }
-  }, [session]);
+      setMessages(prev => [...prev, userMessage]);
+
+      try {
+        // Implementation à venir
+        console.log('Sending message to AI Coach:', content);
+        // const response = await AICoachService.submitQuestion(content, session?.context);
+
+        // Simuler une réponse de l'IA (à remplacer par l'appel au service)
+        const aiMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: "Réponse simulée de l'IA Coach...",
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiMessage]);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erreur lors de l'envoi du message");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [session]
+  );
 
   const getRecommendations = useCallback(async () => {
     setLoading(true);
@@ -52,7 +55,9 @@ export const useAICoach = () => {
       // const recs = await AICoachService.getPersonalizedPlan(userProfile);
       // setRecommendations(recs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des recommandations');
+      setError(
+        err instanceof Error ? err.message : 'Erreur lors du chargement des recommandations'
+      );
     } finally {
       setLoading(false);
     }

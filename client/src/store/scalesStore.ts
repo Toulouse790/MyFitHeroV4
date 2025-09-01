@@ -63,18 +63,18 @@ export interface ScalesActions {
   syncScaleWeight: (scaleId: string) => Promise<number>;
   loadConnectedScales: (userId: string) => Promise<void>;
   updateScaleStatus: (scaleId: string, updates: Partial<ScaleDevice>) => Promise<void>;
-  
+
   // Actions historique du poids
   addWeightEntry: (entry: Omit<WeightEntry, 'userId' | 'createdAt'>) => Promise<void>;
   updateWeightEntry: (entryId: string, updates: Partial<WeightEntry>) => Promise<void>;
   deleteWeightEntry: (entryId: string) => Promise<void>;
   loadWeightHistory: (userId: string, limit?: number) => Promise<void>;
-  
+
   // Actions de synchronisation
   scanForScales: () => Promise<ScaleDevice[]>;
   syncAllScales: () => Promise<void>;
   importWeightData: (data: WeightEntry[]) => Promise<void>;
-  
+
   // Actions utilitaires
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -88,7 +88,9 @@ export type ScalesStore = ScalesState & ScalesActions;
 
 // Service de gestion des balances (simulé pour l'instant)
 class ScaleService {
-  static async scanForDevices(): Promise<Omit<ScaleDevice, 'userId' | 'createdAt' | 'updatedAt'>[]> {
+  static async scanForDevices(): Promise<
+    Omit<ScaleDevice, 'userId' | 'createdAt' | 'updatedAt'>[]
+  > {
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     return [
@@ -154,7 +156,7 @@ export const useScalesStore = create<ScalesStore>()(
       ...initialState,
 
       // Actions balances connectées
-      connectScale: async (device) => {
+      connectScale: async device => {
         set({ isLoading: true, error: null });
 
         try {
@@ -183,7 +185,7 @@ export const useScalesStore = create<ScalesStore>()(
         }
       },
 
-      disconnectScale: async (scaleId) => {
+      disconnectScale: async scaleId => {
         set({ isLoading: true, error: null });
 
         try {
@@ -201,7 +203,7 @@ export const useScalesStore = create<ScalesStore>()(
         }
       },
 
-      syncScaleWeight: async (scaleId) => {
+      syncScaleWeight: async scaleId => {
         const { connectedScales } = get();
         const scale = connectedScales.find(s => s.id === scaleId);
         if (!scale) throw new Error('Balance non trouvée');
@@ -240,7 +242,7 @@ export const useScalesStore = create<ScalesStore>()(
         }
       },
 
-      loadConnectedScales: async (_userId) => {
+      loadConnectedScales: async _userId => {
         set({ isLoading: true, error: null });
 
         try {
@@ -271,7 +273,7 @@ export const useScalesStore = create<ScalesStore>()(
       },
 
       // Actions historique du poids
-      addWeightEntry: async (entry) => {
+      addWeightEntry: async entry => {
         set({ isLoading: true, error: null });
 
         try {
@@ -289,8 +291,8 @@ export const useScalesStore = create<ScalesStore>()(
             weightHistory: [newEntry, ...state.weightHistory].slice(0, 100),
           }));
         } catch {
-          set({ error: 'Erreur lors de l\'ajout du poids' });
-          throw new Error('Erreur lors de l\'ajout du poids');
+          set({ error: "Erreur lors de l'ajout du poids" });
+          throw new Error("Erreur lors de l'ajout du poids");
         } finally {
           set({ isLoading: false });
         }
@@ -316,7 +318,7 @@ export const useScalesStore = create<ScalesStore>()(
         }
       },
 
-      deleteWeightEntry: async (entryId) => {
+      deleteWeightEntry: async entryId => {
         set({ isLoading: true, error: null });
 
         try {
@@ -342,7 +344,7 @@ export const useScalesStore = create<ScalesStore>()(
           // const history = await supabaseService.getWeightHistory(userId, limit);
           // set({ weightHistory: history });
         } catch {
-          set({ error: 'Erreur lors du chargement de l\'historique' });
+          set({ error: "Erreur lors du chargement de l'historique" });
         } finally {
           set({ isLoading: false });
         }
@@ -371,10 +373,11 @@ export const useScalesStore = create<ScalesStore>()(
         set({ isSyncing: true, error: null });
 
         try {
-          const syncPromises = connectedDevices.map(scale =>
-            get()
-              .syncScaleWeight(scale.id)
-              .catch(() => null) // Ignore les erreurs individuelles
+          const syncPromises = connectedDevices.map(
+            scale =>
+              get()
+                .syncScaleWeight(scale.id)
+                .catch(() => null) // Ignore les erreurs individuelles
           );
 
           await Promise.all(syncPromises);
@@ -385,26 +388,26 @@ export const useScalesStore = create<ScalesStore>()(
         }
       },
 
-      importWeightData: async (data) => {
+      importWeightData: async data => {
         set({ isLoading: true, error: null });
 
         try {
           const importPromises = data.map(entry => get().addWeightEntry(entry));
           await Promise.all(importPromises);
         } catch {
-          set({ error: 'Erreur lors de l\'importation des données' });
-          throw new Error('Erreur lors de l\'importation des données');
+          set({ error: "Erreur lors de l'importation des données" });
+          throw new Error("Erreur lors de l'importation des données");
         } finally {
           set({ isLoading: false });
         }
       },
 
       // Actions utilitaires
-      setLoading: (isLoading) => {
+      setLoading: isLoading => {
         set({ isLoading });
       },
 
-      setError: (error) => {
+      setError: error => {
         set({ error, isLoading: false });
       },
 
@@ -418,9 +421,9 @@ export const useScalesStore = create<ScalesStore>()(
 
         const latest = weightHistory[0]?.weight;
         const previous = weightHistory[1]?.weight;
-        
+
         if (!latest || !previous) return null;
-        
+
         const diff = latest - previous;
 
         if (Math.abs(diff) < 0.1) return { type: 'stable', diff: 0 };
@@ -451,7 +454,7 @@ export const useScalesStore = create<ScalesStore>()(
     }),
     {
       name: 'scales-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         connectedScales: state.connectedScales,
         weightHistory: state.weightHistory.slice(0, 20), // Persister seulement les 20 dernières
         lastScaleSync: state.lastScaleSync,
@@ -461,33 +464,36 @@ export const useScalesStore = create<ScalesStore>()(
 );
 
 // Sélecteurs optimisés
-export const useScalesState = () => useScalesStore(state => ({
-  connectedScales: state.connectedScales,
-  isScanning: state.isScanning,
-  isSyncing: state.isSyncing,
-  lastScaleSync: state.lastScaleSync,
-  isLoading: state.isLoading,
-  error: state.error,
-}));
+export const useScalesState = () =>
+  useScalesStore(state => ({
+    connectedScales: state.connectedScales,
+    isScanning: state.isScanning,
+    isSyncing: state.isSyncing,
+    lastScaleSync: state.lastScaleSync,
+    isLoading: state.isLoading,
+    error: state.error,
+  }));
 
-export const useWeightHistory = () => useScalesStore(state => ({
-  weightHistory: state.weightHistory,
-  addWeightEntry: state.addWeightEntry,
-  updateWeightEntry: state.updateWeightEntry,
-  deleteWeightEntry: state.deleteWeightEntry,
-  loadWeightHistory: state.loadWeightHistory,
-  importWeightData: state.importWeightData,
-  getLatestWeight: state.getLatestWeight,
-  getWeightTrend: state.getWeightTrend,
-  getWeightStats: state.getWeightStats,
-}));
+export const useWeightHistory = () =>
+  useScalesStore(state => ({
+    weightHistory: state.weightHistory,
+    addWeightEntry: state.addWeightEntry,
+    updateWeightEntry: state.updateWeightEntry,
+    deleteWeightEntry: state.deleteWeightEntry,
+    loadWeightHistory: state.loadWeightHistory,
+    importWeightData: state.importWeightData,
+    getLatestWeight: state.getLatestWeight,
+    getWeightTrend: state.getWeightTrend,
+    getWeightStats: state.getWeightStats,
+  }));
 
-export const useScaleActions = () => useScalesStore(state => ({
-  connectScale: state.connectScale,
-  disconnectScale: state.disconnectScale,
-  syncScaleWeight: state.syncScaleWeight,
-  scanForScales: state.scanForScales,
-  syncAllScales: state.syncAllScales,
-  updateScaleStatus: state.updateScaleStatus,
-  loadConnectedScales: state.loadConnectedScales,
-}));
+export const useScaleActions = () =>
+  useScalesStore(state => ({
+    connectScale: state.connectScale,
+    disconnectScale: state.disconnectScale,
+    syncScaleWeight: state.syncScaleWeight,
+    scanForScales: state.scanForScales,
+    syncAllScales: state.syncAllScales,
+    updateScaleStatus: state.updateScaleStatus,
+    loadConnectedScales: state.loadConnectedScales,
+  }));

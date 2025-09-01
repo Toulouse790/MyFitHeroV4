@@ -41,7 +41,7 @@ class UnifiedSupabaseService {
   ): Promise<SupabaseResponse<TableRow<T>[]>> {
     try {
       const { columns = '*', filters = [], orderBy, limit, offset } = options;
-      
+
       let query = supabase.from(table).select(columns, { count: 'exact' });
 
       // Appliquer les filtres
@@ -63,13 +63,13 @@ class UnifiedSupabaseService {
       return {
         data: data as TableRow<T>[],
         error: error?.message || null,
-        count: count || 0
+        count: count || 0,
       };
     } catch (err) {
       return {
         data: null,
         error: err instanceof Error ? err.message : 'Erreur inconnue',
-        count: 0
+        count: 0,
       };
     }
   }
@@ -81,20 +81,16 @@ class UnifiedSupabaseService {
     columns: string = '*'
   ): Promise<SupabaseResponse<TableRow<T>>> {
     try {
-      const { data, error } = await supabase
-        .from(table)
-        .select(columns)
-        .eq('id', id)
-        .single();
+      const { data, error } = await supabase.from(table).select(columns).eq('id', id).single();
 
       return {
         data: data as TableRow<T>,
-        error: error?.message || null
+        error: error?.message || null,
       };
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : 'Erreur inconnue'
+        error: err instanceof Error ? err.message : 'Erreur inconnue',
       };
     }
   }
@@ -107,7 +103,7 @@ class UnifiedSupabaseService {
   ): Promise<SupabaseResponse<TableRow<T>[]>> {
     return this.get(table, {
       ...options,
-      filters: [{ column: 'user_id', operator: 'eq', value: userId }]
+      filters: [{ column: 'user_id', operator: 'eq', value: userId }],
     });
   }
 
@@ -125,12 +121,12 @@ class UnifiedSupabaseService {
 
       return {
         data: insertedData as TableRow<T>,
-        error: error?.message || null
+        error: error?.message || null,
       };
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : 'Erreur inconnue'
+        error: err instanceof Error ? err.message : 'Erreur inconnue',
       };
     }
   }
@@ -144,21 +140,21 @@ class UnifiedSupabaseService {
     try {
       const { data: upsertedData, error } = await supabase
         .from(table)
-        .upsert(data, { 
+        .upsert(data, {
           onConflict: conflictColumns?.join(',') || 'id',
-          ignoreDuplicates: false 
+          ignoreDuplicates: false,
         })
         .select()
         .single();
 
       return {
         data: upsertedData as TableRow<T>,
-        error: error?.message || null
+        error: error?.message || null,
       };
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : 'Erreur inconnue'
+        error: err instanceof Error ? err.message : 'Erreur inconnue',
       };
     }
   }
@@ -179,35 +175,29 @@ class UnifiedSupabaseService {
 
       return {
         data: updatedData as TableRow<T>,
-        error: error?.message || null
+        error: error?.message || null,
       };
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : 'Erreur inconnue'
+        error: err instanceof Error ? err.message : 'Erreur inconnue',
       };
     }
   }
 
   // DELETE - Suppression avec gestion d'erreur unifiée
-  async delete<T extends TableName>(
-    table: T,
-    id: string
-  ): Promise<SupabaseResponse<void>> {
+  async delete<T extends TableName>(table: T, id: string): Promise<SupabaseResponse<void>> {
     try {
-      const { error } = await supabase
-        .from(table)
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from(table).delete().eq('id', id);
 
       return {
         data: null,
-        error: error?.message || null
+        error: error?.message || null,
       };
     } catch (err) {
       return {
         data: null,
-        error: err instanceof Error ? err.message : 'Erreur inconnue'
+        error: err instanceof Error ? err.message : 'Erreur inconnue',
       };
     }
   }
@@ -218,18 +208,22 @@ class UnifiedSupabaseService {
   async getUserWorkouts(userId: string, limit = 50) {
     return this.getByUserId('workouts', userId, {
       orderBy: { column: 'created_at', ascending: false },
-      limit
+      limit,
     });
   }
 
   // Pattern daily_stats: upsert des stats quotidiennes
   async upsertDailyStats(userId: string, date: string, stats: Record<string, unknown>) {
-    return this.upsert('daily_stats', {
-      user_id: userId,
-      stat_date: date,
-      ...stats,
-      updated_at: new Date().toISOString()
-    }, ['user_id', 'stat_date']);
+    return this.upsert(
+      'daily_stats',
+      {
+        user_id: userId,
+        stat_date: date,
+        ...stats,
+        updated_at: new Date().toISOString(),
+      },
+      ['user_id', 'stat_date']
+    );
   }
 
   // Pattern user_profile: récupérer le profil complet

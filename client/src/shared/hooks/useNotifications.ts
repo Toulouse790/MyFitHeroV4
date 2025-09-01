@@ -24,26 +24,29 @@ export interface UseNotificationsReturn {
 export const useNotifications = (): UseNotificationsReturn => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp'>): string => {
-    const id = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newNotification: Notification = {
-      ...notification,
-      id,
-      timestamp: Date.now()
-    };
+  const addNotification = useCallback(
+    (notification: Omit<Notification, 'id' | 'timestamp'>): string => {
+      const id = `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newNotification: Notification = {
+        ...notification,
+        id,
+        timestamp: Date.now(),
+      };
 
-    setNotifications(prev => [...prev, newNotification]);
+      setNotifications(prev => [...prev, newNotification]);
 
-    // Auto-remove after duration (default 5 seconds) unless persistent
-    if (!notification.persistent) {
-      const duration = notification.duration || 5000;
-      setTimeout(() => {
-        setNotifications(prev => prev.filter(n => n.id !== id));
-      }, duration);
-    }
+      // Auto-remove after duration (default 5 seconds) unless persistent
+      if (!notification.persistent) {
+        const duration = notification.duration || 5000;
+        setTimeout(() => {
+          setNotifications(prev => prev.filter(n => n.id !== id));
+        }, duration);
+      }
 
-    return id;
-  }, []);
+      return id;
+    },
+    []
+  );
 
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(notification => notification.id !== id));
@@ -54,29 +57,45 @@ export const useNotifications = (): UseNotificationsReturn => {
   }, []);
 
   // Convenience methods
-  const success = useCallback((title: string, message?: string): string => {
-    const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'success', title };
-    if (message !== undefined) notification.message = message;
-    return addNotification(notification);
-  }, [addNotification]);
+  const success = useCallback(
+    (title: string, message?: string): string => {
+      const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'success', title };
+      if (message !== undefined) notification.message = message;
+      return addNotification(notification);
+    },
+    [addNotification]
+  );
 
-  const error = useCallback((title: string, message?: string): string => {
-    const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'error', title, persistent: true };
-    if (message !== undefined) notification.message = message;
-    return addNotification(notification);
-  }, [addNotification]);
+  const error = useCallback(
+    (title: string, message?: string): string => {
+      const notification: Omit<Notification, 'id' | 'timestamp'> = {
+        type: 'error',
+        title,
+        persistent: true,
+      };
+      if (message !== undefined) notification.message = message;
+      return addNotification(notification);
+    },
+    [addNotification]
+  );
 
-  const warning = useCallback((title: string, message?: string): string => {
-    const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'warning', title };
-    if (message !== undefined) notification.message = message;
-    return addNotification(notification);
-  }, [addNotification]);
+  const warning = useCallback(
+    (title: string, message?: string): string => {
+      const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'warning', title };
+      if (message !== undefined) notification.message = message;
+      return addNotification(notification);
+    },
+    [addNotification]
+  );
 
-  const info = useCallback((title: string, message?: string): string => {
-    const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'info', title };
-    if (message !== undefined) notification.message = message;
-    return addNotification(notification);
-  }, [addNotification]);
+  const info = useCallback(
+    (title: string, message?: string): string => {
+      const notification: Omit<Notification, 'id' | 'timestamp'> = { type: 'info', title };
+      if (message !== undefined) notification.message = message;
+      return addNotification(notification);
+    },
+    [addNotification]
+  );
 
   return {
     notifications,
@@ -86,7 +105,7 @@ export const useNotifications = (): UseNotificationsReturn => {
     success,
     error,
     warning,
-    info
+    info,
   };
 };
 

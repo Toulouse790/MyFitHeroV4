@@ -68,16 +68,16 @@ export interface UseLandingReturn {
   content: LandingContent | null;
   contentLoading: boolean;
   contentError: string | null;
-  
+
   // Analytics
   metrics: LandingMetrics | null;
   metricsLoading: boolean;
   metricsError: string | null;
-  
+
   // CTA tracking
   ctaStats: CTAStats[];
   ctaStatsLoading: boolean;
-  
+
   // Actions
   loadContent: () => Promise<void>;
   loadMetrics: () => Promise<void>;
@@ -85,11 +85,11 @@ export interface UseLandingReturn {
   updateContent: (section: keyof LandingContent, data: unknown) => Promise<boolean>;
   trackCTAClick: (section: string) => Promise<void>;
   trackPageView: () => Promise<void>;
-  
+
   // A/B Testing
   startABTest: (testName: string, variants: string[]) => Promise<boolean>;
   getABTestResult: (testName: string) => Promise<{ winner: string; confidence: number } | null>;
-  
+
   // Performance
   optimizeImages: () => Promise<boolean>;
   generateSitemap: () => Promise<boolean>;
@@ -119,10 +119,10 @@ export const useLanding = (): UseLandingReturn => {
       // Mock data - replace with actual API call
       const mockContent: LandingContent = {
         hero: {
-          title: "Transform Your Fitness Journey",
-          subtitle: "Join thousands of users who have achieved their fitness goals with MyFitHero",
-          ctaText: "Start Your Journey",
-          backgroundImage: "/images/hero-bg.jpg"
+          title: 'Transform Your Fitness Journey',
+          subtitle: 'Join thousands of users who have achieved their fitness goals with MyFitHero',
+          ctaText: 'Start Your Journey',
+          backgroundImage: '/images/hero-bg.jpg',
         },
         features: [
           {
@@ -131,7 +131,7 @@ export const useLanding = (): UseLandingReturn => {
             description: 'AI-powered workout plans tailored to your goals and fitness level',
             icon: 'dumbbell',
             order: 1,
-            enabled: true
+            enabled: true,
           },
           {
             id: 'feature-2',
@@ -139,7 +139,7 @@ export const useLanding = (): UseLandingReturn => {
             description: 'Advanced analytics to monitor your fitness progress over time',
             icon: 'chart',
             order: 2,
-            enabled: true
+            enabled: true,
           },
           {
             id: 'feature-3',
@@ -147,7 +147,7 @@ export const useLanding = (): UseLandingReturn => {
             description: 'Connect with like-minded fitness enthusiasts for motivation',
             icon: 'users',
             order: 3,
-            enabled: true
+            enabled: true,
           },
           {
             id: 'feature-4',
@@ -155,8 +155,8 @@ export const useLanding = (): UseLandingReturn => {
             description: 'Access to certified trainers and nutrition experts',
             icon: 'user-check',
             order: 4,
-            enabled: true
-          }
+            enabled: true,
+          },
         ],
         testimonials: [
           {
@@ -164,18 +164,20 @@ export const useLanding = (): UseLandingReturn => {
             name: 'Sarah Johnson',
             avatar: '/images/testimonials/sarah.jpg',
             rating: 5,
-            comment: 'MyFitHero completely transformed my workout routine. I\'ve never been more motivated!',
+            comment:
+              "MyFitHero completely transformed my workout routine. I've never been more motivated!",
             featured: true,
-            order: 1
+            order: 1,
           },
           {
             id: 'testimonial-2',
             name: 'Mike Chen',
             avatar: '/images/testimonials/mike.jpg',
             rating: 5,
-            comment: 'The personalized workouts are incredible. It\'s like having a personal trainer 24/7.',
+            comment:
+              "The personalized workouts are incredible. It's like having a personal trainer 24/7.",
             featured: true,
-            order: 2
+            order: 2,
           },
           {
             id: 'testimonial-3',
@@ -184,8 +186,8 @@ export const useLanding = (): UseLandingReturn => {
             rating: 4,
             comment: 'Great app with amazing features. The community aspect keeps me accountable.',
             featured: false,
-            order: 3
-          }
+            order: 3,
+          },
         ],
         pricing: {
           enabled: true,
@@ -195,49 +197,61 @@ export const useLanding = (): UseLandingReturn => {
               name: 'Basic',
               price: 9.99,
               features: ['Basic workouts', 'Progress tracking', 'Community access'],
-              recommended: false
+              recommended: false,
             },
             {
               id: 'pro',
               name: 'Pro',
               price: 19.99,
-              features: ['All Basic features', 'Personalized plans', 'Expert consultations', 'Advanced analytics'],
-              recommended: true
+              features: [
+                'All Basic features',
+                'Personalized plans',
+                'Expert consultations',
+                'Advanced analytics',
+              ],
+              recommended: true,
             },
             {
               id: 'premium',
               name: 'Premium',
               price: 29.99,
-              features: ['All Pro features', '1-on-1 coaching', 'Nutrition plans', 'Priority support'],
-              recommended: false
-            }
-          ]
+              features: [
+                'All Pro features',
+                '1-on-1 coaching',
+                'Nutrition plans',
+                'Priority support',
+              ],
+              recommended: false,
+            },
+          ],
         },
         faq: [
           {
             id: 'faq-1',
             question: 'How does the personalized workout system work?',
-            answer: 'Our AI analyzes your fitness level, goals, and preferences to create custom workout plans that adapt as you progress.',
-            order: 1
+            answer:
+              'Our AI analyzes your fitness level, goals, and preferences to create custom workout plans that adapt as you progress.',
+            order: 1,
           },
           {
             id: 'faq-2',
             question: 'Can I cancel my subscription anytime?',
-            answer: 'Yes, you can cancel your subscription at any time. There are no long-term commitments.',
-            order: 2
+            answer:
+              'Yes, you can cancel your subscription at any time. There are no long-term commitments.',
+            order: 2,
           },
           {
             id: 'faq-3',
             question: 'Is there a free trial available?',
             answer: 'Yes, we offer a 7-day free trial for all new users to explore all features.',
-            order: 3
-          }
-        ]
+            order: 3,
+          },
+        ],
       };
 
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 800));
-      
+
       setContent(mockContent);
     } catch (error) {
       setContentError(error instanceof Error ? error.message : 'Failed to load content');
@@ -259,12 +273,12 @@ export const useLanding = (): UseLandingReturn => {
         conversionRate: 3.2,
         bounceRate: 45.8,
         averageSessionTime: 185,
-        signupRate: 2.1
+        signupRate: 2.1,
       };
 
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 600));
-      
+
       setMetrics(mockMetrics);
     } catch (error) {
       setMetricsError(error instanceof Error ? error.message : 'Failed to load metrics');
@@ -284,31 +298,31 @@ export const useLanding = (): UseLandingReturn => {
           section: 'hero',
           clicks: 1250,
           impressions: 8930,
-          conversionRate: 14.0
+          conversionRate: 14.0,
         },
         {
           section: 'features',
           clicks: 890,
           impressions: 7650,
-          conversionRate: 11.6
+          conversionRate: 11.6,
         },
         {
           section: 'pricing',
           clicks: 560,
           impressions: 4320,
-          conversionRate: 13.0
+          conversionRate: 13.0,
         },
         {
           section: 'testimonials',
           clicks: 320,
           impressions: 3200,
-          conversionRate: 10.0
-        }
+          conversionRate: 10.0,
+        },
       ];
 
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       setCTAStats(mockCTAStats);
     } catch (error) {
       console.error('Failed to load CTA stats:', error);
@@ -318,40 +332,49 @@ export const useLanding = (): UseLandingReturn => {
   }, []);
 
   // Update content
-  const updateContent = useCallback(async (section: keyof LandingContent, data: unknown): Promise<boolean> => {
-    try {
-      if (!content) return false;
+  const updateContent = useCallback(
+    async (section: keyof LandingContent, data: unknown): Promise<boolean> => {
+      try {
+        if (!content) return false;
 
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setContent(prev => prev ? {
-        ...prev,
-        [section]: data
-      } : null);
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to update content:', error);
-      return false;
-    }
-  }, [content]);
+        // Mock API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        setContent(prev =>
+          prev
+            ? {
+                ...prev,
+                [section]: data,
+              }
+            : null
+        );
+
+        return true;
+      } catch (error) {
+        console.error('Failed to update content:', error);
+        return false;
+      }
+    },
+    [content]
+  );
 
   // Track CTA click
   const trackCTAClick = useCallback(async (section: string): Promise<void> => {
     try {
       // Mock tracking - replace with actual analytics
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      setCTAStats(prev => prev.map(stat => 
-        stat.section === section 
-          ? { 
-              ...stat, 
-              clicks: stat.clicks + 1,
-              conversionRate: ((stat.clicks + 1) / stat.impressions) * 100
-            }
-          : stat
-      ));
+
+      setCTAStats(prev =>
+        prev.map(stat =>
+          stat.section === section
+            ? {
+                ...stat,
+                clicks: stat.clicks + 1,
+                conversionRate: ((stat.clicks + 1) / stat.impressions) * 100,
+              }
+            : stat
+        )
+      );
     } catch (error) {
       console.error('Failed to track CTA click:', error);
     }
@@ -362,48 +385,58 @@ export const useLanding = (): UseLandingReturn => {
     try {
       // Mock tracking - replace with actual analytics
       await new Promise(resolve => setTimeout(resolve, 50));
-      
-      setMetrics(prev => prev ? {
-        ...prev,
-        pageViews: prev.pageViews + 1
-      } : null);
+
+      setMetrics(prev =>
+        prev
+          ? {
+              ...prev,
+              pageViews: prev.pageViews + 1,
+            }
+          : null
+      );
     } catch (error) {
       console.error('Failed to track page view:', error);
     }
   }, []);
 
   // Start A/B test
-  const startABTest = useCallback(async (testName: string, variants: string[]): Promise<boolean> => {
-    try {
-      // Mock A/B test setup
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log(`Starting A/B test: ${testName} with variants:`, variants);
-      return true;
-    } catch (error) {
-      console.error('Failed to start A/B test:', error);
-      return false;
-    }
-  }, []);
+  const startABTest = useCallback(
+    async (testName: string, variants: string[]): Promise<boolean> => {
+      try {
+        // Mock A/B test setup
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log(`Starting A/B test: ${testName} with variants:`, variants);
+        return true;
+      } catch (error) {
+        console.error('Failed to start A/B test:', error);
+        return false;
+      }
+    },
+    []
+  );
 
   // Get A/B test result
-  const getABTestResult = useCallback(async (testName: string): Promise<{ winner: string; confidence: number } | null> => {
-    try {
-      // Mock A/B test results
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Mock results
-      const mockResults = {
-        winner: 'variant-a',
-        confidence: 85.6
-      };
-      
-      console.log(`A/B test results for ${testName}:`, mockResults);
-      return mockResults;
-    } catch (error) {
-      console.error('Failed to get A/B test result:', error);
-      return null;
-    }
-  }, []);
+  const getABTestResult = useCallback(
+    async (testName: string): Promise<{ winner: string; confidence: number } | null> => {
+      try {
+        // Mock A/B test results
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Mock results
+        const mockResults = {
+          winner: 'variant-a',
+          confidence: 85.6,
+        };
+
+        console.log(`A/B test results for ${testName}:`, mockResults);
+        return mockResults;
+      } catch (error) {
+        console.error('Failed to get A/B test result:', error);
+        return null;
+      }
+    },
+    []
+  );
 
   // Optimize images
   const optimizeImages = useCallback(async (): Promise<boolean> => {
@@ -448,16 +481,16 @@ export const useLanding = (): UseLandingReturn => {
     content,
     contentLoading,
     contentError,
-    
+
     // Analytics
     metrics,
     metricsLoading,
     metricsError,
-    
+
     // CTA tracking
     ctaStats,
     ctaStatsLoading,
-    
+
     // Actions
     loadContent,
     loadMetrics,
@@ -465,14 +498,14 @@ export const useLanding = (): UseLandingReturn => {
     updateContent,
     trackCTAClick,
     trackPageView,
-    
+
     // A/B Testing
     startABTest,
     getABTestResult,
-    
+
     // Performance
     optimizeImages,
-    generateSitemap
+    generateSitemap,
   };
 };
 

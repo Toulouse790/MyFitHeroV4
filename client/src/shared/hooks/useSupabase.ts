@@ -3,11 +3,16 @@ import { useState, useEffect, useCallback } from 'react';
 // Mock Supabase client interface for development
 interface MockSupabaseClient {
   auth: {
-    signIn: (credentials: { email: string; password: string }) => Promise<{ data: any; error: any }>;
+    signIn: (credentials: {
+      email: string;
+      password: string;
+    }) => Promise<{ data: any; error: any }>;
     signUp: (userData: { email: string; password: string }) => Promise<{ data: any; error: any }>;
     signOut: () => Promise<{ error: any }>;
     getUser: () => Promise<{ data: { user: any }; error: any }>;
-    onAuthStateChange: (callback: (event: string, session: any) => void) => { unsubscribe: () => void };
+    onAuthStateChange: (callback: (event: string, session: any) => void) => {
+      unsubscribe: () => void;
+    };
   };
   from: (table: string) => {
     select: (fields?: string) => Promise<{ data: any; error: any }>;
@@ -29,19 +34,19 @@ interface MockSupabaseClient {
 const createMockSupabaseClient = (): MockSupabaseClient => {
   return {
     auth: {
-      signIn: async (credentials) => {
+      signIn: async credentials => {
         // Mock authentication
         console.log('Mock Supabase: signIn', credentials);
         return {
           data: { user: { id: '1', email: credentials.email } },
-          error: null
+          error: null,
         };
       },
-      signUp: async (userData) => {
+      signUp: async userData => {
         console.log('Mock Supabase: signUp', userData);
         return {
           data: { user: { id: '1', email: userData.email } },
-          error: null
+          error: null,
         };
       },
       signOut: async () => {
@@ -52,28 +57,28 @@ const createMockSupabaseClient = (): MockSupabaseClient => {
         console.log('Mock Supabase: getUser');
         return {
           data: { user: { id: '1', email: 'user@example.com' } },
-          error: null
+          error: null,
         };
       },
-      onAuthStateChange: (callback) => {
+      onAuthStateChange: callback => {
         console.log('Mock Supabase: onAuthStateChange');
         // Mock auth state change
         setTimeout(() => {
           callback('SIGNED_IN', { user: { id: '1', email: 'user@example.com' } });
         }, 100);
         return { unsubscribe: () => console.log('Unsubscribed from auth changes') };
-      }
+      },
     },
     from: (table: string) => ({
-      select: async (fields) => {
+      select: async fields => {
         console.log(`Mock Supabase: select from ${table}`, fields);
         return { data: [], error: null };
       },
-      insert: async (data) => {
+      insert: async data => {
         console.log(`Mock Supabase: insert into ${table}`, data);
         return { data: [{ id: Date.now(), ...data }], error: null };
       },
-      update: async (data) => {
+      update: async data => {
         console.log(`Mock Supabase: update ${table}`, data);
         return { data: [{ id: 1, ...data }], error: null };
       },
@@ -84,19 +89,19 @@ const createMockSupabaseClient = (): MockSupabaseClient => {
       eq: (column, value) => {
         console.log(`Mock Supabase: filter ${column} = ${value}`);
         return {
-          select: async (fields) => ({ data: [], error: null }),
-          update: async (data) => ({ data: [data], error: null }),
-          delete: async () => ({ data: null, error: null })
+          select: async fields => ({ data: [], error: null }),
+          update: async data => ({ data: [data], error: null }),
+          delete: async () => ({ data: null, error: null }),
         };
-      }
+      },
     }),
     storage: {
       from: (bucket: string) => ({
         upload: async (path: string, file: File) => {
           console.log(`Mock Supabase: upload to ${bucket}/${path}`, file.name);
-          return { 
-            data: { path: `${bucket}/${path}`, fullPath: `mock-url/${bucket}/${path}` }, 
-            error: null 
+          return {
+            data: { path: `${bucket}/${path}`, fullPath: `mock-url/${bucket}/${path}` },
+            error: null,
           };
         },
         download: async (path: string) => {
@@ -106,9 +111,9 @@ const createMockSupabaseClient = (): MockSupabaseClient => {
         remove: async (paths: string[]) => {
           console.log(`Mock Supabase: remove from ${bucket}`, paths);
           return { data: null, error: null };
-        }
-      })
-    }
+        },
+      }),
+    },
   };
 };
 
@@ -117,18 +122,38 @@ export interface UseSupabaseReturn {
   isConnected: boolean;
   error: string | null;
   // Auth methods
-  signIn: (email: string, password: string) => Promise<{ success: boolean; data?: any; error?: string }>;
-  signUp: (email: string, password: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
+  signUp: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
   signOut: () => Promise<{ success: boolean; error?: string }>;
   getCurrentUser: () => Promise<{ success: boolean; data?: any; error?: string }>;
   // Database methods
-  query: (table: string, options?: { select?: string; filters?: Record<string, any> }) => Promise<{ success: boolean; data?: any; error?: string }>;
+  query: (
+    table: string,
+    options?: { select?: string; filters?: Record<string, any> }
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
   insert: (table: string, data: any) => Promise<{ success: boolean; data?: any; error?: string }>;
-  update: (table: string, id: any, data: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+  update: (
+    table: string,
+    id: any,
+    data: any
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
   remove: (table: string, id: any) => Promise<{ success: boolean; error?: string }>;
   // Storage methods
-  uploadFile: (bucket: string, path: string, file: File) => Promise<{ success: boolean; data?: any; error?: string }>;
-  downloadFile: (bucket: string, path: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+  uploadFile: (
+    bucket: string,
+    path: string,
+    file: File
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
+  downloadFile: (
+    bucket: string,
+    path: string
+  ) => Promise<{ success: boolean; data?: any; error?: string }>;
   deleteFile: (bucket: string, paths: string[]) => Promise<{ success: boolean; error?: string }>;
 }
 
@@ -148,35 +173,41 @@ export const useSupabase = (): UseSupabaseReturn => {
   }, []);
 
   // Auth methods
-  const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      const { data, error } = await client.auth.signIn({ email, password });
-      if (error) {
-        return { success: false, error: error.message };
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const { data, error } = await client.auth.signIn({ email, password });
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Sign in failed',
+        };
       }
-      return { success: true, data };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Sign in failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
 
-  const signUp = useCallback(async (email: string, password: string) => {
-    try {
-      const { data, error } = await client.auth.signUp({ email, password });
-      if (error) {
-        return { success: false, error: error.message };
+  const signUp = useCallback(
+    async (email: string, password: string) => {
+      try {
+        const { data, error } = await client.auth.signUp({ email, password });
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Sign up failed',
+        };
       }
-      return { success: true, data };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Sign up failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
 
   const signOut = useCallback(async () => {
     try {
@@ -186,9 +217,9 @@ export const useSupabase = (): UseSupabaseReturn => {
       }
       return { success: true };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Sign out failed' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Sign out failed',
       };
     }
   }, [client]);
@@ -201,130 +232,148 @@ export const useSupabase = (): UseSupabaseReturn => {
       }
       return { success: true, data: data.user };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Get user failed' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Get user failed',
       };
     }
   }, [client]);
 
   // Database methods
-  const query = useCallback(async (
-    table: string, 
-    options?: { select?: string; filters?: Record<string, any> }
-  ) => {
-    try {
-      let queryBuilder = client.from(table);
-      
-      if (options?.filters) {
-        Object.entries(options.filters).forEach(([key, value]) => {
-          queryBuilder = queryBuilder.eq(key, value);
-        });
-      }
-      
-      const { data, error } = await queryBuilder.select(options?.select);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true, data };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Query failed' 
-      };
-    }
-  }, [client]);
+  const query = useCallback(
+    async (table: string, options?: { select?: string; filters?: Record<string, any> }) => {
+      try {
+        let queryBuilder = client.from(table);
 
-  const insert = useCallback(async (table: string, data: any) => {
-    try {
-      const { data: insertedData, error } = await client.from(table).insert(data);
-      if (error) {
-        return { success: false, error: error.message };
-      }
-      return { success: true, data: insertedData };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Insert failed' 
-      };
-    }
-  }, [client]);
+        if (options?.filters) {
+          Object.entries(options.filters).forEach(([key, value]) => {
+            queryBuilder = queryBuilder.eq(key, value);
+          });
+        }
 
-  const update = useCallback(async (table: string, id: any, data: any) => {
-    try {
-      const { data: updatedData, error } = await client.from(table).eq('id', id).update(data);
-      if (error) {
-        return { success: false, error: error.message };
+        const { data, error } = await queryBuilder.select(options?.select);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Query failed',
+        };
       }
-      return { success: true, data: updatedData };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Update failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
 
-  const remove = useCallback(async (table: string, id: any) => {
-    try {
-      const { error } = await client.from(table).eq('id', id).delete();
-      if (error) {
-        return { success: false, error: error.message };
+  const insert = useCallback(
+    async (table: string, data: any) => {
+      try {
+        const { data: insertedData, error } = await client.from(table).insert(data);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data: insertedData };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Insert failed',
+        };
       }
-      return { success: true };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Delete failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
+
+  const update = useCallback(
+    async (table: string, id: any, data: any) => {
+      try {
+        const { data: updatedData, error } = await client.from(table).eq('id', id).update(data);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data: updatedData };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Update failed',
+        };
+      }
+    },
+    [client]
+  );
+
+  const remove = useCallback(
+    async (table: string, id: any) => {
+      try {
+        const { error } = await client.from(table).eq('id', id).delete();
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Delete failed',
+        };
+      }
+    },
+    [client]
+  );
 
   // Storage methods
-  const uploadFile = useCallback(async (bucket: string, path: string, file: File) => {
-    try {
-      const { data, error } = await client.storage.from(bucket).upload(path, file);
-      if (error) {
-        return { success: false, error: error.message };
+  const uploadFile = useCallback(
+    async (bucket: string, path: string, file: File) => {
+      try {
+        const { data, error } = await client.storage.from(bucket).upload(path, file);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Upload failed',
+        };
       }
-      return { success: true, data };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Upload failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
 
-  const downloadFile = useCallback(async (bucket: string, path: string) => {
-    try {
-      const { data, error } = await client.storage.from(bucket).download(path);
-      if (error) {
-        return { success: false, error: error.message };
+  const downloadFile = useCallback(
+    async (bucket: string, path: string) => {
+      try {
+        const { data, error } = await client.storage.from(bucket).download(path);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true, data };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Download failed',
+        };
       }
-      return { success: true, data };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Download failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
 
-  const deleteFile = useCallback(async (bucket: string, paths: string[]) => {
-    try {
-      const { error } = await client.storage.from(bucket).remove(paths);
-      if (error) {
-        return { success: false, error: error.message };
+  const deleteFile = useCallback(
+    async (bucket: string, paths: string[]) => {
+      try {
+        const { error } = await client.storage.from(bucket).remove(paths);
+        if (error) {
+          return { success: false, error: error.message };
+        }
+        return { success: true };
+      } catch (err) {
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Delete failed',
+        };
       }
-      return { success: true };
-    } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Delete failed' 
-      };
-    }
-  }, [client]);
+    },
+    [client]
+  );
 
   return {
     client,
@@ -340,7 +389,7 @@ export const useSupabase = (): UseSupabaseReturn => {
     remove,
     uploadFile,
     downloadFile,
-    deleteFile
+    deleteFile,
   };
 };
 

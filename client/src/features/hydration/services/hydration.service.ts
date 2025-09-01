@@ -20,7 +20,7 @@ export class HydrationService {
       const response = await fetch(`${this.BASE_URL}/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Erreur lors de la mise à jour');
       return await response.json();
@@ -37,7 +37,7 @@ export class HydrationService {
       userId: 'user_123',
       data: {},
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
   }
 }

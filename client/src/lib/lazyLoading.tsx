@@ -3,21 +3,16 @@ import { lazy, ComponentType, LazyExoticComponent } from 'react';
 // Error boundary for lazy loaded components
 export const LazyComponentError = ({ error, retry }: { error: Error; retry: () => void }) => (
   <div className="flex flex-col items-center justify-center p-8 text-center">
-    <h3 className="text-lg font-semibold text-red-600 mb-2">
-      Failed to load component
-    </h3>
+    <h3 className="text-lg font-semibold text-red-600 mb-2">Failed to load component</h3>
     <p className="text-gray-600 mb-4">{error.message}</p>
-    <button
-      onClick={retry}
-      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-    >
+    <button onClick={retry} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
       Retry
     </button>
   </div>
 );
 
 // Loading fallback component
-export const LazyComponentLoading = ({ message = "Loading..." }: { message?: string }) => (
+export const LazyComponentLoading = ({ message = 'Loading...' }: { message?: string }) => (
   <div className="flex items-center justify-center p-8">
     <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-blue-600"></div>
     <span className="ml-3 text-gray-600">{message}</span>
@@ -57,12 +52,18 @@ export const LazyComponents = {
   WorkoutHistory: createLazyComponent(() => import('../features/workout/pages/WorkoutHistory')),
 
   // Nutrition components
-  NutritionDashboard: createLazyComponent(() => import('../features/nutrition/pages/NutritionDashboard')),
+  NutritionDashboard: createLazyComponent(
+    () => import('../features/nutrition/pages/NutritionDashboard')
+  ),
   MealPlanner: createLazyComponent(() => import('../features/nutrition/pages/MealPlanner')),
-  NutritionTracking: createLazyComponent(() => import('../features/nutrition/pages/NutritionTracking')),
+  NutritionTracking: createLazyComponent(
+    () => import('../features/nutrition/pages/NutritionTracking')
+  ),
 
   // Recovery components
-  RecoveryDashboard: createLazyComponent(() => import('../features/recovery/pages/RecoveryDashboard')),
+  RecoveryDashboard: createLazyComponent(
+    () => import('../features/recovery/pages/RecoveryDashboard')
+  ),
   RecoveryMetrics: createLazyComponent(() => import('../features/recovery/pages/RecoveryMetrics')),
 
   // Admin components
@@ -112,9 +113,7 @@ export const preloadCriticalRoutes = (): void => {
 };
 
 // Hook for lazy loading with loading state
-export const useLazyComponent = (
-  importFunc: () => Promise<{ default: ComponentType<any> }>
-) => {
+export const useLazyComponent = (importFunc: () => Promise<{ default: ComponentType<any> }>) => {
   const LazyComponent = createLazyComponent(importFunc);
   return LazyComponent;
 };
@@ -130,11 +129,11 @@ export const routeLazyMap = {
   '/workout': LazyComponents.WorkoutDashboard,
   '/workout/session': LazyComponents.WorkoutSession,
   '/workout/history': LazyComponents.WorkoutHistory,
-  
+
   '/nutrition': LazyComponents.NutritionDashboard,
   '/nutrition/meals': LazyComponents.MealPlanner,
   '/nutrition/tracking': LazyComponents.NutritionTracking,
-  
+
   '/recovery': LazyComponents.RecoveryDashboard,
   '/recovery/metrics': LazyComponents.RecoveryMetrics,
 

@@ -32,7 +32,7 @@ if (typeof globalThis.TransformStream === 'undefined') {
   globalThis.TransformStream = class TransformStream {
     constructor(transformer = {}) {
       this.readable = new ReadableStream();
-      this.writable = new WritableStream(); 
+      this.writable = new WritableStream();
     }
   };
 }
@@ -41,15 +41,19 @@ if (typeof globalThis.TransformStream === 'undefined') {
 if (typeof globalThis.ReadableStream === 'undefined') {
   globalThis.ReadableStream = class ReadableStream {
     constructor() {}
-    getReader() { return { read: () => Promise.resolve({ done: true }) }; }
+    getReader() {
+      return { read: () => Promise.resolve({ done: true }) };
+    }
   };
 }
 
-// WritableStream polyfill basique si manquant  
+// WritableStream polyfill basique si manquant
 if (typeof globalThis.WritableStream === 'undefined') {
   globalThis.WritableStream = class WritableStream {
     constructor() {}
-    getWriter() { return { write: () => Promise.resolve() }; }
+    getWriter() {
+      return { write: () => Promise.resolve() };
+    }
   };
 }
 

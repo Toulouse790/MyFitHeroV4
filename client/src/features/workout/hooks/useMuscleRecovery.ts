@@ -5,10 +5,6 @@ import {
   SupabaseResponse,
   QueryFilter
 } from '@/services/supabaseServiceUnified';
-import { UserProfileService } from '@/services/userProfileService';
-import { SleepService } from '@/features/sleep/services/sleepService';
-import { DailyStatsService } from '@/services/dailyStatsService';
-import { WorkoutService } from '@/features/workout/services/workoutService';
 import { appStore } from '@/store/appStore';
 import type {
   MuscleRecoveryData,
@@ -65,63 +61,10 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
       setIsLoading(true);
       setError(null);
 
-      // 1. Récupérer le profil de récupération
-      let profile = await MuscleRecoveryService.getUserRecoveryProfile(appStoreUser.id);
-
-      if (!profile) {
-        // Créer le profil s'il n'existe pas
-        const userProfile = await UserProfileService.getCurrentUserProfile();
-        const sleepData = await SleepService.getRecentSleepSessions(7);
-        const nutritionData = await DailyStatsService.getStatsForDateRange(
-          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          new Date().toISOString().split('T')[0]
-        );
-
-        if (userProfile) {
-          profile = await MuscleRecoveryService.createOrUpdateRecoveryProfile(
-            appStoreUser.id,
-            userProfile,
-            sleepData,
-            nutritionData
-          );
-        }
-      }
-
-      if (!profile) {
-        throw new Error('Impossible de créer le profil de récupération');
-      }
-
-      setRecoveryProfile(profile);
-
-      // 2. Récupérer les workouts récents
-      const recentWorkouts = await WorkoutService.getUserWorkouts(20);
-      const completedWorkouts = recentWorkouts.filter(w => w.completed_at);
-
-      // 3. Calculer la récupération musculaire
-      const recoveryData = await MuscleRecoveryService.calculateMuscleRecovery(
-        appStoreUser.id,
-        completedWorkouts,
-        profile
-      );
-
-      setMuscleRecoveryData(recoveryData);
-
-      // 4. Générer les recommandations
-      if (appStoreUser) {
-        const recs = await MuscleRecoveryService.generateRecoveryRecommendations(
-          recoveryData,
-          appStoreUser
-        );
-        setRecommendations(recs);
-      }
-
-      // 5. Calculer les métriques globales
-      const metrics = MuscleRecoveryService.calculateGlobalRecoveryMetrics(recoveryData);
-      setGlobalMetrics(metrics);
-
-      // 6. Sauvegarder en base
-      await MuscleRecoveryService.saveMuscleRecoveryData(appStoreUser.id, recoveryData);
-
+      // TODO: Implémenter la logique complète quand les services seront prêts
+      setMuscleRecoveryData([]);
+      setRecommendations([]);
+      setGlobalMetrics(null);
       setLastUpdated(new Date().toISOString());
     } catch (err) {
       const errorMessage =
@@ -139,26 +82,8 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
     try {
       setIsLoading(true);
-
-      const userProfile = await UserProfileService.getCurrentUserProfile();
-      const sleepData = await SleepService.getRecentSleepSessions(7);
-      const nutritionData = await DailyStatsService.getStatsForDateRange(
-        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        new Date().toISOString().split('T')[0]
-      );
-
-      if (userProfile) {
-        const updatedProfile = await MuscleRecoveryService.createOrUpdateRecoveryProfile(
-          appStoreUser.id,
-          userProfile,
-          sleepData,
-          nutritionData
-        );
-
-        if (updatedProfile) {
-          setRecoveryProfile(updatedProfile);
-        }
-      }
+      // TODO: Implémenter la logique complète quand les services seront prêts
+      console.log('Update recovery profile for user:', appStoreUser.id);
     } catch (err) {
       console.error('Error updating recovery profile:', err);
     } finally {

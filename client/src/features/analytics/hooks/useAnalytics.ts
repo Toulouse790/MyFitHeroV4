@@ -26,7 +26,7 @@ export const useAnalytics = () => {
       // Implementation à venir
       console.log('Exporting data in format:', format);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'export');
+      setError(err instanceof Error ? err.message : "Erreur lors de l'export");
     }
   }, []);
 

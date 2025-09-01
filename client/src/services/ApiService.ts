@@ -1,10 +1,10 @@
-import { 
-  ApiResponse, 
-  ApiError, 
-  RequestConfig, 
+import {
+  ApiResponse,
+  ApiError,
+  RequestConfig,
   PaginatedResponse,
   UploadProgress,
-  UploadResponse 
+  UploadResponse,
 } from '../types/api';
 
 export class ApiService {
@@ -16,7 +16,7 @@ export class ApiService {
     this.baseURL = baseURL.replace(/\/$/, ''); // Remove trailing slash
     this.defaultHeaders = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      Accept: 'application/json',
     };
   }
 
@@ -32,13 +32,13 @@ export class ApiService {
   // Build URL with parameters
   private buildUrl(endpoint: string, params?: Record<string, string | number>): string {
     const url = new URL(`${this.baseURL}${endpoint}`);
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, String(value));
       });
     }
-    
+
     return url.toString();
   }
 
@@ -59,36 +59,26 @@ export class ApiService {
       status: response.status,
       statusText: response.statusText,
       message: errorMessage,
-      details: errorDetails
+      details: errorDetails,
     };
 
     throw apiError;
   }
 
   // Generic request method
-  async request<T>(
-    endpoint: string, 
-    config: RequestConfig = {}
-  ): Promise<ApiResponse<T>> {
-    const {
-      method = 'GET',
-      headers = {},
-      body,
-      params,
-      timeout = 30000,
-      retries = 3
-    } = config;
+  async request<T>(endpoint: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
+    const { method = 'GET', headers = {}, body, params, timeout = 30000, retries = 3 } = config;
 
     const url = this.buildUrl(endpoint, params);
     const requestId = `${method}-${url}-${Date.now()}`;
-    
+
     // Create abort controller for this request
     const abortController = new AbortController();
     this.abortControllers.set(requestId, abortController);
 
     const requestHeaders = {
       ...this.defaultHeaders,
-      ...headers
+      ...headers,
     };
 
     // Remove Content-Type for FormData
@@ -99,14 +89,13 @@ export class ApiService {
     const requestConfig: RequestInit = {
       method,
       headers: requestHeaders,
-      signal: abortController.signal
+      signal: abortController.signal,
     };
 
     // Add body for non-GET requests
     if (body && method !== 'GET') {
-      requestConfig.body = body instanceof FormData || typeof body === 'string' 
-        ? body 
-        : JSON.stringify(body);
+      requestConfig.body =
+        body instanceof FormData || typeof body === 'string' ? body : JSON.stringify(body);
     }
 
     let lastError: Error;
@@ -126,21 +115,22 @@ export class ApiService {
         }
 
         const data: ApiResponse<T> = await response.json();
-        
+
         // Clean up
         this.abortControllers.delete(requestId);
-        
-        return data;
 
+        return data;
       } catch (error) {
         lastError = error as Error;
-        
+
         // Don't retry on abort or client errors (4xx)
         if (
-          error instanceof Error && 
-          (error.name === 'AbortError' || 
-           ('status' in error && typeof error.status === 'number' && 
-            error.status >= 400 && error.status < 500))
+          error instanceof Error &&
+          (error.name === 'AbortError' ||
+            ('status' in error &&
+              typeof error.status === 'number' &&
+              error.status >= 400 &&
+              error.status < 500))
         ) {
           break;
         }
@@ -158,7 +148,10 @@ export class ApiService {
   }
 
   // Convenience methods
-  async get<T>(endpoint: string, params?: Record<string, string | number>): Promise<ApiResponse<T>> {
+  async get<T>(
+    endpoint: string,
+    params?: Record<string, string | number>
+  ): Promise<ApiResponse<T>> {
     const config: RequestConfig = { method: 'GET' };
     if (params) config.params = params;
     return this.request<T>(endpoint, config);
@@ -187,21 +180,17 @@ export class ApiService {
   }
 
   // Paginated requests
-  async getPaginated<T>(
-    endpoint: string, 
-    page = 1, 
-    limit = 20
-  ): Promise<PaginatedResponse<T>> {
+  async getPaginated<T>(endpoint: string, page = 1, limit = 20): Promise<PaginatedResponse<T>> {
     return this.request<T[]>(endpoint, {
       method: 'GET',
-      params: { page, limit }
+      params: { page, limit },
     }) as Promise<PaginatedResponse<T>>;
   }
 
   // File upload with progress
   async upload(
-    endpoint: string, 
-    file: File, 
+    endpoint: string,
+    file: File,
     onProgress?: (progress: UploadProgress) => void
   ): Promise<ApiResponse<UploadResponse>> {
     return new Promise((resolve, reject) => {
@@ -212,12 +201,12 @@ export class ApiService {
 
       // Upload progress
       if (onProgress) {
-        xhr.upload.addEventListener('progress', (event) => {
+        xhr.upload.addEventListener('progress', event => {
           if (event.lengthComputable) {
             const progress: UploadProgress = {
               loaded: event.loaded,
               total: event.total,
-              percentage: Math.round((event.loaded / event.total) * 100)
+              percentage: Math.round((event.loaded / event.total) * 100),
             };
             onProgress(progress);
           }
@@ -242,7 +231,7 @@ export class ApiService {
       });
 
       xhr.open('POST', this.buildUrl(endpoint));
-      
+
       // Add auth header if available
       if (this.defaultHeaders['Authorization']) {
         xhr.setRequestHeader('Authorization', this.defaultHeaders['Authorization']);

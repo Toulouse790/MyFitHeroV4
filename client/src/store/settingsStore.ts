@@ -122,24 +122,24 @@ export const useSettingsStore = create<SettingsStore>()(
       ...initialState,
 
       // Actions spécifiques
-      updateTheme: (theme) => {
+      updateTheme: theme => {
         set(state => ({
           settings: { ...state.settings, theme },
           error: null,
         }));
-        
+
         // Appliquer le thème immédiatement
         document.documentElement.setAttribute('data-theme', theme);
       },
 
-      updateLanguage: (language) => {
+      updateLanguage: language => {
         set(state => ({
           settings: { ...state.settings, language },
           error: null,
         }));
       },
 
-      updateUnits: (units) => {
+      updateUnits: units => {
         set(state => ({
           settings: {
             ...state.settings,
@@ -149,7 +149,7 @@ export const useSettingsStore = create<SettingsStore>()(
         }));
       },
 
-      updateNotifications: (notifications) => {
+      updateNotifications: notifications => {
         set(state => ({
           settings: {
             ...state.settings,
@@ -159,7 +159,7 @@ export const useSettingsStore = create<SettingsStore>()(
         }));
       },
 
-      updatePrivacy: (privacy) => {
+      updatePrivacy: privacy => {
         set(state => ({
           settings: {
             ...state.settings,
@@ -169,7 +169,7 @@ export const useSettingsStore = create<SettingsStore>()(
         }));
       },
 
-      updateWorkoutSettings: (workout) => {
+      updateWorkoutSettings: workout => {
         set(state => ({
           settings: {
             ...state.settings,
@@ -179,7 +179,7 @@ export const useSettingsStore = create<SettingsStore>()(
         }));
       },
 
-      updateDisplaySettings: (display) => {
+      updateDisplaySettings: display => {
         set(state => ({
           settings: {
             ...state.settings,
@@ -199,7 +199,7 @@ export const useSettingsStore = create<SettingsStore>()(
         }));
       },
 
-      loadSettings: async (_userId) => {
+      loadSettings: async _userId => {
         set({ isLoading: true, error: null });
 
         try {
@@ -208,7 +208,7 @@ export const useSettingsStore = create<SettingsStore>()(
           // if (userSettings) {
           //   set({ settings: { ...defaultSettings, ...userSettings } });
           // }
-          
+
           set({ lastSynced: new Date().toISOString() });
         } catch {
           set({ error: 'Erreur lors du chargement des paramètres' });
@@ -222,10 +222,10 @@ export const useSettingsStore = create<SettingsStore>()(
 
         try {
           const { settings } = get();
-          
+
           // Ici, sauvegarder en base de données
           // await supabaseService.saveUserSettings(settings);
-          
+
           set({ lastSynced: new Date().toISOString() });
         } catch {
           set({ error: 'Erreur lors de la sauvegarde des paramètres' });
@@ -245,17 +245,21 @@ export const useSettingsStore = create<SettingsStore>()(
 
       exportSettings: () => {
         const { settings } = get();
-        return JSON.stringify({
-          version: '4.0.0',
-          exportDate: new Date().toISOString(),
-          settings,
-        }, null, 2);
+        return JSON.stringify(
+          {
+            version: '4.0.0',
+            exportDate: new Date().toISOString(),
+            settings,
+          },
+          null,
+          2
+        );
       },
 
-      importSettings: (settingsJson) => {
+      importSettings: settingsJson => {
         try {
           const imported = JSON.parse(settingsJson);
-          
+
           if (!imported.settings) {
             set({ error: 'Format de paramètres invalide' });
             return false;
@@ -275,16 +279,16 @@ export const useSettingsStore = create<SettingsStore>()(
 
           return true;
         } catch {
-          set({ error: 'Erreur lors de l\'importation des paramètres' });
+          set({ error: "Erreur lors de l'importation des paramètres" });
           return false;
         }
       },
 
-      setLoading: (isLoading) => {
+      setLoading: isLoading => {
         set({ isLoading });
       },
 
-      setError: (error) => {
+      setError: error => {
         set({ error, isLoading: false });
       },
 
@@ -294,7 +298,7 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: 'settings-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         settings: state.settings,
         lastSynced: state.lastSynced,
       }),
@@ -305,53 +309,62 @@ export const useSettingsStore = create<SettingsStore>()(
 // Sélecteurs optimisés
 export const useAppSettings = () => useSettingsStore(state => state.settings);
 
-export const useThemeSettings = () => useSettingsStore(state => ({
-  theme: state.settings.theme,
-  updateTheme: state.updateTheme,
-}));
+export const useThemeSettings = () =>
+  useSettingsStore(state => ({
+    theme: state.settings.theme,
+    updateTheme: state.updateTheme,
+  }));
 
-export const useLanguageSettings = () => useSettingsStore(state => ({
-  language: state.settings.language,
-  updateLanguage: state.updateLanguage,
-}));
+export const useLanguageSettings = () =>
+  useSettingsStore(state => ({
+    language: state.settings.language,
+    updateLanguage: state.updateLanguage,
+  }));
 
-export const useUnitsSettings = () => useSettingsStore(state => ({
-  units: state.settings.units,
-  updateUnits: state.updateUnits,
-}));
+export const useUnitsSettings = () =>
+  useSettingsStore(state => ({
+    units: state.settings.units,
+    updateUnits: state.updateUnits,
+  }));
 
-export const useNotificationSettings = () => useSettingsStore(state => ({
-  notifications: state.settings.notifications,
-  updateNotifications: state.updateNotifications,
-}));
+export const useNotificationSettings = () =>
+  useSettingsStore(state => ({
+    notifications: state.settings.notifications,
+    updateNotifications: state.updateNotifications,
+  }));
 
-export const usePrivacySettings = () => useSettingsStore(state => ({
-  privacy: state.settings.privacy,
-  updatePrivacy: state.updatePrivacy,
-}));
+export const usePrivacySettings = () =>
+  useSettingsStore(state => ({
+    privacy: state.settings.privacy,
+    updatePrivacy: state.updatePrivacy,
+  }));
 
-export const useWorkoutSettings = () => useSettingsStore(state => ({
-  workout: state.settings.workout,
-  updateWorkoutSettings: state.updateWorkoutSettings,
-}));
+export const useWorkoutSettings = () =>
+  useSettingsStore(state => ({
+    workout: state.settings.workout,
+    updateWorkoutSettings: state.updateWorkoutSettings,
+  }));
 
-export const useDisplaySettings = () => useSettingsStore(state => ({
-  display: state.settings.display,
-  updateDisplaySettings: state.updateDisplaySettings,
-}));
+export const useDisplaySettings = () =>
+  useSettingsStore(state => ({
+    display: state.settings.display,
+    updateDisplaySettings: state.updateDisplaySettings,
+  }));
 
-export const useSettingsActions = () => useSettingsStore(state => ({
-  loadSettings: state.loadSettings,
-  saveSettings: state.saveSettings,
-  resetSettings: state.resetSettings,
-  exportSettings: state.exportSettings,
-  importSettings: state.importSettings,
-  updateSetting: state.updateSetting,
-}));
+export const useSettingsActions = () =>
+  useSettingsStore(state => ({
+    loadSettings: state.loadSettings,
+    saveSettings: state.saveSettings,
+    resetSettings: state.resetSettings,
+    exportSettings: state.exportSettings,
+    importSettings: state.importSettings,
+    updateSetting: state.updateSetting,
+  }));
 
-export const useSettingsState = () => useSettingsStore(state => ({
-  isLoading: state.isLoading,
-  error: state.error,
-  lastSynced: state.lastSynced,
-  clearError: state.clearError,
-}));
+export const useSettingsState = () =>
+  useSettingsStore(state => ({
+    isLoading: state.isLoading,
+    error: state.error,
+    lastSynced: state.lastSynced,
+    clearError: state.clearError,
+  }));

@@ -51,7 +51,7 @@ Veuillez:
 
 Documentation: README.md#configuration
     `.trim();
-    
+
     throw new Error(errorMessage);
   }
 

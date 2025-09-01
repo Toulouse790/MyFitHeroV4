@@ -35,7 +35,9 @@ export interface UseFormReturn<T> {
   isValid: boolean;
   isSubmitting: boolean;
   isDirty: boolean;
-  handleChange: (field: keyof T) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  handleChange: (
+    field: keyof T
+  ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleBlur: (field: keyof T) => () => void;
   setFieldValue: (field: keyof T, value: string) => void;
   setFieldError: (field: keyof T, error: string) => void;
@@ -54,11 +56,11 @@ export const useForm = <T extends Record<string, string>>(
   // Initialize form data with field metadata
   const initializeFormData = (): FormData<T> => {
     const formData = {} as FormData<T>;
-    Object.keys(initialValues).forEach((key) => {
+    Object.keys(initialValues).forEach(key => {
       const field = key as keyof T;
       formData[field] = {
         value: initialValues[field],
-        touched: false
+        touched: false,
       };
     });
     return formData;
@@ -75,13 +77,16 @@ export const useForm = <T extends Record<string, string>>(
   }, {} as T);
 
   // Extract current errors
-  const errors = Object.keys(formData).reduce((acc, key) => {
-    const field = key as keyof T;
-    if (formData[field].error) {
-      acc[field] = formData[field].error;
-    }
-    return acc;
-  }, {} as { [K in keyof T]?: string });
+  const errors = Object.keys(formData).reduce(
+    (acc, key) => {
+      const field = key as keyof T;
+      if (formData[field].error) {
+        acc[field] = formData[field].error;
+      }
+      return acc;
+    },
+    {} as { [K in keyof T]?: string }
+  );
 
   // Check if form is valid (no errors)
   const isValid = Object.values(errors).every(error => !error);
@@ -90,52 +95,55 @@ export const useForm = <T extends Record<string, string>>(
   const isDirty = Object.values(formData).some(field => field.touched);
 
   // Validate a single field
-  const validateField = useCallback((field: keyof T): boolean => {
-    const value = formData[field].value;
-    const rules = validationRules[field];
-    
-    if (!rules) return true;
+  const validateField = useCallback(
+    (field: keyof T): boolean => {
+      const value = formData[field].value;
+      const rules = validationRules[field];
 
-    let error: string | undefined;
+      if (!rules) return true;
 
-    // Required validation
-    if (rules.required && (!value || value.trim() === '')) {
-      error = 'This field is required';
-    }
-    // Min length validation
-    else if (rules.minLength && value.length < rules.minLength) {
-      error = `Minimum length is ${rules.minLength} characters`;
-    }
-    // Max length validation
-    else if (rules.maxLength && value.length > rules.maxLength) {
-      error = `Maximum length is ${rules.maxLength} characters`;
-    }
-    // Pattern validation
-    else if (rules.pattern && !rules.pattern.test(value)) {
-      error = 'Invalid format';
-    }
-    // Custom validation
-    else if (rules.custom) {
-      error = rules.custom(value);
-    }
+      let error: string | undefined;
 
-    // Update field error
-    setFormData(prev => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        error
+      // Required validation
+      if (rules.required && (!value || value.trim() === '')) {
+        error = 'This field is required';
       }
-    }));
+      // Min length validation
+      else if (rules.minLength && value.length < rules.minLength) {
+        error = `Minimum length is ${rules.minLength} characters`;
+      }
+      // Max length validation
+      else if (rules.maxLength && value.length > rules.maxLength) {
+        error = `Maximum length is ${rules.maxLength} characters`;
+      }
+      // Pattern validation
+      else if (rules.pattern && !rules.pattern.test(value)) {
+        error = 'Invalid format';
+      }
+      // Custom validation
+      else if (rules.custom) {
+        error = rules.custom(value);
+      }
 
-    return !error;
-  }, [formData, validationRules]);
+      // Update field error
+      setFormData(prev => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error,
+        },
+      }));
+
+      return !error;
+    },
+    [formData, validationRules]
+  );
 
   // Validate entire form
   const validateForm = useCallback((): boolean => {
     let isFormValid = true;
-    
-    Object.keys(formData).forEach((key) => {
+
+    Object.keys(formData).forEach(key => {
       const field = key as keyof T;
       const fieldValid = validateField(field);
       if (!fieldValid) {
@@ -147,26 +155,31 @@ export const useForm = <T extends Record<string, string>>(
   }, [formData, validateField]);
 
   // Handle input change
-  const handleChange = useCallback((field: keyof T) => (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { value } = event.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [field]: {
-        ...prev[field],
-        value,
-        touched: true,
-        error: undefined // Clear error on change
-      }
-    }));
-  }, []);
+  const handleChange = useCallback(
+    (field: keyof T) =>
+      (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { value } = event.target;
+
+        setFormData(prev => ({
+          ...prev,
+          [field]: {
+            ...prev[field],
+            value,
+            touched: true,
+            error: undefined, // Clear error on change
+          },
+        }));
+      },
+    []
+  );
 
   // Handle input blur (validation trigger)
-  const handleBlur = useCallback((field: keyof T) => () => {
-    validateField(field);
-  }, [validateField]);
+  const handleBlur = useCallback(
+    (field: keyof T) => () => {
+      validateField(field);
+    },
+    [validateField]
+  );
 
   // Set field value programmatically
   const setFieldValue = useCallback((field: keyof T, value: string) => {
@@ -175,8 +188,8 @@ export const useForm = <T extends Record<string, string>>(
       [field]: {
         ...prev[field],
         value,
-        touched: true
-      }
+        touched: true,
+      },
     }));
   }, []);
 
@@ -186,8 +199,8 @@ export const useForm = <T extends Record<string, string>>(
       ...prev,
       [field]: {
         ...prev[field],
-        error
-      }
+        error,
+      },
     }));
   }, []);
 
@@ -197,30 +210,33 @@ export const useForm = <T extends Record<string, string>>(
       ...prev,
       [field]: {
         ...prev[field],
-        error: undefined
-      }
+        error: undefined,
+      },
     }));
   }, []);
 
   // Handle form submission
-  const handleSubmit = useCallback(async (event?: React.FormEvent) => {
-    if (event) {
-      event.preventDefault();
-    }
+  const handleSubmit = useCallback(
+    async (event?: React.FormEvent) => {
+      if (event) {
+        event.preventDefault();
+      }
 
-    if (!validateForm() || !onSubmit) {
-      return;
-    }
+      if (!validateForm() || !onSubmit) {
+        return;
+      }
 
-    setIsSubmitting(true);
-    try {
-      await onSubmit(values);
-    } catch (error) {
-      console.error('Form submission error:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [validateForm, onSubmit, values]);
+      setIsSubmitting(true);
+      try {
+        await onSubmit(values);
+      } catch (error) {
+        console.error('Form submission error:', error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [validateForm, onSubmit, values]
+  );
 
   // Reset form to initial state
   const reset = useCallback(() => {
@@ -243,7 +259,7 @@ export const useForm = <T extends Record<string, string>>(
     validateField,
     validateForm,
     handleSubmit,
-    reset
+    reset,
   };
 };
 

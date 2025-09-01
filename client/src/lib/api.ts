@@ -1,20 +1,15 @@
 import { apiService } from '../services/ApiService';
 import { API_ENDPOINTS } from '../types/api';
-import type { 
-  ApiResponse, 
-  PaginatedResponse,
-  UploadResponse,
-  UploadProgress 
-} from '../types/api';
+import type { ApiResponse, PaginatedResponse, UploadResponse, UploadProgress } from '../types/api';
 
 // Re-export types for convenience
-export type { 
-  ApiResponse, 
-  ApiError, 
+export type {
+  ApiResponse,
+  ApiError,
   RequestConfig,
   PaginatedResponse,
   UploadResponse,
-  UploadProgress 
+  UploadProgress,
 } from '../types/api';
 
 // Authentication API methods
@@ -23,17 +18,19 @@ const authApi = {
     return apiService.post<{ user: any; tokens: any }>(API_ENDPOINTS.AUTH.LOGIN, credentials);
   },
 
-  register: async (userData: { 
-    email: string; 
-    password: string; 
-    firstName: string; 
-    lastName: string; 
+  register: async (userData: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
   }) => {
     return apiService.post<{ user: any; tokens: any }>(API_ENDPOINTS.AUTH.REGISTER, userData);
   },
 
   refreshToken: async (refreshToken: string) => {
-    return apiService.post<{ tokens: any; user?: any }>(API_ENDPOINTS.AUTH.REFRESH, { refreshToken });
+    return apiService.post<{ tokens: any; user?: any }>(API_ENDPOINTS.AUTH.REFRESH, {
+      refreshToken,
+    });
   },
 
   logout: async () => {
@@ -50,7 +47,7 @@ const authApi = {
 
   verifyEmail: async (token: string) => {
     return apiService.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL, { token });
-  }
+  },
 };
 
 // User API methods
@@ -73,7 +70,7 @@ const userApi = {
 
   uploadAvatar: async (file: File, onProgress?: (progress: UploadProgress) => void) => {
     return apiService.upload(API_ENDPOINTS.USER.AVATAR, file, onProgress);
-  }
+  },
 };
 
 // Workout API methods
@@ -100,7 +97,7 @@ const workoutApi = {
 
   getTemplates: async () => {
     return apiService.get<any[]>(API_ENDPOINTS.WORKOUT.TEMPLATES);
-  }
+  },
 };
 
 // Nutrition API methods
@@ -133,7 +130,7 @@ const nutritionApi = {
 
   updateTracking: async (trackingData: Record<string, unknown>) => {
     return apiService.post<any>(API_ENDPOINTS.NUTRITION.TRACKING, trackingData);
-  }
+  },
 };
 
 // Recovery API methods
@@ -153,7 +150,7 @@ const recoveryApi = {
 
   getRecommendations: async () => {
     return apiService.get<any[]>(API_ENDPOINTS.RECOVERY.RECOMMENDATIONS);
-  }
+  },
 };
 
 // Analytics API methods
@@ -164,7 +161,7 @@ const analyticsApi = {
 
   exportData: async (type: string, format: string = 'json') => {
     return apiService.get<any>(API_ENDPOINTS.ANALYTICS.EXPORT, { type, format });
-  }
+  },
 };
 
 // Generic API methods
@@ -176,24 +173,24 @@ export const api = {
   patch: apiService.patch.bind(apiService),
   delete: apiService.delete.bind(apiService),
   upload: apiService.upload.bind(apiService),
-  
+
   // Specialized methods
   getPaginated: apiService.getPaginated.bind(apiService),
-  
+
   // Token management
   setAuthToken: apiService.setAuthToken.bind(apiService),
-  
+
   // Request cancellation
   cancelAllRequests: apiService.cancelAllRequests.bind(apiService),
   cancelRequest: apiService.cancelRequest.bind(apiService),
-  
+
   // Feature-specific APIs
   auth: authApi,
   user: userApi,
   workout: workoutApi,
   nutrition: nutritionApi,
   recovery: recoveryApi,
-  analytics: analyticsApi
+  analytics: analyticsApi,
 };
 
 // Default export

@@ -8,9 +8,7 @@ const WorkoutDetailPage = lazy(() => import('@/features/workout/pages/WorkoutDet
 const ExercisesPage = lazy(() => import('@/features/workout/pages/ExercisesPage'));
 const ExerciseDetailPage = lazy(() => import('@/features/workout/pages/ExerciseDetailPage'));
 const ChallengesPage = lazy(() => import('@/features/social/pages/ChallengesPage'));
-const RecoveryPage = lazy(() =>
-  import('@/features/recovery/pages/RecoveryPage')
-);
+const RecoveryPage = lazy(() => import('@/features/recovery/pages/RecoveryPage'));
 const AICoachPage = lazy(() => import('@/features/ai-coach/pages/AICoachPage'));
 
 export const fitnessRoutes: RouteConfig[] = [

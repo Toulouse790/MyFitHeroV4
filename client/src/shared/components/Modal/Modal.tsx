@@ -19,7 +19,7 @@ const sizeClasses = {
   md: 'max-w-lg',
   lg: 'max-w-2xl',
   xl: 'max-w-4xl',
-  full: 'max-w-full mx-4'
+  full: 'max-w-full mx-4',
 };
 
 export const Modal: React.FC<ModalProps> = ({
@@ -32,7 +32,7 @@ export const Modal: React.FC<ModalProps> = ({
   closeOnEscape = true,
   showCloseButton = true,
   className = '',
-  overlayClassName = ''
+  overlayClassName = '',
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
@@ -56,12 +56,12 @@ export const Modal: React.FC<ModalProps> = ({
     if (isOpen) {
       // Store the currently focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
-      
+
       // Focus the modal
       if (modalRef.current) {
         modalRef.current.focus();
       }
-      
+
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     } else {
@@ -69,7 +69,7 @@ export const Modal: React.FC<ModalProps> = ({
       if (previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
-      
+
       // Restore body scroll
       document.body.style.overflow = 'unset';
     }
@@ -97,7 +97,7 @@ export const Modal: React.FC<ModalProps> = ({
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity" />
-      
+
       {/* Modal */}
       <div
         ref={modalRef}
@@ -125,12 +125,7 @@ export const Modal: React.FC<ModalProps> = ({
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label="Close modal"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -142,11 +137,9 @@ export const Modal: React.FC<ModalProps> = ({
             )}
           </div>
         )}
-        
+
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-          {children}
-        </div>
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">{children}</div>
       </div>
     </div>
   );
@@ -173,7 +166,7 @@ export const ConfirmModal: React.FC<{
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  confirmButtonClass = 'bg-red-600 hover:bg-red-700 text-white'
+  confirmButtonClass = 'bg-red-600 hover:bg-red-700 text-white',
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
@@ -204,15 +197,12 @@ export const ConfirmModal: React.FC<{
 export const LoadingModal: React.FC<{
   isOpen: boolean;
   message?: string;
-}> = ({
-  isOpen,
-  message = 'Loading...'
-}) => {
+}> = ({ isOpen, message = 'Loading...' }) => {
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={() => {}} 
-      closeOnOverlayClick={false} 
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {}}
+      closeOnOverlayClick={false}
       closeOnEscape={false}
       showCloseButton={false}
       size="sm"

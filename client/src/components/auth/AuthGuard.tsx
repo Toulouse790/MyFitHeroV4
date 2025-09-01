@@ -12,7 +12,7 @@ interface AuthGuardProps {
 export const AuthGuard: React.FC<AuthGuardProps> = ({
   children,
   requireAuth = true,
-  redirectTo = '/auth/login'
+  redirectTo = '/auth/login',
 }) => {
   const { isLoading, isAuthenticated } = useAuth();
   const location = useLocation();
@@ -24,13 +24,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   // Redirect to login if authentication required but user not authenticated
   if (requireAuth && !isAuthenticated) {
-    return (
-      <Navigate 
-        to={redirectTo} 
-        state={{ from: location.pathname }} 
-        replace 
-      />
-    );
+    return <Navigate to={redirectTo} state={{ from: location.pathname }} replace />;
   }
 
   // Redirect authenticated users away from auth pages

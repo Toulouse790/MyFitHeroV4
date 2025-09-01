@@ -81,34 +81,35 @@ export const API_ENDPOINTS = {
     REFRESH: '/auth/refresh',
     LOGOUT: '/auth/logout',
     PROFILE: '/auth/profile',
-    VERIFY_EMAIL: '/auth/verify-email'
+    VERIFY_EMAIL: '/auth/verify-email',
   },
   USER: {
     PROFILE: '/user/profile',
     PREFERENCES: '/user/preferences',
-    AVATAR: '/user/avatar'
+    AVATAR: '/user/avatar',
   },
   WORKOUT: {
     LIST: '/workouts',
     CREATE: '/workouts',
     UPDATE: '/workouts/:id',
     DELETE: '/workouts/:id',
-    TEMPLATES: '/workouts/templates'
+    TEMPLATES: '/workouts/templates',
   },
   NUTRITION: {
     MEALS: '/nutrition/meals',
     FOODS: '/nutrition/foods',
-    TRACKING: '/nutrition/tracking'
+    TRACKING: '/nutrition/tracking',
   },
   RECOVERY: {
     STATUS: '/recovery/status',
     METRICS: '/recovery/metrics',
-    RECOMMENDATIONS: '/recovery/recommendations'
+    RECOMMENDATIONS: '/recovery/recommendations',
   },
   ANALYTICS: {
     DASHBOARD: '/analytics/dashboard',
-    EXPORT: '/analytics/export'
-  }
+    EXPORT: '/analytics/export',
+  },
 } as const;
 
-export type ApiEndpoint = typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS][keyof typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS]];
+export type ApiEndpoint =
+  (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS][keyof (typeof API_ENDPOINTS)[keyof typeof API_ENDPOINTS]];

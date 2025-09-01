@@ -11,5 +11,5 @@
 export const LandingModule = {
   name: 'landing',
   status: 'planned',
-  description: 'Module landing - À implémenter'
+  description: 'Module landing - À implémenter',
 };

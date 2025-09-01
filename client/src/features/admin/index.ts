@@ -11,5 +11,5 @@
 export const AdminModule = {
   name: 'admin',
   status: 'planned',
-  description: 'Module admin - À implémenter'
+  description: 'Module admin - À implémenter',
 };

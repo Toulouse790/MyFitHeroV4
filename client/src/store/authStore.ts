@@ -45,21 +45,21 @@ export const useAuthStore = create<AuthStore>()(
       ...initialState,
 
       // Actions
-      setUser: (user) => {
-        set({ 
-          user, 
+      setUser: user => {
+        set({
+          user,
           isAuthenticated: !!user,
-          error: null 
+          error: null,
         });
       },
 
       setTokens: (sessionToken, refreshToken, expiresAt) => {
-        set({ 
-          sessionToken, 
-          refreshToken, 
+        set({
+          sessionToken,
+          refreshToken,
           expiresAt,
           isAuthenticated: true,
-          error: null 
+          error: null,
         });
       },
 
@@ -70,11 +70,11 @@ export const useAuthStore = create<AuthStore>()(
         });
       },
 
-      setLoading: (isLoading) => {
+      setLoading: isLoading => {
         set({ isLoading });
       },
 
-      setError: (error) => {
+      setError: error => {
         set({ error, isLoading: false });
       },
 
@@ -82,11 +82,11 @@ export const useAuthStore = create<AuthStore>()(
         set({ error: null });
       },
 
-      updateUserData: (updates) => {
+      updateUserData: updates => {
         const { user } = get();
         if (user) {
-          set({ 
-            user: { ...user, ...updates } 
+          set({
+            user: { ...user, ...updates },
           });
         }
       },
@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthStore>()(
       checkTokenExpiry: () => {
         const { expiresAt } = get();
         if (!expiresAt) return false;
-        
+
         const now = new Date();
         const expiry = new Date(expiresAt);
         return now < expiry;
@@ -106,15 +106,15 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
           set({ isLoading: true, error: null });
-          
+
           // Ici, intégrer la logique de refresh avec Supabase
           // Pour l'instant, simulation
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
+
           // En cas de succès, mettre à jour les tokens
           // const newTokens = await authService.refreshTokens(refreshToken);
           // get().setTokens(newTokens.sessionToken, newTokens.refreshToken, newTokens.expiresAt);
-          
+
           return true;
         } catch {
           set({ error: 'Échec du rafraîchissement de session' });
@@ -127,7 +127,7 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         sessionToken: state.sessionToken,
         refreshToken: state.refreshToken,
@@ -139,24 +139,26 @@ export const useAuthStore = create<AuthStore>()(
 );
 
 // Sélecteurs optimisés
-export const useAuthState = () => useAuthStore(state => ({
-  user: state.user,
-  isAuthenticated: state.isAuthenticated,
-  isLoading: state.isLoading,
-  error: state.error,
-}));
+export const useAuthState = () =>
+  useAuthStore(state => ({
+    user: state.user,
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
+    error: state.error,
+  }));
 
-export const useAuthActions = () => useAuthStore(state => ({
-  setUser: state.setUser,
-  setTokens: state.setTokens,
-  clearAuth: state.clearAuth,
-  setLoading: state.setLoading,
-  setError: state.setError,
-  clearError: state.clearError,
-  updateUserData: state.updateUserData,
-  checkTokenExpiry: state.checkTokenExpiry,
-  refreshSession: state.refreshSession,
-}));
+export const useAuthActions = () =>
+  useAuthStore(state => ({
+    setUser: state.setUser,
+    setTokens: state.setTokens,
+    clearAuth: state.clearAuth,
+    setLoading: state.setLoading,
+    setError: state.setError,
+    clearError: state.clearError,
+    updateUserData: state.updateUserData,
+    checkTokenExpiry: state.checkTokenExpiry,
+    refreshSession: state.refreshSession,
+  }));
 
 export const useUser = () => useAuthStore(state => state.user);
 export const useIsAuthenticated = () => useAuthStore(state => state.isAuthenticated);

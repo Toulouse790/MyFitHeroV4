@@ -38,14 +38,15 @@ useEffect(() => {
 
 // ✅ APRÈS : Service unifié
 export const NouveauPattern = ({ userId }: { userId: string }) => {
-  const { data: workouts, loading, error } = useSupabaseQuery(
-    () => SupabaseService.getUserWorkouts(userId),
-    [userId]
-  );
+  const {
+    data: workouts,
+    loading,
+    error,
+  } = useSupabaseQuery(() => SupabaseService.getUserWorkouts(userId), [userId]);
 
   if (loading) return <div>Chargement...</div>;
   if (error) return <div>Erreur: {error}</div>;
-  
+
   return (
     <div>
       {workouts?.map(workout => (
@@ -59,10 +60,11 @@ export const NouveauPattern = ({ userId }: { userId: string }) => {
 
 // 1. Récupération simple par ID
 export const UserProfileExample = ({ userId }: { userId: string }) => {
-  const { data: profile, loading, error } = useSupabaseQuery<AppUser>(
-    () => SupabaseService.getUserProfile(userId),
-    [userId]
-  );
+  const {
+    data: profile,
+    loading,
+    error,
+  } = useSupabaseQuery<AppUser>(() => SupabaseService.getUserProfile(userId), [userId]);
 
   return (
     <div>
@@ -80,13 +82,19 @@ export const UserProfileExample = ({ userId }: { userId: string }) => {
 
 // 2. Récupération avec pagination
 export const WorkoutListExample = ({ userId }: { userId: string }) => {
-  const { data: workouts, loading, error, refetch } = useSupabaseQuery(
-    () => SupabaseService.getUserWorkouts(userId, {
-      limit: 10,
-      page: 1,
-      orderBy: 'completed_at',
-      ascending: false
-    }),
+  const {
+    data: workouts,
+    loading,
+    error,
+    refetch,
+  } = useSupabaseQuery(
+    () =>
+      SupabaseService.getUserWorkouts(userId, {
+        limit: 10,
+        page: 1,
+        orderBy: 'completed_at',
+        ascending: false,
+      }),
     [userId]
   );
 
@@ -112,8 +120,12 @@ export const WorkoutListExample = ({ userId }: { userId: string }) => {
 // 3. Nutrition par date
 export const NutritionExample = ({ userId }: { userId: string }) => {
   const today = new Date().toISOString().split('T')[0];
-  
-  const { data: nutrition, loading, error } = useSupabaseQuery(
+
+  const {
+    data: nutrition,
+    loading,
+    error,
+  } = useSupabaseQuery(
     () => SupabaseService.getUserNutrition(userId, today, { limit: 20 }),
     [userId, today]
   );
@@ -137,11 +149,12 @@ export const NutritionExample = ({ userId }: { userId: string }) => {
 // 4. Stats quotidiennes
 export const DailyStatsExample = ({ userId }: { userId: string }) => {
   const today = new Date().toISOString().split('T')[0];
-  
-  const { data: stats, loading, error } = useSupabaseQuery(
-    () => SupabaseService.getDailyStats(userId, today),
-    [userId, today]
-  );
+
+  const {
+    data: stats,
+    loading,
+    error,
+  } = useSupabaseQuery(() => SupabaseService.getDailyStats(userId, today), [userId, today]);
 
   return (
     <div>
@@ -171,10 +184,10 @@ export const UpdateProfileExample = ({ userId }: { userId: string }) => {
   const handleUpdateProfile = async (updates: Partial<AppUser>) => {
     setIsUpdating(true);
     setUpdateError(null);
-    
+
     try {
       const result = await SupabaseService.updateUserProfile(userId, updates);
-      
+
       if (result.success) {
         console.log('Profil mis à jour:', result.data);
         // Réactualiser les données si nécessaire
@@ -204,16 +217,18 @@ export const UpdateProfileExample = ({ userId }: { userId: string }) => {
 // 6. Pattern de recherche générique
 export const GenericSearchExample = () => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [results, setResults] = React.useState<Array<{
-    id: string;
-    workout_name?: string;
-    description?: string;
-  }>>([]);
+  const [results, setResults] = React.useState<
+    Array<{
+      id: string;
+      workout_name?: string;
+      description?: string;
+    }>
+  >([]);
   const [loading, setLoading] = React.useState(false);
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
-    
+
     setLoading(true);
     try {
       // Recherche dans les workouts
@@ -223,15 +238,16 @@ export const GenericSearchExample = () => {
         {
           limit: 10,
           orderBy: 'created_at',
-          ascending: false
+          ascending: false,
         },
         `*, workout_name, description`
       );
 
       if (workoutResults.success) {
-        const filtered = workoutResults.data?.filter((workout: { workout_name?: string }) =>
-          workout.workout_name?.toLowerCase().includes(searchTerm.toLowerCase())
-        ) || [];
+        const filtered =
+          workoutResults.data?.filter((workout: { workout_name?: string }) =>
+            workout.workout_name?.toLowerCase().includes(searchTerm.toLowerCase())
+          ) || [];
         setResults(filtered);
       }
     } catch (err) {
@@ -246,13 +262,13 @@ export const GenericSearchExample = () => {
       <input
         type="text"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={e => setSearchTerm(e.target.value)}
         placeholder="Rechercher un workout..."
       />
       <button onClick={handleSearch} disabled={loading}>
         {loading ? 'Recherche...' : 'Rechercher'}
       </button>
-      
+
       <div>
         {results.map(result => (
           <div key={result.id}>
@@ -283,7 +299,7 @@ export const SafeOperationExample = ({ userId }: { userId: string }) => {
 
     try {
       const result = await SupabaseService.delete('user_workouts', workoutId, userId);
-      
+
       if (result.success) {
         console.log('Workout supprimé avec succès');
       } else {
@@ -294,11 +310,7 @@ export const SafeOperationExample = ({ userId }: { userId: string }) => {
     }
   };
 
-  return (
-    <button onClick={() => handleSafeDelete('workout-id')}>
-      Supprimer workout
-    </button>
-  );
+  return <button onClick={() => handleSafeDelete('workout-id')}>Supprimer workout</button>;
 };
 
 // 🎯 GESTION D'ERREURS CENTRALISÉE
@@ -307,12 +319,12 @@ export const ErrorHandlingExample = () => {
   const handleOperationWithErrorHandling = async () => {
     try {
       const result = await SupabaseService.getUserProfile('invalid-user-id');
-      
+
       if (!result.success) {
         // Utiliser le gestionnaire d'erreur unifié
         const userFriendlyMessage = SupabaseService.handleError(result.error);
         console.log('Message utilisateur:', userFriendlyMessage);
-        
+
         // Afficher une notification ou toast
         // showErrorToast(userFriendlyMessage);
       }
@@ -322,11 +334,7 @@ export const ErrorHandlingExample = () => {
     }
   };
 
-  return (
-    <button onClick={handleOperationWithErrorHandling}>
-      Test gestion d&apos;erreur
-    </button>
-  );
+  return <button onClick={handleOperationWithErrorHandling}>Test gestion d&apos;erreur</button>;
 };
 
 export default {
@@ -338,5 +346,5 @@ export default {
   UpdateProfileExample,
   GenericSearchExample,
   SafeOperationExample,
-  ErrorHandlingExample
+  ErrorHandlingExample,
 };

@@ -9,11 +9,11 @@ import '@testing-library/jest-dom';
 // MSW - Réactivé avec polyfills corrects
 import { server } from './test-utils/mocks/server';
 
-// ---- MSW lifecycle ---- 
+// ---- MSW lifecycle ----
 beforeAll(() => {
   // Démarrer le serveur MSW avant tous les tests
-  server.listen({ 
-    onUnhandledRequest: 'warn'
+  server.listen({
+    onUnhandledRequest: 'warn',
   });
 });
 
@@ -50,18 +50,22 @@ global.matchMedia =
   } as any);
 
 // ResizeObserver
-(global as any).ResizeObserver = (global as any).ResizeObserver || jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+(global as any).ResizeObserver =
+  (global as any).ResizeObserver ||
+  jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+  }));
 
 // IntersectionObserver
-(global as any).IntersectionObserver = (global as any).IntersectionObserver || jest.fn().mockImplementation(() => ({
-  observe: jest.fn(),
-  unobserve: jest.fn(),
-  disconnect: jest.fn(),
-}));
+(global as any).IntersectionObserver =
+  (global as any).IntersectionObserver ||
+  jest.fn().mockImplementation(() => ({
+    observe: jest.fn(),
+    unobserve: jest.fn(),
+    disconnect: jest.fn(),
+  }));
 
 // Timeout global des tests async
 jest.setTimeout(10000);

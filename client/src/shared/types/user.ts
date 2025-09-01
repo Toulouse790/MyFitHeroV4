@@ -12,11 +12,11 @@ export interface AppUser extends SupabaseUser {
   level?: number;
   totalPoints?: number;
   joinDate?: string;
-  
+
   // Extensions métier
-  name?: string;  // Calculé depuis full_name || username
-  goal?: string;  // Calculé depuis primary_goals[0]
-  
+  name?: string; // Calculé depuis full_name || username
+  goal?: string; // Calculé depuis primary_goals[0]
+
   // Extensions sport (compatibilité)
   sport_specific_stats?: Record<string, number>;
   daily_calories?: number | null;
@@ -57,16 +57,23 @@ export interface UserFormData {
 }
 
 export interface UserUpdatePayload extends Partial<AppUser> {
-  updated_at: string;  // Toujours requis pour les updates
+  updated_at: string; // Toujours requis pour les updates
 }
 
 // Guards de types (évite les erreurs)
 export const isAppUser = (user: unknown): user is AppUser => {
-  return user !== null && typeof user === 'object' && 'id' in user && typeof (user as { id: unknown }).id === 'string';
+  return (
+    user !== null &&
+    typeof user === 'object' &&
+    'id' in user &&
+    typeof (user as { id: unknown }).id === 'string'
+  );
 };
 
 export const isAuthenticatedUser = (user: unknown): user is AuthUser => {
-  return isAppUser(user) && 'isAuthenticated' in user && (user as AuthUser).isAuthenticated === true;
+  return (
+    isAppUser(user) && 'isAuthenticated' in user && (user as AuthUser).isAuthenticated === true
+  );
 };
 
 export const hasAdminAccess = (user: unknown): user is AdminUser => {
@@ -93,7 +100,7 @@ export default AppUser;
 /** @deprecated Utilise AppUser à la place */
 export type User = AppUser;
 
-/** @deprecated Utilise ProfileUser à la place */  
+/** @deprecated Utilise ProfileUser à la place */
 export type UserProfile = ProfileUser;
 
 /** @deprecated Utilise AuthUser à la place */

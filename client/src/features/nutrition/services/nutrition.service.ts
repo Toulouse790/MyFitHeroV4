@@ -1,4 +1,17 @@
-import { NutritionData, Meal, FoodItem, NutritionGoals, NutritionAnalysis, Recipe, MealPlan, NutritionTrend, CreateMealDTO, UpdateNutritionGoalsDTO, FoodSearchQuery, NutritionInsight } from '../types/index';
+import {
+  NutritionData,
+  Meal,
+  FoodItem,
+  NutritionGoals,
+  NutritionAnalysis,
+  Recipe,
+  MealPlan,
+  NutritionTrend,
+  CreateMealDTO,
+  UpdateNutritionGoalsDTO,
+  FoodSearchQuery,
+  NutritionInsight,
+} from '../types/index';
 
 export class NutritionService {
   private static readonly BASE_URL = '/api/nutrition';
@@ -7,7 +20,8 @@ export class NutritionService {
   static async getNutritionData(userId: string, date: string): Promise<NutritionData> {
     try {
       const response = await fetch(`${this.BASE_URL}/${userId}/daily/${date}`);
-      if (!response.ok) throw new Error('Erreur lors de la récupération des données nutritionnelles');
+      if (!response.ok)
+        throw new Error('Erreur lors de la récupération des données nutritionnelles');
       return await response.json();
     } catch (error) {
       console.error('Erreur API nutrition:', error);
@@ -29,9 +43,9 @@ export class NutritionService {
       const response = await fetch(`${this.BASE_URL}/${userId}/meals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mealData)
+        body: JSON.stringify(mealData),
       });
-      if (!response.ok) throw new Error('Erreur lors de l\'ajout du repas');
+      if (!response.ok) throw new Error("Erreur lors de l'ajout du repas");
       return await response.json();
     } catch (error) {
       console.error('Erreur ajout repas:', error);
@@ -48,7 +62,7 @@ export class NutritionService {
       const userId = 'current-user';
       return await this.addMeal(userId, data);
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du repas:', error);
+      console.error("Erreur lors de l'enregistrement du repas:", error);
       return null;
     }
   }
@@ -61,7 +75,7 @@ export class NutritionService {
       const response = await fetch(`${this.BASE_URL}/meals/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Erreur lors de la mise à jour du repas');
       return await response.json();
@@ -77,7 +91,7 @@ export class NutritionService {
   static async deleteMeal(id: string): Promise<boolean> {
     try {
       const response = await fetch(`${this.BASE_URL}/meals/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
       return response.ok;
     } catch (error) {
@@ -89,18 +103,24 @@ export class NutritionService {
   /**
    * Calcule les macros d'une liste de repas
    */
-  static async calculateMacros(meals: Meal[]): Promise<{ calories: number; macros: { proteins: number; carbohydrates: number; fats: number } } | null> {
+  static async calculateMacros(meals: Meal[]): Promise<{
+    calories: number;
+    macros: { proteins: number; carbohydrates: number; fats: number };
+  } | null> {
     try {
       const totalCalories = meals.reduce((sum, meal) => sum + meal.totalCalories, 0);
-      const totalMacros = meals.reduce((acc, meal) => ({
-        proteins: acc.proteins + meal.macros.proteins,
-        carbohydrates: acc.carbohydrates + meal.macros.carbohydrates,
-        fats: acc.fats + meal.macros.fats
-      }), { proteins: 0, carbohydrates: 0, fats: 0 });
+      const totalMacros = meals.reduce(
+        (acc, meal) => ({
+          proteins: acc.proteins + meal.macros.proteins,
+          carbohydrates: acc.carbohydrates + meal.macros.carbohydrates,
+          fats: acc.fats + meal.macros.fats,
+        }),
+        { proteins: 0, carbohydrates: 0, fats: 0 }
+      );
 
       return {
         calories: totalCalories,
-        macros: totalMacros
+        macros: totalMacros,
       };
     } catch (error) {
       console.error('Erreur calcul macros:', error);
@@ -111,12 +131,18 @@ export class NutritionService {
   /**
    * Récupère les recommandations nutritionnelles
    */
-  static async getRecommendations(profile: { age: number; weight: number; height: number; activityLevel: string; goal: string }): Promise<NutritionGoals | null> {
+  static async getRecommendations(profile: {
+    age: number;
+    weight: number;
+    height: number;
+    activityLevel: string;
+    goal: string;
+  }): Promise<NutritionGoals | null> {
     try {
       const response = await fetch(`${this.BASE_URL}/recommendations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile)
+        body: JSON.stringify(profile),
       });
       if (!response.ok) throw new Error('Erreur lors du calcul des recommandations');
       return await response.json();
@@ -132,9 +158,9 @@ export class NutritionService {
     try {
       const params = new URLSearchParams({
         q: query.query,
-        limit: (query.limit || 20).toString()
+        limit: (query.limit || 20).toString(),
       });
-      
+
       if (query.filters) {
         Object.entries(query.filters).forEach(([key, value]) => {
           if (value !== undefined) params.append(key, value.toString());
@@ -142,7 +168,7 @@ export class NutritionService {
       }
 
       const response = await fetch(`${this.BASE_URL}/foods/search?${params}`);
-      if (!response.ok) throw new Error('Erreur lors de la recherche d\'aliments');
+      if (!response.ok) throw new Error("Erreur lors de la recherche d'aliments");
       return await response.json();
     } catch (error) {
       console.error('Erreur recherche aliments:', error);
@@ -151,12 +177,15 @@ export class NutritionService {
   }
 
   // Mise à jour des objectifs nutritionnels
-  static async updateNutritionGoals(userId: string, goals: UpdateNutritionGoalsDTO): Promise<NutritionGoals> {
+  static async updateNutritionGoals(
+    userId: string,
+    goals: UpdateNutritionGoalsDTO
+  ): Promise<NutritionGoals> {
     try {
       const response = await fetch(`${this.BASE_URL}/${userId}/goals`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(goals)
+        body: JSON.stringify(goals),
       });
       if (!response.ok) throw new Error('Erreur lors de la mise à jour des objectifs');
       return await response.json();
@@ -167,10 +196,16 @@ export class NutritionService {
   }
 
   // Analyse nutritionnelle
-  static async getNutritionAnalysis(userId: string, startDate: string, endDate: string): Promise<NutritionAnalysis> {
+  static async getNutritionAnalysis(
+    userId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<NutritionAnalysis> {
     try {
-      const response = await fetch(`${this.BASE_URL}/${userId}/analysis?start=${startDate}&end=${endDate}`);
-      if (!response.ok) throw new Error('Erreur lors de l\'analyse nutritionnelle');
+      const response = await fetch(
+        `${this.BASE_URL}/${userId}/analysis?start=${startDate}&end=${endDate}`
+      );
+      if (!response.ok) throw new Error("Erreur lors de l'analyse nutritionnelle");
       return await response.json();
     } catch (error) {
       console.error('Erreur analyse nutritionnelle:', error);
@@ -179,7 +214,10 @@ export class NutritionService {
   }
 
   // Récupération des recettes
-  static async getRecipes(_userId: string, filters?: { tags?: string[]; difficulty?: string }): Promise<Recipe[]> {
+  static async getRecipes(
+    _userId: string,
+    filters?: { tags?: string[]; difficulty?: string }
+  ): Promise<Recipe[]> {
     try {
       const params = new URLSearchParams();
       if (filters?.tags) params.append('tags', filters.tags.join(','));
@@ -207,7 +245,10 @@ export class NutritionService {
   }
 
   // Tendances nutritionnelles
-  static async getNutritionTrends(userId: string, period: 'week' | 'month' | 'quarter'): Promise<NutritionTrend> {
+  static async getNutritionTrends(
+    userId: string,
+    period: 'week' | 'month' | 'quarter'
+  ): Promise<NutritionTrend> {
     try {
       const response = await fetch(`${this.BASE_URL}/${userId}/trends/${period}`);
       if (!response.ok) throw new Error('Erreur lors de la récupération des tendances');
@@ -233,65 +274,71 @@ export class NutritionService {
   // Calcul du score nutritionnel
   static calculateNutritionScore(data: NutritionData): number {
     const { totalCalories, totalMacros, dailyGoals, waterIntake } = data;
-    
+
     // Score des calories (30%)
     const calorieRatio = Math.min(totalCalories / dailyGoals.dailyCalories, 1.2);
     const calorieScore = calorieRatio <= 1.1 ? 100 : Math.max(0, 100 - (calorieRatio - 1.1) * 500);
-    
+
     // Score des macros (40%)
     const proteinRatio = totalMacros.proteins / dailyGoals.macroTargets.proteins;
     const carbRatio = totalMacros.carbohydrates / dailyGoals.macroTargets.carbohydrates;
     const fatRatio = totalMacros.fats / dailyGoals.macroTargets.fats;
-    
-    const macroScore = (
-      Math.min(proteinRatio, 1.2) * 0.4 +
-      Math.min(carbRatio, 1.2) * 0.3 +
-      Math.min(fatRatio, 1.2) * 0.3
-    ) * 100;
-    
+
+    const macroScore =
+      (Math.min(proteinRatio, 1.2) * 0.4 +
+        Math.min(carbRatio, 1.2) * 0.3 +
+        Math.min(fatRatio, 1.2) * 0.3) *
+      100;
+
     // Score d'hydratation (30%)
     const hydrationScore = Math.min(waterIntake / dailyGoals.waterGoal, 1) * 100;
-    
+
     return Math.round(calorieScore * 0.3 + macroScore * 0.4 + hydrationScore * 0.3);
   }
 
   // Calcul de recommandations basiques
-  private static calculateBasicRecommendations(profile: { age: number; weight: number; height: number; activityLevel: string; goal: string }): NutritionGoals {
+  private static calculateBasicRecommendations(profile: {
+    age: number;
+    weight: number;
+    height: number;
+    activityLevel: string;
+    goal: string;
+  }): NutritionGoals {
     // Calcul BMR (Basal Metabolic Rate) - formule de Mifflin-St Jeor
     const bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5; // Pour les hommes
-    
+
     // Facteur d'activité
     const activityFactors: Record<string, number> = {
       sedentary: 1.2,
       light: 1.375,
       moderate: 1.55,
       active: 1.725,
-      very_active: 1.9
+      very_active: 1.9,
     };
-    
+
     const activityFactor = activityFactors[profile.activityLevel] || 1.2;
     let dailyCalories = bmr * activityFactor;
-    
+
     // Ajustement selon l'objectif
     if (profile.goal === 'weight_loss') {
       dailyCalories -= 500; // Déficit de 500 calories
     } else if (profile.goal === 'weight_gain') {
       dailyCalories += 500; // Surplus de 500 calories
     }
-    
+
     // Calcul des macros (30% protéines, 40% glucides, 30% lipides)
     const proteins = (dailyCalories * 0.3) / 4; // 4 cal/g
     const carbohydrates = (dailyCalories * 0.4) / 4; // 4 cal/g
     const fats = (dailyCalories * 0.3) / 9; // 9 cal/g
-    
+
     return {
       dailyCalories: Math.round(dailyCalories),
       macroTargets: {
         proteins: Math.round(proteins),
         carbohydrates: Math.round(carbohydrates),
-        fats: Math.round(fats)
+        fats: Math.round(fats),
       },
-      waterGoal: profile.weight * 35 // 35ml par kg de poids
+      waterGoal: profile.weight * 35, // 35ml par kg de poids
     };
   }
 
@@ -307,23 +354,23 @@ export class NutritionService {
           timestamp: `${date}T08:00:00Z`,
           foods: [
             {
-              name: 'Flocons d\'avoine',
+              name: "Flocons d'avoine",
               quantity: 50,
               unit: 'g',
               calories: 185,
-              macros: { proteins: 6.5, carbohydrates: 33, fats: 3.5 }
+              macros: { proteins: 6.5, carbohydrates: 33, fats: 3.5 },
             },
             {
               name: 'Banane',
               quantity: 120,
               unit: 'g',
               calories: 108,
-              macros: { proteins: 1.3, carbohydrates: 27, fats: 0.4 }
-            }
+              macros: { proteins: 1.3, carbohydrates: 27, fats: 0.4 },
+            },
           ],
           totalCalories: 293,
-          macros: { proteins: 7.8, carbohydrates: 60, fats: 3.9 }
-        }
+          macros: { proteins: 7.8, carbohydrates: 60, fats: 3.9 },
+        },
       ],
       totalCalories: 1847,
       totalMacros: { proteins: 95, carbohydrates: 220, fats: 65 },
@@ -331,8 +378,8 @@ export class NutritionService {
       dailyGoals: {
         dailyCalories: 2000,
         macroTargets: { proteins: 100, carbohydrates: 250, fats: 70 },
-        waterGoal: 2500
-      }
+        waterGoal: 2500,
+      },
     };
   }
 
@@ -344,27 +391,25 @@ export class NutritionService {
         quantity: 100,
         unit: 'g' as const,
         calories: 52,
-        macros: { proteins: 0.3, carbohydrates: 14, fats: 0.2 }
+        macros: { proteins: 0.3, carbohydrates: 14, fats: 0.2 },
       },
       {
         name: 'Blanc de poulet',
         quantity: 100,
         unit: 'g' as const,
         calories: 165,
-        macros: { proteins: 31, carbohydrates: 0, fats: 3.6 }
+        macros: { proteins: 31, carbohydrates: 0, fats: 3.6 },
       },
       {
         name: 'Riz basmati',
         quantity: 100,
         unit: 'g' as const,
         calories: 356,
-        macros: { proteins: 8.9, carbohydrates: 78, fats: 0.9 }
-      }
+        macros: { proteins: 8.9, carbohydrates: 78, fats: 0.9 },
+      },
     ];
-    
-    return foods.filter(food => 
-      food.name.toLowerCase().includes(query.toLowerCase())
-    );
+
+    return foods.filter(food => food.name.toLowerCase().includes(query.toLowerCase()));
   }
 
   private static getMockNutritionAnalysis(): NutritionAnalysis {
@@ -375,15 +420,15 @@ export class NutritionService {
       macroBalance: {
         proteins: 95,
         carbohydrates: 88,
-        fats: 93
+        fats: 93,
       },
       hydrationStatus: 72,
       nutritionScore: 78,
       recommendations: [
-        'Augmentez votre consommation d\'eau',
+        "Augmentez votre consommation d'eau",
         'Ajoutez plus de légumes verts à vos repas',
-        'Pensez à inclure des collations riches en protéines'
-      ]
+        'Pensez à inclure des collations riches en protéines',
+      ],
     };
   }
 
@@ -402,11 +447,11 @@ export class NutritionService {
         tags: ['healthy', 'vegetarian', 'lunch'],
         nutritionPerServing: {
           calories: 285,
-          macros: { proteins: 12, carbohydrates: 45, fats: 8 }
+          macros: { proteins: 12, carbohydrates: 45, fats: 8 },
         },
         createdBy: 'nutritionist',
-        isPublic: true
-      }
+        isPublic: true,
+      },
     ];
   }
 
@@ -421,8 +466,8 @@ export class NutritionService {
         targetMacros: { proteins: 120, carbohydrates: 180, fats: 60 },
         meals: [],
         createdBy: 'nutritionist',
-        isPublic: true
-      }
+        isPublic: true,
+      },
     ];
   }
 
@@ -434,7 +479,7 @@ export class NutritionService {
       averageHydration: 2100,
       consistency: 82,
       improvements: ['Meilleure hydratation', 'Apport en protéines plus régulier'],
-      concerns: ['Consommation de sucres ajoutés élevée']
+      concerns: ['Consommation de sucres ajoutés élevée'],
     };
   }
 
@@ -446,16 +491,16 @@ export class NutritionService {
         description: 'Vous avez atteint votre objectif de protéines 5 jours consécutifs',
         data: { streak: 5, target: 100 },
         actionRequired: false,
-        priority: 'low'
+        priority: 'low',
       },
       {
         type: 'warning',
         title: 'Hydratation insuffisante',
-        description: 'Votre consommation d\'eau est en dessous de l\'objectif depuis 3 jours',
+        description: "Votre consommation d'eau est en dessous de l'objectif depuis 3 jours",
         data: { currentIntake: 1800, target: 2500, deficit: 700 },
         actionRequired: true,
-        priority: 'medium'
-      }
+        priority: 'medium',
+      },
     ];
   }
 }

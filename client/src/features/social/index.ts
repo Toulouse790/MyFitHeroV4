@@ -11,5 +11,5 @@
 export const SocialModule = {
   name: 'social',
   status: 'planned',
-  description: 'Module social - À implémenter'
+  description: 'Module social - À implémenter',
 };

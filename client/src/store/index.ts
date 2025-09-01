@@ -2,13 +2,25 @@
 // Architecture modulaire avec stores séparés
 
 // Imports des stores modulaires
-export { useAuthStore, useAuthState, useAuthActions, useUser, useIsAuthenticated } from './authStore';
-export { useProfileStore, useProfileState, useProfileActions, useProfileMetrics, useUserSettings } from './profileStore';
+export {
+  useAuthStore,
+  useAuthState,
+  useAuthActions,
+  useUser,
+  useIsAuthenticated,
+} from './authStore';
+export {
+  useProfileStore,
+  useProfileState,
+  useProfileActions,
+  useProfileMetrics,
+  useUserSettings,
+} from './profileStore';
 export { useScalesStore, useScalesState, useWeightHistory, useScaleActions } from './scalesStore';
-export { 
-  useSettingsStore, 
-  useAppSettings, 
-  useThemeSettings, 
+export {
+  useSettingsStore,
+  useAppSettings,
+  useThemeSettings,
   useLanguageSettings,
   useUnitsSettings,
   useNotificationSettings,
@@ -16,11 +28,18 @@ export {
   useWorkoutSettings,
   useDisplaySettings,
   useSettingsActions,
-  useSettingsState
+  useSettingsState,
 } from './settingsStore';
 
 // Legacy workout store (à migrer)
-export { appStoreUnified, useWorkoutSession, useWorkoutExercises, useWorkoutStats, useWorkoutFavorites, useWorkoutSettings } from './legacyWorkoutStore';
+export {
+  appStoreUnified,
+  useWorkoutSession,
+  useWorkoutExercises,
+  useWorkoutStats,
+  useWorkoutFavorites,
+  useWorkoutSettings,
+} from './legacyWorkoutStore';
 
 // Types exports
 export type { AuthStore } from './authStore';
@@ -55,7 +74,7 @@ export const StoreUtils = {
   resetAllStores: () => {
     // Implémenter si nécessaire
   },
-  
+
   // Vérifier l'état de synchronisation
   getSyncStatus: () => {
     // Implémenter si nécessaire

@@ -55,21 +55,21 @@ export const useUnifiedLoading = (initialLoading = false): [LoadingState, Loadin
     }));
   }, []);
 
-  const withLoading = useCallback(async <T>(
-    asyncFn: () => Promise<T>,
-    action?: string
-  ): Promise<T> => {
-    setLoading(true, action);
-    try {
-      const result = await asyncFn();
-      setLoading(false);
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
-      setError(errorMessage);
-      throw error;
-    }
-  }, [setLoading, setError]);
+  const withLoading = useCallback(
+    async <T>(asyncFn: () => Promise<T>, action?: string): Promise<T> => {
+      setLoading(true, action);
+      try {
+        const result = await asyncFn();
+        setLoading(false);
+        return result;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+        setError(errorMessage);
+        throw error;
+      }
+    },
+    [setLoading, setError]
+  );
 
   const reset = useCallback(() => {
     setState({
@@ -101,7 +101,8 @@ export const useSimpleLoading = (initialLoading = false) => {
 
 // Pattern avec error: isLoading + error + setError
 export const useLoadingWithError = (initialLoading = false) => {
-  const [{ isLoading, error }, { setLoading, setError, clearError }] = useUnifiedLoading(initialLoading);
+  const [{ isLoading, error }, { setLoading, setError, clearError }] =
+    useUnifiedLoading(initialLoading);
   return { isLoading, error, setLoading, setError, clearError };
 };
 
@@ -114,28 +115,31 @@ export const useAsyncLoading = () => {
 // Pattern pour les formulaires
 export const useFormLoading = () => {
   const [{ isLoading, error }, { withLoading, setError, clearError }] = useUnifiedLoading();
-  
-  const submitForm = useCallback(async <T>(
-    submitFn: () => Promise<T>,
-    onSuccess?: (result: T) => void,
-    onError?: (error: Error) => void
-  ) => {
-    try {
-      const result = await withLoading(submitFn, 'form_submit');
-      onSuccess?.(result);
-      return result;
-    } catch (error) {
-      onError?.(error as Error);
-      throw error;
-    }
-  }, [withLoading]);
 
-  return { 
-    isLoading, 
-    error, 
-    submitForm, 
-    setError, 
-    clearError 
+  const submitForm = useCallback(
+    async <T>(
+      submitFn: () => Promise<T>,
+      onSuccess?: (result: T) => void,
+      onError?: (error: Error) => void
+    ) => {
+      try {
+        const result = await withLoading(submitFn, 'form_submit');
+        onSuccess?.(result);
+        return result;
+      } catch (error) {
+        onError?.(error as Error);
+        throw error;
+      }
+    },
+    [withLoading]
+  );
+
+  return {
+    isLoading,
+    error,
+    submitForm,
+    setError,
+    clearError,
   };
 };
 
@@ -144,24 +148,27 @@ export const useDataLoading = <T>() => {
   const [{ isLoading, error }, { withLoading, clearError }] = useUnifiedLoading();
   const [data, setData] = useState<T | null>(null);
 
-  const fetchData = useCallback(async (
-    fetchFn: () => Promise<T>,
-    onSuccess?: (data: T) => void
-  ) => {
-    try {
-      const result = await withLoading(fetchFn, 'data_fetch');
-      setData(result);
-      onSuccess?.(result);
-      return result;
-    } catch (error) {
-      setData(null);
-      throw error;
-    }
-  }, [withLoading]);
+  const fetchData = useCallback(
+    async (fetchFn: () => Promise<T>, onSuccess?: (data: T) => void) => {
+      try {
+        const result = await withLoading(fetchFn, 'data_fetch');
+        setData(result);
+        onSuccess?.(result);
+        return result;
+      } catch (error) {
+        setData(null);
+        throw error;
+      }
+    },
+    [withLoading]
+  );
 
-  const refetch = useCallback((fetchFn: () => Promise<T>) => {
-    return fetchData(fetchFn);
-  }, [fetchData]);
+  const refetch = useCallback(
+    (fetchFn: () => Promise<T>) => {
+      return fetchData(fetchFn);
+    },
+    [fetchData]
+  );
 
   return {
     data,

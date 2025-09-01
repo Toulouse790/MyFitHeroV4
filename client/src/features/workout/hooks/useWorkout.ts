@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WorkoutService } from '../services/WorkoutService';
-import type { 
-  Workout, 
-  WorkoutSession, 
-  Exercise, 
-  CreateWorkoutData, 
-  UpdateWorkoutData, 
-  WorkoutStats 
+import type {
+  Workout,
+  WorkoutSession,
+  Exercise,
+  CreateWorkoutData,
+  UpdateWorkoutData,
+  WorkoutStats,
 } from '../types/WorkoutTypes';
 
 export interface UseWorkoutReturn {
@@ -49,15 +49,16 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   // Chargement des workouts
   const loadWorkouts = useCallback(async () => {
     if (!currentUserId) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const workoutsData = await WorkoutService.getWorkouts(currentUserId);
       setWorkouts(workoutsData);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement des workouts';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors du chargement des workouts';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -67,7 +68,7 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   // Chargement des statistiques
   const loadStats = useCallback(async () => {
     if (!currentUserId) return;
-    
+
     try {
       const statsData = await WorkoutService.getWorkoutStats(currentUserId);
       setStats(statsData);
@@ -77,33 +78,38 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   }, [currentUserId]);
 
   // Création de workout
-  const createWorkout = useCallback(async (data: CreateWorkoutData) => {
-    if (!currentUserId) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const newWorkout = await WorkoutService.createWorkout(currentUserId, data);
-      setWorkouts(prev => [...prev, newWorkout]);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la création du workout';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentUserId]);
+  const createWorkout = useCallback(
+    async (data: CreateWorkoutData) => {
+      if (!currentUserId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const newWorkout = await WorkoutService.createWorkout(currentUserId, data);
+        setWorkouts(prev => [...prev, newWorkout]);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erreur lors de la création du workout';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentUserId]
+  );
 
   // Mise à jour de workout
   const updateWorkout = useCallback(async (id: string, data: UpdateWorkoutData) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const updatedWorkout = await WorkoutService.updateWorkout(id, data);
-      setWorkouts(prev => prev.map(w => w.id === id ? updatedWorkout : w));
+      setWorkouts(prev => prev.map(w => (w.id === id ? updatedWorkout : w)));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du workout';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors de la mise à jour du workout';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -114,12 +120,13 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   const deleteWorkout = useCallback(async (id: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       await WorkoutService.deleteWorkout(id);
       setWorkouts(prev => prev.filter(w => w.id !== id));
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la suppression du workout';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors de la suppression du workout';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -127,29 +134,33 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   }, []);
 
   // Démarrage de workout
-  const startWorkout = useCallback(async (workoutId: string) => {
-    if (!currentUserId) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const session = await WorkoutService.startWorkoutSession(currentUserId, workoutId);
-      const workout = workouts.find(w => w.id === workoutId);
-      setCurrentSession(session);
-      setActiveWorkout(workout || null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du démarrage du workout';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentUserId, workouts]);
+  const startWorkout = useCallback(
+    async (workoutId: string) => {
+      if (!currentUserId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const session = await WorkoutService.startWorkoutSession(currentUserId, workoutId);
+        const workout = workouts.find(w => w.id === workoutId);
+        setCurrentSession(session);
+        setActiveWorkout(workout || null);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erreur lors du démarrage du workout';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentUserId, workouts]
+  );
 
   // Pause de workout
   const pauseWorkout = useCallback(async () => {
     if (!currentSession) return;
-    
+
     try {
       const updatedSession = await WorkoutService.pauseWorkoutSession(currentSession.id);
       setCurrentSession(updatedSession);
@@ -162,7 +173,7 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   // Reprise de workout
   const resumeWorkout = useCallback(async () => {
     if (!currentSession) return;
-    
+
     try {
       const updatedSession = await WorkoutService.resumeWorkoutSession(currentSession.id);
       setCurrentSession(updatedSession);
@@ -175,10 +186,10 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   // Finalisation de workout
   const completeWorkout = useCallback(async () => {
     if (!currentSession) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       await WorkoutService.completeWorkoutSession(currentSession.id);
       setCurrentSession(null);
@@ -195,29 +206,33 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
   // Annulation de workout
   const cancelWorkout = useCallback(async () => {
     if (!currentSession) return;
-    
+
     try {
       await WorkoutService.cancelWorkoutSession(currentSession.id);
       setCurrentSession(null);
       setActiveWorkout(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'annulation';
+      const errorMessage = err instanceof Error ? err.message : "Erreur lors de l'annulation";
       setError(errorMessage);
     }
   }, [currentSession]);
 
   // Log d'exercice
-  const logExercise = useCallback(async (exerciseId: string, sets: number, reps: number, weight?: number) => {
-    if (!currentSession) return;
-    
-    try {
-      await WorkoutService.logExercise(currentSession.id, exerciseId, { sets, reps, weight });
-      // Optionnel: recharger la session pour avoir les données à jour
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement de l\'exercice';
-      setError(errorMessage);
-    }
-  }, [currentSession]);
+  const logExercise = useCallback(
+    async (exerciseId: string, sets: number, reps: number, weight?: number) => {
+      if (!currentSession) return;
+
+      try {
+        await WorkoutService.logExercise(currentSession.id, exerciseId, { sets, reps, weight });
+        // Optionnel: recharger la session pour avoir les données à jour
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Erreur lors de l'enregistrement de l'exercice";
+        setError(errorMessage);
+      }
+    },
+    [currentSession]
+  );
 
   // Rafraîchissement
   const refreshWorkouts = useCallback(async () => {
@@ -269,6 +284,6 @@ export function useWorkout(userId?: string): UseWorkoutReturn {
     refreshWorkouts,
     getWorkoutDuration,
     getCompletedExercises,
-    getTotalWorkouts
+    getTotalWorkouts,
   };
 }

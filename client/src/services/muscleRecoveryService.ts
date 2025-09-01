@@ -9,7 +9,12 @@ import type {
   RecoveryStatus,
   WorkoutIntensity,
 } from '@/features/workout/types/muscleRecovery';
-import type { UserProfile, Workout, SleepSession, DailyStats } from '@/features/workout/types/database';
+import type {
+  UserProfile,
+  Workout,
+  SleepSession,
+  DailyStats,
+} from '@/features/workout/types/database';
 
 export class MuscleRecoveryService {
   // === CONSTANTES DE RÉCUPÉRATION ===

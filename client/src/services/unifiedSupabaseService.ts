@@ -90,20 +90,13 @@ class UnifiedSupabaseService {
   ): Promise<SupabaseResponse<T[]>> {
     return this.findMany<T>(table, {
       ...options,
-      filters: [
-        { column: 'user_id', operator: 'eq', value: userId },
-        ...(options.filters || []),
-      ],
+      filters: [{ column: 'user_id', operator: 'eq', value: userId }, ...(options.filters || [])],
     });
   }
 
   async create<T>(table: string, data: Partial<T>): Promise<SupabaseResponse<T>> {
     try {
-      return await supabase
-        .from(table)
-        .insert(data)
-        .select()
-        .single();
+      return await supabase.from(table).insert(data).select().single();
     } catch (error) {
       return { data: null, error };
     }
@@ -111,27 +104,15 @@ class UnifiedSupabaseService {
 
   async createMany<T>(table: string, data: Partial<T>[]): Promise<SupabaseResponse<T[]>> {
     try {
-      return await supabase
-        .from(table)
-        .insert(data)
-        .select();
+      return await supabase.from(table).insert(data).select();
     } catch (error) {
       return { data: null, error };
     }
   }
 
-  async update<T>(
-    table: string,
-    id: string,
-    data: Partial<T>
-  ): Promise<SupabaseResponse<T>> {
+  async update<T>(table: string, id: string, data: Partial<T>): Promise<SupabaseResponse<T>> {
     try {
-      return await supabase
-        .from(table)
-        .update(data)
-        .eq('id', id)
-        .select()
-        .single();
+      return await supabase.from(table).update(data).eq('id', id).select().single();
     } catch (error) {
       return { data: null, error };
     }
@@ -139,11 +120,7 @@ class UnifiedSupabaseService {
 
   async upsert<T>(table: string, data: Partial<T>): Promise<SupabaseResponse<T>> {
     try {
-      return await supabase
-        .from(table)
-        .upsert(data)
-        .select()
-        .single();
+      return await supabase.from(table).upsert(data).select().single();
     } catch (error) {
       return { data: null, error };
     }
@@ -151,10 +128,7 @@ class UnifiedSupabaseService {
 
   async delete(table: string, id: string): Promise<SupabaseResponse<null>> {
     try {
-      return await supabase
-        .from(table)
-        .delete()
-        .eq('id', id);
+      return await supabase.from(table).delete().eq('id', id);
     } catch (error) {
       return { data: null, error };
     }
@@ -168,7 +142,7 @@ class UnifiedSupabaseService {
     options: Omit<SupabaseQueryOptions, 'limit' | 'offset'> = {}
   ): Promise<PaginatedResponse<T>> {
     const offset = (page - 1) * limit;
-    
+
     const { data, error, count } = await this.findMany<T>(table, {
       ...options,
       limit,
@@ -230,7 +204,9 @@ class UnifiedSupabaseService {
   // Authentification helper
   async getCurrentUser() {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       return { data: user, error: null };
     } catch (error) {
       return { data: null, error };

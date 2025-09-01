@@ -16,25 +16,25 @@ export class ApiServiceLayer {
   async signIn(email: string, password: string): Promise<ServiceResponse> {
     try {
       const response = await api.auth.login({ email, password });
-      
+
       if (response.success && response.data?.tokens) {
         // Set auth token for subsequent requests
         api.setAuthToken(response.data.tokens.accessToken);
-        
+
         return {
           success: true,
-          data: response.data
+          data: response.data,
         };
       }
-      
+
       return {
         success: false,
-        error: response.error || 'Login failed'
+        error: response.error || 'Login failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Login failed'
+        error: error instanceof Error ? error.message : 'Login failed',
       };
     }
   }
@@ -47,25 +47,25 @@ export class ApiServiceLayer {
   }): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const response = await api.auth.register(userData);
-      
+
       if (response.success && response.data?.tokens) {
         // Set auth token for subsequent requests
         api.setAuthToken(response.data.tokens.accessToken);
-        
+
         return {
           success: true,
-          data: response.data
+          data: response.data,
         };
       }
-      
+
       return {
         success: false,
-        error: response.error || 'Registration failed'
+        error: response.error || 'Registration failed',
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Registration failed'
+        error: error instanceof Error ? error.message : 'Registration failed',
       };
     }
   }
@@ -87,17 +87,17 @@ export class ApiServiceLayer {
       if (!refreshToken) return false;
 
       const response = await api.auth.refreshToken(refreshToken);
-      
+
       if (response.success && response.data?.tokens) {
         api.setAuthToken(response.data.tokens.accessToken);
-        
+
         // Update stored tokens
         localStorage.setItem('accessToken', response.data.tokens.accessToken);
         localStorage.setItem('refreshToken', response.data.tokens.refreshToken);
-        
+
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error('Token refresh failed:', error);
@@ -112,61 +112,68 @@ export class ApiServiceLayer {
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch profile'
+        error: error instanceof Error ? error.message : 'Failed to fetch profile',
       };
     }
   }
 
-  async updateUserProfile(updates: Record<string, unknown>): Promise<{ success: boolean; data?: any; error?: string }> {
+  async updateUserProfile(
+    updates: Record<string, unknown>
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const response = await api.user.updateProfile(updates);
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update profile'
+        error: error instanceof Error ? error.message : 'Failed to update profile',
       };
     }
   }
 
   // Workout operations
-  async getWorkouts(page = 1, limit = 20): Promise<{ success: boolean; data?: any; error?: string }> {
+  async getWorkouts(
+    page = 1,
+    limit = 20
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const response = await api.workout.getWorkouts({ page, limit });
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch workouts'
+        error: error instanceof Error ? error.message : 'Failed to fetch workouts',
       };
     }
   }
 
-  async createWorkout(workoutData: Record<string, unknown>): Promise<{ success: boolean; data?: any; error?: string }> {
+  async createWorkout(
+    workoutData: Record<string, unknown>
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const response = await api.workout.createWorkout(workoutData);
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create workout'
+        error: error instanceof Error ? error.message : 'Failed to create workout',
       };
     }
   }
@@ -179,28 +186,30 @@ export class ApiServiceLayer {
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch meals'
+        error: error instanceof Error ? error.message : 'Failed to fetch meals',
       };
     }
   }
 
-  async addMeal(mealData: Record<string, unknown>): Promise<{ success: boolean; data?: any; error?: string }> {
+  async addMeal(
+    mealData: Record<string, unknown>
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const response = await api.nutrition.addMeal(mealData);
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to add meal'
+        error: error instanceof Error ? error.message : 'Failed to add meal',
       };
     }
   }
@@ -212,28 +221,30 @@ export class ApiServiceLayer {
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch recovery status'
+        error: error instanceof Error ? error.message : 'Failed to fetch recovery status',
       };
     }
   }
 
-  async updateRecoveryStatus(statusData: Record<string, unknown>): Promise<{ success: boolean; data?: any; error?: string }> {
+  async updateRecoveryStatus(
+    statusData: Record<string, unknown>
+  ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
       const response = await api.recovery.updateStatus(statusData);
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to update recovery status'
+        error: error instanceof Error ? error.message : 'Failed to update recovery status',
       };
     }
   }
@@ -245,20 +256,20 @@ export class ApiServiceLayer {
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch dashboard data'
+        error: error instanceof Error ? error.message : 'Failed to fetch dashboard data',
       };
     }
   }
 
   // File upload operations
   async uploadFile(
-    endpoint: string, 
-    file: File, 
+    endpoint: string,
+    file: File,
     onProgress?: (progress: { loaded: number; total: number; percentage: number }) => void
   ): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
@@ -266,12 +277,12 @@ export class ApiServiceLayer {
       return {
         success: response.success,
         data: response.data,
-        error: response.error
+        error: response.error,
       };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Upload failed'
+        error: error instanceof Error ? error.message : 'Upload failed',
       };
     }
   }
@@ -283,14 +294,14 @@ export class ApiServiceLayer {
     errorCount: number;
   }> {
     const results = await Promise.allSettled(operations.map(op => op()));
-    
+
     const processedResults = results.map(result => {
       if (result.status === 'fulfilled') {
         return { success: true, data: result.value };
       } else {
-        return { 
-          success: false, 
-          error: result.reason instanceof Error ? result.reason.message : 'Operation failed'
+        return {
+          success: false,
+          error: result.reason instanceof Error ? result.reason.message : 'Operation failed',
         };
       }
     });
@@ -301,7 +312,7 @@ export class ApiServiceLayer {
     return {
       results: processedResults,
       successCount,
-      errorCount
+      errorCount,
     };
   }
 

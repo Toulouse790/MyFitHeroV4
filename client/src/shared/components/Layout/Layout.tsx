@@ -35,14 +35,12 @@ const Header: React.FC<{
             </svg>
           </button>
         )}
-        
+
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">MF</span>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 hidden sm:block">
-            MyFitHero
-          </h1>
+          <h1 className="text-xl font-semibold text-gray-900 hidden sm:block">MyFitHero</h1>
         </div>
       </div>
 
@@ -96,7 +94,7 @@ const Sidebar: React.FC<{
     >
       <nav className="mt-8">
         <ul className="space-y-2 px-3">
-          {navigationItems.map((item) => (
+          {navigationItems.map(item => (
             <li key={item.path}>
               <a
                 href={item.path}
@@ -107,9 +105,7 @@ const Sidebar: React.FC<{
                 `}
               >
                 <span className="text-xl">{item.icon}</span>
-                {!collapsed && (
-                  <span className="text-sm font-medium">{item.label}</span>
-                )}
+                {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
               </a>
             </li>
           ))}
@@ -124,13 +120,17 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-gray-200 py-4 px-6">
       <div className="flex items-center justify-between text-sm text-gray-600">
-        <div>
-          © 2025 MyFitHero. All rights reserved.
-        </div>
+        <div>© 2025 MyFitHero. All rights reserved.</div>
         <div className="flex items-center space-x-4">
-          <a href="/privacy" className="hover:text-gray-900">Privacy</a>
-          <a href="/terms" className="hover:text-gray-900">Terms</a>
-          <a href="/support" className="hover:text-gray-900">Support</a>
+          <a href="/privacy" className="hover:text-gray-900">
+            Privacy
+          </a>
+          <a href="/terms" className="hover:text-gray-900">
+            Terms
+          </a>
+          <a href="/support" className="hover:text-gray-900">
+            Support
+          </a>
         </div>
       </div>
     </footer>
@@ -145,26 +145,18 @@ export const Layout: React.FC<LayoutProps> = ({
   showSidebar = true,
   showFooter = false,
   sidebarCollapsed = false,
-  onSidebarToggle
+  onSidebarToggle,
 }) => {
   return (
     <div className={`min-h-screen bg-gray-50 ${className}`}>
       {/* Header */}
       {showHeader && (
-        <Header
-          onSidebarToggle={onSidebarToggle}
-          sidebarCollapsed={sidebarCollapsed}
-        />
+        <Header onSidebarToggle={onSidebarToggle} sidebarCollapsed={sidebarCollapsed} />
       )}
 
       <div className="flex h-[calc(100vh-4rem)]">
         {/* Sidebar */}
-        {showSidebar && (
-          <Sidebar
-            collapsed={sidebarCollapsed}
-            className="hidden lg:block"
-          />
-        )}
+        {showSidebar && <Sidebar collapsed={sidebarCollapsed} className="hidden lg:block" />}
 
         {/* Mobile Sidebar Overlay */}
         {showSidebar && !sidebarCollapsed && (
@@ -176,9 +168,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto">
-          <div className="p-6">
-            {children || <Outlet />}
-          </div>
+          <div className="p-6">{children || <Outlet />}</div>
         </main>
       </div>
 
@@ -223,11 +213,7 @@ export const DashboardLayout: React.FC<{ children?: React.ReactNode }> = ({ chil
 
 export const SimpleLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Layout
-      showHeader={true}
-      showSidebar={false}
-      showFooter={true}
-    >
+    <Layout showHeader={true} showSidebar={false} showFooter={true}>
       {children}
     </Layout>
   );

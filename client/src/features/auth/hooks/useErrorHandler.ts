@@ -51,58 +51,58 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
   const { error, setError, clearError } = useLoadingState();
 
   // Normalise une erreur en AppError
-  const createError = useCallback((
-    code: string,
-    message: string,
-    details?: any
-  ): AppError => ({
-    code,
-    message,
-    details,
-    timestamp: new Date().toISOString(),
-    context: globalContext,
-  }), [globalContext]);
+  const createError = useCallback(
+    (code: string, message: string, details?: any): AppError => ({
+      code,
+      message,
+      details,
+      timestamp: new Date().toISOString(),
+      context: globalContext,
+    }),
+    [globalContext]
+  );
 
   // Gère une erreur générique
-  const handleError = useCallback((error: unknown, context?: string): AppError => {
-    let appError: AppError;
+  const handleError = useCallback(
+    (error: unknown, context?: string): AppError => {
+      let appError: AppError;
 
-    if (error instanceof Error) {
-      appError = createError(
-        error.name || 'UnknownError',
-        error.message,
-        { stack: error.stack, context }
-      );
-    } else if (typeof error === 'string') {
-      appError = createError('StringError', error, { context });
-    } else {
-      appError = createError(
-        'UnknownError',
-        'Une erreur inconnue est survenue',
-        { originalError: error, context }
-      );
-    }
+      if (error instanceof Error) {
+        appError = createError(error.name || 'UnknownError', error.message, {
+          stack: error.stack,
+          context,
+        });
+      } else if (typeof error === 'string') {
+        appError = createError('StringError', error, { context });
+      } else {
+        appError = createError('UnknownError', 'Une erreur inconnue est survenue', {
+          originalError: error,
+          context,
+        });
+      }
 
-    // Log l'erreur si activé
-    if (logErrors) {
-      console.error('🚨 Erreur capturée:', appError);
-    }
+      // Log l'erreur si activé
+      if (logErrors) {
+        console.error('🚨 Erreur capturée:', appError);
+      }
 
-    // Callback personnalisé
-    if (onError) {
-      onError(appError);
-    }
+      // Callback personnalisé
+      if (onError) {
+        onError(appError);
+      }
 
-    // Toast si activé (nécessite une intégration avec le système de toast)
-    if (showToast) {
-      // toast.error(appError.message);
-    }
+      // Toast si activé (nécessite une intégration avec le système de toast)
+      if (showToast) {
+        // toast.error(appError.message);
+      }
 
-    // Mettre à jour l'état local
-    setError(appError.message);
+      // Mettre à jour l'état local
+      setError(appError.message);
 
-    return appError;
-  }, [createError, logErrors, onError, showToast, setError]);
+      return appError;
+    },
+    [createError, logErrors, onError, showToast, setError]
+  );
 
   // Gère spécifiquement les erreurs d'API
   const handleApiError = useCallback((error: unknown): ApiError | null => {
@@ -149,7 +149,7 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
   // Gère les erreurs de validation
   const handleValidationErrors = useCallback((errors: ValidationError[]): string => {
     if (errors.length === 0) return '';
-    
+
     if (errors.length === 1) {
       return `${errors[0].field}: ${errors[0].message}`;
     }
@@ -158,17 +158,18 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
   }, []);
 
   // Wrapper pour les fonctions async
-  const wrapAsync = useCallback(async <T>(
-    asyncFn: () => Promise<T>
-  ): Promise<T | null> => {
-    try {
-      clearError();
-      return await asyncFn();
-    } catch (error) {
-      handleError(error);
-      return null;
-    }
-  }, [clearError, handleError]);
+  const wrapAsync = useCallback(
+    async <T>(asyncFn: () => Promise<T>): Promise<T | null> => {
+      try {
+        clearError();
+        return await asyncFn();
+      } catch (error) {
+        handleError(error);
+        return null;
+      }
+    },
+    [clearError, handleError]
+  );
 
   return {
     error,
@@ -212,19 +213,25 @@ export function useFormErrorHandler(): UseFormErrorHandlerReturn {
   }, []);
 
   const handleValidationErrors = useCallback((validationErrors: ValidationError[]) => {
-    const errorMap = validationErrors.reduce((acc, error) => {
-      acc[error.field] = error.message;
-      return acc;
-    }, {} as Record<string, string>);
-    
+    const errorMap = validationErrors.reduce(
+      (acc, error) => {
+        acc[error.field] = error.message;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+
     setErrors(errorMap);
   }, []);
 
   const hasErrors = Object.keys(errors).length > 0;
 
-  const getFieldError = useCallback((field: string) => {
-    return errors[field];
-  }, [errors]);
+  const getFieldError = useCallback(
+    (field: string) => {
+      return errors[field];
+    },
+    [errors]
+  );
 
   return {
     errors,
@@ -241,10 +248,11 @@ export function useFormErrorHandler(): UseFormErrorHandlerReturn {
 export const ErrorUtils = {
   // Vérifie si c'est une erreur réseau
   isNetworkError: (error: unknown): boolean => {
-    return error instanceof Error && (
-      error.message.includes('fetch') ||
-      error.message.includes('network') ||
-      error.message.includes('offline')
+    return (
+      error instanceof Error &&
+      (error.message.includes('fetch') ||
+        error.message.includes('network') ||
+        error.message.includes('offline'))
     );
   },
 

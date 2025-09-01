@@ -33,11 +33,7 @@ export interface UseLoadingStateReturn<T = any> {
 export function useLoadingState<T = any>(
   options: UseLoadingStateOptions = {}
 ): UseLoadingStateReturn<T> {
-  const {
-    initialLoading = false,
-    initialError = null,
-    initialData = null,
-  } = options;
+  const { initialLoading = false, initialError = null, initialData = null } = options;
 
   const [isLoading, setIsLoading] = useState(initialLoading);
   const [error, setError] = useState<string | null>(initialError);
@@ -68,9 +64,7 @@ export function useLoadingState<T = any>(
   }, [initialLoading, initialError, initialData]);
 
   // Exécute une fonction async avec gestion automatique du loading/error
-  const execute = useCallback(async <R = T>(
-    asyncFn: () => Promise<R>
-  ): Promise<R | null> => {
+  const execute = useCallback(async <R = T>(asyncFn: () => Promise<R>): Promise<R | null> => {
     setIsLoading(true);
     setError(null);
 
@@ -87,24 +81,25 @@ export function useLoadingState<T = any>(
   }, []);
 
   // Exécute une fonction async et stocke le résultat dans data
-  const executeWithData = useCallback(async <R = T>(
-    asyncFn: () => Promise<R>
-  ): Promise<R | null> => {
-    setIsLoading(true);
-    setError(null);
+  const executeWithData = useCallback(
+    async <R = T>(asyncFn: () => Promise<R>): Promise<R | null> => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const result = await asyncFn();
-      setData(result as T);
-      setIsLoading(false);
-      return result;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      setError(errorMessage);
-      setIsLoading(false);
-      return null;
-    }
-  }, []);
+      try {
+        const result = await asyncFn();
+        setData(result as T);
+        setIsLoading(false);
+        return result;
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
+        setError(errorMessage);
+        setIsLoading(false);
+        return null;
+      }
+    },
+    []
+  );
 
   return {
     isLoading,
@@ -131,11 +126,12 @@ export interface UseFormLoadingReturn {
 export function useFormLoading(): UseFormLoadingReturn {
   const { isLoading, error, clearError, execute } = useLoadingState();
 
-  const submitForm = useCallback(async <T>(
-    submitFn: () => Promise<T>
-  ): Promise<T | null> => {
-    return await execute(submitFn);
-  }, [execute]);
+  const submitForm = useCallback(
+    async <T>(submitFn: () => Promise<T>): Promise<T | null> => {
+      return await execute(submitFn);
+    },
+    [execute]
+  );
 
   return {
     isSubmitting: isLoading,
@@ -165,9 +161,12 @@ export function useApiLoading<T = any>(
     return await executeWithData(apiFn);
   }, [executeWithData, apiFn]);
 
-  const mutate = useCallback((newData: T | null) => {
-    setData(newData);
-  }, [setData]);
+  const mutate = useCallback(
+    (newData: T | null) => {
+      setData(newData);
+    },
+    [setData]
+  );
 
   // Auto-fetch au montage du composant
   const [hasFetched, setHasFetched] = useState(false);
@@ -201,31 +200,32 @@ export function useLoadingWithTimeout<T = any>(
   const loadingState = useLoadingState<T>();
   const [isTimeout, setIsTimeout] = useState(false);
 
-  const executeWithTimeout = useCallback(async <R = T>(
-    asyncFn: () => Promise<R>
-  ): Promise<R | null> => {
-    setIsTimeout(false);
-    
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        setIsTimeout(true);
-        reject(new Error('Délai d\'attente dépassé'));
-      }, timeoutMs);
-    });
+  const executeWithTimeout = useCallback(
+    async <R = T>(asyncFn: () => Promise<R>): Promise<R | null> => {
+      setIsTimeout(false);
 
-    try {
-      return await Promise.race([asyncFn(), timeoutPromise]);
-    } catch (err) {
-      if (err instanceof Error && err.message === 'Délai d\'attente dépassé') {
-        loadingState.setError('Délai d\'attente dépassé');
-      } else {
-        loadingState.setError(err instanceof Error ? err.message : 'Erreur inconnue');
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          setIsTimeout(true);
+          reject(new Error("Délai d'attente dépassé"));
+        }, timeoutMs);
+      });
+
+      try {
+        return await Promise.race([asyncFn(), timeoutPromise]);
+      } catch (err) {
+        if (err instanceof Error && err.message === "Délai d'attente dépassé") {
+          loadingState.setError("Délai d'attente dépassé");
+        } else {
+          loadingState.setError(err instanceof Error ? err.message : 'Erreur inconnue');
+        }
+        return null;
+      } finally {
+        loadingState.setLoading(false);
       }
-      return null;
-    } finally {
-      loadingState.setLoading(false);
-    }
-  }, [loadingState, timeoutMs]);
+    },
+    [loadingState, timeoutMs]
+  );
 
   return {
     ...loadingState,

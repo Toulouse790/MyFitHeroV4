@@ -18,10 +18,10 @@ export function useWearables(userId?: string): UseWearablesReturn {
 
   const loadData = useCallback(async () => {
     if (!currentUserId) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await WearablesService.getWearablesData(currentUserId);
       setData(result);
@@ -33,22 +33,25 @@ export function useWearables(userId?: string): UseWearablesReturn {
     }
   }, [currentUserId]);
 
-  const update = useCallback(async (newData: any) => {
-    if (!currentUserId) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await WearablesService.updateWearables(currentUserId, newData);
-      setData(result);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentUserId]);
+  const update = useCallback(
+    async (newData: any) => {
+      if (!currentUserId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await WearablesService.updateWearables(currentUserId, newData);
+        setData(result);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentUserId]
+  );
 
   const refresh = useCallback(async () => {
     await loadData();
@@ -63,6 +66,6 @@ export function useWearables(userId?: string): UseWearablesReturn {
     isLoading,
     error,
     refresh,
-    update
+    update,
   };
 }

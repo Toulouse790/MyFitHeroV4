@@ -1,9 +1,9 @@
-import { 
-  RecoveryData, 
-  RecoveryMetrics, 
-  RecoveryActivity, 
+import {
+  RecoveryData,
+  RecoveryMetrics,
+  RecoveryActivity,
   RecoveryRecommendation,
-  RecoveryTrendData
+  RecoveryTrendData,
 } from '../types';
 
 export class RecoveryService {
@@ -39,12 +39,15 @@ export class RecoveryService {
   /**
    * Met à jour les métriques de récupération
    */
-  static async updateRecoveryMetrics(userId: string, metrics: Partial<RecoveryMetrics>): Promise<RecoveryMetrics> {
+  static async updateRecoveryMetrics(
+    userId: string,
+    metrics: Partial<RecoveryMetrics>
+  ): Promise<RecoveryMetrics> {
     try {
       const response = await fetch(`${this.BASE_URL}/${userId}/metrics`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(metrics)
+        body: JSON.stringify(metrics),
       });
       if (!response.ok) throw new Error('Erreur lors de la mise à jour');
       return await response.json();
@@ -62,9 +65,9 @@ export class RecoveryService {
       const response = await fetch(`${this.BASE_URL}/${userId}/activities`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(activity)
+        body: JSON.stringify(activity),
       });
-      if (!response.ok) throw new Error('Erreur lors de l\'enregistrement');
+      if (!response.ok) throw new Error("Erreur lors de l'enregistrement");
     } catch (error) {
       // Mock success
       console.log('Activité enregistrée (mode mock):', activity);
@@ -94,7 +97,7 @@ export class RecoveryService {
       hrVariability = 30,
       stressLevel = 5,
       muscleStiffness = 5,
-      energyLevel = 5
+      energyLevel = 5,
     } = metrics;
 
     // Normalisation des scores (0-100)
@@ -106,8 +109,12 @@ export class RecoveryService {
     const energyScore = energyLevel * 10;
 
     return Math.round(
-      (sleepScore * 0.25 + hrScore * 0.2 + hrvScore * 0.2 + 
-       stressScore * 0.15 + stiffnessScore * 0.1 + energyScore * 0.1)
+      sleepScore * 0.25 +
+        hrScore * 0.2 +
+        hrvScore * 0.2 +
+        stressScore * 0.15 +
+        stiffnessScore * 0.1 +
+        energyScore * 0.1
     );
   }
 
@@ -134,7 +141,7 @@ export class RecoveryService {
       history: [
         { date: '2024-01-01', overallScore: 70, sleepScore: 75, stressScore: 65, energyScore: 80 },
         { date: '2024-01-02', overallScore: 72, sleepScore: 78, stressScore: 68, energyScore: 82 },
-        { date: '2024-01-03', overallScore: 75, sleepScore: 80, stressScore: 70, energyScore: 85 }
+        { date: '2024-01-03', overallScore: 75, sleepScore: 80, stressScore: 70, energyScore: 85 },
       ],
       recentActivities: [
         {
@@ -143,9 +150,9 @@ export class RecoveryService {
           duration: 15,
           intensity: 3,
           timestamp: new Date().toISOString(),
-          benefits: ['flexibilité', 'relaxation']
-        }
-      ]
+          benefits: ['flexibilité', 'relaxation'],
+        },
+      ],
     };
   }
 
@@ -162,7 +169,7 @@ export class RecoveryService {
       energyLevel: 7,
       moodScore: 8,
       overallScore: 75,
-      readinessScore: 80
+      readinessScore: 80,
     };
   }
 
@@ -177,7 +184,7 @@ export class RecoveryService {
         action: 'Essayez de vous coucher 30 minutes plus tôt',
         estimatedBenefit: '+10% récupération',
         timeToComplete: 480,
-        difficulty: 'easy'
+        difficulty: 'easy',
       },
       {
         id: '2',
@@ -188,29 +195,29 @@ export class RecoveryService {
         action: 'Pratiquez 10 minutes de méditation',
         estimatedBenefit: '+5% bien-être',
         timeToComplete: 10,
-        difficulty: 'easy'
-      }
+        difficulty: 'easy',
+      },
     ];
   }
 
   private static getMockTrendData(days: number): RecoveryTrendData[] {
     const data: RecoveryTrendData[] = [];
     const today = new Date();
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      
+
       data.push({
         date: date.toISOString().split('T')[0]!,
         overall: 60 + Math.random() * 30,
         sleep: 50 + Math.random() * 40,
         stress: 40 + Math.random() * 50,
         energy: 55 + Math.random() * 35,
-        hrv: 20 + Math.random() * 40
+        hrv: 20 + Math.random() * 40,
       });
     }
-    
+
     return data;
   }
 }

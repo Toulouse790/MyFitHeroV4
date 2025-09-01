@@ -18,10 +18,10 @@ export function useHydration(userId?: string): UseHydrationReturn {
 
   const loadData = useCallback(async () => {
     if (!currentUserId) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await HydrationService.getHydrationData(currentUserId);
       setData(result);
@@ -33,22 +33,25 @@ export function useHydration(userId?: string): UseHydrationReturn {
     }
   }, [currentUserId]);
 
-  const update = useCallback(async (newData: any) => {
-    if (!currentUserId) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const result = await HydrationService.updateHydration(currentUserId, newData);
-      setData(result);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentUserId]);
+  const update = useCallback(
+    async (newData: any) => {
+      if (!currentUserId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const result = await HydrationService.updateHydration(currentUserId, newData);
+        setData(result);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentUserId]
+  );
 
   const refresh = useCallback(async () => {
     await loadData();
@@ -63,6 +66,6 @@ export function useHydration(userId?: string): UseHydrationReturn {
     isLoading,
     error,
     refresh,
-    update
+    update,
   };
 }

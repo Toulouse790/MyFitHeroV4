@@ -59,7 +59,9 @@ describe('WorkoutCard', () => {
       render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
       expect(screen.getByText('Upper Body Strength')).toBeInTheDocument();
-      expect(screen.getByText('Complete upper body workout focusing on chest and arms')).toBeInTheDocument();
+      expect(
+        screen.getByText('Complete upper body workout focusing on chest and arms')
+      ).toBeInTheDocument();
       expect(screen.getByText('45 min')).toBeInTheDocument();
       expect(screen.getByText('350 cal')).toBeInTheDocument();
       expect(screen.getByText('128')).toBeInTheDocument();
@@ -84,8 +86,8 @@ describe('WorkoutCard', () => {
     });
   });
 
-  describe('Interaction d\'expansion', () => {
-    it('s\'étend quand on clique sur l\'en-tête', async () => {
+  describe("Interaction d'expansion", () => {
+    it("s'étend quand on clique sur l'en-tête", async () => {
       const user = userEvent.setup();
       render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 
@@ -103,8 +105,8 @@ describe('WorkoutCard', () => {
     });
   });
 
-  describe('Démarrage d\'entraînement', () => {
-    it('affiche les boutons d\'action quand étendu', async () => {
+  describe("Démarrage d'entraînement", () => {
+    it("affiche les boutons d'action quand étendu", async () => {
       const user = userEvent.setup();
       render(<WorkoutCard workout={mockWorkout} onStartWorkout={mockOnStartWorkout} />);
 

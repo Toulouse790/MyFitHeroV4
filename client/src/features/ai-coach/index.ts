@@ -11,5 +11,5 @@
 export const AiCoachModule = {
   name: 'ai-coach',
   status: 'planned',
-  description: 'Module ai-coach - À implémenter'
+  description: 'Module ai-coach - À implémenter',
 };

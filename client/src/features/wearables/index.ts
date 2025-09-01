@@ -11,5 +11,5 @@
 export const WearablesModule = {
   name: 'wearables',
   status: 'planned',
-  description: 'Module wearables - À implémenter'
+  description: 'Module wearables - À implémenter',
 };

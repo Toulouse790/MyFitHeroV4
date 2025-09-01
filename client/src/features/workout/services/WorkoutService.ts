@@ -1,15 +1,15 @@
-import type { 
-  Workout, 
-  WorkoutSession, 
-  Exercise, 
-  CreateWorkoutData, 
-  UpdateWorkoutData, 
+import type {
+  Workout,
+  WorkoutSession,
+  Exercise,
+  CreateWorkoutData,
+  UpdateWorkoutData,
   WorkoutStats,
   WorkoutTemplate,
   WorkoutPlan,
   WorkoutProgress,
   WorkoutFilters,
-  WorkoutSearchQuery
+  WorkoutSearchQuery,
 } from '../types/WorkoutTypes';
 
 export class WorkoutService {
@@ -50,7 +50,7 @@ export class WorkoutService {
       const response = await fetch(`${this.BASE_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, userId })
+        body: JSON.stringify({ ...data, userId }),
       });
       if (!response.ok) throw new Error('Erreur lors de la création du workout');
       return await response.json();
@@ -66,7 +66,7 @@ export class WorkoutService {
       const response = await fetch(`${this.BASE_URL}/${workoutId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!response.ok) throw new Error('Erreur lors de la mise à jour du workout');
       return await response.json();
@@ -80,7 +80,7 @@ export class WorkoutService {
   static async deleteWorkout(workoutId: string): Promise<void> {
     try {
       const response = await fetch(`${this.BASE_URL}/${workoutId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
       if (!response.ok) throw new Error('Erreur lors de la suppression du workout');
     } catch (error) {
@@ -97,7 +97,7 @@ export class WorkoutService {
       const response = await fetch(`${this.BASE_URL}/${workoutId}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({ userId }),
       });
       if (!response.ok) throw new Error('Erreur lors du démarrage de la session');
       return await response.json();
@@ -111,7 +111,7 @@ export class WorkoutService {
   static async pauseWorkoutSession(sessionId: string): Promise<WorkoutSession> {
     try {
       const response = await fetch(`${this.BASE_URL}/sessions/${sessionId}/pause`, {
-        method: 'POST'
+        method: 'POST',
       });
       if (!response.ok) throw new Error('Erreur lors de la pause de la session');
       return await response.json();
@@ -125,7 +125,7 @@ export class WorkoutService {
   static async resumeWorkoutSession(sessionId: string): Promise<WorkoutSession> {
     try {
       const response = await fetch(`${this.BASE_URL}/sessions/${sessionId}/resume`, {
-        method: 'POST'
+        method: 'POST',
       });
       if (!response.ok) throw new Error('Erreur lors de la reprise de la session');
       return await response.json();
@@ -139,7 +139,7 @@ export class WorkoutService {
   static async completeWorkoutSession(sessionId: string): Promise<WorkoutSession> {
     try {
       const response = await fetch(`${this.BASE_URL}/sessions/${sessionId}/complete`, {
-        method: 'POST'
+        method: 'POST',
       });
       if (!response.ok) throw new Error('Erreur lors de la finalisation de la session');
       return await response.json();
@@ -153,9 +153,9 @@ export class WorkoutService {
   static async cancelWorkoutSession(sessionId: string): Promise<void> {
     try {
       const response = await fetch(`${this.BASE_URL}/sessions/${sessionId}/cancel`, {
-        method: 'POST'
+        method: 'POST',
       });
-      if (!response.ok) throw new Error('Erreur lors de l\'annulation de la session');
+      if (!response.ok) throw new Error("Erreur lors de l'annulation de la session");
     } catch (error) {
       console.error('Erreur WorkoutService.cancelWorkoutSession:', error);
       throw error;
@@ -164,17 +164,20 @@ export class WorkoutService {
 
   // Enregistrement d'un exercice
   static async logExercise(
-    sessionId: string, 
-    exerciseId: string, 
+    sessionId: string,
+    exerciseId: string,
     data: { sets: number; reps: number; weight?: number; duration?: number }
   ): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/sessions/${sessionId}/exercises/${exerciseId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      if (!response.ok) throw new Error('Erreur lors de l\'enregistrement de l\'exercice');
+      const response = await fetch(
+        `${this.BASE_URL}/sessions/${sessionId}/exercises/${exerciseId}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
+      if (!response.ok) throw new Error("Erreur lors de l'enregistrement de l'exercice");
     } catch (error) {
       console.error('Erreur WorkoutService.logExercise:', error);
       throw error;
@@ -215,7 +218,7 @@ export class WorkoutService {
       const response = await fetch(`${this.BASE_URL}/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(query)
+        body: JSON.stringify(query),
       });
       if (!response.ok) throw new Error('Erreur lors de la recherche');
       return await response.json();
@@ -258,7 +261,7 @@ export class WorkoutService {
             weight: 80,
             restTime: 120,
             instructions: ['Allongez-vous sur le banc', 'Descendez la barre lentement'],
-            muscleGroups: ['chest', 'triceps']
+            muscleGroups: ['chest', 'triceps'],
           },
           {
             id: 'ex2',
@@ -268,8 +271,8 @@ export class WorkoutService {
             reps: 12,
             restTime: 90,
             instructions: ['Descendez lentement', 'Remontez en contractant'],
-            muscleGroups: ['chest', 'triceps']
-          }
+            muscleGroups: ['chest', 'triceps'],
+          },
         ],
         tags: ['force', 'haut du corps'],
         equipment: [],
@@ -277,8 +280,8 @@ export class WorkoutService {
         isPublic: true,
         createdBy: 'coach1',
         createdAt: '2024-01-01T00:00:00Z',
-        updatedAt: '2024-01-01T00:00:00Z'
-      }
+        updatedAt: '2024-01-01T00:00:00Z',
+      },
     ];
   }
 
@@ -289,7 +292,7 @@ export class WorkoutService {
       userId,
       startTime: new Date().toISOString(),
       status: 'in_progress',
-      exercises: []
+      exercises: [],
     };
   }
 
@@ -319,8 +322,8 @@ export class WorkoutService {
         glutes: 10,
         calves: 6,
         full_body: 3,
-        core: 8
-      }
+        core: 8,
+      },
     };
   }
 
@@ -333,23 +336,23 @@ export class WorkoutService {
           sets: 4,
           reps: 8,
           weight: 75,
-          volume: 2400
+          volume: 2400,
         },
         {
           date: '2024-01-03',
           sets: 4,
           reps: 8,
           weight: 80,
-          volume: 2560
-        }
+          volume: 2560,
+        },
       ],
       personalBest: {
         maxWeight: 85,
         maxReps: 10,
         maxVolume: 2720,
-        achievedAt: '2024-01-05T00:00:00Z'
+        achievedAt: '2024-01-05T00:00:00Z',
       },
-      trend: 'improving'
+      trend: 'improving',
     };
   }
 
@@ -366,8 +369,8 @@ export class WorkoutService {
         equipment: [],
         isPublic: true,
         rating: 4.5,
-        usageCount: 1250
-      }
+        usageCount: 1250,
+      },
     ];
   }
 }

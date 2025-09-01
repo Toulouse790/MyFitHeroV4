@@ -1,5 +1,5 @@
 /**
- * Tests pour la page LandingPage  
+ * Tests pour la page LandingPage
  * TEMPORAIREMENT MINIMAL pour stabiliser l'environnement de test
  */
 

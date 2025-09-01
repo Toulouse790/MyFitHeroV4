@@ -77,15 +77,15 @@ export const useProfileStore = create<ProfileStore>()(
       ...initialState,
 
       // Actions de base
-      setProfile: (profile) => {
-        set({ 
-          profile, 
+      setProfile: profile => {
+        set({
+          profile,
           error: null,
           lastUpdated: new Date().toISOString(),
         });
       },
 
-      updateProfile: async (updates) => {
+      updateProfile: async updates => {
         const { profile } = get();
         if (!profile) {
           set({ error: 'Profil non chargé' });
@@ -104,7 +104,7 @@ export const useProfileStore = create<ProfileStore>()(
           // Ici, intégrer l'appel API Supabase
           // await supabaseService.updateProfile(profile.userId, updates);
 
-          set({ 
+          set({
             profile: updatedProfile,
             lastUpdated: new Date().toISOString(),
           });
@@ -116,34 +116,34 @@ export const useProfileStore = create<ProfileStore>()(
         }
       },
 
-      updateUnits: async (units) => {
+      updateUnits: async units => {
         if (units) {
           await get().updateProfile({ units });
         }
       },
 
-      updateNotifications: async (notifications) => {
+      updateNotifications: async notifications => {
         if (notifications) {
           await get().updateProfile({ notifications });
         }
       },
 
-      updatePrivacy: async (privacy) => {
+      updatePrivacy: async privacy => {
         if (privacy) {
           await get().updateProfile({ privacy });
         }
       },
 
-      loadProfile: async (_userId) => {
+      loadProfile: async _userId => {
         set({ isLoading: true, error: null });
 
         try {
           // Ici, intégrer l'appel API Supabase
           // const profile = await supabaseService.getProfile(userId);
-          
+
           // Simulation pour l'instant
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
+
           // set({ profile, lastUpdated: new Date().toISOString() });
         } catch {
           set({ error: 'Erreur lors du chargement du profil' });
@@ -152,11 +152,11 @@ export const useProfileStore = create<ProfileStore>()(
         }
       },
 
-      setLoading: (isLoading) => {
+      setLoading: isLoading => {
         set({ isLoading });
       },
 
-      setError: (error) => {
+      setError: error => {
         set({ error, isLoading: false });
       },
 
@@ -181,11 +181,11 @@ export const useProfileStore = create<ProfileStore>()(
 
         // Formule de Harris-Benedict révisée
         const { weight_kg, height_cm, age, gender } = profile;
-        
+
         if (gender === 'male') {
-          return Math.round(88.362 + (13.397 * weight_kg) + (4.799 * height_cm) - (5.677 * age));
+          return Math.round(88.362 + 13.397 * weight_kg + 4.799 * height_cm - 5.677 * age);
         } else {
-          return Math.round(447.593 + (9.247 * weight_kg) + (3.098 * height_cm) - (4.330 * age));
+          return Math.round(447.593 + 9.247 * weight_kg + 3.098 * height_cm - 4.33 * age);
         }
       },
 
@@ -194,12 +194,17 @@ export const useProfileStore = create<ProfileStore>()(
         if (!profile) return 0;
 
         const requiredFields = [
-          'displayName', 'weight_kg', 'height_cm', 'age', 
-          'gender', 'activityLevel', 'fitnessGoal'
+          'displayName',
+          'weight_kg',
+          'height_cm',
+          'age',
+          'gender',
+          'activityLevel',
+          'fitnessGoal',
         ] as const;
 
-        const completedFields = requiredFields.filter(field => 
-          profile[field] !== null && profile[field] !== undefined && profile[field] !== ''
+        const completedFields = requiredFields.filter(
+          field => profile[field] !== null && profile[field] !== undefined && profile[field] !== ''
         );
 
         return Math.round((completedFields.length / requiredFields.length) * 100);
@@ -211,7 +216,7 @@ export const useProfileStore = create<ProfileStore>()(
     }),
     {
       name: 'profile-storage',
-      partialize: (state) => ({
+      partialize: state => ({
         profile: state.profile,
         lastUpdated: state.lastUpdated,
       }),
@@ -220,37 +225,41 @@ export const useProfileStore = create<ProfileStore>()(
 );
 
 // Sélecteurs optimisés
-export const useProfileState = () => useProfileStore(state => ({
-  profile: state.profile,
-  isLoading: state.isLoading,
-  error: state.error,
-  lastUpdated: state.lastUpdated,
-}));
+export const useProfileState = () =>
+  useProfileStore(state => ({
+    profile: state.profile,
+    isLoading: state.isLoading,
+    error: state.error,
+    lastUpdated: state.lastUpdated,
+  }));
 
-export const useProfileActions = () => useProfileStore(state => ({
-  updateProfile: state.updateProfile,
-  updateUnits: state.updateUnits,
-  updateNotifications: state.updateNotifications,
-  updatePrivacy: state.updatePrivacy,
-  loadProfile: state.loadProfile,
-  setLoading: state.setLoading,
-  setError: state.setError,
-  clearError: state.clearError,
-  resetProfile: state.resetProfile,
-}));
+export const useProfileActions = () =>
+  useProfileStore(state => ({
+    updateProfile: state.updateProfile,
+    updateUnits: state.updateUnits,
+    updateNotifications: state.updateNotifications,
+    updatePrivacy: state.updatePrivacy,
+    loadProfile: state.loadProfile,
+    setLoading: state.setLoading,
+    setError: state.setError,
+    clearError: state.clearError,
+    resetProfile: state.resetProfile,
+  }));
 
-export const useProfileMetrics = () => useProfileStore(state => ({
-  calculateBMI: state.calculateBMI,
-  calculateBMR: state.calculateBMR,
-  getProfileCompleteness: state.getProfileCompleteness,
-  profile: state.profile,
-}));
+export const useProfileMetrics = () =>
+  useProfileStore(state => ({
+    calculateBMI: state.calculateBMI,
+    calculateBMR: state.calculateBMR,
+    getProfileCompleteness: state.getProfileCompleteness,
+    profile: state.profile,
+  }));
 
-export const useUserSettings = () => useProfileStore(state => ({
-  units: state.profile?.units,
-  notifications: state.profile?.notifications,
-  privacy: state.profile?.privacy,
-  updateUnits: state.updateUnits,
-  updateNotifications: state.updateNotifications,
-  updatePrivacy: state.updatePrivacy,
-}));
+export const useUserSettings = () =>
+  useProfileStore(state => ({
+    units: state.profile?.units,
+    notifications: state.profile?.notifications,
+    privacy: state.profile?.privacy,
+    updateUnits: state.updateUnits,
+    updateNotifications: state.updateNotifications,
+    updatePrivacy: state.updatePrivacy,
+  }));

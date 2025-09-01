@@ -1,17 +1,17 @@
-import { 
-  User, 
-  LoginCredentials, 
-  RegisterData, 
-  ResetPasswordData, 
-  ChangePasswordData, 
-  UpdateProfileData, 
-  UpdatePreferencesData, 
+import {
+  User,
+  LoginCredentials,
+  RegisterData,
+  ResetPasswordData,
+  ChangePasswordData,
+  UpdateProfileData,
+  UpdatePreferencesData,
   UpdateUserProfileData,
-  LoginResponse, 
-  RefreshTokenResponse, 
-  UserStatsResponse, 
+  LoginResponse,
+  RefreshTokenResponse,
+  UserStatsResponse,
   SessionInfo,
-  OAuthCredentials
+  OAuthCredentials,
 } from '../types/index';
 
 export class AuthService {
@@ -28,7 +28,7 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify(credentials),
       });
 
       if (!response.ok) {
@@ -37,7 +37,7 @@ export class AuthService {
       }
 
       const loginResponse: LoginResponse = await response.json();
-      
+
       // Stockage sécurisé des tokens
       if (credentials.rememberMe) {
         localStorage.setItem(this.TOKEN_KEY, loginResponse.session.accessToken);
@@ -63,17 +63,17 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Erreur lors de l\'inscription');
+        throw new Error(error.message || "Erreur lors de l'inscription");
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
+      console.error("Erreur lors de l'inscription:", error);
       throw error;
     }
   }
@@ -84,7 +84,7 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/oauth/${credentials.provider}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
+        body: JSON.stringify(credentials),
       });
 
       if (!response.ok) {
@@ -93,7 +93,7 @@ export class AuthService {
       }
 
       const loginResponse: LoginResponse = await response.json();
-      
+
       // Stockage des tokens
       localStorage.setItem(this.TOKEN_KEY, loginResponse.session.accessToken);
       localStorage.setItem(this.REFRESH_TOKEN_KEY, loginResponse.session.refreshToken);
@@ -113,10 +113,10 @@ export class AuthService {
       if (token) {
         await fetch(`${this.BASE_URL}/logout`, {
           method: 'POST',
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         });
       }
     } catch (error) {
@@ -138,7 +138,7 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken })
+        body: JSON.stringify({ refreshToken }),
       });
 
       if (!response.ok) {
@@ -147,7 +147,7 @@ export class AuthService {
       }
 
       const refreshResponse: RefreshTokenResponse = await response.json();
-      
+
       // Mise à jour du token
       const storage = localStorage.getItem(this.TOKEN_KEY) ? localStorage : sessionStorage;
       storage.setItem(this.TOKEN_KEY, refreshResponse.accessToken);
@@ -168,7 +168,7 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/password/reset-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -187,7 +187,7 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/password/reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword })
+        body: JSON.stringify({ token, newPassword }),
       });
 
       if (!response.ok) {
@@ -205,11 +205,11 @@ export class AuthService {
     try {
       const response = await fetch(`${this.BASE_URL}/password/change`, {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${this.getAccessToken()}`,
-          'Content-Type': 'application/json'
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -231,7 +231,7 @@ export class AuthService {
       if (!token) return null;
 
       const response = await fetch(`${this.BASE_URL}/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -243,7 +243,7 @@ export class AuthService {
       }
 
       const user = await response.json();
-      
+
       // Mise à jour du stockage local
       const storage = localStorage.getItem(this.USER_KEY) ? localStorage : sessionStorage;
       storage.setItem(this.USER_KEY, JSON.stringify(user));
@@ -260,11 +260,11 @@ export class AuthService {
     try {
       const response = await fetch(`${this.BASE_URL}/profile`, {
         method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${this.getAccessToken()}`,
-          'Content-Type': 'application/json'
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -273,7 +273,7 @@ export class AuthService {
       }
 
       const updatedUser = await response.json();
-      
+
       // Mise à jour du stockage local
       const storage = localStorage.getItem(this.USER_KEY) ? localStorage : sessionStorage;
       storage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
@@ -290,11 +290,11 @@ export class AuthService {
     try {
       const response = await fetch(`${this.BASE_URL}/preferences`, {
         method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${this.getAccessToken()}`,
-          'Content-Type': 'application/json'
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -314,11 +314,11 @@ export class AuthService {
     try {
       const response = await fetch(`${this.BASE_URL}/fitness-profile`, {
         method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${this.getAccessToken()}`,
-          'Content-Type': 'application/json'
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
@@ -341,12 +341,12 @@ export class AuthService {
       const response = await fetch(`${this.BASE_URL}/verify/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ token }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Erreur lors de la vérification d\'email');
+        throw new Error(error.message || "Erreur lors de la vérification d'email");
       }
     } catch (error) {
       console.error('Erreur vérification email:', error);
@@ -359,7 +359,7 @@ export class AuthService {
     try {
       const response = await fetch(`${this.BASE_URL}/verify/email/resend`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${this.getAccessToken()}` }
+        headers: { Authorization: `Bearer ${this.getAccessToken()}` },
       });
 
       if (!response.ok) {
@@ -378,7 +378,7 @@ export class AuthService {
   static async getUserStats(): Promise<UserStatsResponse> {
     try {
       const response = await fetch(`${this.BASE_URL}/stats`, {
-        headers: { 'Authorization': `Bearer ${this.getAccessToken()}` }
+        headers: { Authorization: `Bearer ${this.getAccessToken()}` },
       });
 
       if (!response.ok) {
@@ -403,7 +403,7 @@ export class AuthService {
       }
 
       const response = await fetch(`${this.BASE_URL}/session`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -426,7 +426,9 @@ export class AuthService {
 
   // Récupération du token de rafraîchissement
   static getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY) || sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+    return (
+      localStorage.getItem(this.REFRESH_TOKEN_KEY) || sessionStorage.getItem(this.REFRESH_TOKEN_KEY)
+    );
   }
 
   // Récupération de l'utilisateur stocké
@@ -470,12 +472,12 @@ export class AuthService {
           osVersion: 'Unknown',
           appVersion: '1.0.0',
           lastSeen: new Date().toISOString(),
-          isActive: true
-        }
+          isActive: true,
+        },
       },
       isFirstLogin: email.includes('new'),
       requiresTwoFactor: false,
-      twoFactorMethods: []
+      twoFactorMethods: [],
     };
   }
 
@@ -503,7 +505,7 @@ export class AuthService {
           recoveryAlerts: true,
           achievementNotifications: true,
           weeklyReports: true,
-          friendsActivity: true
+          friendsActivity: true,
         },
         privacy: {
           profileVisibility: 'friends',
@@ -511,15 +513,15 @@ export class AuthService {
           statsVisibility: 'private',
           allowFriendRequests: true,
           allowCoachRequests: false,
-          dataSharing: false
+          dataSharing: false,
         },
         accessibility: {
           highContrast: false,
           largeText: false,
           reducedMotion: false,
           screenReader: false,
-          colorBlindMode: 'none'
-        }
+          colorBlindMode: 'none',
+        },
       },
       profile: {
         height: 180,
@@ -535,8 +537,8 @@ export class AuthService {
             deadline: '2024-12-31',
             isActive: true,
             progress: 67,
-            createdAt: '2024-01-01T00:00:00Z'
-          }
+            createdAt: '2024-01-01T00:00:00Z',
+          },
         ],
         medicalConditions: [],
         allergies: ['peanuts'],
@@ -544,22 +546,22 @@ export class AuthService {
           name: 'Jane Doe',
           relationship: 'spouse',
           phone: '+33 6 87 65 43 21',
-          email: 'jane@example.com'
-        }
+          email: 'jane@example.com',
+        },
       },
       subscription: {
         plan: 'premium',
         status: 'active',
         startDate: '2024-01-01T00:00:00Z',
         endDate: '2024-12-31T23:59:59Z',
-        features: ['advanced_analytics', 'custom_workouts', 'nutrition_tracking', 'coach_support']
+        features: ['advanced_analytics', 'custom_workouts', 'nutrition_tracking', 'coach_support'],
       },
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: new Date().toISOString(),
       lastLoginAt: new Date().toISOString(),
       isEmailVerified: true,
       isPhoneVerified: false,
-      isActive: true
+      isActive: true,
     };
   }
 
@@ -571,7 +573,7 @@ export class AuthService {
       currentStreak: 12,
       longestStreak: 28,
       lastWorkout: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      joinedDaysAgo: 95
+      joinedDaysAgo: 95,
     };
   }
 }

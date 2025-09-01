@@ -1,9 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RecoveryService } from '../services/recovery.service';
-import type { RecoveryData, RecoveryMetrics, RecoveryRecommendation, RecoveryActivity } from '../types/index';
+import type {
+  RecoveryData,
+  RecoveryMetrics,
+  RecoveryRecommendation,
+  RecoveryActivity,
+} from '../types/index';
 
 type RecoveryActivityInput = {
-  type: 'massage' | 'stretching' | 'meditation' | 'cold_therapy' | 'heat_therapy' | 'sleep' | 'rest';
+  type:
+    | 'massage'
+    | 'stretching'
+    | 'meditation'
+    | 'cold_therapy'
+    | 'heat_therapy'
+    | 'sleep'
+    | 'rest';
   duration: number;
   intensity?: number;
   notes?: string;
@@ -40,12 +52,12 @@ export const useRecovery = (userId?: string): UseRecoveryReturn => {
 
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const [data, metricsData, recs] = await Promise.all([
         RecoveryService.getRecoveryStatus(userId),
         RecoveryService.getRecoveryMetrics(userId),
-        RecoveryService.getRecoveryRecommendations(userId)
+        RecoveryService.getRecoveryRecommendations(userId),
       ]);
 
       setRecoveryData(data);
@@ -59,46 +71,59 @@ export const useRecovery = (userId?: string): UseRecoveryReturn => {
   }, [userId]);
 
   // Mettre à jour les métriques
-  const updateRecoveryMetrics = useCallback(async (newMetrics: Partial<RecoveryMetrics>) => {
-    if (!userId) return;
+  const updateRecoveryMetrics = useCallback(
+    async (newMetrics: Partial<RecoveryMetrics>) => {
+      if (!userId) return;
 
-    setIsLoading(true);
-    try {
-      const updated = await RecoveryService.updateRecoveryMetrics(userId, newMetrics);
-      setMetrics(updated);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId]);
+      setIsLoading(true);
+      try {
+        const updated = await RecoveryService.updateRecoveryMetrics(userId, newMetrics);
+        setMetrics(updated);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erreur lors de la mise à jour');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userId]
+  );
 
   // Ajouter une activité de récupération
-  const addRecoveryActivity = useCallback(async (activity: { type: string; duration: number; intensity?: number; notes?: string }) => {
-    if (!userId) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-            const fullActivity: RecoveryActivity = {
-        userId,
-        timestamp: new Date().toISOString(),
-        type: activity.type as 'massage' | 'stretching' | 'meditation' | 'cold_therapy' | 'heat_therapy' | 'sleep' | 'rest',
-        duration: activity.duration,
-        ...(activity.intensity !== undefined && { intensity: activity.intensity }),
-        ...(activity.notes !== undefined && { notes: activity.notes })
-      };
-      
-      await RecoveryService.logRecoveryActivity(userId, fullActivity);
-      await loadRecoveryData(); // Recharger les données
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'ajout';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, loadRecoveryData]);
+  const addRecoveryActivity = useCallback(
+    async (activity: { type: string; duration: number; intensity?: number; notes?: string }) => {
+      if (!userId) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const fullActivity: RecoveryActivity = {
+          userId,
+          timestamp: new Date().toISOString(),
+          type: activity.type as
+            | 'massage'
+            | 'stretching'
+            | 'meditation'
+            | 'cold_therapy'
+            | 'heat_therapy'
+            | 'sleep'
+            | 'rest',
+          duration: activity.duration,
+          ...(activity.intensity !== undefined && { intensity: activity.intensity }),
+          ...(activity.notes !== undefined && { notes: activity.notes }),
+        };
+
+        await RecoveryService.logRecoveryActivity(userId, fullActivity);
+        await loadRecoveryData(); // Recharger les données
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Erreur lors de l'ajout";
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [userId, loadRecoveryData]
+  );
 
   // Calculer le score global de récupération
   const calculateOverallScore = useCallback((): number => {
@@ -110,7 +135,7 @@ export const useRecovery = (userId?: string): UseRecoveryReturn => {
       hrVariability = 30,
       stressLevel = 5,
       muscleStiffness = 5,
-      energyLevel = 5
+      energyLevel = 5,
     } = metrics;
 
     // Normalisation des scores (0-100)
@@ -122,8 +147,12 @@ export const useRecovery = (userId?: string): UseRecoveryReturn => {
     const energyScore = energyLevel * 10; // 0-10 -> 0-100
 
     return Math.round(
-      (sleepScore * 0.25 + hrScore * 0.2 + hrvScore * 0.2 + 
-       stressScore * 0.15 + stiffnessScore * 0.1 + energyScore * 0.1)
+      sleepScore * 0.25 +
+        hrScore * 0.2 +
+        hrvScore * 0.2 +
+        stressScore * 0.15 +
+        stiffnessScore * 0.1 +
+        energyScore * 0.1
     );
   }, [metrics]);
 
@@ -133,14 +162,14 @@ export const useRecovery = (userId?: string): UseRecoveryReturn => {
 
     const recent = recoveryData.history.slice(-3);
     const scores = recent.map(r => r.overallScore);
-    
+
     const firstScore = scores[0];
     const lastScore = scores[scores.length - 1];
-    
+
     if (firstScore === undefined || lastScore === undefined) return 'stable';
-    
+
     const trend = lastScore - firstScore;
-    
+
     if (trend > 5) return 'improving';
     if (trend < -5) return 'declining';
     return 'stable';
@@ -173,6 +202,6 @@ export const useRecovery = (userId?: string): UseRecoveryReturn => {
 
     // Calculateurs
     calculateOverallScore,
-    getRecoveryTrend
+    getRecoveryTrend,
   };
 };

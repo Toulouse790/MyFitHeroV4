@@ -11,5 +11,5 @@
 export const ProfileModule = {
   name: 'profile',
   status: 'planned',
-  description: 'Module profile - À implémenter'
+  description: 'Module profile - À implémenter',
 };

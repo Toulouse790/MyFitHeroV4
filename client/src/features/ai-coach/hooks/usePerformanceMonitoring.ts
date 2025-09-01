@@ -33,9 +33,9 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
     interactionTime: 0,
     memoryUsage: 0,
     networkRequests: 0,
-    bundleSize: 0
+    bundleSize: 0,
   });
-  
+
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [performanceObserver, setPerformanceObserver] = useState<PerformanceObserver | null>(null);
 
@@ -60,10 +60,14 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
   // Calculate bundle size from resource entries
   const getBundleSize = useCallback((): number => {
     if ('getEntriesByType' in performance) {
-      const resourceEntries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
-      return resourceEntries
-        .filter(entry => entry.name.includes('.js') || entry.name.includes('.css'))
-        .reduce((total, entry) => total + (entry.transferSize || 0), 0) / 1024; // Convert to KB
+      const resourceEntries = performance.getEntriesByType(
+        'resource'
+      ) as PerformanceResourceTiming[];
+      return (
+        resourceEntries
+          .filter(entry => entry.name.includes('.js') || entry.name.includes('.css'))
+          .reduce((total, entry) => total + (entry.transferSize || 0), 0) / 1024
+      ); // Convert to KB
     }
     return 0;
   }, []);
@@ -71,29 +75,29 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
   // Start monitoring performance
   const startMonitoring = useCallback(() => {
     if (!isMonitoring && 'PerformanceObserver' in window) {
-      const observer = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver(list => {
         const entries = list.getEntries();
-        
-        entries.forEach((entry) => {
+
+        entries.forEach(entry => {
           if (entry.entryType === 'navigation') {
             const navigationEntry = entry as PerformanceNavigationTiming;
             setMetrics(prev => ({
               ...prev,
-              loadTime: navigationEntry.loadEventEnd - navigationEntry.navigationStart
+              loadTime: navigationEntry.loadEventEnd - navigationEntry.navigationStart,
             }));
           }
-          
+
           if (entry.entryType === 'measure') {
             setMetrics(prev => ({
               ...prev,
-              renderTime: entry.duration
+              renderTime: entry.duration,
             }));
           }
-          
+
           if (entry.entryType === 'user-timing') {
             setMetrics(prev => ({
               ...prev,
-              interactionTime: entry.duration
+              interactionTime: entry.duration,
             }));
           }
         });
@@ -109,7 +113,7 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
           ...prev,
           memoryUsage: getMemoryUsage(),
           networkRequests: getNetworkRequests(),
-          bundleSize: getBundleSize()
+          bundleSize: getBundleSize(),
         }));
       } catch (error) {
         console.warn('Performance monitoring not supported:', error);
@@ -131,9 +135,9 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
     if ('mark' in performance && 'measure' in performance) {
       const startMark = `${name}-start`;
       const endMark = `${name}-end`;
-      
+
       performance.mark(startMark);
-      
+
       // Simulate interaction end (in real app, call this when interaction completes)
       setTimeout(() => {
         performance.mark(endMark);
@@ -148,7 +152,7 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
       ...metrics,
       memoryUsage: getMemoryUsage(),
       networkRequests: getNetworkRequests(),
-      bundleSize: getBundleSize()
+      bundleSize: getBundleSize(),
     };
   }, [metrics, getMemoryUsage, getNetworkRequests, getBundleSize]);
 
@@ -160,9 +164,9 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
       interactionTime: 0,
       memoryUsage: 0,
       networkRequests: 0,
-      bundleSize: 0
+      bundleSize: 0,
     });
-    
+
     if ('clearMarks' in performance && 'clearMeasures' in performance) {
       performance.clearMarks();
       performance.clearMeasures();
@@ -176,7 +180,7 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
         setMetrics(prev => ({
           ...prev,
           memoryUsage: getMemoryUsage(),
-          networkRequests: getNetworkRequests()
+          networkRequests: getNetworkRequests(),
         }));
       }, 5000); // Update every 5 seconds
 
@@ -200,7 +204,7 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
     stopMonitoring,
     recordInteraction,
     getReport,
-    clearMetrics
+    clearMetrics,
   };
 };
 

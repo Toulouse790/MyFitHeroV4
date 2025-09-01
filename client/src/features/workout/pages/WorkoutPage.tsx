@@ -302,8 +302,12 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
           <div className="text-center py-12">
             <div className="mb-6">
               <Dumbbell size={64} className="mx-auto text-gray-400 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Prêt pour l&apos;entraînement ?</h2>
-              <p className="text-gray-600">Commencez votre session d&apos;entraînement maintenant</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Prêt pour l&apos;entraînement ?
+              </h2>
+              <p className="text-gray-600">
+                Commencez votre session d&apos;entraînement maintenant
+              </p>
             </div>
             <Button onClick={handleStartWorkout} size="lg" className="bg-red-600 hover:bg-red-700">
               <Play className="mr-2" size={20} />
