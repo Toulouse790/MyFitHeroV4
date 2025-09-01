@@ -34,7 +34,7 @@
       "@/types/*": ["./src/types/*"]
     },
 
-    "types": ["node", "vite/client"]   // <---- AJOUT
+    "types": ["node", "vite/client", "jest", "@testing-library/jest-dom"]   // <---- AJOUT
   },
   "include": ["src", "src/**/*"],
   "exclude": [

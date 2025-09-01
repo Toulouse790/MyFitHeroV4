@@ -1,15 +1,15 @@
-// Export principal du module sleep
+// Export principal du module admin
 // export * from './types/index';
-// export * from './services/sleep.service';
-// export * from './hooks/useSleep';
+// export * from './services/admin.service';
+// export * from './hooks/useAdmin';
 
 // Exports des composants (à implémenter)
 // export * from './components';
 // export * from './pages';
 
 // Placeholder pour éviter les erreurs d'import
-export const SleepModule = {
-  name: 'sleep',
+export const AdminModule = {
+  name: 'admin',
   status: 'planned',
-  description: 'Module sleep - À implémenter'
+  description: 'Module admin - À implémenter'
 };
