@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { appStore } from '@/store/app-store';
-import { useToast } from './use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 
 interface SleepEntry {
   id: string;

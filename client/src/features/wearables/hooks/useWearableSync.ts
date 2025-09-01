@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useToast } from './use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 
 export interface SleepSession {
   id: string;

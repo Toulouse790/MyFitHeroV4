@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import AIIntelligence from '@/components/AIIntelligence';
+import AIIntelligence from '@/features/ai-coach/components/AIIntelligence';
 
 interface AnalyticsData {
   consistency_rate: number;

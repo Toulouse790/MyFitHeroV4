@@ -1,8 +1,8 @@
 // client/src/components/DailyCheckIn.tsx
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/shared/hooks/use-toast';
 import { UserDataService, DailyCheckin } from '@/services/userDataService';
 import { BadgeService } from '@/services/badgeService';

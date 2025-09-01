@@ -20,8 +20,8 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import WearableStats from '@/components/WearableStats';
-import WearableNotificationCenter from '@/components/WearableNotificationCenter';
+import WearableStats from '@/features/analytics/components/WearableStats';
+import WearableNotificationCenter from '@/features/wearables/components/WearableNotificationCenter';
 import Settings from '@/features/profile/pages/SettingsPage';
 
 interface WearableDevice {

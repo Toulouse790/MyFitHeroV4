@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MuscleRecoveryService } from '@/services/muscleRecoveryService';
 import {
-  WorkoutService,
-  UserProfileService,
-  SleepService,
-  DailyStatsService,
-} from '@/services/supabaseService';
+  supabaseService,
+  SupabaseResponse,
+  QueryFilter
+} from '@/services/supabaseServiceUnified';
+import { UserProfileService } from '@/services/userProfileService';
+import { SleepService } from '@/features/sleep/services/sleepService';
+import { DailyStatsService } from '@/services/dailyStatsService';
+import { WorkoutService } from '@/features/workout/services/workoutService';
 import { appStore } from '@/store/appStore';
 import type {
   MuscleRecoveryData,
@@ -13,7 +16,7 @@ import type {
   RecoveryRecommendation,
   GlobalRecoveryMetrics,
   MuscleGroup,
-} from '@/shared/types/muscleRecovery';
+} from '@/features/workout/types/muscleRecovery';
 
 interface UseMuscleRecoveryReturn {
   // État

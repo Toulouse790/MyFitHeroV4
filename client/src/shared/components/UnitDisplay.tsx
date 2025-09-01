@@ -1,6 +1,6 @@
 // client/src/components/UnitDisplay.tsx
 import React from 'react';
-import { useUnitPreferences } from '@/hooks/useUnitPreferences';
+import { useUnitPreferences } from '@/shared/hooks/useUnitPreferences';
 import {
   convertWeight,
   convertHeight,

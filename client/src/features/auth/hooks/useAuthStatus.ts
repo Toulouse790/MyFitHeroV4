@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../config/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 export interface AuthStatus {
   isAuthenticated: boolean;

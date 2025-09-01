@@ -3,7 +3,7 @@ import { Activity, Heart, Moon, TrendingUp, Clock, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useWearableSync, WearableData } from '@/shared/hooks/useWearableSync';
+import { useWearableSync, WearableData } from '@/features/wearables/hooks/useWearableSync';
 import { AnalyticsService } from '@/lib/analytics';
 
 interface WearableStatsProps {

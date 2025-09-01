@@ -1,10 +1,10 @@
 // hooks/workout/useWorkoutSessionCore.ts
 import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '../use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 import { appStore } from '@/store/appStore';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
-import type { WorkoutSession, WorkoutExercise, ExerciseSet } from '@/shared/types/workout';
+import type { WorkoutSession, WorkoutExercise, ExerciseSet } from '@/shared/types/workout.types';
 
 export interface UseWorkoutSessionCoreReturn {
   currentSession: WorkoutSession | null;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MuscleRecoveryDashboard } from '@/features/recovery/components/MuscleRecoveryDashboard';
+import { MuscleRecoveryDashboard } from '@/features/workout/components/MuscleRecoveryDashboard';
 
 const RecoveryPage: React.FC = () => {
   return (

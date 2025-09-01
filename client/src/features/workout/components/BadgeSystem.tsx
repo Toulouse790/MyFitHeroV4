@@ -14,7 +14,7 @@ import {
   Moon,
 } from 'lucide-react';
 import { appStore } from '../store/appStore';
-import { supabase } from '../config/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 interface Badge {
   id: string;

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useToast } from '../use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 import { WorkoutSession, WorkoutExercise, ExerciseSet } from './useWorkoutSessionCore';
 
 export interface UseWorkoutExercisesReturn {

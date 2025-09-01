@@ -29,7 +29,7 @@ import {
   Brain,
   Package,
 } from 'lucide-react';
-import { supabase } from '../config/supabaseClient';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '../hooks/use-toast';
 import {
   ConversationalStep,
