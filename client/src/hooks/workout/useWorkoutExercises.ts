@@ -1,4 +1,3 @@
-hooks / workout / useWorkoutExercises.ts;
 import { useCallback } from 'react';
 import { useToast } from '../use-toast';
 import { WorkoutSession, WorkoutExercise, ExerciseSet } from './useWorkoutSessionCore';

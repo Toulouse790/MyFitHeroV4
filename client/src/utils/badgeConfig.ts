@@ -1,4 +1,4 @@
-import { LucideIcon, Trophy, Medal, Award, Crown, Star, Sparkles } from 'lucide-react';
+import { LucideIcon, Trophy, Medal, Award, Crown, Sparkles } from 'lucide-react';
 
 export type BadgeRarity = 'common' | 'rare' | 'epic' | 'legendary' | 'mythic';
 

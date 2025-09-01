@@ -2,6 +2,9 @@ import { defineConfig, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import fs from 'fs'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Copie index.html -> 404.html après le build (fallback SPA pour GitHub Pages)
 function spa404Plugin(): Plugin {
@@ -13,7 +16,6 @@ function spa404Plugin(): Plugin {
       const dst = path.resolve(__dirname, 'dist/404.html')
       if (fs.existsSync(src)) {
         fs.copyFileSync(src, dst)
-        // eslint-disable-next-line no-console
         console.log('SPA fallback: dist/404.html created')
       }
     },

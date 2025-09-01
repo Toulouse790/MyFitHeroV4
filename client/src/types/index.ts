@@ -269,30 +269,3 @@ export interface FormFieldProps {
   error?: string;
   helperText?: string;
 }
-
-// Default export with commonly used types
-export default {
-  // API
-  ApiResponse,
-  ApiError,
-  
-  // Auth
-  User,
-  LoginCredentials,
-  
-  // Common UI
-  LoadingState,
-  PaginationState,
-  ModalProps,
-  
-  // Forms
-  FormField,
-  FormData,
-  
-  // Notifications
-  Notification,
-  
-  // Config
-  AppConfig,
-  UserSettings,
-};

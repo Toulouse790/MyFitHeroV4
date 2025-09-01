@@ -8,7 +8,7 @@
 // export * from './pages';
 
 // Placeholder pour éviter les erreurs d'import
-export const Ai-coachModule = {
+export const AiCoachModule = {
   name: 'ai-coach',
   status: 'planned',
   description: 'Module ai-coach - À implémenter'

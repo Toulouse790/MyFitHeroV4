@@ -17,14 +17,12 @@ import {
   BarChart3,
   RefreshCw,
   AlertCircle,
-  CheckCircle2,
   Wifi,
   WifiOff,
 } from 'lucide-react';
 import WearableStats from '@/components/WearableStats';
 import WearableNotificationCenter from '@/components/WearableNotificationCenter';
 import Settings from '@/features/profile/pages/SettingsPage';
-import { useAppStore } from '@/store/useAppStore';
 
 interface WearableDevice {
   id: string;
@@ -46,12 +44,10 @@ interface WearableError {
 }
 
 const WearableHub: React.FC = () => {
-  const { appStoreUser } = useAppStore();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   const [devices, setDevices] = useState<WearableDevice[]>([]);
   const [errors, setErrors] = useState<WearableError[]>([]);
-  const [loading, setLoading] = useState(true);
   const [syncLoading, setSyncLoading] = useState(false);
 
   // Chargement des appareils connectés
@@ -112,8 +108,6 @@ const WearableHub: React.FC = () => {
         description: 'Impossible de charger vos appareils connectés',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   }, [toast]);
 
@@ -157,7 +151,7 @@ const WearableHub: React.FC = () => {
     } finally {
       setSyncLoading(false);
     }
-  }, [devices, appStoreUser?.id, toast]);
+  }, [devices, toast]);
 
   // Reconnexion d'un appareil
   const handleReconnectDevice = useCallback(
@@ -323,7 +317,7 @@ const WearableHub: React.FC = () => {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 size={16} />
-              <span>Vue d'ensemble</span>
+              <span>Vue d&apos;ensemble</span>
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center space-x-2">
               <Bell size={16} />
@@ -364,7 +358,7 @@ const WearableHub: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Niveau d'activité</span>
+                      <span className="text-sm text-gray-600">Niveau d&apos;activité</span>
                       <Badge variant="secondary" className="bg-blue-100 text-blue-800">
                         Très actif
                       </Badge>
@@ -482,7 +476,7 @@ const WearableHub: React.FC = () => {
                       • Les jours avec plus de sommeil REM correspondent à de meilleures
                       performances
                     </li>
-                    <li>• Votre fréquence cardiaque de repos s'améliore constamment</li>
+                    <li>• Votre fréquence cardiaque de repos s&apos;améliore constamment</li>
                     <li>• Les entraînements matinaux donnent les meilleurs résultats</li>
                   </ul>
                 </div>

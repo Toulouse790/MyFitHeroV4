@@ -1,3 +1,4 @@
+import React from 'react';
 import { toast as sonnerToast } from 'sonner';
 import { useState, useCallback } from 'react';
 
@@ -36,7 +37,13 @@ export const useToast = () => {
   const toast = useCallback(
     ({ title, description, variant = 'default', duration = 4000 }: ToastOptions) => {
       const id = Math.random().toString(36).substring(7);
-      const newToast: ToastState = { id, title, description, variant, duration };
+      const newToast: ToastState = {
+        id,
+        title,
+        variant,
+        duration,
+        ...(description && { description }),
+      };
 
       toastsStore.push(newToast);
       notifyListeners();

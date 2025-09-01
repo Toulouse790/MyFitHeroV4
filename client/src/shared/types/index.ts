@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Shared types pour toute l'application MyFitHero
 
 // Types utilisateur de base

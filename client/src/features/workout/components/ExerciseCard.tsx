@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, RotateCcw, Check } from 'lucide-react';
+import { Play, RotateCcw, Check } from 'lucide-react';
 
 interface ExerciseCardProps {
   exercise: {

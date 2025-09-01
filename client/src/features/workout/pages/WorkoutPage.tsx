@@ -49,13 +49,13 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
     resumeSession,
     completeSession,
     cancelSession,
-    addExercise,
+    _addExercise,
     updateExerciseSet,
     completeExercise,
     addSetToExercise,
     removeSetFromExercise,
     loadExercisesFromLastSession,
-    getLastWeightForExercise,
+    _getLastWeightForExercise,
     calculateCalories,
     formatTime,
   } = useWorkoutSession();
@@ -65,8 +65,8 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [quickMode, setQuickMode] = useState(false);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_error, _setError] = useState<string | null>(null);
+  const [isLoading, _setIsLoading] = useState(false);
 
   // Exercices par défaut
   const defaultExercises: WorkoutExercise[] = [
@@ -258,7 +258,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
 
   const currentTip = getCurrentTip();
 
-  const handleCompleteWorkout = async () => {
+  const _handleCompleteWorkout = async () => {
     if (currentSession) {
       await completeSession();
       setShowSessionSummary(true);
@@ -302,12 +302,12 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
           <div className="text-center py-12">
             <div className="mb-6">
               <Dumbbell size={64} className="mx-auto text-gray-400 mb-4" />
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Prêt pour l'entraînement ?</h2>
-              <p className="text-gray-600">Commencez votre session d'entraînement maintenant</p>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Prêt pour l&apos;entraînement ?</h2>
+              <p className="text-gray-600">Commencez votre session d&apos;entraînement maintenant</p>
             </div>
             <Button onClick={handleStartWorkout} size="lg" className="bg-red-600 hover:bg-red-700">
               <Play className="mr-2" size={20} />
-              Commencer l'entraînement
+              Commencer l&apos;entraînement
             </Button>
           </div>
         ) : (
@@ -383,7 +383,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                   })}
                   <div>
                     <h3 className="font-semibold text-blue-800 text-sm mb-1">
-                      Conseil d'entraînement
+                      Conseil d&apos;entraînement
                     </h3>
                     <p className="text-blue-700 text-xs">{currentTip.text}</p>
                   </div>
@@ -759,7 +759,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
                 <div className="text-3xl font-bold text-green-600 mb-2">
                   {formatTime(workoutTime)}
                 </div>
-                <p className="text-gray-600">Temps d'entraînement</p>
+                <p className="text-gray-600">Temps d&apos;entraînement</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-center">
