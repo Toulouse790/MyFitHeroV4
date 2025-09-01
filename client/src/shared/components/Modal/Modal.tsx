@@ -1,25 +1,24 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
-interface ModalProps {
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
-  size?: 'small' | 'medium' | 'large' | 'full';
   children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+  showCloseButton?: boolean;
   className?: string;
   overlayClassName?: string;
-  closeOnOverlayClick?: boolean;
-  closeOnEscapeKey?: boolean;
-  showCloseButton?: boolean;
-  preventScroll?: boolean;
-  modalId?: string;
 }
 
 const sizeClasses = {
-  small: 'max-w-md',
-  medium: 'max-w-lg',
-  large: 'max-w-4xl',
+  sm: 'max-w-md',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
+  xl: 'max-w-4xl',
   full: 'max-w-full mx-4'
 };
 
@@ -27,141 +26,103 @@ export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   title,
-  size = 'medium',
   children,
-  className = '',
-  overlayClassName = '',
+  size = 'md',
   closeOnOverlayClick = true,
-  closeOnEscapeKey = true,
+  closeOnEscape = true,
   showCloseButton = true,
-  preventScroll = true,
-  modalId = 'modal'
+  className = '',
+  overlayClassName = ''
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
   // Handle escape key
   useEffect(() => {
-    if (!closeOnEscapeKey || !isOpen) return;
-
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && closeOnEscape && isOpen) {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose, closeOnEscapeKey]);
-
-  // Handle body scroll
-  useEffect(() => {
-    if (!preventScroll) return;
-
     if (isOpen) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-    } else {
-      const scrollY = parseInt(document.body.style.top || '0', 10);
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, Math.abs(scrollY));
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
     }
+  }, [isOpen, closeOnEscape, onClose]);
 
-    return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-    };
-  }, [isOpen, preventScroll]);
-
-  // Focus management
+  // Handle focus management
   useEffect(() => {
     if (isOpen) {
-      // Store currently focused element
+      // Store the currently focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
       
-      // Focus modal
-      setTimeout(() => {
-        modalRef.current?.focus();
-      }, 100);
+      // Focus the modal
+      if (modalRef.current) {
+        modalRef.current.focus();
+      }
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
     } else {
       // Restore focus to previous element
       if (previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
+      
+      // Restore body scroll
+      document.body.style.overflow = 'unset';
     }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isOpen]);
 
   // Handle overlay click
-  const handleOverlayClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
-    if (closeOnOverlayClick && event.target === event.currentTarget) {
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget && closeOnOverlayClick) {
       onClose();
     }
-  }, [onClose, closeOnOverlayClick]);
+  };
 
-  // Handle focus trap
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key !== 'Tab') return;
-
-    const modal = modalRef.current;
-    if (!modal) return;
-
-    const focusableElements = modal.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-    if (event.shiftKey) {
-      if (document.activeElement === firstElement) {
-        event.preventDefault();
-        lastElement?.focus();
-      }
-    } else {
-      if (document.activeElement === lastElement) {
-        event.preventDefault();
-        firstElement?.focus();
-      }
-    }
-  }, []);
-
+  // Don't render if not open
   if (!isOpen) return null;
 
   const modalContent = (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${overlayClassName}`}
       onClick={handleOverlayClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={title ? `${modalId}-title` : undefined}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity" />
       
       {/* Modal */}
       <div
         ref={modalRef}
-        className={`relative bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-hidden ${className}`}
-        onKeyDown={handleKeyDown}
         tabIndex={-1}
+        className={`
+          relative bg-white rounded-lg shadow-xl transform transition-all
+          w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden
+          ${className}
+        `}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
       >
         {/* Header */}
         {(title || showCloseButton) && (
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             {title && (
-              <h2 id={`${modalId}-title`} className="text-xl font-semibold text-gray-900">
+              <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
                 {title}
               </h2>
             )}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label="Close modal"
               >
                 <svg
@@ -183,16 +144,85 @@ export const Modal: React.FC<ModalProps> = ({
         )}
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
           {children}
         </div>
       </div>
     </div>
   );
 
-  // Render to portal
-  const modalRoot = document.getElementById('modal-root') || document.body;
-  return createPortal(modalContent, modalRoot);
+  // Render modal in portal
+  return createPortal(modalContent, document.body);
+};
+
+// Modal components for specific use cases
+export const ConfirmModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmButtonClass?: string;
+}> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  confirmButtonClass = 'bg-red-600 hover:bg-red-700 text-white'
+}) => {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
+      <div className="p-6">
+        <p className="text-gray-600 mb-6">{message}</p>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
+            className={`px-4 py-2 rounded ${confirmButtonClass}`}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export const LoadingModal: React.FC<{
+  isOpen: boolean;
+  message?: string;
+}> = ({
+  isOpen,
+  message = 'Loading...'
+}) => {
+  return (
+    <Modal 
+      isOpen={isOpen} 
+      onClose={() => {}} 
+      closeOnOverlayClick={false} 
+      closeOnEscape={false}
+      showCloseButton={false}
+      size="sm"
+    >
+      <div className="p-8 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-300 border-t-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">{message}</p>
+      </div>
+    </Modal>
+  );
 };
 
 export default Modal;
