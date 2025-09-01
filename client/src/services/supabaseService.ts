@@ -1,54 +1,406 @@
-// services/supabaseService.ts
-import { supabase } from '../config/supabaseClient';
-import type {
-  UserProfile,
-  UserProfileInsert,
-  UserProfileUpdate,
-  DailyStats,
-  DailyStatsInsert,
-  DailyStatsUpdate,
-  Workout,
-  WorkoutInsert,
-  WorkoutUpdate,
-  Meal,
-  MealInsert,
-  SleepSession,
-  SleepSessionInsert,
-  HydrationLog,
-  HydrationLogInsert,
-  AiRecommendation,
-  UserGoal,
-  UserNotification,
-  UserRecoveryProfile,
-  MuscleRecoveryData,
-} from '../types/database';
+import { supabase } from '@/config/supabaseClient';
+import React from 'react';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { useLoadingState } from '@/hooks/useLoadingState';
 
-// ===== USER PROFILES =====
-export class UserProfileService {
-  static async getCurrentUserProfile(): Promise<UserProfile | null> {
+// Types génériques pour les opérations Supabase
+export interface SupabaseQueryOptions {
+  select?: string;
+  limit?: number;
+  offset?: number;
+  orderBy?: { column: string; ascending?: boolean };
+  filters?: Array<{
+    column: string;
+    operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'like' | 'ilike' | 'in';
+    value: any;
+  }>;
+}
+
+export interface SupabaseResponse<T> {
+  data: T | null;
+  error: any;
+  count?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  count: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  currentPage: number;
+  totalPages: number;
+}
+
+/**
+ * Service centralisé pour toutes les opérations Supabase
+ * Élimine la duplication des 30+ appels Supabase identiques
+ */
+class SupabaseService {
+  // CRUD générique
+  async findMany<T>(
+    table: string,
+    options: SupabaseQueryOptions = {}
+  ): Promise<SupabaseResponse<T[]>> {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return null;
+      let query = supabase.from(table).select(options.select || '*', {
+        count: 'exact',
+      });
 
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+      // Appliquer les filtres
+      if (options.filters) {
+        options.filters.forEach(filter => {
+          query = query[filter.operator](filter.column, filter.value);
+        });
+      }
 
-      if (error) throw error;
-      return data;
+      // Appliquer l'ordre
+      if (options.orderBy) {
+        query = query.order(options.orderBy.column, {
+          ascending: options.orderBy.ascending ?? true,
+        });
+      }
+
+      // Appliquer la pagination
+      if (options.limit) {
+        query = query.limit(options.limit);
+      }
+      if (options.offset) {
+        query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
+      }
+
+      return await query;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
-      return null;
+      return { data: null, error };
     }
   }
 
-  static async updateUserProfile(updates: UserProfileUpdate): Promise<UserProfile | null> {
+  async findById<T>(table: string, id: string, select?: string): Promise<SupabaseResponse<T>> {
     try {
-      const {
+      return await supabase
+        .from(table)
+        .select(select || '*')
+        .eq('id', id)
+        .single();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async findByUserId<T>(
+    table: string,
+    userId: string,
+    options: SupabaseQueryOptions = {}
+  ): Promise<SupabaseResponse<T[]>> {
+    return this.findMany<T>(table, {
+      ...options,
+      filters: [
+        { column: 'user_id', operator: 'eq', value: userId },
+        ...(options.filters || []),
+      ],
+    });
+  }
+
+  async create<T>(table: string, data: Partial<T>): Promise<SupabaseResponse<T>> {
+    try {
+      return await supabase
+        .from(table)
+        .insert(data)
+        .select()
+        .single();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async createMany<T>(table: string, data: Partial<T>[]): Promise<SupabaseResponse<T[]>> {
+    try {
+      return await supabase
+        .from(table)
+        .insert(data)
+        .select();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async update<T>(
+    table: string,
+    id: string,
+    data: Partial<T>
+  ): Promise<SupabaseResponse<T>> {
+    try {
+      return await supabase
+        .from(table)
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async updateByUserId<T>(
+    table: string,
+    userId: string,
+    data: Partial<T>
+  ): Promise<SupabaseResponse<T[]>> {
+    try {
+      return await supabase
+        .from(table)
+        .update(data)
+        .eq('user_id', userId)
+        .select();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async upsert<T>(table: string, data: Partial<T>): Promise<SupabaseResponse<T>> {
+    try {
+      return await supabase
+        .from(table)
+        .upsert(data)
+        .select()
+        .single();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async delete(table: string, id: string): Promise<SupabaseResponse<null>> {
+    try {
+      return await supabase
+        .from(table)
+        .delete()
+        .eq('id', id);
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async deleteByUserId(table: string, userId: string): Promise<SupabaseResponse<null>> {
+    try {
+      return await supabase
+        .from(table)
+        .delete()
+        .eq('user_id', userId);
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  // Méthodes spécialisées communes
+  async findWithPagination<T>(
+    table: string,
+    page: number = 1,
+    limit: number = 10,
+    options: Omit<SupabaseQueryOptions, 'limit' | 'offset'> = {}
+  ): Promise<PaginatedResponse<T>> {
+    const offset = (page - 1) * limit;
+    
+    const { data, error, count } = await this.findMany<T>(table, {
+      ...options,
+      limit,
+      offset,
+    });
+
+    if (error || !data) {
+      throw new Error(error?.message || 'Erreur lors de la récupération des données');
+    }
+
+    const totalPages = Math.ceil((count || 0) / limit);
+
+    return {
+      data,
+      count: count || 0,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+      currentPage: page,
+      totalPages,
+    };
+  }
+
+  async searchByText<T>(
+    table: string,
+    searchColumn: string,
+    searchTerm: string,
+    options: SupabaseQueryOptions = {}
+  ): Promise<SupabaseResponse<T[]>> {
+    return this.findMany<T>(table, {
+      ...options,
+      filters: [
+        { column: searchColumn, operator: 'ilike', value: `%${searchTerm}%` },
+        ...(options.filters || []),
+      ],
+    });
+  }
+
+  // Gestion des stats/métriques
+  async getDailyStats(userId: string, date: string) {
+    return this.findMany('daily_stats', {
+      filters: [
+        { column: 'user_id', operator: 'eq', value: userId },
+        { column: 'date', operator: 'eq', value: date },
+      ],
+    });
+  }
+
+  async getWeeklyStats(userId: string, startDate: string, endDate: string) {
+    return this.findMany('daily_stats', {
+      filters: [
+        { column: 'user_id', operator: 'eq', value: userId },
+        { column: 'date', operator: 'gte', value: startDate },
+        { column: 'date', operator: 'lte', value: endDate },
+      ],
+      orderBy: { column: 'date', ascending: true },
+    });
+  }
+
+  // Gestion des fichiers/uploads
+  async uploadFile(bucket: string, path: string, file: File) {
+    try {
+      return await supabase.storage
+        .from(bucket)
+        .upload(path, file);
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async getFileUrl(bucket: string, path: string) {
+    try {
+      const { data } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(path);
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async deleteFile(bucket: string, path: string) {
+    try {
+      return await supabase.storage
+        .from(bucket)
+        .remove([path]);
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  // Subscriptions en temps réel
+  createSubscription(
+    table: string,
+    callback: (payload: any) => void,
+    filters?: { column: string; value: any }[]
+  ) {
+    let subscription = supabase
+      .channel(`${table}_changes`)
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table,
+          ...(filters && { filter: filters.map(f => `${f.column}=eq.${f.value}`).join(',') })
+        }, 
+        callback
+      );
+
+    return subscription.subscribe();
+  }
+
+  // Authentification helper
+  async getCurrentUser() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      return { data: user, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
+  async signOut() {
+    try {
+      return await supabase.auth.signOut();
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+}
+
+// Instance singleton
+export const supabaseService = new SupabaseService();
+
+/**
+ * Hook personnalisé pour utiliser le service Supabase avec gestion d'erreur
+ */
+export function useSupabaseQuery<T = any>(
+  queryFn: () => Promise<SupabaseResponse<T>>,
+  deps: any[] = []
+) {
+  const { isLoading, error, data, executeWithData, clearError } = useLoadingState<T>();
+  const { handleError } = useErrorHandler();
+
+  const execute = React.useCallback(async () => {
+    return executeWithData(async () => {
+      const response = await queryFn();
+      if (response.error) {
+        throw new Error(response.error.message || 'Erreur Supabase');
+      }
+      return response.data;
+    });
+  }, [executeWithData, queryFn]);
+
+  const mutate = React.useCallback((newData: T) => {
+    // Mise à jour optimiste
+    // setData(newData);
+  }, []);
+
+  React.useEffect(() => {
+    execute().catch(error => {
+      handleError(error, 'useSupabaseQuery');
+    });
+  }, deps);
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch: execute,
+    mutate,
+    clearError,
+  };
+}
+
+/**
+ * Hook pour les mutations Supabase
+ */
+export function useSupabaseMutation<T = any>() {
+  const { isLoading, error, execute, clearError } = useLoadingState();
+  const { handleError } = useErrorHandler();
+
+  const mutate = React.useCallback(async (
+    mutationFn: () => Promise<SupabaseResponse<T>>
+  ): Promise<T | null> => {
+    return execute(async () => {
+      const response = await mutationFn();
+      if (response.error) {
+        throw new Error(response.error.message || 'Erreur de mutation');
+      }
+      return response.data;
+    });
+  }, [execute]);
+
+  return {
+    mutate,
+    isLoading,
+    error,
+    clearError,
+  };
+}
+
+export default supabaseService;
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');

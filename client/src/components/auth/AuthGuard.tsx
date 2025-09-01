@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { AppLoadingSpinner } from '../common/AppLoadingSpinner';
+import AppLoadingSpinner from '@/components/AppLoadingSpinner';
 
 interface AuthGuardProps {
   children: React.ReactNode;

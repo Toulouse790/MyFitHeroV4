@@ -1,78 +1,70 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { createWorkoutSlice, WorkoutSlice } from './slices/workout.slice';
+// Store principal refactorisé - MyFitHero V4
+// Architecture modulaire avec stores séparés
 
-// Store principal unifié
-export interface AppStore extends WorkoutSlice {}
+// Imports des stores modulaires
+export { useAuthStore, useAuthState, useAuthActions, useUser, useIsAuthenticated } from './authStore';
+export { useProfileStore, useProfileState, useProfileActions, useProfileMetrics, useUserSettings } from './profileStore';
+export { useScalesStore, useScalesState, useWeightHistory, useScaleActions } from './scalesStore';
+export { 
+  useSettingsStore, 
+  useAppSettings, 
+  useThemeSettings, 
+  useLanguageSettings,
+  useUnitsSettings,
+  useNotificationSettings,
+  usePrivacySettings,
+  useWorkoutSettings,
+  useDisplaySettings,
+  useSettingsActions,
+  useSettingsState
+} from './settingsStore';
 
-export const useAppStoreUnified = create<AppStore>()(
-  persist(
-    (...a) => ({
-      ...createWorkoutSlice(...a),
-    }),
-    {
-      name: 'myfithero-storage',
-      partialize: state => ({
-        // Persister seulement les données importantes
-        sessionHistory: state.sessionHistory,
-        favoriteExercises: state.favoriteExercises,
-        totalWorkouts: state.totalWorkouts,
-        totalTimeSpent: state.totalTimeSpent,
-        totalCaloriesBurned: state.totalCaloriesBurned,
-        defaultRestTime: state.defaultRestTime,
-        quickModeEnabled: state.quickModeEnabled,
-        notificationsEnabled: state.notificationsEnabled,
-      }),
-    }
-  )
-);
+// Legacy workout store (à migrer)
+export { useAppStoreUnified, useWorkoutSession, useWorkoutExercises, useWorkoutStats, useWorkoutFavorites, useWorkoutSettings } from './legacyWorkoutStore';
 
-// Sélecteurs optimisés
-export const useWorkoutSession = () =>
-  useAppStoreUnified(state => ({
-    currentSession: state.currentSession,
-    isSessionActive: state.isSessionActive,
-    startWorkoutSession: state.startWorkoutSession,
-    pauseWorkoutSession: state.pauseWorkoutSession,
-    resumeWorkoutSession: state.resumeWorkoutSession,
-    completeWorkoutSession: state.completeWorkoutSession,
-    cancelWorkoutSession: state.cancelWorkoutSession,
-  }));
+// Types exports
+export type { AuthStore } from './authStore';
+export type { ProfileStore } from './profileStore';
+export type { ScalesStore } from './scalesStore';
+export type { SettingsStore } from './settingsStore';
 
-export const useWorkoutExercises = () =>
-  useAppStoreUnified(state => ({
-    exercises: state.currentSession?.exercises || [],
-    updateSessionExercise: state.updateSessionExercise,
-    updateExerciseSet: state.updateExerciseSet,
-    completeExercise: state.completeExercise,
-    addSetToExercise: state.addSetToExercise,
-    removeSetFromExercise: state.removeSetFromExercise,
-  }));
+// Store combiné pour compatibilité (temporaire)
+export interface CombinedAppState {
+  auth: ReturnType<typeof useAuthState>;
+  profile: ReturnType<typeof useProfileState>;
+  scales: ReturnType<typeof useScalesState>;
+  settings: ReturnType<typeof useSettingsState>;
+}
 
-export const useWorkoutStats = () =>
-  useAppStoreUnified(state => ({
-    totalWorkouts: state.totalWorkouts,
-    totalTimeSpent: state.totalTimeSpent,
-    totalCaloriesBurned: state.totalCaloriesBurned,
-    sessionHistory: state.sessionHistory,
-    incrementTotalWorkouts: state.incrementTotalWorkouts,
-    addTimeSpent: state.addTimeSpent,
-    addCaloriesBurned: state.addCaloriesBurned,
-  }));
+/**
+ * Hook combiné pour accéder à l'état global de l'app
+ * @deprecated Utilisez les stores individuels pour de meilleures performances
+ */
+export function useCombinedAppState(): CombinedAppState {
+  return {
+    auth: useAuthState(),
+    profile: useProfileState(),
+    scales: useScalesState(),
+    settings: useSettingsState(),
+  };
+}
 
-export const useWorkoutFavorites = () =>
-  useAppStoreUnified(state => ({
-    favoriteExercises: state.favoriteExercises,
-    addFavoriteExercise: state.addFavoriteExercise,
-    removeFavoriteExercise: state.removeFavoriteExercise,
-  }));
+// Utilitaires pour la migration
+export const StoreUtils = {
+  // Reset tous les stores
+  resetAllStores: () => {
+    // Implémenter si nécessaire
+  },
+  
+  // Vérifier l'état de synchronisation
+  getSyncStatus: () => {
+    // Implémenter si nécessaire
+  },
+};
 
-export const useWorkoutSettings = () =>
-  useAppStoreUnified(state => ({
-    defaultRestTime: state.defaultRestTime,
-    quickModeEnabled: state.quickModeEnabled,
-    notificationsEnabled: state.notificationsEnabled,
-    setQuickMode: state.setQuickMode,
-    setDefaultRestTime: state.setDefaultRestTime,
-    setNotifications: state.setNotifications,
-  }));
+export default {
+  useAuthStore,
+  useProfileStore,
+  useScalesStore,
+  useSettingsStore,
+};

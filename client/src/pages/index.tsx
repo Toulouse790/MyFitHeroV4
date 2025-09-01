@@ -1413,7 +1413,7 @@ const SocialFeed = lazy(() => import('../components/SocialDashboard'));
 const ChallengeBoard = lazy(() => import('../components/FriendsComparison'));
 const UserProfile = lazy(() => import('../components/UserProfileTabs'));
 const ProgressCharts = lazy(() => import('../components/ProgressCharts'));
-const AdminDashboard = lazy(() => import('../components/AdminDashboard'));
+const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
 const DebugPage = lazy(() => import('../components/DebugPage'));
 const AppLoadingSpinner = lazy(() => import('../components/AppLoadingSpinner'));
 const AppErrorBoundary = lazy(() => import('../components/AppErrorBoundary'));
