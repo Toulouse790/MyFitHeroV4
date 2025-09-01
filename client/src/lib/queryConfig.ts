@@ -1,458 +1,175 @@
-import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query';
-import { api } from './api';
-import type { ApiError } from '../types/api';
+import { QueryClient, DefaultOptions } from '@tanstack/react-query';
 
-// Query keys factory for consistent cache management
+// Default query options
+const queryConfig: DefaultOptions = {
+  queries: {
+    // Cache time - how long data stays in cache when component unmounts
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    
+    // Stale time - how long data is considered fresh
+    staleTime: 1000 * 60, // 1 minute
+    
+    // Retry configuration
+    retry: (failureCount, error) => {
+      // Don't retry on 4xx errors (client errors)
+      if (error && typeof error === 'object' && 'status' in error) {
+        const status = error.status as number;
+        if (status >= 400 && status < 500) {
+          return false;
+        }
+      }
+      
+      // Retry up to 3 times for other errors
+      return failureCount < 3;
+    },
+    
+    // Retry delay with exponential backoff
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    
+    // Refetch on window focus (useful for real-time data)
+    refetchOnWindowFocus: true,
+    
+    // Refetch on reconnect
+    refetchOnReconnect: true,
+    
+    // Don't refetch on mount if data is fresh
+    refetchOnMount: true,
+    
+    // Background refetch interval (optional)
+    // refetchInterval: 1000 * 60 * 5, // 5 minutes
+  },
+  
+  mutations: {
+    // Retry mutations only once
+    retry: 1,
+    
+    // Mutation retry delay
+    retryDelay: 1000,
+  }
+};
+
+// Query keys factory for consistent key management
 export const queryKeys = {
-  // Auth queries
+  // Authentication
   auth: {
-    all: ['auth'] as const,
-    user: () => [...queryKeys.auth.all, 'user'] as const,
-    profile: () => [...queryKeys.auth.all, 'profile'] as const,
-    preferences: () => [...queryKeys.auth.all, 'preferences'] as const,
-    stats: () => [...queryKeys.auth.all, 'stats'] as const,
+    user: ['auth', 'user'] as const,
+    profile: ['auth', 'profile'] as const,
+    preferences: ['auth', 'preferences'] as const,
   },
-
-  // User data queries
-  user: {
-    all: ['user'] as const,
-    profile: (id: string) => [...queryKeys.user.all, 'profile', id] as const,
-    preferences: (id: string) => [...queryKeys.user.all, 'preferences', id] as const,
-    stats: (id: string) => [...queryKeys.user.all, 'stats', id] as const,
-    achievements: (id: string) => [...queryKeys.user.all, 'achievements', id] as const,
-  },
-
-  // Workout queries
+  
+  // Workouts
   workouts: {
     all: ['workouts'] as const,
     lists: () => [...queryKeys.workouts.all, 'list'] as const,
-    list: (filters?: Record<string, unknown>) => 
-      [...queryKeys.workouts.lists(), filters] as const,
+    list: (filters: Record<string, unknown>) => [...queryKeys.workouts.lists(), { filters }] as const,
     details: () => [...queryKeys.workouts.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.workouts.details(), id] as const,
-    templates: () => [...queryKeys.workouts.all, 'templates'] as const,
-    history: (userId: string) => [...queryKeys.workouts.all, 'history', userId] as const,
-    sessions: () => [...queryKeys.workouts.all, 'sessions'] as const,
-    activeSession: () => [...queryKeys.workouts.sessions(), 'active'] as const,
+    templates: ['workouts', 'templates'] as const,
+    sessions: (userId: string) => ['workouts', 'sessions', userId] as const,
+    history: (userId: string) => ['workouts', 'history', userId] as const,
   },
-
-  // Exercise queries
-  exercises: {
-    all: ['exercises'] as const,
-    lists: () => [...queryKeys.exercises.all, 'list'] as const,
-    list: (filters?: Record<string, unknown>) => 
-      [...queryKeys.exercises.lists(), filters] as const,
-    details: () => [...queryKeys.exercises.all, 'detail'] as const,
-    detail: (id: string) => [...queryKeys.exercises.details(), id] as const,
-    categories: () => [...queryKeys.exercises.all, 'categories'] as const,
-    equipment: () => [...queryKeys.exercises.all, 'equipment'] as const,
-  },
-
-  // Nutrition queries
+  
+  // Nutrition
   nutrition: {
     all: ['nutrition'] as const,
-    meals: () => [...queryKeys.nutrition.all, 'meals'] as const,
-    meal: (id: string) => [...queryKeys.nutrition.meals(), id] as const,
+    meals: (userId: string, date: string) => [...queryKeys.nutrition.all, 'meals', userId, date] as const,
     foods: () => [...queryKeys.nutrition.all, 'foods'] as const,
-    food: (id: string) => [...queryKeys.nutrition.foods(), id] as const,
-    tracking: () => [...queryKeys.nutrition.all, 'tracking'] as const,
-    dailyTracking: (date: string) => [...queryKeys.nutrition.tracking(), date] as const,
-    macros: (userId: string, date: string) => 
-      [...queryKeys.nutrition.all, 'macros', userId, date] as const,
+    tracking: (userId: string) => [...queryKeys.nutrition.all, 'tracking', userId] as const,
+    goals: (userId: string) => [...queryKeys.nutrition.all, 'goals', userId] as const,
   },
-
-  // Recovery queries
+  
+  // Recovery
   recovery: {
     all: ['recovery'] as const,
-    status: () => [...queryKeys.recovery.all, 'status'] as const,
-    metrics: () => [...queryKeys.recovery.all, 'metrics'] as const,
-    recommendations: () => [...queryKeys.recovery.all, 'recommendations'] as const,
-    sleep: () => [...queryKeys.recovery.all, 'sleep'] as const,
-    sleepData: (date: string) => [...queryKeys.recovery.sleep(), date] as const,
-    hrv: () => [...queryKeys.recovery.all, 'hrv'] as const,
-    stress: () => [...queryKeys.recovery.all, 'stress'] as const,
+    status: (userId: string) => [...queryKeys.recovery.all, 'status', userId] as const,
+    metrics: (userId: string, period: string) => [...queryKeys.recovery.all, 'metrics', userId, period] as const,
+    recommendations: (userId: string) => [...queryKeys.recovery.all, 'recommendations', userId] as const,
   },
-
-  // Hydration queries
-  hydration: {
-    all: ['hydration'] as const,
-    daily: (date: string) => [...queryKeys.hydration.all, 'daily', date] as const,
-    history: (userId: string, days: number) => 
-      [...queryKeys.hydration.all, 'history', userId, days] as const,
-    goals: () => [...queryKeys.hydration.all, 'goals'] as const,
-  },
-
-  // Analytics queries
+  
+  // Analytics
   analytics: {
     all: ['analytics'] as const,
-    dashboard: () => [...queryKeys.analytics.all, 'dashboard'] as const,
-    progress: (userId: string, metric: string, timeframe: string) => 
-      [...queryKeys.analytics.all, 'progress', userId, metric, timeframe] as const,
-    reports: () => [...queryKeys.analytics.all, 'reports'] as const,
-    insights: () => [...queryKeys.analytics.all, 'insights'] as const,
+    dashboard: (userId: string) => [...queryKeys.analytics.all, 'dashboard', userId] as const,
+    progress: (userId: string, type: string) => [...queryKeys.analytics.all, 'progress', userId, type] as const,
+    insights: (userId: string) => [...queryKeys.analytics.all, 'insights', userId] as const,
   },
-
-  // Social queries
-  social: {
-    all: ['social'] as const,
-    feed: () => [...queryKeys.social.all, 'feed'] as const,
-    friends: () => [...queryKeys.social.all, 'friends'] as const,
-    challenges: () => [...queryKeys.social.all, 'challenges'] as const,
-    challenge: (id: string) => [...queryKeys.social.challenges(), id] as const,
-    leaderboards: () => [...queryKeys.social.all, 'leaderboards'] as const,
-  },
-
-  // Wearables queries
-  wearables: {
-    all: ['wearables'] as const,
-    devices: () => [...queryKeys.wearables.all, 'devices'] as const,
-    device: (id: string) => [...queryKeys.wearables.devices(), id] as const,
-    sync: () => [...queryKeys.wearables.all, 'sync'] as const,
-    data: (deviceId: string, type: string) => 
-      [...queryKeys.wearables.all, 'data', deviceId, type] as const,
-  },
-} as const;
-
-// Enhanced error handling
-const handleQueryError = (error: unknown): ApiError => {
-  if (error && typeof error === 'object' && 'status' in error) {
-    return error as ApiError;
-  }
-
-  return {
-    status: 500,
-    statusText: 'Internal Error',
-    message: error instanceof Error ? error.message : 'An unknown error occurred',
-    details: { originalError: error }
-  };
-};
-
-// Global error handler
-const globalErrorHandler = (error: unknown): void => {
-  const apiError = handleQueryError(error);
   
-  // Log error in development
-  if (import.meta.env.DEV) {
-    console.error('Query Error:', {
-      status: apiError.status,
-      message: apiError.message,
-      details: apiError.details
-    });
-  }
-
-  // Handle specific error cases
-  switch (apiError.status) {
-    case 401:
-      // Handle unauthorized - already handled by API interceptor
-      break;
-    case 403:
-      // Handle forbidden
-      console.warn('Access denied:', apiError.message);
-      break;
-    case 429:
-      // Handle rate limiting
-      console.warn('Rate limit exceeded:', apiError.message);
-      break;
-    case 500:
-    case 502:
-    case 503:
-    case 504:
-      // Handle server errors
-      console.error('Server error:', apiError.message);
-      break;
-    default:
-      console.error('Unhandled error:', apiError.message);
+  // Admin
+  admin: {
+    all: ['admin'] as const,
+    users: () => [...queryKeys.admin.all, 'users'] as const,
+    stats: () => [...queryKeys.admin.all, 'stats'] as const,
+    reports: (type: string) => [...queryKeys.admin.all, 'reports', type] as const,
   }
 };
 
-// Retry logic for failed queries
-const shouldRetry = (failureCount: number, error: unknown): boolean => {
-  const apiError = handleQueryError(error);
-  
-  // Don't retry client errors (4xx) except 429 (rate limit)
-  if (apiError.status >= 400 && apiError.status < 500 && apiError.status !== 429) {
-    return false;
-  }
-
-  // Retry up to 3 times for server errors and network issues
-  return failureCount < 3;
-};
-
-// Retry delay with exponential backoff
-const retryDelay = (attemptIndex: number): number => {
-  return Math.min(1000 * 2 ** attemptIndex, 30000);
-};
-
-// Query cache configuration
-const queryCache = new QueryCache({
-  onError: globalErrorHandler,
-  onSuccess: (data, query) => {
-    // Log successful queries in development
-    if (import.meta.env.DEV) {
-      console.log('Query Success:', {
-        queryKey: query.queryKey,
-        dataType: typeof data,
-        hasData: !!data
-      });
-    }
-  },
-});
-
-// Mutation cache configuration
-const mutationCache = new MutationCache({
-  onError: globalErrorHandler,
-  onSuccess: (data, _variables, _context, mutation) => {
-    // Log successful mutations in development
-    if (import.meta.env.DEV) {
-      console.log('Mutation Success:', {
-        mutationKey: mutation.options.mutationKey,
-        dataType: typeof data
-      });
-    }
-  },
-});
-
-// Main QueryClient configuration
-export const queryClient = new QueryClient({
-  queryCache,
-  mutationCache,
-  defaultOptions: {
-    queries: {
-      // Stale time - how long data is considered fresh
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      
-      // Cache time - how long data stays in cache when unused
-      gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime in older versions)
-      
-      // Retry configuration
-      retry: shouldRetry,
-      retryDelay,
-      
-      // Refetch configuration
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchOnMount: true,
-      
-      // Error handling
-      throwOnError: false,
-      
-      // Network mode
-      networkMode: 'online',
-    },
-    mutations: {
-      // Retry configuration for mutations
-      retry: (failureCount, error) => {
-        const apiError = handleQueryError(error);
-        // Only retry server errors, not client errors
-        return failureCount < 2 && apiError.status >= 500;
-      },
-      retryDelay,
-      
-      // Error handling
-      throwOnError: false,
-      
-      // Network mode
-      networkMode: 'online',
-    },
-  },
-});
-
-// Simple localStorage persistence (without external dependency)
-const persistanceKey = 'myfit-hero-cache';
-
-// Save critical query data to localStorage
-const saveCriticalData = (queryClient: QueryClient): void => {
-  try {
-    const criticalQueries = [
-      queryKeys.auth.user(),
-      queryKeys.auth.preferences(),
-      queryKeys.workouts.templates(),
-    ];
-
-    const dataToSave: Record<string, unknown> = {};
+// Create query client with configuration
+export const createQueryClient = (): QueryClient => {
+  return new QueryClient({
+    defaultOptions: queryConfig,
     
-    criticalQueries.forEach((queryKey) => {
-      const data = queryClient.getQueryData(queryKey);
-      if (data) {
-        dataToSave[JSON.stringify(queryKey)] = data;
-      }
-    });
-
-    localStorage.setItem(persistanceKey, JSON.stringify(dataToSave));
-  } catch (error) {
-    console.warn('Failed to save query data to localStorage:', error);
-  }
-};
-
-// Load critical query data from localStorage
-const loadCriticalData = (queryClient: QueryClient): void => {
-  try {
-    const savedData = localStorage.getItem(persistanceKey);
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      
-      Object.entries(parsedData).forEach(([keyString, data]) => {
-        try {
-          const queryKey = JSON.parse(keyString);
-          queryClient.setQueryData(queryKey, data);
-        } catch (error) {
-          console.warn('Failed to restore query data:', error);
-        }
-      });
-    }
-  } catch (error) {
-    console.warn('Failed to load query data from localStorage:', error);
-  }
-};
-
-// Initialize persistence (only in browser)
-if (typeof window !== 'undefined') {
-  // Load persisted data on initialization
-  loadCriticalData(queryClient);
-  
-  // Save data before page unload
-  window.addEventListener('beforeunload', () => {
-    saveCriticalData(queryClient);
+    // Global error handler
+    queryCache: undefined,
+    mutationCache: undefined,
   });
-  
-  // Save data periodically
-  setInterval(() => {
-    saveCriticalData(queryClient);
-  }, 5 * 60 * 1000); // Every 5 minutes
-}
-
-// Query prefetching helpers
-export const prefetchQueries = {
-  // Prefetch user profile
-  userProfile: async (userId: string) => {
-    await queryClient.prefetchQuery({
-      queryKey: queryKeys.user.profile(userId),
-      queryFn: () => api.get(`/users/${userId}/profile`),
-      staleTime: 10 * 60 * 1000, // 10 minutes
-    });
-  },
-
-  // Prefetch workout templates
-  workoutTemplates: async () => {
-    await queryClient.prefetchQuery({
-      queryKey: queryKeys.workouts.templates(),
-      queryFn: () => api.get('/workouts/templates'),
-      staleTime: 30 * 60 * 1000, // 30 minutes
-    });
-  },
-
-  // Prefetch exercises
-  exercises: async () => {
-    await queryClient.prefetchQuery({
-      queryKey: queryKeys.exercises.list(),
-      queryFn: () => api.get('/exercises'),
-      staleTime: 60 * 60 * 1000, // 1 hour
-    });
-  },
-
-  // Prefetch today's nutrition
-  todayNutrition: async () => {
-    const today = new Date().toISOString().split('T')[0];
-    if (today) {
-      await queryClient.prefetchQuery({
-        queryKey: queryKeys.nutrition.dailyTracking(today),
-        queryFn: () => api.get(`/nutrition/tracking/${today}`),
-        staleTime: 5 * 60 * 1000, // 5 minutes
-      });
-    }
-  },
 };
 
-// Cache invalidation helpers
+// Singleton query client instance
+export const queryClient = createQueryClient();
+
+// Helper functions for cache management
 export const invalidateQueries = {
   // Invalidate all auth-related queries
-  auth: () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.auth.all });
+  auth: () => queryClient.invalidateQueries({ queryKey: queryKeys.auth.user }),
+  
+  // Invalidate workout queries
+  workouts: {
+    all: () => queryClient.invalidateQueries({ queryKey: queryKeys.workouts.all }),
+    byId: (id: string) => queryClient.invalidateQueries({ queryKey: queryKeys.workouts.detail(id) }),
+    lists: () => queryClient.invalidateQueries({ queryKey: queryKeys.workouts.lists() }),
   },
-
-  // Invalidate user data
-  user: (userId?: string) => {
-    if (userId) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.user.profile(userId) });
-    } else {
-      queryClient.invalidateQueries({ queryKey: queryKeys.user.all });
-    }
+  
+  // Invalidate nutrition queries
+  nutrition: {
+    all: () => queryClient.invalidateQueries({ queryKey: queryKeys.nutrition.all }),
+    meals: (userId: string, date: string) => 
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutrition.meals(userId, date) }),
+    tracking: (userId: string) => 
+      queryClient.invalidateQueries({ queryKey: queryKeys.nutrition.tracking(userId) }),
   },
-
-  // Invalidate workout data
-  workouts: () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.workouts.all });
+  
+  // Invalidate recovery queries
+  recovery: {
+    all: () => queryClient.invalidateQueries({ queryKey: queryKeys.recovery.all }),
+    status: (userId: string) => 
+      queryClient.invalidateQueries({ queryKey: queryKeys.recovery.status(userId) }),
   },
-
-  // Invalidate nutrition data
-  nutrition: (date?: string) => {
-    if (date) {
-      queryClient.invalidateQueries({ queryKey: queryKeys.nutrition.dailyTracking(date) });
-    } else {
-      queryClient.invalidateQueries({ queryKey: queryKeys.nutrition.all });
-    }
-  },
-
-  // Invalidate recovery data
-  recovery: () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.recovery.all });
-  },
-
-  // Invalidate all cached data
-  all: () => {
-    queryClient.invalidateQueries();
-  },
+  
+  // Invalidate analytics queries
+  analytics: {
+    all: () => queryClient.invalidateQueries({ queryKey: queryKeys.analytics.all }),
+    dashboard: (userId: string) => 
+      queryClient.invalidateQueries({ queryKey: queryKeys.analytics.dashboard(userId) }),
+  }
 };
 
-// Cache optimization helpers
-export const optimisticUpdates = {
-  // Optimistic update for user profile
-  updateUserProfile: (userId: string, updates: Record<string, unknown>) => {
-    queryClient.setQueryData(
-      queryKeys.user.profile(userId),
-      (oldData: unknown) => {
-        if (oldData && typeof oldData === 'object') {
-          return { ...oldData, ...updates };
-        }
-        return updates;
-      }
-    );
+// Cache prefetching utilities
+export const prefetchQueries = {
+  workouts: {
+    templates: () => queryClient.prefetchQuery({
+      queryKey: queryKeys.workouts.templates,
+      queryFn: () => import('../features/workout/services/WorkoutService').then(m => m.workoutService.getTemplates()),
+      staleTime: 1000 * 60 * 10, // 10 minutes
+    }),
   },
-
-  // Optimistic update for workout completion
-  completeWorkout: (workoutId: string) => {
-    queryClient.setQueryData(
-      queryKeys.workouts.detail(workoutId),
-      (oldData: unknown) => {
-        if (oldData && typeof oldData === 'object') {
-          return { 
-            ...oldData, 
-            status: 'completed',
-            completedAt: new Date().toISOString()
-          };
-        }
-        return oldData;
-      }
-    );
-  },
+  
+  nutrition: {
+    foods: () => queryClient.prefetchQuery({
+      queryKey: queryKeys.nutrition.foods(),
+      queryFn: () => import('../features/nutrition/services/NutritionService').then(m => m.nutritionService.getFoods()),
+      staleTime: 1000 * 60 * 30, // 30 minutes
+    }),
+  }
 };
 
-// Background synchronization
-export const backgroundSync = {
-  // Sync critical data in background
-  syncCriticalData: async () => {
-    const promises = [
-      queryClient.refetchQueries({ queryKey: queryKeys.auth.user() }),
-      queryClient.refetchQueries({ queryKey: queryKeys.workouts.activeSession() }),
-    ];
-
-    await Promise.allSettled(promises);
-  },
-
-  // Sync all stale data
-  syncStaleData: async () => {
-    await queryClient.refetchQueries({ stale: true });
-  },
-};
-
-export default queryClient;
+export default queryConfig;
