@@ -1,296 +1,206 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-interface PerformanceMetrics {
-  fps: number;
-  memoryUsage: {
-    used: number;
-    total: number;
-    percentage: number;
-  };
+export interface PerformanceMetrics {
   loadTime: number;
   renderTime: number;
-  bundleSize?: number;
+  interactionTime: number;
+  memoryUsage: number;
+  networkRequests: number;
+  bundleSize: number;
 }
 
-interface PerformanceAlert {
-  type: 'warning' | 'critical';
-  message: string;
-  timestamp: number;
-  metric: string;
-  value: number;
-  threshold: number;
+export interface PerformanceEntry {
+  name: string;
+  entryType: string;
+  startTime: number;
+  duration: number;
 }
 
-interface UsePerformanceMonitoringOptions {
-  enableFpsMonitoring?: boolean;
-  enableMemoryMonitoring?: boolean;
-  enableRenderTimeTracking?: boolean;
-  fpsThreshold?: number;
-  memoryThreshold?: number;
-  renderTimeThreshold?: number;
-  sampleInterval?: number;
-}
-
-interface UsePerformanceMonitoringReturn {
+export interface UsePerformanceMonitoringReturn {
   metrics: PerformanceMetrics;
-  alerts: PerformanceAlert[];
   isMonitoring: boolean;
   startMonitoring: () => void;
   stopMonitoring: () => void;
-  clearAlerts: () => void;
-  trackPageLoad: () => void;
-  trackRender: (componentName: string) => () => void;
-  getPerformanceReport: () => string;
+  recordInteraction: (name: string) => void;
+  getReport: () => PerformanceMetrics;
+  clearMetrics: () => void;
 }
 
-export type { UsePerformanceMonitoringReturn };
-
-export const usePerformanceMonitoring = (
-  options: UsePerformanceMonitoringOptions = {}
-): UsePerformanceMonitoringReturn => {
-  const {
-    enableFpsMonitoring = true,
-    enableMemoryMonitoring = true,
-    enableRenderTimeTracking = true,
-    fpsThreshold = 30,
-    memoryThreshold = 80,
-    renderTimeThreshold = 16, // 60fps = 16ms per frame
-    sampleInterval = 1000
-  } = options;
-
+export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
-    fps: 0,
-    memoryUsage: { used: 0, total: 0, percentage: 0 },
     loadTime: 0,
-    renderTime: 0
+    renderTime: 0,
+    interactionTime: 0,
+    memoryUsage: 0,
+    networkRequests: 0,
+    bundleSize: 0
   });
-
-  const [alerts, setAlerts] = useState<PerformanceAlert[]>([]);
+  
   const [isMonitoring, setIsMonitoring] = useState(false);
+  const [performanceObserver, setPerformanceObserver] = useState<PerformanceObserver | null>(null);
 
-  const frameCountRef = useRef(0);
-  const lastTimeRef = useRef(0);
-  const animationFrameRef = useRef<number>();
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const renderTimesRef = useRef<number[]>([]);
-
-  // FPS Monitoring
-  const measureFPS = useCallback(() => {
-    const measure = (timestamp: number) => {
-      if (lastTimeRef.current) {
-        frameCountRef.current++;
-        const deltaTime = timestamp - lastTimeRef.current;
-        
-        if (deltaTime >= 1000) {
-          const fps = Math.round((frameCountRef.current * 1000) / deltaTime);
-          
-          setMetrics(prev => ({ ...prev, fps }));
-          
-          // Check FPS threshold
-          if (fps < fpsThreshold) {
-            const alert: PerformanceAlert = {
-              type: fps < fpsThreshold * 0.5 ? 'critical' : 'warning',
-              message: `Low FPS detected: ${fps} fps`,
-              timestamp: Date.now(),
-              metric: 'fps',
-              value: fps,
-              threshold: fpsThreshold
-            };
-            
-            setAlerts(prev => [...prev, alert]);
-          }
-          
-          frameCountRef.current = 0;
-          lastTimeRef.current = timestamp;
-        }
-      } else {
-        lastTimeRef.current = timestamp;
-      }
-      
-      if (isMonitoring) {
-        animationFrameRef.current = requestAnimationFrame(measure);
-      }
-    };
-    
-    if (enableFpsMonitoring && isMonitoring) {
-      animationFrameRef.current = requestAnimationFrame(measure);
+  // Get memory usage if available
+  const getMemoryUsage = useCallback((): number => {
+    if ('memory' in performance) {
+      const memory = (performance as any).memory;
+      return memory.usedJSHeapSize / 1024 / 1024; // Convert to MB
     }
-  }, [enableFpsMonitoring, isMonitoring, fpsThreshold]);
-
-  // Memory Monitoring
-  const measureMemory = useCallback(() => {
-    if (!enableMemoryMonitoring || !('memory' in performance)) return;
-
-    try {
-      const memory = (performance as { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory;
-      if (!memory) return;
-      const used = Math.round(memory.usedJSHeapSize / 1024 / 1024); // MB
-      const total = Math.round(memory.totalJSHeapSize / 1024 / 1024); // MB
-      const percentage = Math.round((used / total) * 100);
-
-      setMetrics(prev => ({
-        ...prev,
-        memoryUsage: { used, total, percentage }
-      }));
-
-      // Check memory threshold
-      if (percentage > memoryThreshold) {
-        const alert: PerformanceAlert = {
-          type: percentage > memoryThreshold * 1.2 ? 'critical' : 'warning',
-          message: `High memory usage: ${percentage}%`,
-          timestamp: Date.now(),
-          metric: 'memory',
-          value: percentage,
-          threshold: memoryThreshold
-        };
-        
-        setAlerts(prev => [...prev, alert]);
-      }
-    } catch (error) {
-      console.warn('Memory monitoring not available:', error);
-    }
-  }, [enableMemoryMonitoring, memoryThreshold]);
-
-  // Page Load Tracking
-  const trackPageLoad = useCallback(() => {
-    try {
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-      const loadTime = navigation.loadEventEnd - navigation.fetchStart;
-      
-      setMetrics(prev => ({ ...prev, loadTime }));
-      
-      // Track bundle size if available
-      const resources = performance.getEntriesByType('resource');
-      const jsResources = resources.filter(r => r.name.endsWith('.js'));
-      const totalBundleSize = jsResources.reduce((sum, resource) => {
-        return sum + ((resource as PerformanceResourceTiming).transferSize || 0);
-      }, 0);
-      
-      if (totalBundleSize > 0) {
-        setMetrics(prev => ({ ...prev, bundleSize: Math.round(totalBundleSize / 1024) })); // KB
-      }
-    } catch (error) {
-      console.warn('Page load tracking failed:', error);
-    }
+    return 0;
   }, []);
 
-  // Render Time Tracking
-  const trackRender = useCallback((componentName: string) => {
-    if (!enableRenderTimeTracking) return () => {};
+  // Get network request count
+  const getNetworkRequests = useCallback((): number => {
+    if ('getEntriesByType' in performance) {
+      const networkEntries = performance.getEntriesByType('resource');
+      return networkEntries.length;
+    }
+    return 0;
+  }, []);
 
-    const startTime = performance.now();
-    
-    return () => {
-      const endTime = performance.now();
-      const renderTime = endTime - startTime;
-      
-      renderTimesRef.current.push(renderTime);
-      
-      // Keep only last 10 render times
-      if (renderTimesRef.current.length > 10) {
-        renderTimesRef.current.shift();
-      }
-      
-      // Calculate average render time
-      const avgRenderTime = renderTimesRef.current.reduce((sum, time) => sum + time, 0) / renderTimesRef.current.length;
-      
-      setMetrics(prev => ({ ...prev, renderTime: avgRenderTime }));
-      
-      // Check render time threshold
-      if (renderTime > renderTimeThreshold) {
-        const alert: PerformanceAlert = {
-          type: renderTime > renderTimeThreshold * 2 ? 'critical' : 'warning',
-          message: `Slow render detected in ${componentName}: ${renderTime.toFixed(2)}ms`,
-          timestamp: Date.now(),
-          metric: 'renderTime',
-          value: renderTime,
-          threshold: renderTimeThreshold
-        };
-        
-        setAlerts(prev => [...prev, alert]);
-      }
-    };
-  }, [enableRenderTimeTracking, renderTimeThreshold]);
+  // Calculate bundle size from resource entries
+  const getBundleSize = useCallback((): number => {
+    if ('getEntriesByType' in performance) {
+      const resourceEntries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+      return resourceEntries
+        .filter(entry => entry.name.includes('.js') || entry.name.includes('.css'))
+        .reduce((total, entry) => total + (entry.transferSize || 0), 0) / 1024; // Convert to KB
+    }
+    return 0;
+  }, []);
 
-  // Start monitoring
+  // Start monitoring performance
   const startMonitoring = useCallback(() => {
-    setIsMonitoring(true);
-    trackPageLoad();
-  }, [trackPageLoad]);
+    if (!isMonitoring && 'PerformanceObserver' in window) {
+      const observer = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        
+        entries.forEach((entry) => {
+          if (entry.entryType === 'navigation') {
+            const navigationEntry = entry as PerformanceNavigationTiming;
+            setMetrics(prev => ({
+              ...prev,
+              loadTime: navigationEntry.loadEventEnd - navigationEntry.navigationStart
+            }));
+          }
+          
+          if (entry.entryType === 'measure') {
+            setMetrics(prev => ({
+              ...prev,
+              renderTime: entry.duration
+            }));
+          }
+          
+          if (entry.entryType === 'user-timing') {
+            setMetrics(prev => ({
+              ...prev,
+              interactionTime: entry.duration
+            }));
+          }
+        });
+      });
+
+      try {
+        observer.observe({ entryTypes: ['navigation', 'measure', 'user-timing'] });
+        setPerformanceObserver(observer);
+        setIsMonitoring(true);
+
+        // Update other metrics
+        setMetrics(prev => ({
+          ...prev,
+          memoryUsage: getMemoryUsage(),
+          networkRequests: getNetworkRequests(),
+          bundleSize: getBundleSize()
+        }));
+      } catch (error) {
+        console.warn('Performance monitoring not supported:', error);
+      }
+    }
+  }, [isMonitoring, getMemoryUsage, getNetworkRequests, getBundleSize]);
 
   // Stop monitoring
   const stopMonitoring = useCallback(() => {
-    setIsMonitoring(false);
-    
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
+    if (performanceObserver) {
+      performanceObserver.disconnect();
+      setPerformanceObserver(null);
+      setIsMonitoring(false);
     }
-    
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+  }, [performanceObserver]);
+
+  // Record user interaction
+  const recordInteraction = useCallback((name: string) => {
+    if ('mark' in performance && 'measure' in performance) {
+      const startMark = `${name}-start`;
+      const endMark = `${name}-end`;
+      
+      performance.mark(startMark);
+      
+      // Simulate interaction end (in real app, call this when interaction completes)
+      setTimeout(() => {
+        performance.mark(endMark);
+        performance.measure(name, startMark, endMark);
+      }, 0);
     }
   }, []);
 
-  // Clear alerts
-  const clearAlerts = useCallback(() => {
-    setAlerts([]);
-  }, []);
-
-  // Generate performance report
-  const getPerformanceReport = useCallback(() => {
-    const report = {
-      timestamp: new Date().toISOString(),
-      metrics,
-      alerts: alerts.length,
-      summary: {
-        fpsStatus: metrics.fps >= fpsThreshold ? 'Good' : 'Poor',
-        memoryStatus: metrics.memoryUsage.percentage <= memoryThreshold ? 'Good' : 'High',
-        renderStatus: metrics.renderTime <= renderTimeThreshold ? 'Fast' : 'Slow'
-      }
+  // Get current performance report
+  const getReport = useCallback((): PerformanceMetrics => {
+    return {
+      ...metrics,
+      memoryUsage: getMemoryUsage(),
+      networkRequests: getNetworkRequests(),
+      bundleSize: getBundleSize()
     };
-    
-    return JSON.stringify(report, null, 2);
-  }, [metrics, alerts, fpsThreshold, memoryThreshold, renderTimeThreshold]);
+  }, [metrics, getMemoryUsage, getNetworkRequests, getBundleSize]);
 
-  // Setup monitoring intervals
+  // Clear metrics
+  const clearMetrics = useCallback(() => {
+    setMetrics({
+      loadTime: 0,
+      renderTime: 0,
+      interactionTime: 0,
+      memoryUsage: 0,
+      networkRequests: 0,
+      bundleSize: 0
+    });
+    
+    if ('clearMarks' in performance && 'clearMeasures' in performance) {
+      performance.clearMarks();
+      performance.clearMeasures();
+    }
+  }, []);
+
+  // Update metrics periodically
   useEffect(() => {
     if (isMonitoring) {
-      measureFPS();
-      
-      intervalRef.current = setInterval(() => {
-        measureMemory();
-      }, sampleInterval);
-    }
-    
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isMonitoring, measureFPS, measureMemory, sampleInterval]);
+      const interval = setInterval(() => {
+        setMetrics(prev => ({
+          ...prev,
+          memoryUsage: getMemoryUsage(),
+          networkRequests: getNetworkRequests()
+        }));
+      }, 5000); // Update every 5 seconds
 
-  // Auto-start monitoring on mount
+      return () => clearInterval(interval);
+    }
+  }, [isMonitoring, getMemoryUsage, getNetworkRequests]);
+
+  // Cleanup on unmount
   useEffect(() => {
-    startMonitoring();
-    
     return () => {
-      stopMonitoring();
+      if (performanceObserver) {
+        performanceObserver.disconnect();
+      }
     };
-  }, [startMonitoring, stopMonitoring]);
+  }, [performanceObserver]);
 
   return {
     metrics,
-    alerts,
     isMonitoring,
     startMonitoring,
     stopMonitoring,
-    clearAlerts,
-    trackPageLoad,
-    trackRender,
-    getPerformanceReport
+    recordInteraction,
+    getReport,
+    clearMetrics
   };
 };
 
