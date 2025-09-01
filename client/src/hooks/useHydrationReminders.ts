@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/app-store';
+import { appStore } from '@/store/app-store';
 import { useToast } from './use-toast';
 
 interface HydrationEntry {
@@ -31,7 +31,7 @@ interface HydrationStats {
 }
 
 export function useHydrationReminders() {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const { showToast } = useToast();
 
   const [hydrationEntries, setHydrationEntries] = useState<HydrationEntry[]>([]);

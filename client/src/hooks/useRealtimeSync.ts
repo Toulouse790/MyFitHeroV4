@@ -1,7 +1,7 @@
 // client/src/hooks/useRealtimeSync.ts
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 
 interface RealtimeSyncOptions {
   pillar: 'hydration' | 'nutrition' | 'sleep' | 'workout';
@@ -12,7 +12,7 @@ interface RealtimeSyncOptions {
 
 export const useRealtimeSync = ({ pillar, onUpdate, onInsert, onDelete }: RealtimeSyncOptions) => {
   const channelRef = useRef<any>(null);
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
 
   useEffect(() => {
     if (!appStoreUser?.id) return;

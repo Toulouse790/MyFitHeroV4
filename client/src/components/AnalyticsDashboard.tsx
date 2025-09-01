@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Target, Award, RefreshCw, Download, Activity, Flame } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 import { useAnimateOnMount } from '@/hooks/useAnimations';
 import AdvancedCharts from '@/components/AdvancedCharts';
@@ -17,7 +17,7 @@ interface AnalyticsDashboardProps {
 }
 
 const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ className = '' }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const adaptiveColors = useAdaptiveColors();
   const isAnimated = useAnimateOnMount();
 

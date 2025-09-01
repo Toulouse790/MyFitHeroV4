@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/app-store';
+import { appStore } from '@/store/app-store';
 import { useToast } from './use-toast';
 
 interface SleepEntry {
@@ -50,7 +50,7 @@ interface SleepRecommendation {
 }
 
 export function useSleepAnalysis() {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const { showToast } = useToast();
 
   const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);

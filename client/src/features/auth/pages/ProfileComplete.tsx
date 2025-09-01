@@ -22,11 +22,11 @@ import {
   Zap,
   Heart,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 
 const ProfileComplete: React.FC = () => {
   const { navigateTo } = useAppNavigation();
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
 
   // Calcul de complétude du profil optimisé
   const profileCompletion = useMemo(() => {

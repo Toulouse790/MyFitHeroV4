@@ -13,7 +13,7 @@ import {
 } from '../../test-utils/test-utils';
 import { server } from '../../test-utils/mocks/server';
 import { http, HttpResponse } from 'msw';
-import WorkoutPage from '../../pages/WorkoutPage';
+import WorkoutPage from '@/features/workout/pages/WorkoutPage';
 
 // Mock du router pour les paramètres d'URL
 const mockUseParams = jest.fn();

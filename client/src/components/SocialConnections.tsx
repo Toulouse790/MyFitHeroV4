@@ -21,7 +21,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { socialService, UserConnection, SocialStats } from '@/services/socialService';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { useToast } from '@/hooks/use-toast';
 
 interface SocialConnectionsProps {
@@ -29,7 +29,7 @@ interface SocialConnectionsProps {
 }
 
 const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<'friends' | 'search' | 'requests' | 'suggestions'>(

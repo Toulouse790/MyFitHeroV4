@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useLocation } from 'wouter';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { SmartDashboardContext, DailyProgramDisplay } from '@/types/dashboard';
 import { DailyStats, Json } from '@/lib/supabase';
 import { User as SupabaseAuthUserType } from '@supabase/supabase-js';
@@ -82,7 +82,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
   const colors = useAdaptiveColors();
   const { clickVibration } = useHaptic();
 
-  const { dailyGoals, fetchDailyStats, fetchAiRecommendations, appStoreUser } = useAppStore();
+  const { dailyGoals, fetchDailyStats, fetchAiRecommendations, appStoreUser } = appStore();
 
   const today = new Date().toISOString().split('T')[0];
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Redirect } from 'wouter';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 
 interface ProtectedRouteProps {
   children: React.ReactElement;
@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 
 // Page d'activation de module
 const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
-  const { appStoreUser, activateModule } = useAppStore();
+  const { appStoreUser, activateModule } = appStore();
   const [isActivating, setIsActivating] = React.useState(false);
 
   const moduleConfigs = {
@@ -110,7 +110,7 @@ const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
 };
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, moduleRequired }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const [loading, setLoading] = React.useState(true);
   const [session, setSession] = React.useState<any>(null);
 

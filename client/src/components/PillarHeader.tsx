@@ -11,7 +11,7 @@ import {
   Award,
   Flame,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { supabase } from '@/lib/supabase';
 import { useAnimateOnMount, useProgressAnimation, useHaptic } from '@/hooks/useAnimations';
 
@@ -50,7 +50,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   unit = '',
   showAIRecommendation = true,
 }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const [aiRecommendation, setAiRecommendation] = useState<AIRecommendation | null>(null);
   const [dailyGoal, setDailyGoal] = useState<string>('');
   const [progressPercentage, setProgressPercentage] = useState<number>(0);

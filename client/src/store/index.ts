@@ -20,7 +20,7 @@ export {
 } from './settingsStore';
 
 // Legacy workout store (à migrer)
-export { useAppStoreUnified, useWorkoutSession, useWorkoutExercises, useWorkoutStats, useWorkoutFavorites, useWorkoutSettings } from './legacyWorkoutStore';
+export { appStoreUnified, useWorkoutSession, useWorkoutExercises, useWorkoutStats, useWorkoutFavorites, useWorkoutSettings } from './legacyWorkoutStore';
 
 // Types exports
 export type { AuthStore } from './authStore';

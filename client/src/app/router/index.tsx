@@ -10,7 +10,7 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const HydrationPage = lazy(() => import('@/features/hydration/HydrationPage'));
 const SleepPage = lazy(() => import('@/features/sleep/SleepPage'));
 const SocialPage = lazy(() => import('@/features/social/SocialPage'));
-const WorkoutPage = lazy(() => import('@/pages/WorkoutPage'));
+const WorkoutPage = lazy(() => import('@/features/workout/pages/WorkoutPage'));
 const NutritionPage = lazy(() => import('@/pages/NutritionPage'));
 const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));

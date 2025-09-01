@@ -5,7 +5,7 @@ import {
   type CoachingResponse,
   type ContextualRecommendation,
 } from '@/services/aiService';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { useAnimateOnMount } from '@/hooks/useAnimations';
 import { useAdaptiveColors } from '@/components/ThemeProvider';
 
@@ -24,7 +24,7 @@ const AIIntelligence: React.FC<AIIntelligenceProps> = ({
   showRecommendations = true,
   className = '',
 }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const adaptiveColors = useAdaptiveColors();
   const isAnimated = useAnimateOnMount();
 

@@ -6,7 +6,7 @@ import {
   SleepService,
   DailyStatsService,
 } from '@/services/supabaseService';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import type {
   MuscleRecoveryData,
   UserRecoveryProfile,
@@ -40,7 +40,7 @@ interface UseMuscleRecoveryReturn {
 }
 
 export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
 
   // État local
   const [muscleRecoveryData, setMuscleRecoveryData] = useState<MuscleRecoveryData[]>([]);

@@ -37,7 +37,7 @@ import {
   ThumbsUp,
   AlertTriangle,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { UniformHeader } from '@/components/UniformHeader';
@@ -172,7 +172,7 @@ interface CreateChallengeData {
 
 const Social: React.FC = () => {
   const [location, setLocation] = useLocation();
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const { toast } = useToast();
 
   // States

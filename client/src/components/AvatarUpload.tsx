@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Camera, User, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 
 interface AvatarUploadProps {
   currentAvatar?: string;
@@ -18,7 +18,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   editable = true,
 }) => {
   const { toast } = useToast();
-  const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
+  const { appStoreUser, updateAppStoreUserProfile } = appStore();
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

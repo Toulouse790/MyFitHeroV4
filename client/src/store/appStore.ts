@@ -1,727 +1,951 @@
+// stores/appStore.ts (VERSION COMPLÈTE TYPÉE)
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '@/lib/supabase';
+import {
+  UserProfile,
+  AppStoreState,
+  UserWorkout,
+  UserNutrition,
+  UserHydration,
+  UserSleep,
+  UserAnalytics,
+  DailyNutritionTotals,
+  WearableData,
+  ConnectedScale,
+  WeightEntry,
+  ApiResponse,
+} from '@/types/supabase';
 
-// Types pour les balances connectées
-export interface ScaleDevice {
+// Types spécifiques au store étendu
+export interface AppUser extends UserProfile {
+  level?: number;
+  totalPoints?: number;
+  joinDate?: string;
+  daily_calories?: number | null;
+  sport_specific_stats?: Record<string, number>;
+  name?: string;
+  goal?: string;
+  profile_type?: string;
+  active_modules?: string[];
+  available_time_per_day?: number;
+  season_period?: string;
+  injuries?: string[];
+}
+
+export interface DailyGoals {
+  water: number;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  sleep: number;
+  workouts: number;
+}
+
+export interface DailyStats {
   id: string;
-  name: string;
-  brand: string;
-  model: string;
-  batteryLevel?: number;
-  isConnected: boolean;
-  lastSync?: string;
-  connectionType: 'bluetooth' | 'wifi' | 'api';
-  userId: string;
-  createdAt: string;
-  updatedAt: string;
+  user_id: string;
+  stat_date: string;
+  total_calories_consumed: number;
+  total_protein: number;
+  total_carbs: number;
+  total_fat: number;
+  total_water_ml: number;
+  workouts_completed: number;
+  sleep_hours: number;
+  steps: number | null;
+  active_minutes: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
-// Types pour l'historique du poids
-export interface WeightEntry {
-  id?: string;
-  date: string;
-  weight: number;
-  bodyFat?: number;
-  muscleMass?: number;
-  boneMass?: number;
-  waterPercentage?: number;
-  visceralFat?: number;
-  bmr?: number;
-  source: 'manual' | 'scale' | 'import';
-  scaleId?: string;
-  userId: string;
-  createdAt?: string;
-}
-
-// Types pour le profil utilisateur
-export interface UserProfile {
+export interface AiRecommendation {
   id: string;
-  userId: string;
-  displayName?: string;
-  email?: string;
-  avatarUrl?: string;
-  weight_kg?: number;
-  height_cm?: number;
-  age?: number;
-  gender?: 'male' | 'female' | 'null';
-  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'extra_active';
-  fitnessGoal?: 'lose_weight' | 'maintain' | 'gain_weight' | 'build_muscle' | 'improve_fitness';
-  targetWeight?: number;
-  weeklyGoal?: number;
-  units?: {
-    weight: 'kg' | 'lb';
-    height: 'cm' | 'ft';
-    distance: 'km' | 'mi';
-    temperature: 'c' | 'f';
-  };
-  notifications?: {
-    workoutReminders: boolean;
-    weightTracking: boolean;
-    achievements: boolean;
-    social: boolean;
-  };
-  privacy?: {
-    profileVisibility: 'public' | 'friends' | 'private';
-    shareWorkouts: boolean;
-    shareProgress: boolean;
-  };
-  createdAt?: string;
-  updatedAt?: string;
+  user_id: string;
+  pillar_type: 'nutrition' | 'hydration' | 'sleep' | 'workout' | 'recovery';
+  recommendation_text: string;
+  priority: 'low' | 'medium' | 'high';
+  is_read: boolean;
+  created_at: string;
 }
 
-// Types pour les lectures de balance
-export interface ScaleReading {
-  weight: number;
-  bodyFat?: number;
-  muscleMass?: number;
-  boneMass?: number;
-  waterPercentage?: number;
-  visceralFat?: number;
-  bmr?: number;
-  timestamp: string;
-  deviceId: string;
-}
+// Interface complète du store
+interface ExtendedAppStore extends AppStoreState {
+  // États étendus
+  appStoreUser: AppUser;
+  dailyGoals: DailyGoals;
+  currentStats: DailyStats | null;
+  recommendations: AiRecommendation[];
 
-// Interface principale du store
-interface AppStore {
-  // État utilisateur
-  user: any;
-  userProfile: UserProfile | null;
-  isLoading: boolean;
-  error: string | null;
+  // Données des modules
+  workouts: UserWorkout[];
+  nutritionEntries: UserNutrition[];
+  hydrationEntries: UserHydration[];
+  sleepEntries: UserSleep[];
+  analyticsData: UserAnalytics[];
 
-  // État des balances connectées
-  connectedScales: ScaleDevice[];
+  // États UI
+  activeModule: string | null;
+  syncStatus: 'idle' | 'syncing' | 'success' | 'error';
+  lastSyncTime: string | null;
+
+  // Données wearables
+  wearableData: WearableData | null;
+  connectedScales: ConnectedScale[];
   weightHistory: WeightEntry[];
-  isScanning: boolean;
-  isSyncing: boolean;
-  lastScaleSync: string | null;
 
-  // Actions utilisateur
-  setUser: (user: any) => void;
-  setUserProfile: (profile: UserProfile) => void;
-  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
-  loadUserProfile: (userId: string) => Promise<void>;
+  // Actions étendues
+  updateAppStoreUserProfile: (updates: Partial<AppUser>) => void;
+  setUser: (user: AppUser) => void;
+  clearUser: () => void;
+  updateDailyGoals: (goals: Partial<DailyGoals>) => void;
+  calculateAndSetDailyGoals: () => void;
 
-  // Actions balances connectées
-  connectScale: (device: Omit<ScaleDevice, 'userId' | 'createdAt' | 'updatedAt'>) => Promise<void>;
-  disconnectScale: (scaleId: string) => Promise<void>;
-  syncScaleWeight: (scaleId: string) => Promise<number>;
-  loadConnectedScales: (userId: string) => Promise<void>;
-  updateScaleStatus: (scaleId: string, updates: Partial<ScaleDevice>) => Promise<void>;
+  // Actions données
+  fetchDailyStats: (userId: string, date: string) => Promise<DailyStats | null>;
+  fetchAiRecommendations: (
+    userId: string,
+    pillarType: string,
+    limit?: number
+  ) => Promise<AiRecommendation[]>;
+  markRecommendationAsRead: (recommendationId: string) => Promise<boolean>;
 
-  // Actions historique du poids
-  addWeightEntry: (entry: Omit<WeightEntry, 'userId' | 'createdAt'>) => Promise<void>;
-  updateWeightEntry: (entryId: string, updates: Partial<WeightEntry>) => Promise<void>;
-  deleteWeightEntry: (entryId: string) => Promise<void>;
-  loadWeightHistory: (userId: string, limit?: number) => Promise<void>;
+  // Actions modules
+  addHydration: (amount: number, type?: string) => Promise<boolean>;
+  addMeal: (meal: Partial<UserNutrition>) => Promise<boolean>;
+  addSleepSession: (sleepData: Partial<UserSleep>) => Promise<boolean>;
+  addWorkout: (workout: Partial<UserWorkout>) => Promise<boolean>;
 
-  // Actions utilitaires
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  clearError: () => void;
-  calculateBMI: () => number | null;
-  getWeightTrend: () => { type: 'up' | 'down' | 'stable'; diff: number } | null;
-  getLatestWeight: () => number | null;
+  // Gestion modules
+  activateModule: (moduleId: string) => Promise<boolean>;
+  deactivateModule: (moduleId: string) => Promise<boolean>;
+  isModuleActive: (moduleId: string) => boolean;
+  setActiveModule: (moduleId: string | null) => void;
 
-  // Actions de synchronisation
-  scanForScales: () => Promise<ScaleDevice[]>;
-  syncAllScales: () => Promise<void>;
-  importWeightData: (data: WeightEntry[]) => Promise<void>;
+  // Actions wearables
+  syncWearableData: () => Promise<WearableData | null>;
+  addConnectedScale: (scale: Partial<ConnectedScale>) => Promise<boolean>;
+  addWeightEntry: (entry: Partial<WeightEntry>) => Promise<boolean>;
+
+  // Actions analytics
+  updateUserPoints: (points: number) => void;
+  incrementLevel: () => void;
+  calculateProgress: (date: string) => Promise<{ [key: string]: number }>;
+
+  // Utilitaires
+  getTodayProgress: () => { [key: string]: number };
+  getWeeklyStats: () => Promise<{ [key: string]: number[] }>;
+  exportUserData: () => Promise<any>;
 }
 
-// Service de gestion des balances (simulé)
-class ScaleService {
-  static async scanForDevices(): Promise<ScaleDevice[]> {
-    // Simuler la recherche de balances
-    await new Promise(resolve => setTimeout(resolve, 3000));
+// Calcul des objectifs personnalisés
+const calculatePersonalizedGoals = (user: AppUser): DailyGoals => {
+  let baseCalories = user.daily_calories || 2000;
 
-    const mockDevices: Omit<ScaleDevice, 'userId' | 'createdAt' | 'updatedAt'>[] = [
-      {
-        id: `xiaomi-${Date.now()}`,
-        name: 'Mi Body Composition Scale 2',
-        brand: 'Xiaomi',
-        model: 'XMTZC05HM',
-        connectionType: 'bluetooth',
-        batteryLevel: 78,
-        isConnected: false,
-      },
-      {
-        id: `withings-${Date.now()}`,
-        name: 'Body+ WiFi Scale',
-        brand: 'Withings',
-        model: 'WBS05',
-        connectionType: 'wifi',
-        isConnected: false,
-      },
-    ];
+  // Calcul BMR si données disponibles
+  if (!user.daily_calories && user.age && user.gender && user.weight && user.height) {
+    const weight = user.weight;
+    const height = user.height;
+    const bmr =
+      user.gender === 'male'
+        ? 88.362 + 13.397 * weight + 4.799 * height - 5.677 * user.age
+        : 447.593 + 9.247 * weight + 3.098 * height - 4.33 * user.age;
 
-    return mockDevices;
-  }
-
-  static async connectToDevice(deviceId: string): Promise<boolean> {
-    // Simuler la connexion
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    return Math.random() > 0.2; // 80% de chance de succès
-  }
-
-  static async syncWeight(deviceId: string): Promise<ScaleReading> {
-    // Simuler la lecture du poids
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const baseWeight = 70 + Math.random() * 30; // Entre 70 et 100kg
-
-    return {
-      weight: Math.round(baseWeight * 10) / 10,
-      bodyFat: Math.round((10 + Math.random() * 20) * 10) / 10,
-      muscleMass: Math.round((30 + Math.random() * 20) * 10) / 10,
-      boneMass: Math.round((2 + Math.random() * 2) * 10) / 10,
-      waterPercentage: Math.round((50 + Math.random() * 15) * 10) / 10,
-      visceralFat: Math.round((5 + Math.random() * 10) * 10) / 10,
-      bmr: Math.round(1200 + Math.random() * 800),
-      timestamp: new Date().toISOString(),
-      deviceId,
+    const activityFactors: Record<string, number> = {
+      student: 1.4,
+      office_worker: 1.3,
+      physical_job: 1.6,
+      retired: 1.2,
     };
+
+    const activityFactor = activityFactors[user.lifestyle || ''] || 1.4;
+    baseCalories = Math.round(bmr * activityFactor);
   }
-}
+
+  // Ajustements selon objectifs
+  let calorieAdjustment = 0;
+  if (user.primary_goals?.includes('weight_loss')) calorieAdjustment -= 300;
+  if (user.primary_goals?.includes('muscle_gain')) calorieAdjustment += 400;
+  if (user.primary_goals?.includes('performance')) calorieAdjustment += 200;
+
+  // Ajustements sport
+  const sportAdjustments: Record<string, number> = {
+    basketball: 250,
+    american_football: 500,
+    football: 200,
+    tennis: 150,
+    running: 400,
+    cycling: 400,
+    swimming: 400,
+    musculation: 300,
+    powerlifting: 300,
+    crossfit: 350,
+  };
+
+  const sportAdjustment = sportAdjustments[user.sport?.toLowerCase() || ''] || 0;
+  const finalCalories = baseCalories + calorieAdjustment + sportAdjustment;
+
+  // Calcul macros
+  let proteinMultiplier = 1.2;
+  let carbMultiplier = 1.0;
+
+  if (user.sport?.toLowerCase().includes('strength') || user.sport === 'musculation') {
+    proteinMultiplier = 1.5;
+    carbMultiplier = 1.0;
+  } else if (user.sport?.toLowerCase().includes('endurance') || user.sport === 'running') {
+    proteinMultiplier = 1.2;
+    carbMultiplier = 1.5;
+  }
+
+  const protein = Math.round(((finalCalories * 0.2) / 4) * proteinMultiplier);
+  const carbs = Math.round(((finalCalories * 0.45) / 4) * carbMultiplier);
+  const fat = Math.round((finalCalories * 0.35) / 9);
+
+  // Calcul sommeil
+  let sleepHours = 8;
+  if (user.sport?.includes('american_football') || user.sport?.includes('rugby')) {
+    sleepHours = 9;
+  } else if (user.sport?.includes('endurance') || user.sport === 'running') {
+    sleepHours = 8.5;
+  }
+
+  if (user.age && user.age > 45) sleepHours += 0.5;
+  if (user.training_frequency && user.training_frequency > 5) sleepHours += 0.5;
+
+  // Calcul hydratation
+  let waterGoal = 2.5;
+  if (user.sport?.includes('endurance') || user.sport === 'running') waterGoal = 3.0;
+  if (user.sport?.includes('american_football') || user.sport === 'rugby') waterGoal = 3.5;
+
+  return {
+    calories: finalCalories,
+    protein,
+    carbs,
+    fat,
+    sleep: sleepHours,
+    water: waterGoal,
+    workouts: user.training_frequency || 3,
+  };
+};
+
+// Utilisateur par défaut
+const defaultUser: AppUser = {
+  id: '',
+  username: '',
+  full_name: '',
+  email: '',
+  phone: null,
+  bio: null,
+  city: null,
+  country: null,
+  avatar_url: null,
+  first_name: null,
+  last_name: null,
+  date_of_birth: null,
+  gender: null,
+  height: null,
+  weight: null,
+  activity_level: null,
+  fitness_goals: null,
+  created_at: '',
+  updated_at: '',
+  daily_calories: null,
+  level: 1,
+  totalPoints: 0,
+  joinDate: '',
+  age: null,
+  sport: null,
+  sport_position: null,
+  sport_level: null,
+  lifestyle: null,
+  training_frequency: null,
+  primary_goals: null,
+  fitness_experience: null,
+};
+
+// Objectifs par défaut
+const defaultGoals: DailyGoals = {
+  water: 2.5,
+  calories: 2000,
+  protein: 120,
+  carbs: 250,
+  fat: 70,
+  sleep: 8,
+  workouts: 3,
+};
 
 // Création du store
-export const useAppStore = create<AppStore>()(
+export const appStore = create<ExtendedAppStore>()(
   persist(
     (set, get) => ({
-      // État initial
-      user: null,
-      userProfile: null,
+      // États de base
+      appStoreUser: defaultUser,
       isLoading: false,
       error: null,
+
+      // États étendus
+      dailyGoals: defaultGoals,
+      currentStats: null,
+      recommendations: [],
+
+      // Données modules
+      workouts: [],
+      nutritionEntries: [],
+      hydrationEntries: [],
+      sleepEntries: [],
+      analyticsData: [],
+
+      // États UI
+      activeModule: null,
+      syncStatus: 'idle',
+      lastSyncTime: null,
+
+      // Données wearables
+      wearableData: null,
       connectedScales: [],
       weightHistory: [],
-      isScanning: false,
-      isSyncing: false,
-      lastScaleSync: null,
 
-      // Actions utilisateur
-      setUser: user => {
-        set({ user });
+      // Actions de base
+      setAppStoreUser: (user: AppUser | null) => {
+        set({ appStoreUser: user || defaultUser, error: null });
       },
 
-      setUserProfile: profile => {
-        set({ userProfile: profile });
-      },
-
-      updateUserProfile: async updates => {
-        const { userProfile, user } = get();
-        if (!userProfile || !user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          const updatedProfile = {
-            ...userProfile,
-            ...updates,
-            updatedAt: new Date().toISOString(),
-          };
-
-          // Mise à jour en base de données
-          const { error } = await supabase
-            .from('user_profiles')
-            .update(updates)
-            .eq('user_id', user.id);
-
-          if (error) throw error;
-
-          set({ userProfile: updatedProfile });
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
+      updateUserProfile: (updates: Partial<AppUser>) => {
+        const currentUser = get().appStoreUser;
+        if (currentUser) {
+          set({
+            appStoreUser: {
+              ...currentUser,
+              ...updates,
+              updated_at: new Date().toISOString(),
+            },
+          });
         }
       },
 
-      loadUserProfile: async userId => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const { data, error } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
-
-          if (error && error.code !== 'PGRST116') throw error;
-
-          set({ userProfile: data });
-        } catch (error: any) {
-          set({ error: error.message });
-        } finally {
-          set({ isLoading: false });
-        }
+      clearStore: () => {
+        set({
+          appStoreUser: defaultUser,
+          isLoading: false,
+          error: null,
+          dailyGoals: defaultGoals,
+          currentStats: null,
+          recommendations: [],
+          workouts: [],
+          nutritionEntries: [],
+          hydrationEntries: [],
+          sleepEntries: [],
+          analyticsData: [],
+          activeModule: null,
+          syncStatus: 'idle',
+          lastSyncTime: null,
+          wearableData: null,
+          connectedScales: [],
+          weightHistory: [],
+        });
       },
 
-      // Actions balances connectées
-      connectScale: async device => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          // Tenter la connexion
-          const connected = await ScaleService.connectToDevice(device.id);
-          if (!connected) throw new Error('Échec de la connexion à la balance');
-
-          const newScale: ScaleDevice = {
-            ...device,
-            isConnected: true,
-            userId: user.id,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          // Sauvegarder en base de données
-          const { error } = await supabase.from('connected_scales').insert([newScale]);
-
-          if (error) throw error;
-
-          set(state => ({
-            connectedScales: [...state.connectedScales, newScale],
-          }));
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      disconnectScale: async scaleId => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          // Supprimer de la base de données
-          const { error } = await supabase
-            .from('connected_scales')
-            .delete()
-            .eq('id', scaleId)
-            .eq('user_id', user.id);
-
-          if (error) throw error;
-
-          set(state => ({
-            connectedScales: state.connectedScales.filter(scale => scale.id !== scaleId),
-          }));
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      syncScaleWeight: async scaleId => {
-        const { user, connectedScales } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        const scale = connectedScales.find(s => s.id === scaleId);
-        if (!scale) throw new Error('Balance non trouvée');
-
-        set({ isSyncing: true, error: null });
-
-        try {
-          // Synchroniser avec la balance
-          const reading = await ScaleService.syncWeight(scaleId);
-
-          // Créer une entrée de poids
-          const weightEntry: Omit<WeightEntry, 'userId' | 'createdAt'> = {
-            date: reading.timestamp,
-            weight: reading.weight,
-            bodyFat: reading.bodyFat,
-            muscleMass: reading.muscleMass,
-            boneMass: reading.boneMass,
-            waterPercentage: reading.waterPercentage,
-            visceralFat: reading.visceralFat,
-            bmr: reading.bmr,
-            source: 'scale',
-            scaleId: scaleId,
-          };
-
-          await get().addWeightEntry(weightEntry);
-
-          // Mettre à jour la dernière synchronisation
-          const now = new Date().toISOString();
-          await get().updateScaleStatus(scaleId, { lastSync: now });
-
-          set({ lastScaleSync: now });
-
-          return reading.weight;
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isSyncing: false });
-        }
-      },
-
-      loadConnectedScales: async userId => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const { data, error } = await supabase
-            .from('connected_scales')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-
-          if (error) throw error;
-
-          set({ connectedScales: data || [] });
-        } catch (error: any) {
-          set({ error: error.message });
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      updateScaleStatus: async (scaleId, updates) => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        try {
-          const { error } = await supabase
-            .from('connected_scales')
-            .update({ ...updates, updated_at: new Date().toISOString() })
-            .eq('id', scaleId)
-            .eq('user_id', user.id);
-
-          if (error) throw error;
-
-          set(state => ({
-            connectedScales: state.connectedScales.map(scale =>
-              scale.id === scaleId ? { ...scale, ...updates } : scale
-            ),
-          }));
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        }
-      },
-
-      // Actions historique du poids
-      addWeightEntry: async entry => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          const newEntry: WeightEntry = {
-            ...entry,
-            userId: user.id,
-            createdAt: new Date().toISOString(),
-          };
-
-          // Sauvegarder en base de données
-          const { data, error } = await supabase
-            .from('weight_entries')
-            .insert([newEntry])
-            .select()
-            .single();
-
-          if (error) throw error;
-
-          set(state => ({
-            weightHistory: [data, ...state.weightHistory].slice(0, 100), // Garder 100 entrées max
-          }));
-
-          // Mettre à jour le profil avec le nouveau poids si c'est plus récent
-          const { userProfile } = get();
-          if (
-            userProfile &&
-            (!userProfile.weight_kg || new Date(entry.date) > new Date(userProfile.updatedAt || 0))
-          ) {
-            await get().updateUserProfile({ weight_kg: entry.weight });
-          }
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      updateWeightEntry: async (entryId, updates) => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          const { error } = await supabase
-            .from('weight_entries')
-            .update(updates)
-            .eq('id', entryId)
-            .eq('user_id', user.id);
-
-          if (error) throw error;
-
-          set(state => ({
-            weightHistory: state.weightHistory.map(entry =>
-              entry.id === entryId ? { ...entry, ...updates } : entry
-            ),
-          }));
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      deleteWeightEntry: async entryId => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          const { error } = await supabase
-            .from('weight_entries')
-            .delete()
-            .eq('id', entryId)
-            .eq('user_id', user.id);
-
-          if (error) throw error;
-
-          set(state => ({
-            weightHistory: state.weightHistory.filter(entry => entry.id !== entryId),
-          }));
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      loadWeightHistory: async (userId, limit = 50) => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const { data, error } = await supabase
-            .from('weight_entries')
-            .select('*')
-            .eq('user_id', userId)
-            .order('date', { ascending: false })
-            .limit(limit);
-
-          if (error) throw error;
-
-          set({ weightHistory: data || [] });
-        } catch (error: any) {
-          set({ error: error.message });
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      // Actions utilitaires
-      setLoading: loading => {
+      setLoading: (loading: boolean) => {
         set({ isLoading: loading });
       },
 
-      setError: error => {
+      setError: (error: string | null) => {
         set({ error });
       },
 
-      clearError: () => {
-        set({ error: null });
+      // Actions étendues
+      updateAppStoreUserProfile: (updates: Partial<AppUser>) => {
+        set(state => {
+          const updatedUser = { ...state.appStoreUser, ...updates };
+          if (!updatedUser.name) {
+            updatedUser.name = updatedUser.full_name || updatedUser.username || 'Utilisateur';
+          }
+          if (!updatedUser.goal && updatedUser.primary_goals?.length) {
+            updatedUser.goal = updatedUser.primary_goals[0];
+          }
+          return { appStoreUser: updatedUser };
+        });
+
+        setTimeout(() => {
+          get().calculateAndSetDailyGoals();
+        }, 100);
       },
 
-      calculateBMI: () => {
-        const { userProfile } = get();
-        if (!userProfile?.weight_kg || !userProfile?.height_cm) return null;
-
-        const heightInMeters = userProfile.height_cm / 100;
-        return Math.round((userProfile.weight_kg / (heightInMeters * heightInMeters)) * 10) / 10;
+      setUser: (user: AppUser) => {
+        if (!user.name) {
+          user.name = user.full_name || user.username || 'Utilisateur';
+        }
+        if (!user.goal && user.primary_goals?.length) {
+          user.goal = user.primary_goals[0];
+        }
+        set({ appStoreUser: user });
+        get().calculateAndSetDailyGoals();
       },
 
-      getWeightTrend: () => {
-        const { weightHistory } = get();
-        if (weightHistory.length < 2) return null;
+      clearUser: () => {
+        set({ appStoreUser: defaultUser });
+      },
 
-        const latest = weightHistory[0].weight;
-        const previous = weightHistory[1].weight;
-        const diff = latest - previous;
+      updateDailyGoals: (goals: Partial<DailyGoals>) => {
+        set(state => ({
+          dailyGoals: { ...state.dailyGoals, ...goals },
+        }));
+      },
 
-        if (Math.abs(diff) < 0.1) return { type: 'stable', diff: 0 };
+      calculateAndSetDailyGoals: () => {
+        const { appStoreUser } = get();
+        if (appStoreUser.id) {
+          const newGoals = calculatePersonalizedGoals(appStoreUser);
+          set({ dailyGoals: newGoals });
+          console.log('🎯 Objectifs personnalisés calculés:', newGoals);
+        }
+      },
+
+      // Actions données
+      fetchDailyStats: async (userId: string, date: string): Promise<DailyStats | null> => {
+        try {
+          set({ isLoading: true });
+          const { data, error } = await supabase
+            .from('daily_stats')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('stat_date', date)
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('Erreur fetch daily stats:', error);
+            return null;
+          }
+
+          const stats = data as DailyStats;
+          set({ currentStats: stats });
+          return stats;
+        } catch (error) {
+          console.error('Erreur fetchDailyStats:', error);
+          set({ error: 'Erreur lors du chargement des statistiques' });
+          return null;
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      fetchAiRecommendations: async (
+        userId: string,
+        pillarType: string,
+        limit: number = 5
+      ): Promise<AiRecommendation[]> => {
+        try {
+          const { data, error } = await supabase
+            .from('ai_recommendations')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('pillar_type', pillarType)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+          if (error) {
+            console.error('Erreur fetch AI recommendations:', error);
+            return [];
+          }
+
+          const recommendations = data as AiRecommendation[];
+          set({ recommendations });
+          return recommendations;
+        } catch (error) {
+          console.error('Erreur fetchAiRecommendations:', error);
+          return [];
+        }
+      },
+
+      markRecommendationAsRead: async (recommendationId: string): Promise<boolean> => {
+        try {
+          const { error } = await (supabase as any)
+            .from('ai_recommendations')
+            .update({ is_read: true } as any)
+            .eq('id', recommendationId);
+
+          if (error) {
+            console.error('Erreur mark recommendation as read:', error);
+            return false;
+          }
+
+          // Mettre à jour le state local
+          set(state => ({
+            recommendations: state.recommendations.map(rec =>
+              rec.id === recommendationId ? { ...rec, is_read: true } : rec
+            ),
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur markRecommendationAsRead:', error);
+          return false;
+        }
+      },
+
+      // Actions modules
+      addHydration: async (amount: number, type: string = 'water'): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+          const today = new Date().toISOString().split('T')[0];
+
+          const hydrationEntry: Partial<UserHydration> = {
+            user_id: appStoreUser.id,
+            amount_ml: amount,
+            beverage_type: type as UserHydration['beverage_type'],
+            logged_at: new Date().toISOString(),
+            notes: null,
+          };
+
+          const { data, error } = await (supabase as any)
+            .from('user_hydration')
+            .insert(hydrationEntry)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Erreur ajout hydratation:', error);
+            return false;
+          }
+
+          // Mettre à jour le state local
+          set(state => ({
+            hydrationEntries: [...state.hydrationEntries, data as UserHydration],
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur addHydration:', error);
+          return false;
+        }
+      },
+
+      addMeal: async (meal: Partial<UserNutrition>): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+          const today = new Date().toISOString().split('T')[0];
+
+          const mealEntry: Partial<UserNutrition> = {
+            user_id: appStoreUser.id,
+            meal_type: meal.meal_type || 'snack',
+            food_items: meal.food_items || [],
+            total_calories: meal.total_calories || 0,
+            total_protein: meal.total_protein || 0,
+            total_carbs: meal.total_carbs || 0,
+            total_fat: meal.total_fat || 0,
+            logged_at: new Date().toISOString(),
+            notes: meal.notes || null,
+          };
+
+          const { data, error } = await (supabase as any)
+            .from('user_nutrition')
+            .insert(mealEntry)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Erreur ajout repas:', error);
+            return false;
+          }
+
+          // Mettre à jour le state local
+          set(state => ({
+            nutritionEntries: [...state.nutritionEntries, data as UserNutrition],
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur addMeal:', error);
+          return false;
+        }
+      },
+
+      addSleepSession: async (sleepData: Partial<UserSleep>): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+
+          const sleepEntry: Partial<UserSleep> = {
+            user_id: appStoreUser.id,
+            bedtime: sleepData.bedtime || '',
+            wake_time: sleepData.wake_time || '',
+            duration_hours: sleepData.duration_hours || 0,
+            quality_rating: sleepData.quality_rating || 3,
+            date: sleepData.date || new Date().toISOString().split('T')[0],
+            notes: sleepData.notes || null,
+          };
+
+          const { data, error } = await (supabase as any)
+            .from('user_sleep')
+            .insert(sleepEntry)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Erreur ajout sommeil:', error);
+            return false;
+          }
+
+          // Mettre à jour le state local
+          set(state => ({
+            sleepEntries: [...state.sleepEntries, data as UserSleep],
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur addSleepSession:', error);
+          return false;
+        }
+      },
+
+      addWorkout: async (workout: Partial<UserWorkout>): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+
+          const workoutEntry: Partial<UserWorkout> = {
+            user_id: appStoreUser.id,
+            name: workout.name || 'Entraînement',
+            description: workout.description || null,
+            duration_minutes: workout.duration_minutes || 0,
+            calories_burned: workout.calories_burned || null,
+            exercises: workout.exercises || [],
+            workout_type: workout.workout_type || 'other',
+            intensity: workout.intensity || 'moderate',
+            notes: workout.notes || null,
+            completed_at: new Date().toISOString(),
+          };
+
+          const { data, error } = await (supabase as any)
+            .from('user_workouts')
+            .insert(workoutEntry)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Erreur ajout workout:', error);
+            return false;
+          }
+
+          // Mettre à jour le state local
+          set(state => ({
+            workouts: [...state.workouts, data as UserWorkout],
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur addWorkout:', error);
+          return false;
+        }
+      },
+
+      // Gestion modules
+      activateModule: async (moduleId: string): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+          const currentActiveModules = (appStoreUser as any).active_modules || [];
+
+          if (currentActiveModules.includes(moduleId)) {
+            console.log(`Module ${moduleId} déjà activé`);
+            return true;
+          }
+
+          const newActiveModules = [...currentActiveModules, moduleId];
+
+          const { error } = await (supabase as any)
+            .from('user_profiles')
+            .update({
+              active_modules: newActiveModules,
+              updated_at: new Date().toISOString(),
+            } as any)
+            .eq('id', appStoreUser.id);
+
+          if (error) {
+            console.error('Erreur activation module:', error);
+            return false;
+          }
+
+          get().updateAppStoreUserProfile({ active_modules: newActiveModules } as any);
+          console.log(`✅ Module ${moduleId} activé avec succès`);
+          return true;
+        } catch (error) {
+          console.error('Erreur activateModule:', error);
+          return false;
+        }
+      },
+
+      deactivateModule: async (moduleId: string): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+          const currentActiveModules = (appStoreUser as any).active_modules || [];
+
+          if (!currentActiveModules.includes(moduleId)) {
+            console.log(`Module ${moduleId} déjà inactif`);
+            return true;
+          }
+
+          const newActiveModules = currentActiveModules.filter(module => module !== moduleId);
+
+          const { error } = await (supabase as any)
+            .from('user_profiles')
+            .update({
+              active_modules: newActiveModules,
+              updated_at: new Date().toISOString(),
+            } as any)
+            .eq('id', appStoreUser.id);
+
+          if (error) {
+            console.error('Erreur désactivation module:', error);
+            return false;
+          }
+
+          get().updateAppStoreUserProfile({ active_modules: newActiveModules } as any);
+          console.log(`✅ Module ${moduleId} désactivé avec succès`);
+          return true;
+        } catch (error) {
+          console.error('Erreur deactivateModule:', error);
+          return false;
+        }
+      },
+
+      isModuleActive: (moduleId: string): boolean => {
+        const { appStoreUser } = get();
+        return (appStoreUser as any).active_modules?.includes(moduleId) || false;
+      },
+
+      setActiveModule: (moduleId: string | null) => {
+        set({ activeModule: moduleId });
+      },
+
+      // Actions wearables
+      syncWearableData: async (): Promise<WearableData | null> => {
+        try {
+          set({ syncStatus: 'syncing' });
+
+          // Logique de sync wearable (à implémenter selon tes besoins)
+          // Exemple basique
+          const mockData: WearableData = {
+            steps: 8500,
+            caloriesBurned: 320,
+            activeMinutes: 45,
+            distance: 6.2,
+            heartRate: [],
+            avgHeartRate: 72,
+            maxHeartRate: 145,
+            restingHeartRate: 65,
+            sleepData: null,
+          };
+
+          set({
+            wearableData: mockData,
+            syncStatus: 'success',
+            lastSyncTime: new Date().toISOString(),
+          });
+
+          return mockData;
+        } catch (error) {
+          console.error('Erreur sync wearable:', error);
+          set({ syncStatus: 'error' });
+          return null;
+        }
+      },
+
+      addConnectedScale: async (scale: Partial<ConnectedScale>): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+
+          const scaleEntry: Partial<ConnectedScale> = {
+            user_id: appStoreUser.id,
+            brand: scale.brand || '',
+            model: scale.model || '',
+            mac_address: scale.mac_address || null,
+            is_active: scale.is_active ?? true,
+          };
+
+          const { data, error } = await (supabase as any)
+            .from('connected_scales')
+            .insert(scaleEntry)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Erreur ajout balance:', error);
+            return false;
+          }
+
+          set(state => ({
+            connectedScales: [...state.connectedScales, data as ConnectedScale],
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur addConnectedScale:', error);
+          return false;
+        }
+      },
+
+      addWeightEntry: async (entry: Partial<WeightEntry>): Promise<boolean> => {
+        try {
+          const { appStoreUser } = get();
+
+          const weightEntry: Partial<WeightEntry> = {
+            user_id: appStoreUser.id,
+            weight: entry.weight || 0,
+            body_fat_percentage: entry.body_fat_percentage || null,
+            muscle_mass: entry.muscle_mass || null,
+            source: entry.source || 'manual',
+            recorded_at: entry.recorded_at || new Date().toISOString(),
+          };
+
+          const { data, error } = await (supabase as any)
+            .from('weight_entries')
+            .insert(weightEntry)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Erreur ajout poids:', error);
+            return false;
+          }
+
+          set(state => ({
+            weightHistory: [...state.weightHistory, data as WeightEntry],
+          }));
+
+          return true;
+        } catch (error) {
+          console.error('Erreur addWeightEntry:', error);
+          return false;
+        }
+      },
+
+      // Actions analytics
+      updateUserPoints: (points: number) => {
+        set(state => ({
+          appStoreUser: {
+            ...state.appStoreUser,
+            totalPoints: (state.appStoreUser.totalPoints || 0) + points,
+          },
+        }));
+      },
+
+      incrementLevel: () => {
+        set(state => ({
+          appStoreUser: {
+            ...state.appStoreUser,
+            level: (state.appStoreUser.level || 1) + 1,
+          },
+        }));
+      },
+
+      calculateProgress: async (date: string): Promise<{ [key: string]: number }> => {
+        try {
+          const { appStoreUser, dailyGoals } = get();
+          const stats = await get().fetchDailyStats(appStoreUser.id, date);
+
+          if (!stats) return {};
+
+          return {
+            calories: Math.min((stats.total_calories_consumed / dailyGoals.calories) * 100, 100),
+            protein: Math.min((stats.total_protein / dailyGoals.protein) * 100, 100),
+            water: Math.min((stats.total_water_ml / (dailyGoals.water * 1000)) * 100, 100),
+            sleep: Math.min((stats.sleep_hours / dailyGoals.sleep) * 100, 100),
+            workouts: Math.min((stats.workouts_completed / dailyGoals.workouts) * 100, 100),
+          };
+        } catch (error) {
+          console.error('Erreur calculateProgress:', error);
+          return {};
+        }
+      },
+
+      // Utilitaires
+      getTodayProgress: (): { [key: string]: number } => {
+        const { currentStats, dailyGoals } = get();
+
+        if (!currentStats) return {};
+
         return {
-          type: diff > 0 ? 'up' : 'down',
-          diff: Math.abs(diff),
+          calories: Math.min(
+            (currentStats.total_calories_consumed / dailyGoals.calories) * 100,
+            100
+          ),
+          protein: Math.min((currentStats.total_protein / dailyGoals.protein) * 100, 100),
+          water: Math.min((currentStats.total_water_ml / (dailyGoals.water * 1000)) * 100, 100),
+          sleep: Math.min((currentStats.sleep_hours / dailyGoals.sleep) * 100, 100),
+          workouts: Math.min((currentStats.workouts_completed / dailyGoals.workouts) * 100, 100),
         };
       },
 
-      getLatestWeight: () => {
-        const { weightHistory, userProfile } = get();
-        if (weightHistory.length > 0) return weightHistory[0].weight;
-        return userProfile?.weight_kg || null;
-      },
-
-      // Actions de synchronisation
-      scanForScales: async () => {
-        set({ isScanning: true, error: null });
-
+      getWeeklyStats: async (): Promise<{ [key: string]: number[] }> => {
         try {
-          const devices = await ScaleService.scanForDevices();
-          return devices;
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isScanning: false });
+          const { appStoreUser } = get();
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setDate(endDate.getDate() - 6);
+
+          const { data, error } = await supabase
+            .from('daily_stats')
+            .select('*')
+            .eq('user_id', appStoreUser.id)
+            .gte('stat_date', startDate.toISOString().split('T')[0])
+            .lte('stat_date', endDate.toISOString().split('T')[0])
+            .order('stat_date', { ascending: true });
+
+          if (error) {
+            console.error('Erreur getWeeklyStats:', error);
+            return {};
+          }
+
+          const stats = data as DailyStats[];
+
+          return {
+            calories: stats.map(s => s.total_calories_consumed),
+            protein: stats.map(s => s.total_protein),
+            water: stats.map(s => s.total_water_ml),
+            sleep: stats.map(s => s.sleep_hours),
+            workouts: stats.map(s => s.workouts_completed),
+          };
+        } catch (error) {
+          console.error('Erreur getWeeklyStats:', error);
+          return {};
         }
       },
 
-      syncAllScales: async () => {
-        const { connectedScales } = get();
-        const connectedDevices = connectedScales.filter(scale => scale.isConnected);
-
-        if (connectedDevices.length === 0) return;
-
-        set({ isSyncing: true, error: null });
-
+      exportUserData: async (): Promise<any> => {
         try {
-          const syncPromises = connectedDevices.map(scale =>
-            get()
-              .syncScaleWeight(scale.id)
-              .catch(error => {
-                console.error(`Erreur sync ${scale.name}:`, error);
-                return null;
-              })
-          );
+          const { appStoreUser } = get();
 
-          await Promise.all(syncPromises);
-        } catch (error: any) {
-          set({ error: error.message });
-        } finally {
-          set({ isSyncing: false });
-        }
-      },
+          // Récupérer toutes les données utilisateur
+          const [workouts, nutrition, hydration, sleep, analytics] = await Promise.all([
+            supabase.from('user_workouts').select('*').eq('user_id', appStoreUser.id),
+            supabase.from('user_nutrition').select('*').eq('user_id', appStoreUser.id),
+            supabase.from('user_hydration').select('*').eq('user_id', appStoreUser.id),
+            supabase.from('user_sleep').select('*').eq('user_id', appStoreUser.id),
+            supabase.from('user_analytics').select('*').eq('user_id', appStoreUser.id),
+          ]);
 
-      importWeightData: async data => {
-        const { user } = get();
-        if (!user) throw new Error('Utilisateur non connecté');
-
-        set({ isLoading: true, error: null });
-
-        try {
-          const entries = data.map(entry => ({
-            ...entry,
-            userId: user.id,
-            source: 'import' as const,
-            createdAt: new Date().toISOString(),
-          }));
-
-          const { error } = await supabase.from('weight_entries').insert(entries);
-
-          if (error) throw error;
-
-          // Recharger l'historique
-          await get().loadWeightHistory(user.id);
-        } catch (error: any) {
-          set({ error: error.message });
-          throw error;
-        } finally {
-          set({ isLoading: false });
+          return {
+            profile: appStoreUser,
+            workouts: workouts.data || [],
+            nutrition: nutrition.data || [],
+            hydration: hydration.data || [],
+            sleep: sleep.data || [],
+            analytics: analytics.data || [],
+            exportDate: new Date().toISOString(),
+          };
+        } catch (error) {
+          console.error('Erreur exportUserData:', error);
+          return null;
         }
       },
     }),
     {
-      name: 'myfit-hero-store',
+      name: 'myfithero-app-store',
       partialize: state => ({
-        user: state.user,
-        userProfile: state.userProfile,
-        connectedScales: state.connectedScales,
-        weightHistory: state.weightHistory.slice(0, 20), // Persister seulement les 20 dernières entrées
-        lastScaleSync: state.lastScaleSync,
+        appStoreUser: state.appStoreUser,
+        dailyGoals: state.dailyGoals,
+        activeModule: state.activeModule,
+        lastSyncTime: state.lastSyncTime,
       }),
     }
   )
 );
-
-// Hook personnalisé pour les balances
-export const useScales = () => {
-  const {
-    connectedScales,
-    isScanning,
-    isSyncing,
-    lastScaleSync,
-    connectScale,
-    disconnectScale,
-    syncScaleWeight,
-    scanForScales,
-    syncAllScales,
-    loadConnectedScales,
-    updateScaleStatus,
-  } = useAppStore();
-
-  return {
-    connectedScales,
-    isScanning,
-    isSyncing,
-    lastScaleSync,
-    connectScale,
-    disconnectScale,
-    syncScaleWeight,
-    scanForScales,
-    syncAllScales,
-    loadConnectedScales,
-    updateScaleStatus,
-  };
-};
-
-// Hook personnalisé pour le poids
-export const useWeight = () => {
-  const {
-    weightHistory,
-    addWeightEntry,
-    updateWeightEntry,
-    deleteWeightEntry,
-    loadWeightHistory,
-    importWeightData,
-    calculateBMI,
-    getWeightTrend,
-    getLatestWeight,
-  } = useAppStore();
-
-  return {
-    weightHistory,
-    addWeightEntry,
-    updateWeightEntry,
-    deleteWeightEntry,
-    loadWeightHistory,
-    importWeightData,
-    calculateBMI,
-    getWeightTrend,
-    getLatestWeight,
-  };
-};
-
-// Hook personnalisé pour le profil
-export const useProfile = () => {
-  const { userProfile, updateUserProfile, loadUserProfile, isLoading, error } = useAppStore();
-
-  return {
-    userProfile,
-    updateUserProfile,
-    loadUserProfile,
-    isLoading,
-    error,
-  };
-};
-
-export default useAppStore;

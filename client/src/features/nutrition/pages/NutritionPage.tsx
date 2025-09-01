@@ -43,7 +43,7 @@ import {
   Brain,
   ChevronRight,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { useToast } from '@/hooks/use-toast';
 import AIIntelligence from '@/components/AIIntelligence';
 import { UniformHeader } from '@/components/UniformHeader';
@@ -372,7 +372,7 @@ const Nutrition: React.FC = () => {
   // --- HOOKS ET STATE ---
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
 
   const [dailyData, setDailyData] = useState<DailyNutritionData>({
     calories: 850,

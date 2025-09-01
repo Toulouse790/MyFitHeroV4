@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 
 interface PublicRouteProps {
   children: React.ReactNode;
@@ -7,7 +7,7 @@ interface PublicRouteProps {
 }
 
 export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
 
   // Si l'utilisateur est déjà connecté, rediriger vers le dashboard
   if (appStoreUser && appStoreUser.id) {

@@ -25,7 +25,7 @@ import {
   Brain,
   Info,
 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { useToast } from '@/hooks/use-toast';
 import AIIntelligence from '@/components/AIIntelligence';
 import { supabase } from '@/lib/supabase';
@@ -203,7 +203,7 @@ const sportsHydrationData: Record<SportCategory, SportHydrationConfig> = {
 const Hydration: React.FC = () => {
   // --- HOOKS ET STATE ---
   const navigate = useNavigate();
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const { toast } = useToast();
 
   const [currentMl, setCurrentMl] = useState(0);

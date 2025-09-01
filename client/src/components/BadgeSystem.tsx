@@ -13,7 +13,7 @@ import {
   Unlock,
   Moon,
 } from 'lucide-react';
-import { useAppStore } from '../store/useAppStore';
+import { appStore } from '../store/appStore';
 import { supabase } from '../config/supabaseClient';
 
 interface Badge {
@@ -37,7 +37,7 @@ interface BadgeSystemProps {
 }
 
 const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact = false }) => {
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
   const [badges, setBadges] = useState<Badge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -25,7 +25,7 @@ import {
 import { useWearableSync } from '@/hooks/useWearableSync';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,7 +58,7 @@ interface PrivacySettings {
 const Settings: React.FC = () => {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const { appStoreUser, setAppStoreUser, clearStore } = useAppStore();
+  const { appStoreUser, setAppStoreUser, clearStore } = appStore();
 
   const {
     isLoading: wearableLoading,

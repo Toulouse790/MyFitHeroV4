@@ -838,7 +838,7 @@ interface PendingSync {
   retryCount: number;
 }
 
-const useAppStore = create<AppState>()(
+const appStore = create<AppState>()(
   subscribeWithSelector(
     persist(
       (set, get) => ({
@@ -1081,7 +1081,7 @@ const getTimezoneFromState = (state: string): string => {
 
 // Hook pour les conversions d'unités US
 const useUSUnits = () => {
-  const { preferences } = useAppStore();
+  const { preferences } = appStore();
   const isImperial = preferences.units === 'imperial';
 
   const convertWeight = useCallback(
@@ -1189,7 +1189,7 @@ const useUSUnits = () => {
 const useConversationalAI = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { onboarding, updateOnboarding } = useAppStore();
+  const { onboarding, updateOnboarding } = appStore();
 
   const sendMessage = useCallback(
     async (message: string, context?: Record<string, any>) => {
@@ -1314,7 +1314,7 @@ const useConversationalAI = () => {
 
 // Hook pour la synchronisation offline
 const useOfflineSync = () => {
-  const { ui, addPendingSync, removePendingSync } = useAppStore();
+  const { ui, addPendingSync, removePendingSync } = appStore();
   const [isSyncing, setIsSyncing] = useState(false);
 
   const addToSyncQueue = useCallback(
@@ -1670,7 +1670,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
   requiresAuth = false,
   requiresOnboarding = false,
 }) => {
-  const { user, isAuthenticated, onboarding } = useAppStore();
+  const { user, isAuthenticated, onboarding } = appStore();
   const [location, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -1695,7 +1695,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
             .single();
 
           if (userData && !userError) {
-            useAppStore.getState().setUser(userData);
+            appStore.getState().setUser(userData);
           }
         }
       } catch (error) {
@@ -1722,12 +1722,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
           .single();
 
         if (userData) {
-          useAppStore.getState().setUser(userData);
+          appStore.getState().setUser(userData);
         }
       } else if (event === 'SIGNED_OUT') {
         // Utilisateur déconnecté
-        useAppStore.getState().setUser(null);
-        useAppStore.getState().clearCache();
+        appStore.getState().setUser(null);
+        appStore.getState().clearCache();
         setLocation('/');
       }
     });
@@ -1759,7 +1759,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 // ====================================================================
 
 const MyFitHeroIndex: React.FC = () => {
-  const { isLoading, user, preferences } = useAppStore();
+  const { isLoading, user, preferences } = appStore();
   const [isInitialized, setIsInitialized] = useState(false);
   const [appVersion] = useState('4.0.0');
   const [buildNumber] = useState('20250801');
@@ -1783,7 +1783,7 @@ const MyFitHeroIndex: React.FC = () => {
 
         // Détecter le statut de connectivité
         const updateOnlineStatus = () => {
-          useAppStore.getState().ui.isOffline = !navigator.onLine;
+          appStore.getState().ui.isOffline = !navigator.onLine;
         };
 
         window.addEventListener('online', updateOnlineStatus);
@@ -1893,7 +1893,7 @@ export default React.memo(MyFitHeroIndex);
 // ====================================================================
 
 // Export des hooks personnalisés
-export { useUSLocation, useUSUnits, useConversationalAI, useOfflineSync, useAppStore };
+export { useUSLocation, useUSUnits, useConversationalAI, useOfflineSync, appStore };
 
 // Export des types principaux
 export type {

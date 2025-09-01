@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import AvatarUpload from '@/components/AvatarUpload';
 import UserProfileTabs from '@/components/UserProfileTabs';
 import { toast } from 'react-hot-toast';
@@ -27,7 +27,7 @@ const ProfilePage: React.FC = () => {
     updateUserProfile,
     addConnectedScale,
     addWeightEntry,
-  } = useAppStore();
+  } = appStore();
 
   // États locaux pour les champs modifiables
   const [currentWeight, setCurrentWeight] = useState('');

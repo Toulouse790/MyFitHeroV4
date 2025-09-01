@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 
 interface PrivacySettings {
   profile_visibility: 'public' | 'friends' | 'private';
@@ -32,7 +32,7 @@ interface PrivacySettings {
 
 const PrivacyManager: React.FC = () => {
   const { toast } = useToast();
-  const { appStoreUser, updateAppStoreUserProfile } = useAppStore();
+  const { appStoreUser, updateAppStoreUserProfile } = appStore();
   const [settings, setSettings] = useState<PrivacySettings>({
     profile_visibility: 'public',
     show_activity: true,

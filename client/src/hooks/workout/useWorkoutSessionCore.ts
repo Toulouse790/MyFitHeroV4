@@ -1,7 +1,7 @@
 // hooks/workout/useWorkoutSessionCore.ts
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../use-toast';
-import { useAppStore } from '@/store/useAppStore';
+import { appStore } from '@/store/appStore';
 import { supabase } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import type { WorkoutSession, WorkoutExercise, ExerciseSet } from '@/types/workout';
@@ -29,7 +29,7 @@ export interface UseWorkoutSessionCoreReturn {
 export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { appStoreUser } = useAppStore();
+  const { appStoreUser } = appStore();
 
   const [currentSession, setCurrentSession] = useState<WorkoutSession | null>(() =>
     loadLocalSession()

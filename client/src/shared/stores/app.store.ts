@@ -28,7 +28,7 @@ const initialState: AppState = {
   debugMode: false,
 };
 
-export const useAppStore = create<AppStore>()(
+export const appStore = create<AppStore>()(
   persist(
     set => ({
       ...initialState,
