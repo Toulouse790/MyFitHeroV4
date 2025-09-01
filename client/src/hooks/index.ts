@@ -12,6 +12,9 @@ export { useNotifications } from '../shared/hooks/useNotifications';
 export { useForm } from '../shared/hooks/useForm';
 export { useSupabase } from '../shared/hooks/useSupabase';
 
+// Performance and utility hooks
+export { usePerformanceMonitoring } from './usePerformanceMonitoring';
+
 // Re-export hook types for convenience
 export type { UseWorkoutReturn } from '../features/workout/hooks/useWorkout';
 export type { UseNutritionReturn } from '../features/nutrition/hooks/useNutrition';
@@ -21,6 +24,9 @@ export type { UseAuthReturn } from '../shared/hooks/useAuth';
 export type { UseNotificationsReturn, Notification } from '../shared/hooks/useNotifications';
 export type { UseFormReturn, FormData, ValidationRule } from '../shared/hooks/useForm';
 export type { UseSupabaseReturn } from '../shared/hooks/useSupabase';
+
+// Performance hook types
+export type { UsePerformanceMonitoringReturn } from './usePerformanceMonitoring';
 
 // Hook collections for feature sets
 export const authHooks = {
@@ -46,6 +52,10 @@ export const sharedHooks = {
   useSupabase: () => import('../shared/hooks/useSupabase').then(m => m.useSupabase),
 };
 
+export const utilityHooks = {
+  usePerformanceMonitoring: () => import('./usePerformanceMonitoring').then(m => m.usePerformanceMonitoring),
+};
+
 // Default export with all hooks grouped
 export default {
   auth: authHooks,
@@ -53,4 +63,5 @@ export default {
   nutrition: nutritionHooks,
   recovery: recoveryHooks,
   shared: sharedHooks,
+  utility: utilityHooks,
 };
