@@ -44,9 +44,9 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { appStore } from '@/store/appStore';
-import { useToast } from '@/hooks/use-toast';
-import AIIntelligence from '@/components/AIIntelligence';
-import { UniformHeader } from '@/components/UniformHeader';
+import { useToast } from '@/shared/hooks/use-toast';
+import AIIntelligence from '@/features/ai-coach/components/AIIntelligence';
+import { UniformHeader } from '@/features/profile/components/UniformHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

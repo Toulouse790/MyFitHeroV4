@@ -1,0 +1,12 @@
+// Export des composants de la feature ai-coach
+export { default as BalanceConnectButton } from './BalanceConnectButton';
+export { default as PWAControls } from './PWAControls';
+export { default as LanguageSelector } from './LanguageSelector';
+export { default as PositionSelector } from './PositionSelector';
+export { default as AIIntelligence } from './AIIntelligence';
+export { default as AnimatedToast } from './AnimatedToast';
+export { default as PackSelector } from './PackSelector';
+export { default as OnboardingQuestionnaire } from './OnboardingQuestionnaire';
+export { default as UnitPreferencesSelector } from './UnitPreferencesSelector';
+export { default as DailyCheckIn } from './DailyCheckIn';
+export { default as FloatingActionButton } from './FloatingActionButton';

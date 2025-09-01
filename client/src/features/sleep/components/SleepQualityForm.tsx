@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 import { useSleepStore } from '../hooks/useSleepStore';
 import { defaultSleepFactors, calculateSleepDuration } from '../utils/sleepConfig';
 import type { SleepFactor } from '../types';

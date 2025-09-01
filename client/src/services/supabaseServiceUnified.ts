@@ -2,7 +2,7 @@
 // 🎯 Centralise les 30+ patterns Supabase dupliqués
 
 import { supabase } from '@/config/supabaseClient';
-import type { Database } from '@/types/database';
+import type { Database } from '@/features/workout/types/database';
 
 // Types génériques pour les opérations CRUD
 type TableName = keyof Database['public']['Tables'];

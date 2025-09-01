@@ -1,0 +1,50 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "nutrition": "Nutrition",
+    "workout": "Workout",
+    "sleep": "Sleep",
+    "hydration": "Hydration",
+    "profile": "Profile",
+    "analytics": "Analytics"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "finish": "Finish",
+    "next": "Next",
+    "previous": "Previous",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "units": {
+    "weight": "lbs",
+    "height": "ft/in",
+    "distance": "miles",
+    "liquid": "fl oz",
+    "temperature": "°F"
+  },
+  "time": {
+    "minutes": "minutes",
+    "hours": "hours",
+    "days": "days",
+    "weeks": "weeks",
+    "months": "months"
+  },
+  "success": {
+    "saved": "Successfully saved!",
+    "updated": "Successfully updated!",
+    "deleted": "Successfully deleted!",
+    "completed": "Completed!"
+  },
+  "error": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "validation": "Please check your input and try again.",
+    "unauthorized": "You are not authorized to perform this action."
+  }
+}

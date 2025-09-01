@@ -1,61 +1,119 @@
-import { useState, useEffect, useCallback } from 'react';
+// hooks/workout/useWorkoutTimer.ts
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface UseWorkoutTimerReturn {
-  workoutTime: number;
-  isActive: boolean;
-  start: () => void;
-  pause: () => void;
-  resume: () => void;
-  reset: () => void;
-  formatTime: (time: number) => string;
+  totalTime: number;
+  exerciseTime: number;
+  restTime: number;
+  isResting: boolean;
+  startExerciseTimer: () => void;
+  startRestTimer: (duration: number) => void;
+  pauseTimer: () => void;
+  resumeTimer: () => void;
+  resetTimer: () => void;
+  formatTime: (seconds: number) => string;
 }
 
-export const useWorkoutTimer = (): UseWorkoutTimerReturn => {
-  const [workoutTime, setWorkoutTime] = useState(0);
-  const [isActive, setIsActive] = useState(false);
+export const useWorkoutTimer = (isSessionActive: boolean): UseWorkoutTimerReturn => {
+  const [totalTime, setTotalTime] = useState(0);
+  const [exerciseTime, setExerciseTime] = useState(0);
+  const [restTime, setRestTime] = useState(0);
+  const [isResting, setIsResting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const restTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Timer principal
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isActive) {
-      intervalId = setInterval(() => {
-        setWorkoutTime(prevTime => prevTime + 1);
+    if (isSessionActive && !isPaused) {
+      intervalRef.current = setInterval(() => {
+        setTotalTime(prev => prev + 1);
+        if (isResting) {
+          setRestTime(prev => Math.max(0, prev - 1));
+        } else {
+          setExerciseTime(prev => prev + 1);
+        }
       }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
 
-    return () => clearInterval(intervalId);
-  }, [isActive]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isSessionActive, isPaused, isResting]);
 
-  const start = useCallback(() => {
-    setIsActive(true);
+  const startExerciseTimer = useCallback(() => {
+    setIsResting(false);
+    setExerciseTime(0);
+    if (restTimeoutRef.current) {
+      clearTimeout(restTimeoutRef.current);
+      restTimeoutRef.current = null;
+    }
   }, []);
 
-  const pause = useCallback(() => {
-    setIsActive(false);
+  const startRestTimer = useCallback((duration: number) => {
+    setIsResting(true);
+    setRestTime(duration);
+
+    restTimeoutRef.current = setTimeout(() => {
+      setIsResting(false);
+      setRestTime(0);
+    }, duration * 1000);
   }, []);
 
-  const resume = useCallback(() => {
-    setIsActive(true);
+  const pauseTimer = useCallback(() => {
+    setIsPaused(true);
   }, []);
 
-  const reset = useCallback(() => {
-    setWorkoutTime(0);
-    setIsActive(false);
+  const resumeTimer = useCallback(() => {
+    setIsPaused(false);
   }, []);
 
-  const formatTime = useCallback((time: number): string => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const resetTimer = useCallback(() => {
+    setTotalTime(0);
+    setExerciseTime(0);
+    setRestTime(0);
+    setIsResting(false);
+    setIsPaused(false);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (restTimeoutRef.current) {
+      clearTimeout(restTimeoutRef.current);
+      restTimeoutRef.current = null;
+    }
+  }, []);
+
+  const formatTime = useCallback((seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
   return {
-    workoutTime,
-    isActive,
-    start,
-    pause,
-    resume,
-    reset,
+    totalTime,
+    exerciseTime,
+    restTime,
+    isResting,
+    startExerciseTimer,
+    startRestTimer,
+    pauseTimer,
+    resumeTimer,
+    resetTimer,
     formatTime,
   };
 };

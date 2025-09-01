@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Loading } from '@/shared/components';
-import { ProtectedRoute } from '@/shared/components/ProtectedRoute';
+import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 
 // Lazy loading des pages principales

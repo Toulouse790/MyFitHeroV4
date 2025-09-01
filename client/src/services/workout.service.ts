@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { WorkoutSession, WorkoutTemplate, WorkoutStats } from '@/types/workout.types';
+import { WorkoutSession, WorkoutTemplate, WorkoutStats } from '@/shared/types/workout.types';
 
 export class WorkoutService {
   // Sessions

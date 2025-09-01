@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Route, Switch, Redirect } from 'wouter';
 
 // Composants de routing
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { LoadingRoute } from './components/LoadingRoute';
 

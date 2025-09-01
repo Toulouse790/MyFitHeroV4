@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { WorkoutExercise, WorkoutSession } from '@/types/workout';
+import { WorkoutExercise, WorkoutSession } from '@/shared/types/workout.types';
 
 export interface WorkoutState {
   // Session actuelle

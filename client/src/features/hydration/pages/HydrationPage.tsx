@@ -26,11 +26,11 @@ import {
   Info,
 } from 'lucide-react';
 import { appStore } from '@/store/appStore';
-import { useToast } from '@/hooks/use-toast';
-import AIIntelligence from '@/components/AIIntelligence';
+import { useToast } from '@/shared/hooks/use-toast';
+import AIIntelligence from '@/features/ai-coach/components/AIIntelligence';
 import { supabase } from '@/lib/supabase';
-import { useRealtimeSync } from '@/hooks/useRealtimeSync';
-import { UniformHeader } from '@/components/UniformHeader';
+import { useRealtimeSync } from '@/features/workout/hooks/useRealtimeSync';
+import UniformHeader from '@/features/profile/components/UniformHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +44,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Database } from '@/types/database';
+import { Database } from '@/features/workout/types/database';
 
 // --- TYPES & INTERFACES ---
 type DrinkType = Database['public']['Tables']['hydration_logs']['Row']['drink_type'];

@@ -1,0 +1,50 @@
+{
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "nutrition": "Nutrition",
+    "workout": "Entraînement",
+    "sleep": "Sommeil",
+    "hydration": "Hydratation",
+    "profile": "Profil",
+    "analytics": "Analytics"
+  },
+  "actions": {
+    "save": "Sauvegarder",
+    "cancel": "Annuler",
+    "continue": "Continuer",
+    "finish": "Terminer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "add": "Ajouter",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "close": "Fermer"
+  },
+  "units": {
+    "weight": "kg",
+    "height": "cm",
+    "distance": "km",
+    "liquid": "ml",
+    "temperature": "°C"
+  },
+  "time": {
+    "minutes": "minutes",
+    "hours": "heures",
+    "days": "jours",
+    "weeks": "semaines",
+    "months": "mois"
+  },
+  "success": {
+    "saved": "Sauvegardé avec succès !",
+    "updated": "Mis à jour avec succès !",
+    "deleted": "Supprimé avec succès !",
+    "completed": "Terminé !"
+  },
+  "error": {
+    "generic": "Une erreur s'est produite. Veuillez réessayer.",
+    "network": "Erreur réseau. Vérifiez votre connexion.",
+    "validation": "Veuillez vérifier vos données et réessayer.",
+    "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action."
+  }
+}

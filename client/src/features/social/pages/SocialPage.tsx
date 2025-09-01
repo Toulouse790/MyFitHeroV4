@@ -38,9 +38,9 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { appStore } from '@/store/appStore';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { UniformHeader } from '@/components/UniformHeader';
+import { UniformHeader } from '@/features/profile/components/UniformHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,7 +64,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import AIIntelligence from '@/components/AIIntelligence';
+import AIIntelligence from '@/features/ai-coach/components/AIIntelligence';
 
 // Types
 interface SocialPost {

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/types/database';
+import type { Database } from '@/features/workout/types/database';
 
 // Force reload
 // Singleton pattern pour éviter les multiples instances

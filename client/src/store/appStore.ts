@@ -15,7 +15,7 @@ import {
   ConnectedScale,
   WeightEntry,
   ApiResponse,
-} from '@/types/supabase';
+} from '@/features/workout/types/supabase';
 
 // Types spécifiques au store étendu
 export interface AppUser extends UserProfile {

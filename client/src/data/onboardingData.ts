@@ -1,5 +1,5 @@
 // client/src/data/onboardingData.ts
-import { OnboardingModule, SportOption } from '@/types/onboarding-types';
+import { OnboardingModule, SportOption } from '@/features/auth/types/onboarding-types';
 
 export const AVAILABLE_MODULES: OnboardingModule[] = [
   {

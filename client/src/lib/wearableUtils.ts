@@ -1,5 +1,5 @@
 // client/src/lib/wearableUtils.ts
-import { WearableData } from '@/hooks/useWearableSync';
+import { WearableData } from '@/features/wearables/hooks/useWearableSync';
 
 export interface HealthMetrics {
   steps: number;

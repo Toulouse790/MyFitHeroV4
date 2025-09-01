@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { UniformHeader } from '@/components/UniformHeader';
+import UniformHeader from '@/features/profile/components/UniformHeader';
 import {
   User,
   Trophy,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { appStore } from '@/store/appStore';
-import AvatarUpload from '@/components/AvatarUpload';
-import UserProfileTabs from '@/components/UserProfileTabs';
+import AvatarUpload from '@/features/profile/components/AvatarUpload';
+import UserProfileTabs from '@/features/profile/components/UserProfileTabs';
 import { toast } from 'react-hot-toast';
 import {
   Scale,

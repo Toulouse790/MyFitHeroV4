@@ -1,0 +1,52 @@
+/* client/src/styles/globals.css */
+
+/*
+ * Tailwind CSS utilities directive
+ *
+ * Sans inclure `@tailwind utilities` en tête de ce fichier, le compilateur PostCSS
+ * renvoie une erreur lorsque le bloc `@layer utilities` est rencontré. La directive
+ * ci‑dessus garantit que la couche utilitaire de base de Tailwind est disponible
+ * avant d’être étendue avec nos classes personnalisées.
+ */
+@tailwind utilities;
+
+/* Classe utilitaire pour le fond dégradé MyFitHero */
+@layer utilities {
+  .hero-gradient-bg {
+    background: linear-gradient(135deg, #5d2cfe 0%, #7d36fc 20%, #a53eff 60%, #ff549e 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  /* Variante avec overlay pour améliorer la lisibilité */
+  .hero-gradient-overlay {
+    position: relative;
+  }
+
+  .hero-gradient-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+  }
+
+  /* Classes pour texte à contraste élevé */
+  .hero-text-primary {
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .hero-text-secondary {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Boutons adaptés au gradient */
+  .hero-button-primary {
+    @apply bg-white text-purple-700 hover:bg-gray-100 shadow-lg;
+  }
+
+  .hero-button-secondary {
+    @apply bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-sm;
+  }
+}

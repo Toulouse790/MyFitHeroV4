@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { AdminDashboard } from '@/components/admin';
-import { useAuthStatus } from '@/hooks/useAuthStatus';
+import { useAuthStatus } from '@/features/auth/hooks/useAuthStatus';
 import { supabase } from '@/lib/supabase';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 
 interface UserProfile {
   id: string;

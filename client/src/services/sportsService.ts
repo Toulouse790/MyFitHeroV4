@@ -1,7 +1,7 @@
 // client/src/services/sportsService.ts
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { SportOption } from '@/types/onboarding';
-import { useToast } from '@/hooks/use-toast';
+import { SportOption } from '@/shared/types/onboarding';
+import { useToast } from '@/shared/hooks/use-toast';
 import { useQuery, useQueryClient } from '@tanstack/react-query'; // facultatif
 import React from 'react';
 

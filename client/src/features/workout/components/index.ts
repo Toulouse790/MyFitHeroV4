@@ -1,7 +1,20 @@
-export { WorkoutSessionHeader } from './WorkoutSessionHeader';
-export { WorkoutProgressCard } from './WorkoutProgressCard';
-export { WorkoutTipCard } from './WorkoutTipCard';
-export { ExerciseCard } from './ExerciseCard';
-export { WorkoutStatsCard } from './WorkoutStatsCard';
-export { WorkoutSessionSummary } from './WorkoutSessionSummary';
-export { WorkoutStartScreen } from './WorkoutStartScreen';
+// Export des composants de la feature workout
+export { default as WorkoutTimer } from './WorkoutTimer';
+export { default as PillarHeader } from './PillarHeader';
+export { default as WorkoutProgressCard } from './WorkoutProgressCard';
+export { default as PreferencesSettings } from './PreferencesSettings';
+export { default as BadgeDisplay } from './BadgeDisplay';
+export { default as WorkoutTipCard } from './WorkoutTipCard';
+export { default as ExerciseCard } from './ExerciseCard';
+export { default as WorkoutCard } from './WorkoutCard';
+export { default as BadgeSystem } from './BadgeSystem';
+export { default as LazyComponents } from './LazyComponents';
+export { default as WorkoutDashboard } from './WorkoutDashboard';
+export { default as BottomNav } from './BottomNav';
+export { default as WorkoutSessionHeader } from './WorkoutSessionHeader';
+export { default as MuscleRecoveryDashboard } from './MuscleRecoveryDashboard';
+export { default as WorkoutSessionSummary } from './WorkoutSessionSummary';
+export { default as WorkoutStartScreen } from './WorkoutStartScreen';
+export { default as ActiveSessionIndicator } from './ActiveSessionIndicator';
+export { default as WorkoutStatsCard } from './WorkoutStatsCard';
+export { default as PreWorkoutRecoveryCheck } from './PreWorkoutRecoveryCheck';

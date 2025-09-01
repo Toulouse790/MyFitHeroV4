@@ -22,8 +22,8 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { useWearableSync } from '@/hooks/useWearableSync';
-import { useToast } from '@/hooks/use-toast';
+import { useWearableSync } from '@/features/wearables/hooks/useWearableSync';
+import { useToast } from '@/shared/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
 import { appStore } from '@/store/appStore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -35,7 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { UniformHeader } from '@/components/UniformHeader';
+import { UniformHeader } from '@/features/profile/components/UniformHeader';
 import { AnalyticsService } from '@/lib/analytics';
 
 interface NotificationSettings {

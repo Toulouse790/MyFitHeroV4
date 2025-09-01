@@ -1402,21 +1402,21 @@ const DashboardPage = lazy(() => import('../features/admin/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('./NotFound'));
 
 // Composants spécialisés
-const USOnboardingFlow = lazy(() => import('../components/USMarketOnboarding'));
-const ConversationalChat = lazy(() => import('../components/AIIntelligence'));
-const WorkoutTracker = lazy(() => import('../components/WorkoutTimer'));
-const USNutritionTracker = lazy(() => import('../components/USMarketDashboard'));
-const SleepAnalyzer = lazy(() => import('../components/SmartHealthDashboard'));
-const HydrationReminder = lazy(() => import('../components/PWAControls'));
-const MoodTracker = lazy(() => import('../components/DailyCheckIn'));
-const SocialFeed = lazy(() => import('../components/SocialDashboard'));
-const ChallengeBoard = lazy(() => import('../components/FriendsComparison'));
-const UserProfile = lazy(() => import('../components/UserProfileTabs'));
-const ProgressCharts = lazy(() => import('../components/ProgressCharts'));
+const USOnboardingFlow = lazy(() => import('../features/auth/components/USMarketOnboarding'));
+const ConversationalChat = lazy(() => import('../features/ai-coach/components/AIIntelligence'));
+const WorkoutTracker = lazy(() => import('../features/workout/components/WorkoutTimer'));
+const USNutritionTracker = lazy(() => import('../features/analytics/components/USMarketDashboard'));
+const SleepAnalyzer = lazy(() => import('../features/analytics/components/SmartHealthDashboard'));
+const HydrationReminder = lazy(() => import('../features/ai-coach/components/PWAControls'));
+const MoodTracker = lazy(() => import('../features/ai-coach/components/DailyCheckIn'));
+const SocialFeed = lazy(() => import('../features/social/components/SocialDashboard'));
+const ChallengeBoard = lazy(() => import('../features/social/components/FriendsComparison'));
+const UserProfile = lazy(() => import('../features/profile/components/UserProfileTabs'));
+const ProgressCharts = lazy(() => import('../features/analytics/components/ProgressCharts'));
 const AdminDashboard = lazy(() => import('../components/admin/AdminDashboard'));
-const DebugPage = lazy(() => import('../components/DebugPage'));
-const AppLoadingSpinner = lazy(() => import('../components/AppLoadingSpinner'));
-const AppErrorBoundary = lazy(() => import('../components/AppErrorBoundary'));
+const DebugPage = lazy(() => import('../shared/components/DebugPage'));
+const AppLoadingSpinner = lazy(() => import('../shared/components/AppLoadingSpinner'));
+const AppErrorBoundary = lazy(() => import('../shared/components/AppErrorBoundary'));
 
 // ====================================================================
 // Définition des Routes de l'Application

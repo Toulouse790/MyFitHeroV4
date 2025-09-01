@@ -5,7 +5,7 @@ import type {
   StepNextFunction,
   StepConditionFunction,
   QuestionOption,
-} from '@/types/conversationalOnboarding';
+} from '@/features/auth/types/conversationalOnboarding';
 import {
   MAIN_OBJECTIVES,
   AVAILABLE_MODULES,

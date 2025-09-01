@@ -1,0 +1,11 @@
+// Export des composants de la feature analytics
+export { default as ProgressCharts } from './ProgressCharts';
+export { default as SportSelector } from './SportSelector';
+export { default as AdvancedCharts } from './AdvancedCharts';
+export { default as StatsOverview } from './StatsOverview';
+export { default as SmartDashboard } from './SmartDashboard';
+export { default as DashboardRecoveryWidget } from './DashboardRecoveryWidget';
+export { default as USMarketDashboard } from './USMarketDashboard';
+export { default as SmartHealthDashboard } from './SmartHealthDashboard';
+export { default as AnalyticsDashboard } from './AnalyticsDashboard';
+export { default as WearableStats } from './WearableStats';
