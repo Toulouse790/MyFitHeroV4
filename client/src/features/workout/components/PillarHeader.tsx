@@ -83,7 +83,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erreur récupération recommandation IA:', error);
         return;
       }
 
@@ -97,7 +96,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         });
       }
     } catch {
-      console.error('Erreur chargement recommandation IA:', error);
     }
   };
 
@@ -115,7 +113,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erreur récupération objectif quotidien:', error);
         return;
       }
 
@@ -125,7 +122,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         setDailyGoal(getDefaultGoal());
       }
     } catch {
-      console.error('Erreur chargement objectif quotidien:', error);
       setDailyGoal(getDefaultGoal());
     }
   };
@@ -169,7 +165,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         .limit(30);
 
       if (error) {
-        console.error('Erreur récupération streak:', error);
         return;
       }
 
@@ -193,7 +188,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         setStreak(currentStreak);
       }
     } catch {
-      console.error('Erreur calcul streak:', error);
     }
   };
 

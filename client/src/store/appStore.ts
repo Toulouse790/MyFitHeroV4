@@ -419,7 +419,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error && error.code !== 'PGRST116') {
-            console.error('Erreur fetch daily stats:', error);
             return null;
           }
 
@@ -427,7 +426,6 @@ export const appStore = create<ExtendedAppStore>()(
           set({ currentStats: stats });
           return stats;
         } catch {
-          console.error('Erreur fetchDailyStats:', error);
           set({ error: 'Erreur lors du chargement des statistiques' });
           return null;
         } finally {
@@ -450,7 +448,6 @@ export const appStore = create<ExtendedAppStore>()(
             .limit(limit);
 
           if (error) {
-            console.error('Erreur fetch AI recommendations:', error);
             return [];
           }
 
@@ -458,7 +455,6 @@ export const appStore = create<ExtendedAppStore>()(
           set({ recommendations });
           return recommendations;
         } catch {
-          console.error('Erreur fetchAiRecommendations:', error);
           return [];
         }
       },
@@ -471,7 +467,6 @@ export const appStore = create<ExtendedAppStore>()(
             .eq('id', recommendationId);
 
           if (error) {
-            console.error('Erreur mark recommendation as read:', error);
             return false;
           }
 
@@ -484,7 +479,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur markRecommendationAsRead:', error);
           return false;
         }
       },
@@ -509,7 +503,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error) {
-            console.error('Erreur ajout hydratation:', error);
             return false;
           }
 
@@ -520,7 +513,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur addHydration:', error);
           return false;
         }
       },
@@ -548,7 +540,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error) {
-            console.error('Erreur ajout repas:', error);
             return false;
           }
 
@@ -559,7 +550,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur addMeal:', error);
           return false;
         }
       },
@@ -585,7 +575,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error) {
-            console.error('Erreur ajout sommeil:', error);
             return false;
           }
 
@@ -596,7 +585,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur addSleepSession:', error);
           return false;
         }
       },
@@ -625,7 +613,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error) {
-            console.error('Erreur ajout workout:', error);
             return false;
           }
 
@@ -636,7 +623,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur addWorkout:', error);
           return false;
         }
       },
@@ -663,7 +649,6 @@ export const appStore = create<ExtendedAppStore>()(
             .eq('id', appStoreUser.id);
 
           if (error) {
-            console.error('Erreur activation module:', error);
             return false;
           }
 
@@ -671,7 +656,6 @@ export const appStore = create<ExtendedAppStore>()(
           console.log(`✅ Module ${moduleId} activé avec succès`);
           return true;
         } catch {
-          console.error('Erreur activateModule:', error);
           return false;
         }
       },
@@ -697,7 +681,6 @@ export const appStore = create<ExtendedAppStore>()(
             .eq('id', appStoreUser.id);
 
           if (error) {
-            console.error('Erreur désactivation module:', error);
             return false;
           }
 
@@ -705,7 +688,6 @@ export const appStore = create<ExtendedAppStore>()(
           console.log(`✅ Module ${moduleId} désactivé avec succès`);
           return true;
         } catch {
-          console.error('Erreur deactivateModule:', error);
           return false;
         }
       },
@@ -746,7 +728,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return mockData;
         } catch {
-          console.error('Erreur sync wearable:', error);
           set({ syncStatus: 'error' });
           return null;
         }
@@ -771,7 +752,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error) {
-            console.error('Erreur ajout balance:', error);
             return false;
           }
 
@@ -781,7 +761,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur addConnectedScale:', error);
           return false;
         }
       },
@@ -806,7 +785,6 @@ export const appStore = create<ExtendedAppStore>()(
             .single();
 
           if (error) {
-            console.error('Erreur ajout poids:', error);
             return false;
           }
 
@@ -816,7 +794,6 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
-          console.error('Erreur addWeightEntry:', error);
           return false;
         }
       },
@@ -855,7 +832,6 @@ export const appStore = create<ExtendedAppStore>()(
             workouts: Math.min((stats.workouts_completed / dailyGoals.workouts) * 100, 100),
           };
         } catch {
-          console.error('Erreur calculateProgress:', error);
           return {};
         }
       },
@@ -894,7 +870,6 @@ export const appStore = create<ExtendedAppStore>()(
             .order('stat_date', { ascending: true });
 
           if (error) {
-            console.error('Erreur getWeeklyStats:', error);
             return {};
           }
 
@@ -908,7 +883,6 @@ export const appStore = create<ExtendedAppStore>()(
             workouts: stats.map(s => s.workouts_completed),
           };
         } catch {
-          console.error('Erreur getWeeklyStats:', error);
           return {};
         }
       },
@@ -959,7 +933,6 @@ export const appStore = create<ExtendedAppStore>()(
             } as UserAnalytics,
           };
         } catch {
-          console.error('Erreur exportUserData:', error);
           throw new Error('Failed to export user data');
         }
       },

@@ -2,27 +2,24 @@ import { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { Loading } from '@/shared/components';
 import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
-import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
+import ErrorBoundary from '@/shared/components/ErrorBoundary';
 
 // Lazy loading des pages principales
-const LandingPage = lazy(() => import('@/pages/LandingPage'));
-const Dashboard = lazy(() => import('@/pages/Dashboard'));
-const HydrationPage = lazy(() => import('@/features/hydration/HydrationPage'));
-const SleepPage = lazy(() => import('@/features/sleep/SleepPage'));
-const SocialPage = lazy(() => import('@/features/social/SocialPage'));
+const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'));
+const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'));
+const HydrationPage = lazy(() => import('@/features/hydration/pages/HydrationPage'));
+const SleepPage = lazy(() => import('@/features/sleep/pages/SleepPage'));
+const SocialPage = lazy(() => import('@/features/social/pages/SocialPage'));
 const WorkoutPage = lazy(() => import('@/features/workout/pages/WorkoutPage'));
-const NutritionPage = lazy(() => import('@/pages/NutritionPage'));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const NutritionPage = lazy(() => import('@/features/nutrition/pages/NutritionPage'));
+const SettingsPage = lazy(() => import('@/features/profile/pages/SettingsPage'));
+const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'));
 
 // Pages d'authentification
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
-const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
+const AuthPage = lazy(() => import('@/features/auth/pages/AuthPage'));
 
-// Pages d'erreur
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
-const ErrorPage = lazy(() => import('@/pages/ErrorPage'));
+// Pages d'erreur et support
+const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 
 interface RouteConfig {
   path: string;
@@ -48,34 +45,18 @@ const routes: RouteConfig[] = [
     },
   },
   {
-    path: '/login',
-    element: LoginPage,
+    path: '/auth',
+    element: AuthPage,
     meta: {
-      title: 'Connexion - MyFitHero',
-      redirectIfAuth: true,
-    },
-  },
-  {
-    path: '/register',
-    element: RegisterPage,
-    meta: {
-      title: 'Inscription - MyFitHero',
-      redirectIfAuth: true,
-    },
-  },
-  {
-    path: '/forgot-password',
-    element: ForgotPasswordPage,
-    meta: {
-      title: 'Mot de passe oublié - MyFitHero',
+      title: 'Authentification - MyFitHero',
       redirectIfAuth: true,
     },
   },
 
-  // Routes protégées
+  // Routes protégées - Analytics comme dashboard principal
   {
     path: '/dashboard',
-    element: Dashboard,
+    element: AnalyticsPage,
     meta: {
       title: 'Tableau de bord - MyFitHero',
       description: "Vue d'ensemble de votre santé et bien-être",
@@ -149,7 +130,7 @@ const routes: RouteConfig[] = [
   // Pages d'erreur
   {
     path: '/error',
-    element: ErrorPage,
+    element: NotFoundPage,
     meta: {
       title: 'Erreur - MyFitHero',
     },
@@ -180,7 +161,7 @@ const router = createBrowserRouter(
         </Suspense>
       </ErrorBoundary>
     ),
-    errorElement: <ErrorPage />,
+    errorElement: <div>Erreur de chargement</div>,
   }))
 );
 
@@ -195,7 +176,7 @@ export const useTypedNavigation = () => {
   const routePaths = routes.map(r => r.path);
 
   return {
-    paths: routePaths as const,
+    paths: routePaths,
     isValidPath: (path: string): path is (typeof routePaths)[number] => routePaths.includes(path),
   };
 };

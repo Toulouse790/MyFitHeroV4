@@ -1015,7 +1015,6 @@ const useUSLocation = () => {
       }
     } catch (err) {
       setError('Unable to determine your location. Please ensure location services are enabled.');
-      console.error('Geolocation error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -1350,7 +1349,6 @@ const useOfflineSync = () => {
           }
         }
       } catch {
-        console.error(`Sync error for ${sync.type}:`, error);
       }
     }
 
@@ -1654,7 +1652,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
         } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('Auth check error:', error);
         }
 
         if (session && !user) {
@@ -1670,7 +1667,6 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
           }
         }
       } catch {
-        console.error('Auth initialization error:', error);
       } finally {
         setIsLoading(false);
       }
@@ -1773,7 +1769,6 @@ const MyFitHeroIndex: React.FC = () => {
 
         setIsInitialized(true);
       } catch {
-        console.error('App initialization error:', error);
         setIsInitialized(true); // Continue même en cas d'erreur
       }
     };
