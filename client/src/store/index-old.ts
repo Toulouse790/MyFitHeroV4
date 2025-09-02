@@ -9,7 +9,6 @@ export {
   useUser,
   useIsAuthenticated,
 } from './authStore';
-
 export {
   useProfileStore,
   useProfileState,
@@ -17,14 +16,7 @@ export {
   useProfileMetrics,
   useUserSettings,
 } from './profileStore';
-
-export { 
-  useScalesStore, 
-  useScalesState, 
-  useWeightHistory, 
-  useScaleActions 
-} from './scalesStore';
-
+export { useScalesStore, useScalesState, useWeightHistory, useScaleActions } from './scalesStore';
 export {
   useSettingsStore,
   useAppSettings,
@@ -36,9 +28,30 @@ export {
   useWorkoutSettings,
   useDisplaySettings,
   useSettingsActions,
+  useSettingsState,
 } from './settingsStore';
 
-// Store principal pour les données applicatives
+// Legacy workout store (à migrer)
+export {
+  appStoreUnified,
+  useWorkoutSession,
+  useWorkoutExercises,
+  useWorkoutStats,
+  useWorkoutFavorites,
+  useWorkoutSettings,
+} from './legacyWorkoutStore';
+
+// Types exports
+export type { AuthStore } from './authStore';
+export type { ProfileStore } from './profileStore';
+export type { ScalesStore } from './scalesStore';
+export type { SettingsStore } from './settingsStore';
+
+// Exports centralisés des stores
+export { useAuthStore } from './authStore';
+export { useProfileStore } from './profileStore';
+export { useScalesStore } from './scalesStore';
+export { useSettingsStore } from './settingsStore';
 export { appStore } from './appStore';
 
 // Types
