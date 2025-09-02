@@ -5,24 +5,27 @@
 import React, {
   useState,
   useCallback,
-  useMemo,
   useEffect,
-  useRef,
   lazy,
   Suspense,
-  ErrorInfo,
-  Component,
   ReactNode,
 } from 'react';
-import { Router, Route, useLocation, useRouter } from 'wouter';
+import { Router, Route, useLocation } from 'wouter';
 import { createClient } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { persist, subscribeWithSelector } from 'zustand/middleware';
-import { onCLS, onINP, onFCP, onLCP, onTTFB } from 'web-vitals';
+import { onCLS, onFCP, onLCP, onTTFB, onINP } from 'web-vitals';
 
 // ====================================================================
 // Configuration et Types de Base
 // ====================================================================
+
+// Interfaces pour les données de géolocalisation
+interface GeolocationContext {
+  id: string;
+  short_code?: string;
+  text?: string;
+}
 
 // Configuration Supabase optimisée pour le marché US
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
@@ -208,7 +211,7 @@ interface ConversationMessage {
   type: 'ai' | 'user';
   content: string;
   timestamp: Date;
-  context?: Record<string, any>;
+  context?: Record<string, string | number | boolean> | undefined;
   suggestedResponses?: string[];
 }
 
@@ -812,7 +815,7 @@ interface AppState {
   setUser: (user: User | null) => void;
   updateOnboarding: (state: Partial<OnboardingState>) => void;
   updatePreferences: (preferences: Partial<AppState['preferences']>) => void;
-  updateCache: (cacheKey: keyof AppState['cache'], data: any) => void;
+  updateCache: (cacheKey: keyof AppState['cache'], data: unknown) => void;
   clearCache: () => void;
   addPendingSync: (sync: PendingSync) => void;
   removePendingSync: (syncId: string) => void;
@@ -833,7 +836,7 @@ interface NotificationSettings {
 interface PendingSync {
   id: string;
   type: 'workout' | 'nutrition' | 'sleep' | 'hydration' | 'wellness';
-  data: any;
+  data: unknown;
   timestamp: string;
   retryCount: number;
 }
@@ -841,7 +844,7 @@ interface PendingSync {
 const appStore = create<AppState>()(
   subscribeWithSelector(
     persist(
-      (set, get) => ({
+      (set, _get) => ({
         // État initial
         user: null,
         isAuthenticated: false,
@@ -918,7 +921,7 @@ const appStore = create<AppState>()(
           })),
 
         clearCache: () =>
-          set(state => ({
+          set(_state => ({
             cache: {
               workouts: [],
               exercises: [],
@@ -1000,9 +1003,9 @@ const useUSLocation = () => {
         const context = feature.context || [];
 
         const state =
-          context.find((c: any) => c.id.startsWith('region'))?.short_code?.replace('US-', '') || '';
+          context.find((c: GeolocationContext) => c.id.startsWith('region'))?.short_code?.replace('US-', '') || '';
         const city = feature.text || '';
-        const zip = context.find((c: any) => c.id.startsWith('postcode'))?.text || '';
+        const zip = context.find((c: GeolocationContext) => c.id.startsWith('postcode'))?.text || '';
 
         // Déterminer le fuseau horaire basé sur l'état
         const timezone = getTimezoneFromState(state);
@@ -1192,7 +1195,7 @@ const useConversationalAI = () => {
   const { onboarding, updateOnboarding } = appStore();
 
   const sendMessage = useCallback(
-    async (message: string, context?: Record<string, any>) => {
+    async (message: string, context?: Record<string, string | number | boolean>) => {
       setIsProcessing(true);
       setError(null);
 
@@ -1317,26 +1320,6 @@ const useOfflineSync = () => {
   const { ui, addPendingSync, removePendingSync } = appStore();
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const addToSyncQueue = useCallback(
-    (type: PendingSync['type'], data: any) => {
-      const sync: PendingSync = {
-        id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        type,
-        data,
-        timestamp: new Date().toISOString(),
-        retryCount: 0,
-      };
-
-      addPendingSync(sync);
-
-      // Essayer de synchroniser immédiatement si en ligne
-      if (navigator.onLine) {
-        syncPendingData();
-      }
-    },
-    [addPendingSync]
-  );
-
   const syncPendingData = useCallback(async () => {
     if (isSyncing || ui.pendingSyncs.length === 0) return;
 
@@ -1373,6 +1356,26 @@ const useOfflineSync = () => {
     setIsSyncing(false);
   }, [isSyncing, ui.pendingSyncs, removePendingSync]);
 
+  const addToSyncQueue = useCallback(
+    (type: PendingSync['type'], data: unknown) => {
+      const sync: PendingSync = {
+        id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type,
+        data,
+        timestamp: new Date().toISOString(),
+        retryCount: 0,
+      };
+
+      addPendingSync(sync);
+
+      // Essayer de synchroniser immédiatement si en ligne
+      if (navigator.onLine) {
+        syncPendingData();
+      }
+    },
+    [addPendingSync, syncPendingData]
+  );
+
   // Écouter les changements de connectivité
   useEffect(() => {
     const handleOnline = () => {
@@ -1400,21 +1403,6 @@ const useOfflineSync = () => {
 const OnboardingPage = lazy(() => import('../features/auth/pages/ProfileComplete'));
 const DashboardPage = lazy(() => import('../features/admin/pages/AdminPage'));
 const NotFoundPage = lazy(() => import('./NotFound'));
-
-// Composants spécialisés
-const USOnboardingFlow = lazy(() => import('../features/auth/components/USMarketOnboarding'));
-const ConversationalChat = lazy(() => import('../features/ai-coach/components/AIIntelligence'));
-const WorkoutTracker = lazy(() => import('../features/workout/components/WorkoutTimer'));
-const USNutritionTracker = lazy(() => import('../features/analytics/components/USMarketDashboard'));
-const SleepAnalyzer = lazy(() => import('../features/analytics/components/SmartHealthDashboard'));
-const HydrationReminder = lazy(() => import('../features/ai-coach/components/PWAControls'));
-const MoodTracker = lazy(() => import('../features/ai-coach/components/DailyCheckIn'));
-const SocialFeed = lazy(() => import('../features/social/components/SocialDashboard'));
-const ChallengeBoard = lazy(() => import('../features/social/components/FriendsComparison'));
-const UserProfile = lazy(() => import('../features/profile/components/UserProfileTabs'));
-const ProgressCharts = lazy(() => import('../features/analytics/components/ProgressCharts'));
-const AdminDashboard = lazy(() => import('../features/admin/pages/AdminPage'));
-const DebugPage = lazy(() => import('../shared/components/DebugPage'));
 const AppLoadingSpinner = lazy(() => import('../shared/components/AppLoadingSpinner'));
 const AppErrorBoundary = lazy(() => import('../shared/components/AppErrorBoundary'));
 
@@ -1422,31 +1410,13 @@ const AppErrorBoundary = lazy(() => import('../shared/components/AppErrorBoundar
 // Définition des Routes de l'Application
 // ====================================================================
 
-const routes = {
-  '/': OnboardingPage,
-  '/dashboard': DashboardPage,
-  '/us-onboarding': USOnboardingFlow,
-  '/chat': ConversationalChat,
-  '/workout-tracker': WorkoutTracker,
-  '/us-nutrition': USNutritionTracker,
-  '/sleep-analyzer': SleepAnalyzer,
-  '/hydration-reminder': HydrationReminder,
-  '/mood-tracker': MoodTracker,
-  '/social-feed': SocialFeed,
-  '/challenges': ChallengeBoard,
-  '/progress': ProgressCharts,
-  '/user/:id': UserProfile,
-  '/admin': AdminDashboard,
-  '/debug': DebugPage,
-};
-
 // ====================================================================
 // Configuration des Routes de l'Application
 // ====================================================================
 
 interface RouteConfig {
   path: string;
-  component: React.ComponentType<any>;
+  component: React.ComponentType<Record<string, unknown>>;
   exact?: boolean;
   requiresAuth?: boolean;
   requiresOnboarding?: boolean;
@@ -1661,8 +1631,8 @@ const appRoutes: RouteConfig[] = [
 
 interface AuthGuardProps {
   children: ReactNode;
-  requiresAuth?: boolean;
-  requiresOnboarding?: boolean;
+  requiresAuth?: boolean | undefined;
+  requiresOnboarding?: boolean | undefined;
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({
@@ -1671,7 +1641,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
   requiresOnboarding = false,
 }) => {
   const { user, isAuthenticated, onboarding } = appStore();
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -1759,7 +1729,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
 // ====================================================================
 
 const MyFitHeroIndex: React.FC = () => {
-  const { isLoading, user, preferences } = appStore();
+  const { isLoading, preferences } = appStore();
   const [isInitialized, setIsInitialized] = useState(false);
   const [appVersion] = useState('4.0.0');
   const [buildNumber] = useState('20250801');
@@ -1794,7 +1764,7 @@ const MyFitHeroIndex: React.FC = () => {
           // Web Vitals et autres métriques
 
           onCLS(console.log);
-          onFID(console.log);
+          onINP(console.log);
           onFCP(console.log);
           onLCP(console.log);
           onTTFB(console.log);
@@ -1825,17 +1795,15 @@ const MyFitHeroIndex: React.FC = () => {
       }
     };
 
-    // Écouter les changements de route
-    const currentRoute = routes.find(
-      route =>
-        window.location.pathname === route.path ||
-        (route.path.includes(':') &&
-          new RegExp(route.path.replace(/:[^/]+/g, '[^/]+')).test(window.location.pathname))
-    );
-
-    if (currentRoute) {
-      updatePageMetadata(currentRoute);
-    }
+    // Écouter les changements de route - simplified
+    const currentRouteInfo: RouteConfig = {
+      path: window.location.pathname,
+      component: () => null,
+      title: 'MyFitHero - US Fitness App',
+      description: 'AI-powered fitness coaching for the US market'
+    };
+    
+    updatePageMetadata(currentRouteInfo);
   }, []);
 
   // Affichage du chargement initial
