@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { create } from 'zustand';
 import { toast } from 'sonner';
 
@@ -33,14 +33,6 @@ interface ChallengeParticipant {
   joined_at: string;
   completed: boolean;
   completed_at?: string;
-}
-
-interface ChallengeReward {
-  id: string;
-  challenge_id: string;
-  reward_type: 'badge' | 'points' | 'trophy' | 'discount';
-  reward_value: string;
-  description?: string;
 }
 
 // ---- Zustand store for user state ----

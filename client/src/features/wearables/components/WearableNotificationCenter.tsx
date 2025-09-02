@@ -112,7 +112,7 @@ const WearableNotificationCenter: React.FC = () => {
       });
     }
 
-    // Rappels d'activité
+    // Rappels dd'activitéapos;activité
     const now = new Date();
     const lastActivity = wearableData.lastSync || new Date();
     const hoursSinceLastActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
@@ -342,7 +342,7 @@ const WearableNotificationCenter: React.FC = () => {
               <CheckCircle className="mx-auto mb-4 text-gray-400" size={48} />
               <p className="text-gray-600">Aucune notification pour le moment</p>
               <p className="text-sm text-gray-500 mt-2">
-                Vos notifications d'activité et de santé apparaîtront ici
+                Vos notifications d&apos;activité et de santé apparaîtront ici
               </p>
             </div>
           ) : (

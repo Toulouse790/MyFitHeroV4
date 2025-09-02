@@ -1,47 +1,30 @@
 // pages/Social.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useLocation } from 'wouter';
 import {
   Users,
   Target,
   Trophy,
   MessageCircle,
   Star,
-  Zap,
-  ChevronRight,
   Plus,
   Heart,
   Share2,
   Send,
-  X,
   Image,
-  Camera,
   MapPin,
-  Clock,
   Award,
-  Flame,
   Filter,
-  Search,
-  MoreVertical,
-  CheckCircle2,
-  Eye,
-  TrendingUp,
   Crown,
   Medal,
   Bookmark,
-  Flag,
   Trash2,
-  Edit3,
   UserPlus,
   MessageSquare,
-  ThumbsUp,
-  AlertTriangle,
 } from 'lucide-react';
 import { appStore } from '@/store/appStore';
 import { useToast } from '@/shared/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
 import { UniformHeader } from '@/features/profile/components/UniformHeader';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -62,7 +45,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import AIIntelligence from '@/features/ai-coach/components/AIIntelligence';
 
@@ -171,7 +153,6 @@ interface CreateChallengeData {
 }
 
 const Social: React.FC = () => {
-  const [location, setLocation] = useLocation();
   const { appStoreUser } = appStore();
   const { toast } = useToast();
 
@@ -704,7 +685,7 @@ const Social: React.FC = () => {
   );
 
   const handleAddFriend = useCallback(
-    async (friendId: string) => {
+    async (_friendId: string) => {
       toast({
         title: "Demande d'ami envoyée",
         description: "Votre demande d'ami a été envoyée.",

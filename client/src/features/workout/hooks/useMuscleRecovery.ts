@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MuscleRecoveryService } from '@/services/muscleRecoveryService';
-import { supabaseService, SupabaseResponse, QueryFilter } from '@/services/supabaseServiceUnified';
 import { appStore } from '@/store/appStore';
 import type {
   MuscleRecoveryData,
@@ -39,7 +37,7 @@ export const useMuscleRecovery = (): UseMuscleRecoveryReturn => {
 
   // État local
   const [muscleRecoveryData, setMuscleRecoveryData] = useState<MuscleRecoveryData[]>([]);
-  const [recoveryProfile, setRecoveryProfile] = useState<UserRecoveryProfile | null>(null);
+  const [recoveryProfile] = useState<UserRecoveryProfile | null>(null);
   const [recommendations, setRecommendations] = useState<RecoveryRecommendation[]>([]);
   const [globalMetrics, setGlobalMetrics] = useState<GlobalRecoveryMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);

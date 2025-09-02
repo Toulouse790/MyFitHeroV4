@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMuscleRecovery } from '@/features/workout/hooks/useMuscleRecovery';
 import type { MuscleGroup } from '@/features/workout/types/muscleRecovery';
 
@@ -114,7 +114,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
 
       {/* Recommandation principale */}
       <div className="p-6 bg-blue-50 border-b border-gray-200">
-        <h3 className="font-semibold text-blue-900 mb-2">Recommandation d'entraînement</h3>
+        <h3 className="font-semibold text-blue-900 mb-2">Recommandation d&apos;entraînement</h3>
         <p className="text-blue-800">{getNextWorkoutRecommendation()}</p>
       </div>
 
@@ -176,7 +176,7 @@ export const MuscleRecoveryDashboard: React.FC<MuscleRecoveryDashboardProps> = (
                     <span className="font-medium">{selectedMuscleData.soreness_level}/10</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Prêt à l'entraînement:</span>
+                    <span className="text-sm text-gray-600">Prêt à l&apos;entraînement:</span>
                     <span className="font-medium">{selectedMuscleData.readiness_score}%</span>
                   </div>
                 </div>

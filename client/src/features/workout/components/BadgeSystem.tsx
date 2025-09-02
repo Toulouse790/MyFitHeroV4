@@ -13,7 +13,7 @@ import {
   Unlock,
   Moon,
 } from 'lucide-react';
-import { appStore } from '../store/appStore';
+import { appStore } from '@/store/appStore';
 import { supabase } from '@/lib/supabase';
 
 interface Badge {
@@ -193,23 +193,28 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
     switch (badgeId) {
       case 'first_week':
         return Math.min(stats.length, 7);
-      case 'hydration_master':
+      case 'hydration_master': {
         const hydrationDays = stats.filter(s => s.completed_goals?.includes('hydration')).length;
         return Math.min(hydrationDays, 30);
-      case 'workout_warrior':
+      }
+      case 'workout_warrior': {
         const workoutDays = stats.filter(s => s.completed_goals?.includes('workout')).length;
         return Math.min(workoutDays, 50);
-      case 'sleep_champion':
+      }
+      case 'sleep_champion': {
         const sleepDays = stats.filter(s => s.completed_goals?.includes('sleep')).length;
         return Math.min(sleepDays, 14);
+      }
       case 'streak_legend':
         return Math.min(calculateStreak(stats), 100);
-      case 'perfect_week':
+      case 'perfect_week': {
         const perfectDays = stats.filter(s => s.completion_rate === 100).length;
         return Math.min(perfectDays, 7);
-      case 'nutrition_guru':
+      }
+      case 'nutrition_guru': {
         const nutritionDays = stats.filter(s => s.completed_goals?.includes('nutrition')).length;
         return Math.min(nutritionDays, 21);
+      }
       case 'first_milestone':
         return stats.length > 0 ? 1 : 0;
       default:

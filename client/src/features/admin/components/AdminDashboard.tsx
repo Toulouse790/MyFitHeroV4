@@ -61,7 +61,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userProfile }) =
                 <Badge variant="outline">--</Badge>
               </div>
               <div className="flex justify-between">
-                <span>Aujourd'hui</span>
+                <span>Aujourd&apos;hui</span>
                 <Badge variant="outline">--</Badge>
               </div>
               <Button variant="outline" size="sm" className="w-full">

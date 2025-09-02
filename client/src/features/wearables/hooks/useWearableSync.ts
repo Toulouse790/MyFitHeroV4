@@ -65,7 +65,7 @@ export const useWearableSync = () => {
   // Vérifier si Apple Health est disponible
   const isAppleHealthAvailable = useCallback((): boolean => {
     // Dans un environnement réel, cela vérifierait la disponibilité d'Apple Health
-    // @ts-ignore
+    // @ts-expect-error - Accessing webkit API
     return (
       typeof window !== 'undefined' && window.webkit && window.webkit.messageHandlers?.healthKit
     );
@@ -74,7 +74,7 @@ export const useWearableSync = () => {
   // Vérifier si Google Fit est disponible
   const isGoogleFitAvailable = useCallback((): boolean => {
     // Dans un environnement réel, cela vérifierait la disponibilité de Google Fit
-    // @ts-ignore
+    // @ts-expect-error - Accessing gapi client
     return typeof window !== 'undefined' && window.gapi && window.gapi.client?.fitness;
   }, []);
 
