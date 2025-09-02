@@ -31,7 +31,8 @@ interface GeolocationContext {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// Instance Supabase pour usage interne - pour export, voir /lib/supabase.ts
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     storageKey: 'myfithero-auth',
@@ -1860,10 +1861,13 @@ export default React.memo(MyFitHeroIndex);
 // Exports Utilitaires pour l'Application
 // ====================================================================
 
-// Export des hooks personnalisés
+// REMARQUE: Les exports suivants sont nécessaires mais causent des warnings Fast Refresh
+// Ils seront déplacés dans des fichiers dédiés à terme
+
+// eslint-disable-next-line react-refresh/only-export-components
 export { useUSLocation, useUSUnits, useConversationalAI, useOfflineSync, appStore };
 
-// Export des types principaux
+// Types exportés (peuvent rester car ne cassent pas Fast Refresh)
 export type {
   User,
   FitnessProfile,
@@ -1889,4 +1893,5 @@ export type {
 };
 
 // Export des utilitaires
+// eslint-disable-next-line react-refresh/only-export-components
 export { pwaConfig, AppErrorBoundary, AppLoadingSpinner, AuthGuard };
