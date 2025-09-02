@@ -67,7 +67,7 @@ export const LazyComponents = {
   RecoveryMetrics: createLazyComponent(() => import('../features/recovery/pages/RecoveryMetrics')),
 
   // Admin components
-  AdminDashboard: createLazyComponent(() => import('../components/admin/AdminDashboard')),
+  AdminDashboard: createLazyComponent(() => import('../features/admin/pages/AdminPage')),
   UserManagement: createLazyComponent(() => import('../features/admin/pages/UserManagement')),
 
   // Landing components
@@ -97,7 +97,7 @@ export const preloadRoute = (routePath: string): void => {
     '/workout': () => import('../features/workout/pages/WorkoutDashboard'),
     '/nutrition': () => import('../features/nutrition/pages/NutritionDashboard'),
     '/recovery': () => import('../features/recovery/pages/RecoveryDashboard'),
-    '/admin': () => import('../components/admin/AdminDashboard'),
+    '/admin': () => import('../features/admin/pages/AdminPage'),
   };
 
   const componentImport = routeComponents[routePath];

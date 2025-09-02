@@ -6,7 +6,7 @@ export const NutritionPage = lazy(() => import('@/features/nutrition/pages/Nutri
 export const SocialPage = lazy(() => import('@/features/social/pages/SocialPage'));
 export const ProfilePage = lazy(() => import('@/features/auth/pages/ProfileComplete'));
 export const AnalyticsPage = lazy(() => import('@/features/analytics/pages/AnalyticsPage'));
-export const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard'));
+export const AdminDashboard = lazy(() => import('@/features/admin/pages/AdminPage'));
 
 // Pages d'authentification
 export const AuthPage = lazy(() => import('@/features/auth/pages/AuthPage'));
