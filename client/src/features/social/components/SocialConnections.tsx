@@ -44,6 +44,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       const friendsData = await socialService.getFriends(userId);
       setFriends(friendsData);
     } catch {
+      // Erreur silencieuse
       console.error('Error loading friends:', error);
       toast({
         title: 'Erreur',
@@ -60,6 +61,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       const stats = await socialService.getSocialStats(userId);
       setSocialStats(stats);
     } catch {
+      // Erreur silencieuse
       console.error('Error loading social stats:', error);
     }
   };
@@ -72,6 +74,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       const results = await socialService.searchUsers(searchQuery, userId);
       setSearchResults(results);
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: 'Erreur lors de la recherche',
@@ -94,6 +97,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         setSearchResults(prev => prev.filter(user => user.friend_id !== friendId));
       }
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: "Impossible d'envoyer la demande",
@@ -114,6 +118,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         setFriendRequests(prev => prev.filter(req => req.id !== connectionId));
       }
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: "Impossible d'accepter la demande",
@@ -402,7 +407,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
             ) : (
               <div className="text-center py-12 text-gray-500">
                 <Users size={48} className="mx-auto mb-4 text-gray-300" />
-                <p>Vous n'avez pas encore d'amis</p>
+                <p>Vous n&apos;avez pas encore d'amis</p>
                 <p className="text-sm">
                   Utilisez la recherche pour trouver des personnes à ajouter
                 </p>

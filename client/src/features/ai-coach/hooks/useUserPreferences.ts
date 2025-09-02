@@ -55,6 +55,7 @@ export const useUserPreferences = () => {
           localStorage.setItem('userPreferences', JSON.stringify(detectedPrefs));
         }
       } catch {
+      // Erreur silencieuse
         console.error('Error loading preferences:', error);
         setPreferences(DEFAULT_PREFERENCES);
       } finally {

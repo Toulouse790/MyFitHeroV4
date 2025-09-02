@@ -27,6 +27,7 @@ export const useAuthStatus = (): AuthStatus => {
         setSession(session);
         setUser(session?.user || null);
       } catch {
+      // Erreur silencieuse
         console.error('Error checking user:', error);
         setUser(null);
       } finally {
@@ -53,6 +54,7 @@ export const useAuthStatus = (): AuthStatus => {
       if (error) throw error;
       setUser(null);
     } catch {
+      // Erreur silencieuse
       console.error('Error signing out:', error);
     }
   };

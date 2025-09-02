@@ -47,6 +47,7 @@ export const useHydrationStore = create<HydrationStore>()(
           // Recalculer les stats après ajout
           get().calculateStats('daily');
         } catch {
+      // Erreur silencieuse
           const message = error instanceof Error ? error.message : "Erreur lors de l'ajout";
           set({ error: message, isLoading: false });
           throw error;
@@ -76,6 +77,7 @@ export const useHydrationStore = create<HydrationStore>()(
 
           get().calculateStats('daily');
         } catch {
+      // Erreur silencieuse
           const message = error instanceof Error ? error.message : 'Erreur lors de la mise à jour';
           set({ error: message, isLoading: false });
           throw error;
@@ -97,6 +99,7 @@ export const useHydrationStore = create<HydrationStore>()(
 
           get().calculateStats('daily');
         } catch {
+      // Erreur silencieuse
           const message = error instanceof Error ? error.message : 'Erreur lors de la suppression';
           set({ error: message, isLoading: false });
           throw error;
@@ -134,6 +137,7 @@ export const useHydrationStore = create<HydrationStore>()(
             isLoading: false,
           });
         } catch {
+      // Erreur silencieuse
           const message = error instanceof Error ? error.message : 'Erreur lors du chargement';
           set({ error: message, isLoading: false });
           throw error;
@@ -180,6 +184,7 @@ export const useHydrationStore = create<HydrationStore>()(
             isLoading: false,
           }));
         } catch {
+      // Erreur silencieuse
           const message =
             error instanceof Error ? error.message : "Erreur lors de la définition de l'objectif";
           set({ error: message, isLoading: false });
@@ -209,6 +214,7 @@ export const useHydrationStore = create<HydrationStore>()(
             isLoading: false,
           }));
         } catch {
+      // Erreur silencieuse
           const message =
             error instanceof Error ? error.message : "Erreur lors de la mise à jour de l'objectif";
           set({ error: message, isLoading: false });
@@ -241,6 +247,7 @@ export const useHydrationStore = create<HydrationStore>()(
             isLoading: false,
           });
         } catch {
+      // Erreur silencieuse
           const message =
             error instanceof Error ? error.message : 'Erreur lors du chargement des objectifs';
           set({ error: message, isLoading: false });

@@ -211,6 +211,7 @@ export const useSettingsStore = create<SettingsStore>()(
 
           set({ lastSynced: new Date().toISOString() });
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors du chargement des paramètres' });
         } finally {
           set({ isLoading: false });
@@ -228,6 +229,7 @@ export const useSettingsStore = create<SettingsStore>()(
 
           set({ lastSynced: new Date().toISOString() });
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la sauvegarde des paramètres' });
           throw new Error('Erreur lors de la sauvegarde des paramètres');
         } finally {
@@ -279,6 +281,7 @@ export const useSettingsStore = create<SettingsStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           set({ error: "Erreur lors de l'importation des paramètres" });
           return false;
         }

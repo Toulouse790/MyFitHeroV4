@@ -125,6 +125,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         description: 'Votre photo de profil a été mise à jour avec succès.',
       });
     } catch {
+      // Erreur silencieuse
       console.error('Erreur upload avatar:', error);
       setPreviewUrl(null);
       toast({
@@ -169,6 +170,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         description: 'Votre photo de profil a été supprimée.',
       });
     } catch {
+      // Erreur silencieuse
       console.error('Erreur suppression avatar:', error);
       toast({
         title: 'Erreur',

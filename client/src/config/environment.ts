@@ -59,6 +59,7 @@ Documentation: README.md#configuration
   try {
     new URL(requiredEnvVars.VITE_SUPABASE_URL);
   } catch {
+      // Erreur silencieuse
     throw new Error('VITE_SUPABASE_URL doit être une URL valide');
   }
 

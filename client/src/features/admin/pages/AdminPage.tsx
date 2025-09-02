@@ -13,7 +13,7 @@ interface UserProfile {
 }
 
 const Admin: React.FC = () => {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { session, loading, isAuthenticated } = useAuthStatus();
   const { toast } = useToast();
 
@@ -34,8 +34,8 @@ const Admin: React.FC = () => {
         return null;
       }
 
-      return data;
-    } catch {
+      return data as UserProfile;
+    } catch (error) {
       console.error('Erreur fetchUserProfile:', error);
       return null;
     }
@@ -72,7 +72,7 @@ const Admin: React.FC = () => {
       if (profile.role !== 'admin') {
         toast({
           title: 'Accès refusé',
-          description: "Vous n'avez pas les permissions pour accéder à cette page",
+          description: "Vous n&apos;avez pas les permissions pour accéder à cette page",
           variant: 'destructive',
         });
         setLocation('/');
@@ -91,9 +91,9 @@ const Admin: React.FC = () => {
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
         <p className="text-gray-600 text-sm">
-          {loading ? "Vérification de l'authentification..." : 'Vérification des permissions...'}
+          {loading ? "Vérification de l&apos;authentification..." : 'Vérification des permissions...'}
         </p>
-        <span className="sr-only">Chargement de la page d\'administration</span>
+        <span className="sr-only">Chargement de la page d&apos;administration</span>
       </div>
     );
   }

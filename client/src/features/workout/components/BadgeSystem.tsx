@@ -183,6 +183,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
       // Vérifier si des badges peuvent être débloqués
       await checkForNewBadges(updatedBadges);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors du chargement des badges:', error);
     } finally {
       setIsLoading(false);
@@ -259,6 +260,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
         console.log(`Badge débloqué: ${badge.title}`);
       }
     } catch {
+      // Erreur silencieuse
       console.error("Erreur lors de l'attribution du badge:", error);
     }
   };

@@ -18,7 +18,6 @@ interface PillarHeaderProps {
   pillar: 'hydration' | 'nutrition' | 'sleep' | 'workout';
   title: string;
   icon: React.ElementType;
-  _color: string;
   bgGradient: string;
   emoji: string;
   motivationalMessage?: string;
@@ -40,7 +39,6 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   pillar,
   title,
   icon: Icon,
-  _color,
   bgGradient,
   emoji,
   motivationalMessage,
@@ -87,15 +85,19 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
       }
 
       if (data) {
+        const aiData = data as AIRecommendation;
         setAiRecommendation({
-          id: data.id,
-          title: data.title || 'Conseil IA',
-          message: data.recommendation || 'Continuez vos efforts !',
-          priority: data.priority || 'medium',
-          created_at: data.created_at,
+          id: aiData.id,
+          title: aiData.title || 'Conseil IA',
+          message: aiData.message || 'Continuez vos efforts !',
+          priority: aiData.priority || 'medium',
+          created_at: aiData.created_at,
         });
       }
     } catch {
+      // Erreur silencieuse
+      // Erreur silencieuse
+      // Erreur silencieuse pour les recommandations IA
     }
   };
 
@@ -104,7 +106,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
 
     try {
       const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('daily_goals')
         .select('*')
         .eq('user_id', appStoreUser.id)
@@ -122,6 +124,8 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         setDailyGoal(getDefaultGoal());
       }
     } catch {
+      // Erreur silencieuse
+      // Erreur silencieuse
       setDailyGoal(getDefaultGoal());
     }
   };
@@ -188,6 +192,8 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
         setStreak(currentStreak);
       }
     } catch {
+      // Erreur silencieuse
+      // Erreur silencieuse
     }
   };
 

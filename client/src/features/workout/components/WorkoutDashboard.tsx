@@ -185,6 +185,7 @@ export default function WorkoutDashboard() {
       setRecentWorkouts(workoutsResult);
       setWorkoutPlans(plansResult);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement dashboard:', error);
       toast({
         title: 'Erreur',
@@ -334,6 +335,7 @@ export default function WorkoutDashboard() {
         description: `Bien joué ! ${Math.floor(sessionTimer / 60)} minutes d'effort.`,
       });
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder la session',

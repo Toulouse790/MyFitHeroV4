@@ -18,6 +18,7 @@ export class RecoveryService {
       if (!response.ok) throw new Error('Erreur lors de la récupération du statut');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       // Mode mock pour le développement
       return this.getMockRecoveryData(userId);
     }
@@ -32,6 +33,7 @@ export class RecoveryService {
       if (!response.ok) throw new Error('Erreur lors de la récupération des métriques');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       return this.getMockMetrics(userId);
     }
   }
@@ -52,6 +54,7 @@ export class RecoveryService {
       if (!response.ok) throw new Error('Erreur lors de la mise à jour');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       // Return updated mock data
       return { ...this.getMockMetrics(userId), ...metrics };
     }
@@ -69,6 +72,7 @@ export class RecoveryService {
       });
       if (!response.ok) throw new Error("Erreur lors de l'enregistrement");
     } catch {
+      // Erreur silencieuse
       // Mock success
       console.log('Activité enregistrée (mode mock):', activity);
     }
@@ -83,6 +87,7 @@ export class RecoveryService {
       if (!response.ok) throw new Error('Erreur lors de la récupération des recommandations');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       return this.getMockRecommendations();
     }
   }
@@ -127,6 +132,7 @@ export class RecoveryService {
       if (!response.ok) throw new Error('Erreur lors de la récupération de la tendance');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       return this.getMockTrendData(days);
     }
   }

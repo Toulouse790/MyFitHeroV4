@@ -142,6 +142,7 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
 
       return null;
     } catch {
+      // Erreur silencieuse
       return null;
     }
   }, []);
@@ -164,6 +165,7 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
         clearError();
         return await asyncFn();
       } catch {
+      // Erreur silencieuse
         handleError(error);
         return null;
       }

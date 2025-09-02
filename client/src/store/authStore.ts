@@ -117,6 +117,7 @@ export const useAuthStore = create<AuthStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           set({ error: 'Échec du rafraîchissement de session' });
           get().clearAuth();
           return false;

@@ -78,6 +78,7 @@ export class UserDataService {
 
       return data || [];
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des données du pilier:', error);
       return [];
     }
@@ -105,6 +106,7 @@ export class UserDataService {
 
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la sauvegarde des données du pilier:', error);
       return false;
     }
@@ -130,6 +132,7 @@ export class UserDataService {
 
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la mise à jour des données du pilier:', error);
       return false;
     }
@@ -153,6 +156,7 @@ export class UserDataService {
 
       return data;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des statistiques:', error);
       return null;
     }
@@ -176,6 +180,7 @@ export class UserDataService {
 
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la mise à jour des statistiques:', error);
       return false;
     }
@@ -200,6 +205,7 @@ export class UserDataService {
 
       return data;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération du check-in:', error);
       return null;
     }
@@ -225,6 +231,7 @@ export class UserDataService {
 
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la sauvegarde du check-in:', error);
       return false;
     }
@@ -249,6 +256,7 @@ export class UserDataService {
 
       return data || [];
     } catch {
+      // Erreur silencieuse
       console.error("Erreur lors de la récupération de l'historique des check-ins:", error);
       return [];
     }
@@ -281,6 +289,7 @@ export class UserDataService {
 
       return streak;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors du calcul de la streak:', error);
       return 0;
     }
@@ -325,6 +334,7 @@ export class UserDataService {
         currentStreak,
       };
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des données du dashboard:', error);
       return {
         stats: null,

@@ -32,6 +32,7 @@ export class ApiServiceLayer {
         error: response.error || 'Login failed',
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Login failed',
@@ -63,6 +64,7 @@ export class ApiServiceLayer {
         error: response.error || 'Registration failed',
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Registration failed',
@@ -74,6 +76,7 @@ export class ApiServiceLayer {
     try {
       await api.auth.logout();
     } catch {
+      // Erreur silencieuse
       console.warn('Logout error:', error);
     } finally {
       // Always clear token locally
@@ -100,6 +103,7 @@ export class ApiServiceLayer {
 
       return false;
     } catch {
+      // Erreur silencieuse
       console.error('Token refresh failed:', error);
       return false;
     }
@@ -115,6 +119,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch profile',
@@ -133,6 +138,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update profile',
@@ -153,6 +159,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch workouts',
@@ -171,6 +178,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create workout',
@@ -189,6 +197,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch meals',
@@ -207,6 +216,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to add meal',
@@ -224,6 +234,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch recovery status',
@@ -242,6 +253,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to update recovery status',
@@ -259,6 +271,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch dashboard data',
@@ -280,6 +293,7 @@ export class ApiServiceLayer {
         error: response.error,
       };
     } catch {
+      // Erreur silencieuse
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Upload failed',
@@ -322,6 +336,7 @@ export class ApiServiceLayer {
       const response = await api.get('/health');
       return response.success;
     } catch {
+      // Erreur silencieuse
       return false;
     }
   }

@@ -471,6 +471,7 @@ const Sleep: React.FC = () => {
         }
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement sommeil:', error);
     } finally {
       setIsLoading(false);
@@ -516,6 +517,7 @@ const Sleep: React.FC = () => {
         description: `${Math.floor(durationMinutes / 60)}h${durationMinutes % 60}min de sommeil`,
       });
     } catch {
+      // Erreur silencieuse
       console.error('Erreur sauvegarde sommeil:', error);
       toast({
         title: 'Erreur',

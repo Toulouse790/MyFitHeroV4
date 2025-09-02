@@ -56,6 +56,7 @@ const SmartHealthDashboard: React.FC = () => {
         variant: 'default',
       });
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur de synchronisation',
         description: 'Impossible de synchroniser les données',

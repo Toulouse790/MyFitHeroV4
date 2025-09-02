@@ -104,6 +104,7 @@ const Analytics: React.FC = () => {
 
       setAnalyticsData(mockData);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement analytics:', error);
       toast({
         title: 'Erreur de chargement',
@@ -204,6 +205,7 @@ const Analytics: React.FC = () => {
           });
         }
       } catch {
+      // Erreur silencieuse
         console.error('Erreur export:', error);
         toast({
           title: "Erreur d'export",

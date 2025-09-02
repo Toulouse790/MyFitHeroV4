@@ -53,6 +53,7 @@ export class BadgeService {
 
       return data || [];
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des badges:', error);
       return [];
     }
@@ -81,6 +82,7 @@ export class BadgeService {
 
       return data || [];
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des badges utilisateur:', error);
       return [];
     }
@@ -111,6 +113,7 @@ export class BadgeService {
 
       return progress;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des progrès des badges:', error);
       return [];
     }
@@ -185,6 +188,7 @@ export class BadgeService {
 
       return newBadges;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la vérification des badges:', error);
       return [];
     }
@@ -274,6 +278,7 @@ export class BadgeService {
         created_at: new Date().toISOString(),
       });
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la mise à jour du progrès du badge:', error);
     }
   }
@@ -303,6 +308,7 @@ export class BadgeService {
         })
         .eq('user_id', userId);
     } catch {
+      // Erreur silencieuse
       console.error("Erreur lors de la mise à jour de l'expérience:", error);
     }
   }
@@ -318,6 +324,7 @@ export class BadgeService {
         .eq('user_id', userId)
         .in('badge_id', badgeIds);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la mise à jour des notifications:', error);
     }
   }
@@ -346,6 +353,7 @@ export class BadgeService {
 
       return data || [];
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des badges non notifiés:', error);
       return [];
     }
@@ -370,6 +378,7 @@ export class BadgeService {
 
       return data || [];
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des badges par catégorie:', error);
       return [];
     }
@@ -415,6 +424,7 @@ export class BadgeService {
         totalPoints,
       };
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la récupération des statistiques des badges:', error);
       return {
         totalBadges: 0,

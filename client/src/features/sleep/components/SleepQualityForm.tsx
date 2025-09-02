@@ -106,6 +106,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
 
         onComplete?.();
       } catch {
+      // Erreur silencieuse
         toast({
           title: 'Erreur',
           description: "Impossible d'enregistrer le sommeil",

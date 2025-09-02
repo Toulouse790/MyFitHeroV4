@@ -230,6 +230,7 @@ export const useForm = <T extends Record<string, string>>(
       try {
         await onSubmit(values);
       } catch {
+      // Erreur silencieuse
         console.error('Form submission error:', error);
       } finally {
         setIsSubmitting(false);

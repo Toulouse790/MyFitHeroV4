@@ -109,6 +109,7 @@ export const useProfileStore = create<ProfileStore>()(
             lastUpdated: new Date().toISOString(),
           });
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la mise à jour du profil' });
           throw new Error('Erreur lors de la mise à jour du profil');
         } finally {
@@ -146,6 +147,7 @@ export const useProfileStore = create<ProfileStore>()(
 
           // set({ profile, lastUpdated: new Date().toISOString() });
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors du chargement du profil' });
         } finally {
           set({ isLoading: false });

@@ -489,6 +489,7 @@ const Nutrition: React.FC = () => {
         });
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement nutrition:', error);
     } finally {
       setIsLoading(false);

@@ -26,6 +26,7 @@ export const useExerciseHistory = (): UseExerciseHistoryReturn => {
         );
         return userHistory.length ? userHistory[userHistory.length - 1].weight : null;
       } catch {
+      // Erreur silencieuse
         console.error('Erreur lecture historique poids:', error);
         return null;
       }
@@ -54,6 +55,7 @@ export const useExerciseHistory = (): UseExerciseHistoryReturn => {
 
         localStorage.setItem('exerciseWeightHistory', JSON.stringify(history));
       } catch {
+      // Erreur silencieuse
         console.error('Erreur sauvegarde historique poids:', error);
       }
     },
@@ -91,6 +93,7 @@ export const useExerciseHistory = (): UseExerciseHistoryReturn => {
           })),
         }));
       } catch {
+      // Erreur silencieuse
         console.error('Erreur chargement dernière session:', error);
         return [];
       }

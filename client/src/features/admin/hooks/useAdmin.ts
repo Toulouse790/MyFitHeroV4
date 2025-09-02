@@ -108,6 +108,7 @@ export const useAdmin = (): UseAdminReturn => {
 
       setStats(mockStats);
     } catch {
+      // Erreur silencieuse
       setStatsError(error instanceof Error ? error.message : 'Failed to load stats');
     } finally {
       setStatsLoading(false);
@@ -163,6 +164,7 @@ export const useAdmin = (): UseAdminReturn => {
         filters,
       });
     } catch {
+      // Erreur silencieuse
       setUsersError(error instanceof Error ? error.message : 'Failed to load users');
     } finally {
       setUsersLoading(false);
@@ -183,6 +185,7 @@ export const useAdmin = (): UseAdminReturn => {
 
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to update user status:', error);
         return false;
       }
@@ -204,6 +207,7 @@ export const useAdmin = (): UseAdminReturn => {
 
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to update user role:', error);
         return false;
       }
@@ -225,6 +229,7 @@ export const useAdmin = (): UseAdminReturn => {
 
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Failed to delete user:', error);
       return false;
     }
@@ -255,6 +260,7 @@ export const useAdmin = (): UseAdminReturn => {
 
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to bulk update users:', error);
         return false;
       }
@@ -271,6 +277,7 @@ export const useAdmin = (): UseAdminReturn => {
         console.log('Sending notification to users:', targetUsers, 'Message:', message);
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to send notification:', error);
         return false;
       }
@@ -317,6 +324,7 @@ export const useAdmin = (): UseAdminReturn => {
 
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to export data:', error);
         return false;
       }
@@ -333,6 +341,7 @@ export const useAdmin = (): UseAdminReturn => {
         console.log(`Generating ${type} report...`);
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to generate report:', error);
         return false;
       }

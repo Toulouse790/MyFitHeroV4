@@ -178,6 +178,7 @@ export const useScalesStore = create<ScalesStore>()(
             connectedScales: [...state.connectedScales, newScale],
           }));
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la connexion à la balance' });
           throw new Error('Erreur lors de la connexion à la balance');
         } finally {
@@ -196,6 +197,7 @@ export const useScalesStore = create<ScalesStore>()(
             connectedScales: state.connectedScales.filter(scale => scale.id !== scaleId),
           }));
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la déconnexion de la balance' });
           throw new Error('Erreur lors de la déconnexion de la balance');
         } finally {
@@ -235,6 +237,7 @@ export const useScalesStore = create<ScalesStore>()(
 
           return reading.weight;
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la synchronisation du poids' });
           throw new Error('Erreur lors de la synchronisation du poids');
         } finally {
@@ -250,6 +253,7 @@ export const useScalesStore = create<ScalesStore>()(
           // const scales = await supabaseService.getScales(userId);
           // set({ connectedScales: scales });
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors du chargement des balances' });
         } finally {
           set({ isLoading: false });
@@ -267,6 +271,7 @@ export const useScalesStore = create<ScalesStore>()(
             ),
           }));
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la mise à jour de la balance' });
           throw new Error('Erreur lors de la mise à jour de la balance');
         }
@@ -291,6 +296,7 @@ export const useScalesStore = create<ScalesStore>()(
             weightHistory: [newEntry, ...state.weightHistory].slice(0, 100),
           }));
         } catch {
+      // Erreur silencieuse
           set({ error: "Erreur lors de l'ajout du poids" });
           throw new Error("Erreur lors de l'ajout du poids");
         } finally {
@@ -311,6 +317,7 @@ export const useScalesStore = create<ScalesStore>()(
             ),
           }));
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la mise à jour du poids' });
           throw new Error('Erreur lors de la mise à jour du poids');
         } finally {
@@ -329,6 +336,7 @@ export const useScalesStore = create<ScalesStore>()(
             weightHistory: state.weightHistory.filter(entry => entry.id !== entryId),
           }));
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la suppression du poids' });
           throw new Error('Erreur lors de la suppression du poids');
         } finally {
@@ -344,6 +352,7 @@ export const useScalesStore = create<ScalesStore>()(
           // const history = await supabaseService.getWeightHistory(userId, limit);
           // set({ weightHistory: history });
         } catch {
+      // Erreur silencieuse
           set({ error: "Erreur lors du chargement de l'historique" });
         } finally {
           set({ isLoading: false });
@@ -357,6 +366,7 @@ export const useScalesStore = create<ScalesStore>()(
         try {
           return await ScaleService.scanForDevices();
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la recherche de balances' });
           throw new Error('Erreur lors de la recherche de balances');
         } finally {
@@ -382,6 +392,7 @@ export const useScalesStore = create<ScalesStore>()(
 
           await Promise.all(syncPromises);
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors de la synchronisation' });
         } finally {
           set({ isSyncing: false });
@@ -395,6 +406,7 @@ export const useScalesStore = create<ScalesStore>()(
           const importPromises = data.map(entry => get().addWeightEntry(entry));
           await Promise.all(importPromises);
         } catch {
+      // Erreur silencieuse
           set({ error: "Erreur lors de l'importation des données" });
           throw new Error("Erreur lors de l'importation des données");
         } finally {

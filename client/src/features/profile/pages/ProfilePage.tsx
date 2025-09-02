@@ -81,6 +81,7 @@ const ProfilePage: React.FC = () => {
       } as any);
       toast.success('Profil mis à jour avec succès !');
     } catch {
+      // Erreur silencieuse
       toast.error('Erreur lors de la mise à jour du profil');
       console.error('Profile update error:', error);
     }
@@ -96,6 +97,7 @@ const ProfilePage: React.FC = () => {
       setCurrentWeight(mockWeight.toFixed(1));
       toast.success('Poids synchronisé avec succès !');
     } catch {
+      // Erreur silencieuse
       toast.error('Erreur lors de la synchronisation');
       console.error('Scale sync error:', error);
     } finally {
@@ -116,6 +118,7 @@ const ProfilePage: React.FC = () => {
         toast.success(`${mockDevices.length} balance(s) trouvée(s)`);
       }
     } catch {
+      // Erreur silencieuse
       toast.error('Erreur lors de la recherche');
       console.error('Scale scan error:', error);
     } finally {
@@ -135,6 +138,7 @@ const ProfilePage: React.FC = () => {
       } as any);
       toast.success(`${device.name} connectée avec succès !`);
     } catch {
+      // Erreur silencieuse
       toast.error('Échec de la connexion');
       console.error('Scale connect error:', error);
     }

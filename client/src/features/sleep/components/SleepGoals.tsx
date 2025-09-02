@@ -45,6 +45,7 @@ export const SleepGoals: React.FC<SleepGoalsProps> = ({ className = '' }) => {
 
         setIsEditing(false);
       } catch {
+      // Erreur silencieuse
         toast({
           title: 'Erreur',
           description: "Impossible de sauvegarder l'objectif",

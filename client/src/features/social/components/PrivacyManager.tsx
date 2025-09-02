@@ -69,6 +69,7 @@ const PrivacyManager: React.FC = () => {
         setSettings(data);
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement paramètres:', error);
     }
   };
@@ -96,6 +97,7 @@ const PrivacyManager: React.FC = () => {
         description: 'Vos préférences de confidentialité ont été sauvegardées.',
       });
     } catch {
+      // Erreur silencieuse
       console.error('Erreur sauvegarde paramètres:', error);
       toast({
         title: 'Erreur',
@@ -161,6 +163,7 @@ const PrivacyManager: React.FC = () => {
         description: 'Vos données ont été exportées avec succès.',
       });
     } catch {
+      // Erreur silencieuse
       console.error('Erreur export données:', error);
       toast({
         title: 'Erreur',
@@ -199,6 +202,7 @@ const PrivacyManager: React.FC = () => {
       // Déconnexion
       await supabase.auth.signOut();
     } catch {
+      // Erreur silencieuse
       console.error('Erreur suppression compte:', error);
       toast({
         title: 'Erreur',

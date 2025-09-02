@@ -83,7 +83,7 @@ export const AppRouter: React.FC = () => {
           <AICoachPage />
         </ProtectedRoute>
 
-        {/* Routes d'administration */}
+        {/* Routes d&apos;administration */}
         <ProtectedRoute path={routeConfig.admin.dashboard} adminRequired>
           <AdminDashboard />
         </ProtectedRoute>

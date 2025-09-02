@@ -61,6 +61,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
       setStats(userStats);
       setBadgeStats(badgeStatsData);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors du chargement des statistiques:', error);
       toast({
         title: 'Erreur',

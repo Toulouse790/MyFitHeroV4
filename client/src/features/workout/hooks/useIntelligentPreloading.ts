@@ -51,6 +51,7 @@ export const useIntelligentPreloading = () => {
               break;
           }
         } catch {
+      // Erreur silencieuse
           console.log('Preload failed for', route, error);
         }
       });

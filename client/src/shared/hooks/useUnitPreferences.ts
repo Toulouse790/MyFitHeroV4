@@ -14,6 +14,7 @@ export const useUnitPreferences = () => {
       try {
         return JSON.parse(stored);
       } catch {
+      // Erreur silencieuse
         // Si parsing échoue, utiliser les préférences par défaut
       }
     }

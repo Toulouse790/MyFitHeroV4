@@ -65,6 +65,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
         setCheckin(newCheckin);
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors du chargement du check-in:', error);
       toast({
         title: 'Erreur',
@@ -128,6 +129,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
         }
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la sauvegarde du check-in:', error);
       toast({
         title: 'Erreur',

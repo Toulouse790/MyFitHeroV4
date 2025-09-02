@@ -123,7 +123,7 @@ const WearableNotificationCenter: React.FC = () => {
         type: 'reminder',
         title: '💪 Temps de bouger !',
         message:
-          "Cela fait un moment que vous n'avez pas été actif. Que diriez-vous d'une petite marche ?",
+          "Cela fait un moment que vous n&apos;avez pas été actif. Que diriez-vous d'une petite marche ?",
         timestamp: new Date(),
         icon: Activity,
         priority: 'low',

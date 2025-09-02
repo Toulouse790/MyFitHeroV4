@@ -129,6 +129,7 @@ export const usePWA = (): PWAState & PWAActions => {
         setDeferredPrompt(null);
       }
     } catch {
+      // Erreur silencieuse
       console.error("Erreur lors de l'installation:", error);
     }
   };

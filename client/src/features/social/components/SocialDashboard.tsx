@@ -75,6 +75,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
         setSocialStats(stats);
       }
     } catch {
+      // Erreur silencieuse
       console.error('Error loading social data:', error);
       toast({
         title: 'Erreur',
@@ -106,6 +107,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
         description: 'Votre réaction a été enregistrée',
       });
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: "Impossible d'aimer ce post",
@@ -132,6 +134,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
         });
       }
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: 'Impossible de rejoindre ce défi',

@@ -41,6 +41,7 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
       const data = await socialService.getFriendsComparison(userId, period);
       setComparisonData(data);
     } catch {
+      // Erreur silencieuse
       console.error('Error loading friends comparison:', error);
       toast({
         title: 'Erreur',

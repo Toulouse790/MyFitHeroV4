@@ -51,6 +51,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
         setUserBadges(badges);
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors du chargement des badges:', error);
       toast({
         title: 'Erreur',

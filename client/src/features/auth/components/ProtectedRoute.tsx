@@ -60,6 +60,7 @@ const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
         alert("Erreur lors de l'activation du module");
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur activation:', error);
       alert("Erreur lors de l'activation");
     } finally {
@@ -122,6 +123,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, moduleRequire
         } = await supabase.auth.getSession();
         setSession(session);
       } catch {
+      // Erreur silencieuse
         console.error('Erreur vérification auth:', error);
       } finally {
         setLoading(false);
@@ -136,7 +138,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, moduleRequire
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Vérification de l'authentification...</p>
+          <p className="text-gray-600">Vérification de l&apos;authentification...</p>
         </div>
       </div>
     );

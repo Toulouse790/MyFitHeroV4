@@ -422,6 +422,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         ]);
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement données dashboard:', error);
       setMessages([
         {
@@ -554,6 +555,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
         }
       }, 30000);
     } catch {
+      // Erreur silencieuse
       console.error("Erreur lors de l'envoi du message:", error);
       setMessages(prev => [
         ...prev,

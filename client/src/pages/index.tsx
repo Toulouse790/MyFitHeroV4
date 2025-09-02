@@ -1013,7 +1013,7 @@ const useUSLocation = () => {
 
         setLocation({ state, city, zip, timezone });
       }
-    } catch (err) {
+    } catch () {
       setError('Unable to determine your location. Please ensure location services are enabled.');
     } finally {
       setIsLoading(false);
@@ -1248,7 +1248,7 @@ const useConversationalAI = () => {
         });
 
         return { response: data.response, recommendations: data.recommendations };
-      } catch (err) {
+      } catch () {
         const errorMessage = err instanceof Error ? err.message : 'AI service unavailable';
         setError(errorMessage);
         throw new Error(errorMessage);
@@ -1293,7 +1293,7 @@ const useConversationalAI = () => {
         });
 
         return recommendations;
-      } catch (err) {
+      } catch () {
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to generate recommendations';
         setError(errorMessage);
@@ -1349,6 +1349,8 @@ const useOfflineSync = () => {
           }
         }
       } catch {
+      // Erreur silencieuse
+      // Erreur silencieuse
       }
     }
 
@@ -1667,6 +1669,8 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
           }
         }
       } catch {
+      // Erreur silencieuse
+      // Erreur silencieuse
       } finally {
         setIsLoading(false);
       }
@@ -1769,6 +1773,8 @@ const MyFitHeroIndex: React.FC = () => {
 
         setIsInitialized(true);
       } catch {
+      // Erreur silencieuse
+      // Erreur silencieuse
         setIsInitialized(true); // Continue même en cas d'erreur
       }
     };

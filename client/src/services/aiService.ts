@@ -60,6 +60,7 @@ class AIService {
 
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Pattern analysis error:', error);
       throw error;
     }
@@ -87,6 +88,7 @@ class AIService {
 
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Adaptive coaching error:', error);
       throw error;
     }
@@ -110,6 +112,7 @@ class AIService {
 
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Anomaly detection error:', error);
       throw error;
     }
@@ -133,6 +136,7 @@ class AIService {
 
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Predictions error:', error);
       throw error;
     }
@@ -163,6 +167,7 @@ class AIService {
 
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Contextual recommendations error:', error);
       throw error;
     }
@@ -192,6 +197,7 @@ class AIService {
         generated_at: new Date().toISOString(),
       };
     } catch {
+      // Erreur silencieuse
       console.error('Habits insights error:', error);
       throw error;
     }
@@ -216,6 +222,7 @@ class AIService {
         generated_at: new Date().toISOString(),
       };
     } catch {
+      // Erreur silencieuse
       console.error('Proactive coaching error:', error);
       throw error;
     }

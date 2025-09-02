@@ -2,7 +2,7 @@
 import { supabase } from '@/lib/supabase';
 
 const CACHE_TTL = 5 * 60_000;
-const _MEMO_KEY = 'positions-cache-v1';
+const __MEMO_KEY = 'positions-cache-v1';
 let memoryCache: { [sportId: string]: { data: string[]; expiry: number } } = {};
 
 export class PositionService {

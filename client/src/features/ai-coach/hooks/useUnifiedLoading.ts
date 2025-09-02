@@ -63,6 +63,7 @@ export const useUnifiedLoading = (initialLoading = false): [LoadingState, Loadin
         setLoading(false);
         return result;
       } catch {
+      // Erreur silencieuse
         const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
         setError(errorMessage);
         throw error;
@@ -127,6 +128,7 @@ export const useFormLoading = () => {
         onSuccess?.(result);
         return result;
       } catch {
+      // Erreur silencieuse
         onError?.(error as Error);
         throw error;
       }
@@ -156,6 +158,7 @@ export const useDataLoading = <T>() => {
         onSuccess?.(result);
         return result;
       } catch {
+      // Erreur silencieuse
         setData(null);
         throw error;
       }

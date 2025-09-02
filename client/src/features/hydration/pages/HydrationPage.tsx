@@ -327,6 +327,7 @@ const Hydration: React.FC = () => {
         setLastDrinkTime(new Date(currentLogs[0].logged_at));
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement hydratation:', error);
       toast({
         title: 'Erreur inattendue',
@@ -395,6 +396,7 @@ const Hydration: React.FC = () => {
 
         await loadHydrationData();
       } catch {
+      // Erreur silencieuse
         console.error('Erreur ajout hydratation:', error);
         setCurrentMl(prev => prev - amount);
         toast({
@@ -440,6 +442,7 @@ const Hydration: React.FC = () => {
 
       await loadHydrationData();
     } catch {
+      // Erreur silencieuse
       console.error('Erreur suppression:', error);
       setCurrentMl(prev => prev + lastLog.amount_ml);
       toast({

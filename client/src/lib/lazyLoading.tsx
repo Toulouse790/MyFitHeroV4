@@ -29,6 +29,7 @@ export const createLazyComponent = <T extends ComponentType<any>>(
       const module = await importFunc();
       return module;
     } catch {
+      // Erreur silencieuse
       console.error('Lazy loading error:', error);
       // Return error component as fallback
       if (fallback) {

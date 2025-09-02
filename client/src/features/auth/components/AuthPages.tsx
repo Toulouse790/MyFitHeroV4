@@ -127,6 +127,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         });
       }
     } catch {
+      // Erreur silencieuse
       console.error('🔥 Exception lors inscription:', error);
       toast({
         title: 'Erreur',
@@ -180,6 +181,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
         });
       }
     } catch {
+      // Erreur silencieuse
       console.error('🔥 Exception lors connexion:', error);
       toast({
         title: 'Erreur',

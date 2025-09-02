@@ -422,10 +422,11 @@ export const appStore = create<ExtendedAppStore>()(
             return null;
           }
 
-          const stats = data as DailyStats;
+          const stats = (data as any) || null;
           set({ currentStats: stats });
           return stats;
         } catch {
+      // Erreur silencieuse
           set({ error: 'Erreur lors du chargement des statistiques' });
           return null;
         } finally {
@@ -455,6 +456,7 @@ export const appStore = create<ExtendedAppStore>()(
           set({ recommendations });
           return recommendations;
         } catch {
+      // Erreur silencieuse
           return [];
         }
       },
@@ -479,6 +481,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -513,6 +516,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -550,6 +554,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -585,6 +590,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -623,6 +629,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -656,6 +663,7 @@ export const appStore = create<ExtendedAppStore>()(
           console.log(`✅ Module ${moduleId} activé avec succès`);
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -688,6 +696,7 @@ export const appStore = create<ExtendedAppStore>()(
           console.log(`✅ Module ${moduleId} désactivé avec succès`);
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -728,6 +737,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return mockData;
         } catch {
+      // Erreur silencieuse
           set({ syncStatus: 'error' });
           return null;
         }
@@ -761,6 +771,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -794,6 +805,7 @@ export const appStore = create<ExtendedAppStore>()(
 
           return true;
         } catch {
+      // Erreur silencieuse
           return false;
         }
       },
@@ -832,6 +844,7 @@ export const appStore = create<ExtendedAppStore>()(
             workouts: Math.min((stats.workouts_completed / dailyGoals.workouts) * 100, 100),
           };
         } catch {
+      // Erreur silencieuse
           return {};
         }
       },
@@ -873,7 +886,7 @@ export const appStore = create<ExtendedAppStore>()(
             return {};
           }
 
-          const stats = data as DailyStats[];
+          const stats = (data as any) || [];
 
           return {
             calories: stats.map(s => s.total_calories_consumed),
@@ -883,6 +896,7 @@ export const appStore = create<ExtendedAppStore>()(
             workouts: stats.map(s => s.workouts_completed),
           };
         } catch {
+      // Erreur silencieuse
           return {};
         }
       },
@@ -933,6 +947,7 @@ export const appStore = create<ExtendedAppStore>()(
             } as UserAnalytics,
           };
         } catch {
+      // Erreur silencieuse
           throw new Error('Failed to export user data');
         }
       },

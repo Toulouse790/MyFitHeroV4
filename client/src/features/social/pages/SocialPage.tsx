@@ -210,6 +210,7 @@ const Social: React.FC = () => {
       };
       setUserStats(mockStats);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement stats:', error);
     }
   }, [appStoreUser?.id]);
@@ -287,6 +288,7 @@ const Social: React.FC = () => {
 
       setPosts(mockPosts);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement posts:', error);
     } finally {
       setPostsLoading(false);
@@ -350,6 +352,7 @@ const Social: React.FC = () => {
 
       setChallenges(mockChallenges);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement challenges:', error);
     } finally {
       setChallengesLoading(false);
@@ -398,6 +401,7 @@ const Social: React.FC = () => {
 
       setFriends(mockFriends);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur chargement amis:', error);
     }
   }, [appStoreUser?.id, appStoreUser?.sport]);
@@ -468,6 +472,7 @@ const Social: React.FC = () => {
         });
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur création post:', error);
       toast({
         title: 'Erreur',
@@ -542,6 +547,7 @@ const Social: React.FC = () => {
         });
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur création challenge:', error);
       toast({
         title: 'Erreur',

@@ -36,6 +36,7 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
       const wearableStats = await AnalyticsService.getWearableStats(userId, selectedPeriod);
       setStats(wearableStats);
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors du chargement des données wearables:', error);
     } finally {
       setIsLoading(false);

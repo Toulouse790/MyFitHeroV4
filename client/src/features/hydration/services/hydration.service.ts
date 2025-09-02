@@ -10,6 +10,7 @@ export class HydrationService {
       if (!response.ok) throw new Error('Erreur lors de la récupération des données');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Erreur API hydration:', error);
       return this.getMockHydrationData();
     }
@@ -25,6 +26,7 @@ export class HydrationService {
       if (!response.ok) throw new Error('Erreur lors de la mise à jour');
       return await response.json();
     } catch {
+      // Erreur silencieuse
       console.error('Erreur mise à jour hydration:', error);
       throw error;
     }

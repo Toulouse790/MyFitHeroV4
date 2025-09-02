@@ -261,6 +261,7 @@ const useAICoachLogic = () => {
         const response = await fetchAICoachResponse({ messages: [...messages, newUserMsg] });
         setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       } catch {
+      // Erreur silencieuse
         toast.error('Erreur communication IA.');
       } finally {
         setIsStreaming(false);
@@ -299,6 +300,7 @@ const useAICoachLogic = () => {
         setPersonalPlan(plan);
         toast.success('Plan personnalisé généré.');
       } catch {
+      // Erreur silencieuse
         toast.error('Erreur lors génération plan.');
       }
     } else if (action === 'ajusterCharge') {
@@ -313,6 +315,7 @@ const useAICoachLogic = () => {
         setExerciseAnalysis(analysis);
         toast.success('Analyse forme terminée.');
       } catch {
+      // Erreur silencieuse
         toast.error('Erreur analyse video.');
       }
     }
@@ -328,6 +331,7 @@ const useAICoachLogic = () => {
         const analysis = await fetchExerciseAnalysis(videoRef.current);
         setExerciseAnalysis(analysis);
       } catch {
+      // Erreur silencieuse
         // Silence error buffering
       }
       animationId = requestAnimationFrame(analyseLoop);

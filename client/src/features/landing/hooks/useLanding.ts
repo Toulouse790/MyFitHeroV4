@@ -254,6 +254,7 @@ export const useLanding = (): UseLandingReturn => {
 
       setContent(mockContent);
     } catch {
+      // Erreur silencieuse
       setContentError(error instanceof Error ? error.message : 'Failed to load content');
     } finally {
       setContentLoading(false);
@@ -281,6 +282,7 @@ export const useLanding = (): UseLandingReturn => {
 
       setMetrics(mockMetrics);
     } catch {
+      // Erreur silencieuse
       setMetricsError(error instanceof Error ? error.message : 'Failed to load metrics');
     } finally {
       setMetricsLoading(false);
@@ -325,6 +327,7 @@ export const useLanding = (): UseLandingReturn => {
 
       setCTAStats(mockCTAStats);
     } catch {
+      // Erreur silencieuse
       console.error('Failed to load CTA stats:', error);
     } finally {
       setCTAStatsLoading(false);
@@ -351,6 +354,7 @@ export const useLanding = (): UseLandingReturn => {
 
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to update content:', error);
         return false;
       }
@@ -376,6 +380,7 @@ export const useLanding = (): UseLandingReturn => {
         )
       );
     } catch {
+      // Erreur silencieuse
       console.error('Failed to track CTA click:', error);
     }
   }, []);
@@ -395,6 +400,7 @@ export const useLanding = (): UseLandingReturn => {
           : null
       );
     } catch {
+      // Erreur silencieuse
       console.error('Failed to track page view:', error);
     }
   }, []);
@@ -408,6 +414,7 @@ export const useLanding = (): UseLandingReturn => {
         console.log(`Starting A/B test: ${testName} with variants:`, variants);
         return true;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to start A/B test:', error);
         return false;
       }
@@ -431,6 +438,7 @@ export const useLanding = (): UseLandingReturn => {
         console.log(`A/B test results for ${testName}:`, mockResults);
         return mockResults;
       } catch {
+      // Erreur silencieuse
         console.error('Failed to get A/B test result:', error);
         return null;
       }
@@ -446,6 +454,7 @@ export const useLanding = (): UseLandingReturn => {
       console.log('Images optimized successfully');
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Failed to optimize images:', error);
       return false;
     }
@@ -459,6 +468,7 @@ export const useLanding = (): UseLandingReturn => {
       console.log('Sitemap generated successfully');
       return true;
     } catch {
+      // Erreur silencieuse
       console.error('Failed to generate sitemap:', error);
       return false;
     }

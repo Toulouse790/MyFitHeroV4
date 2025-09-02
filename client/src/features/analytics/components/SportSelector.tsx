@@ -200,6 +200,7 @@ export default function SportSelector({
           customSportName: enrichedResults.length === 0 ? query : '',
         }));
       } catch {
+      // Erreur silencieuse
         const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la recherche';
 
         setSearchState(prev => ({
@@ -276,6 +277,7 @@ export default function SportSelector({
         }));
       }
     } catch {
+      // Erreur silencieuse
       toast({
         title: 'Erreur',
         description: "Impossible d'envoyer votre suggestion. Réessayez plus tard.",

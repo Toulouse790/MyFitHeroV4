@@ -124,6 +124,7 @@ export const useWearableSync = () => {
 
       return mockHealthData;
     } catch {
+      // Erreur silencieuse
       const errorMessage =
         error instanceof Error ? error.message : 'Erreur de synchronisation Apple Health';
       setSyncError(errorMessage);
@@ -186,6 +187,7 @@ export const useWearableSync = () => {
 
       return mockFitData;
     } catch {
+      // Erreur silencieuse
       const errorMessage =
         error instanceof Error ? error.message : 'Erreur de synchronisation Google Fit';
       setSyncError(errorMessage);
@@ -249,6 +251,7 @@ export const useWearableSync = () => {
           try {
             await syncAll();
           } catch {
+      // Erreur silencieuse
             console.error('Erreur lors de la synchronisation programmée:', error);
           }
         },
@@ -277,6 +280,7 @@ export const useWearableSync = () => {
         };
       }
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la lecture des données mises en cache:', error);
     }
     return null;
@@ -287,6 +291,7 @@ export const useWearableSync = () => {
     try {
       localStorage.setItem('wearableData', JSON.stringify(data));
     } catch {
+      // Erreur silencieuse
       console.error('Erreur lors de la sauvegarde des données en cache:', error);
     }
   }, []);

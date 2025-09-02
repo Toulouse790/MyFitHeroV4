@@ -52,6 +52,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
       const raw = localStorage.getItem('currentWorkoutSession');
       return raw ? (JSON.parse(raw) as WorkoutSession) : null;
     } catch {
+      // Erreur silencieuse
       console.error('Erreur parsing session localStorage:', error);
       localStorage.removeItem('currentWorkoutSession');
       return null;
@@ -226,6 +227,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
         }
       );
     } catch {
+      // Erreur silencieuse
       console.error('Erreur mise à jour stats quotidiennes:', error);
     }
 
@@ -296,6 +298,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
             saveLocalSession(session);
           }
         } catch {
+      // Erreur silencieuse
           console.error('Erreur récupération session interrompue:', error);
         }
       }

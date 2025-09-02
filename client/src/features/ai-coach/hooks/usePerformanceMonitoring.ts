@@ -116,6 +116,7 @@ export const usePerformanceMonitoring = (): UsePerformanceMonitoringReturn => {
           bundleSize: getBundleSize(),
         }));
       } catch {
+      // Erreur silencieuse
         console.warn('Performance monitoring not supported:', error);
       }
     }
