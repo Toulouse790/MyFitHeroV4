@@ -18,12 +18,7 @@ export {
   useUserSettings,
 } from './profileStore';
 
-export { 
-  useScalesStore, 
-  useScalesState, 
-  useWeightHistory, 
-  useScaleActions 
-} from './scalesStore';
+export { useScalesStore, useScalesState, useWeightHistory, useScaleActions } from './scalesStore';
 
 export {
   useSettingsStore,
