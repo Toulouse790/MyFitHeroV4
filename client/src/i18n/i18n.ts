@@ -56,7 +56,7 @@ i18n
     },
 
     // Gestion des clés manquantes
-    missingKeyHandler: (lng, ns, key, fallbackValue) => {
+    missingKeyHandler: (lng, ns, key, _fallbackValue) => {
       console.warn(`Missing translation: ${ns}:${key} for language: ${lng}`);
     },
 

@@ -64,7 +64,7 @@ export class MuscleRecoveryService {
 
       if (error && error.code !== 'PGRST116') throw error;
       return data || null;
-    } catch (error) {
+    } catch {
       console.error('Error fetching user recovery profile:', error);
       return null;
     }
@@ -92,7 +92,7 @@ export class MuscleRecoveryService {
 
       if (error) throw error;
       return data;
-    } catch (error) {
+    } catch {
       console.error('Error creating/updating recovery profile:', error);
       return null;
     }
@@ -286,7 +286,7 @@ export class MuscleRecoveryService {
       }
 
       return Array.from(muscleRecoveryMap.values());
-    } catch (error) {
+    } catch {
       console.error('Error calculating muscle recovery:', error);
       return [];
     }
@@ -685,7 +685,7 @@ export class MuscleRecoveryService {
 
       if (error) throw error;
       return true;
-    } catch (error) {
+    } catch {
       console.error('Error saving muscle recovery data:', error);
       return false;
     }
@@ -701,7 +701,7 @@ export class MuscleRecoveryService {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Error fetching muscle recovery data:', error);
       return [];
     }

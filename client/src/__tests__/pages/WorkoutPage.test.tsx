@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import {
   render,
   userEvent,

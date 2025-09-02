@@ -143,7 +143,7 @@ class SocialService {
 
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Error fetching friends:', error);
       throw error;
     }
@@ -187,7 +187,7 @@ class SocialService {
           is_online: user.is_online,
         },
       }));
-    } catch (error) {
+    } catch {
       console.error('Error searching users:', error);
       throw error;
     }
@@ -203,7 +203,7 @@ class SocialService {
 
       if (error) throw error;
       return true;
-    } catch (error) {
+    } catch {
       console.error('Error sending friend request:', error);
       return false;
     }
@@ -218,7 +218,7 @@ class SocialService {
 
       if (error) throw error;
       return true;
-    } catch (error) {
+    } catch {
       console.error('Error accepting friend request:', error);
       return false;
     }
@@ -255,7 +255,7 @@ class SocialService {
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Error fetching challenges:', error);
       throw error;
     }
@@ -273,7 +273,7 @@ class SocialService {
 
       if (error) throw error;
       return true;
-    } catch (error) {
+    } catch {
       console.error('Error joining challenge:', error);
       return false;
     }
@@ -298,7 +298,7 @@ class SocialService {
       await this.joinChallenge(data.id, userId);
 
       return data.id;
-    } catch (error) {
+    } catch {
       console.error('Error creating challenge:', error);
       return null;
     }
@@ -345,7 +345,7 @@ class SocialService {
       });
 
       return { active, completed };
-    } catch (error) {
+    } catch {
       console.error('Error fetching user challenges:', error);
       return { active: [], completed: [] };
     }
@@ -414,7 +414,7 @@ class SocialService {
       }
 
       return mockLeaderboard.slice(0, limit);
-    } catch (error) {
+    } catch {
       console.error('Error fetching leaderboard:', error);
       return [];
     }
@@ -482,7 +482,7 @@ class SocialService {
       ];
 
       return mockPosts.slice(0, limit);
-    } catch (error) {
+    } catch {
       console.error('Error fetching social feed:', error);
       return [];
     }
@@ -504,7 +504,7 @@ class SocialService {
 
       if (error) throw error;
       return data.id;
-    } catch (error) {
+    } catch {
       console.error('Error creating post:', error);
       return null;
     }
@@ -519,7 +519,7 @@ class SocialService {
 
       if (error) throw error;
       return true;
-    } catch (error) {
+    } catch {
       console.error('Error liking post:', error);
       return false;
     }
@@ -543,7 +543,7 @@ class SocialService {
       };
 
       return mockStats;
-    } catch (error) {
+    } catch {
       console.error('Error fetching social stats:', error);
       throw error;
     }
@@ -594,7 +594,7 @@ class SocialService {
         friends_stats: friendsStats,
         user_rank: 2,
       };
-    } catch (error) {
+    } catch {
       console.error('Error fetching friends comparison:', error);
       throw error;
     }
@@ -615,7 +615,7 @@ class SocialService {
         mentions: [],
         achievements: [],
       };
-    } catch (error) {
+    } catch {
       console.error('Error fetching social notifications:', error);
       return {
         friend_requests: [],

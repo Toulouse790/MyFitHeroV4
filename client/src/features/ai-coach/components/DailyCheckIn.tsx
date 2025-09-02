@@ -64,7 +64,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
         };
         setCheckin(newCheckin);
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur lors du chargement du check-in:', error);
       toast({
         title: 'Erreur',
@@ -127,7 +127,7 @@ export const DailyCheckIn: React.FC<DailyCheckInProps> = ({
           });
         }
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la sauvegarde du check-in:', error);
       toast({
         title: 'Erreur',

@@ -41,7 +41,7 @@ class SupabaseAuthClient {
       }
 
       return { user: null, error: 'Registration failed' };
-    } catch (error) {
+    } catch {
       return { user: null, error: 'Registration failed' };
     }
   }
@@ -68,7 +68,7 @@ class SupabaseAuthClient {
       }
 
       return { user: null, error: 'Login failed' };
-    } catch (error) {
+    } catch {
       return { user: null, error: 'Login failed' };
     }
   }
@@ -93,7 +93,7 @@ class SupabaseAuthClient {
         email: user.email!,
         user_metadata: user.user_metadata,
       };
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -105,7 +105,7 @@ class SupabaseAuthClient {
         error,
       } = await supabase.auth.getSession();
       return error ? null : session;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

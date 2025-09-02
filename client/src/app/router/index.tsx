@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { Loading } from '@/shared/components';
 import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
@@ -26,7 +26,7 @@ const ErrorPage = lazy(() => import('@/pages/ErrorPage'));
 
 interface RouteConfig {
   path: string;
-  element: React.LazyExoticComponent<React.ComponentType<any>>;
+  element: React.LazyExoticComponent<React.ComponentType<Record<string, unknown>>>;
   meta: {
     title: string;
     description?: string;

@@ -199,7 +199,7 @@ export default function SportSelector({
           showSuggestion: enrichedResults.length === 0 && allowCustom,
           customSportName: enrichedResults.length === 0 ? query : '',
         }));
-      } catch (error) {
+      } catch {
         const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la recherche';
 
         setSearchState(prev => ({
@@ -275,7 +275,7 @@ export default function SportSelector({
           customSportName: '',
         }));
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: "Impossible d'envoyer votre suggestion. Réessayez plus tard.",

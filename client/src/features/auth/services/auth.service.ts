@@ -50,7 +50,7 @@ export class AuthService {
       }
 
       return loginResponse;
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la connexion:', error);
       // Données de mock pour le développement
       return this.getMockLoginResponse(credentials.email);
@@ -72,7 +72,7 @@ export class AuthService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error("Erreur lors de l'inscription:", error);
       throw error;
     }
@@ -100,7 +100,7 @@ export class AuthService {
       localStorage.setItem(this.USER_KEY, JSON.stringify(loginResponse.session.user));
 
       return loginResponse;
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la connexion OAuth:', error);
       throw error;
     }
@@ -119,7 +119,7 @@ export class AuthService {
           },
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la déconnexion:', error);
     } finally {
       // Nettoyage local dans tous les cas
@@ -153,7 +153,7 @@ export class AuthService {
       storage.setItem(this.TOKEN_KEY, refreshResponse.accessToken);
 
       return refreshResponse;
-    } catch (error) {
+    } catch {
       console.error('Erreur lors du rafraîchissement du token:', error);
       this.clearTokens();
       throw error;
@@ -175,7 +175,7 @@ export class AuthService {
         const error = await response.json();
         throw new Error(error.message || 'Erreur lors de la demande de réinitialisation');
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur demande réinitialisation:', error);
       throw error;
     }
@@ -194,7 +194,7 @@ export class AuthService {
         const error = await response.json();
         throw new Error(error.message || 'Erreur lors de la réinitialisation');
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur réinitialisation mot de passe:', error);
       throw error;
     }
@@ -216,7 +216,7 @@ export class AuthService {
         const error = await response.json();
         throw new Error(error.message || 'Erreur lors du changement de mot de passe');
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur changement mot de passe:', error);
       throw error;
     }
@@ -249,7 +249,7 @@ export class AuthService {
       storage.setItem(this.USER_KEY, JSON.stringify(user));
 
       return user;
-    } catch (error) {
+    } catch {
       console.error('Erreur récupération profil:', error);
       return this.getMockUser();
     }
@@ -279,7 +279,7 @@ export class AuthService {
       storage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
 
       return updatedUser;
-    } catch (error) {
+    } catch {
       console.error('Erreur mise à jour profil:', error);
       throw error;
     }
@@ -303,7 +303,7 @@ export class AuthService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Erreur mise à jour préférences:', error);
       throw error;
     }
@@ -327,7 +327,7 @@ export class AuthService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Erreur mise à jour profil fitness:', error);
       throw error;
     }
@@ -348,7 +348,7 @@ export class AuthService {
         const error = await response.json();
         throw new Error(error.message || "Erreur lors de la vérification d'email");
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur vérification email:', error);
       throw error;
     }
@@ -366,7 +366,7 @@ export class AuthService {
         const error = await response.json();
         throw new Error(error.message || 'Erreur lors du renvoi de vérification');
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur renvoi vérification email:', error);
       throw error;
     }
@@ -386,7 +386,7 @@ export class AuthService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Erreur statistiques utilisateur:', error);
       return this.getMockUserStats();
     }
@@ -411,7 +411,7 @@ export class AuthService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Erreur info session:', error);
       return { isValid: false, expiresIn: 0, user: null, permissions: [], lastActivity: '' };
     }

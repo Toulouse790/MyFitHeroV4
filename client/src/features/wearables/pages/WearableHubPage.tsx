@@ -101,7 +101,7 @@ const WearableHub: React.FC = () => {
       ];
 
       setErrors(mockErrors);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement appareils:', error);
       toast({
         title: 'Erreur',
@@ -141,7 +141,7 @@ const WearableHub: React.FC = () => {
           value: devices.filter(d => d.connected).length,
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur synchronisation:', error);
       toast({
         title: 'Erreur de synchronisation',
@@ -189,7 +189,7 @@ const WearableHub: React.FC = () => {
           title: 'Appareil reconnecté',
           description: `${device?.name} est maintenant connecté et synchronisé.`,
         });
-      } catch (error) {
+      } catch {
         console.error('Erreur reconnexion:', error);
         setDevices(prev =>
           prev.map(device =>

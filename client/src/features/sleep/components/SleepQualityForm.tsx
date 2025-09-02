@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/shared/hooks/use-toast';
 import { useSleepStore } from '../hooks/useSleepStore';
 import { defaultSleepFactors, calculateSleepDuration } from '../utils/sleepConfig';
-import type { SleepFactor } from '../types';
 
 interface SleepQualityFormProps {
   onComplete?: () => void;
@@ -106,7 +105,7 @@ export const SleepQualityForm: React.FC<SleepQualityFormProps> = ({
         setErrors({});
 
         onComplete?.();
-      } catch (error) {
+      } catch {
         toast({
           title: 'Erreur',
           description: "Impossible d'enregistrer le sommeil",

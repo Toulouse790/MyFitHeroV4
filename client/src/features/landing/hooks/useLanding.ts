@@ -253,7 +253,7 @@ export const useLanding = (): UseLandingReturn => {
       await new Promise(resolve => setTimeout(resolve, 800));
 
       setContent(mockContent);
-    } catch (error) {
+    } catch {
       setContentError(error instanceof Error ? error.message : 'Failed to load content');
     } finally {
       setContentLoading(false);
@@ -280,7 +280,7 @@ export const useLanding = (): UseLandingReturn => {
       await new Promise(resolve => setTimeout(resolve, 600));
 
       setMetrics(mockMetrics);
-    } catch (error) {
+    } catch {
       setMetricsError(error instanceof Error ? error.message : 'Failed to load metrics');
     } finally {
       setMetricsLoading(false);
@@ -324,7 +324,7 @@ export const useLanding = (): UseLandingReturn => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       setCTAStats(mockCTAStats);
-    } catch (error) {
+    } catch {
       console.error('Failed to load CTA stats:', error);
     } finally {
       setCTAStatsLoading(false);
@@ -350,7 +350,7 @@ export const useLanding = (): UseLandingReturn => {
         );
 
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to update content:', error);
         return false;
       }
@@ -375,7 +375,7 @@ export const useLanding = (): UseLandingReturn => {
             : stat
         )
       );
-    } catch (error) {
+    } catch {
       console.error('Failed to track CTA click:', error);
     }
   }, []);
@@ -394,7 +394,7 @@ export const useLanding = (): UseLandingReturn => {
             }
           : null
       );
-    } catch (error) {
+    } catch {
       console.error('Failed to track page view:', error);
     }
   }, []);
@@ -407,7 +407,7 @@ export const useLanding = (): UseLandingReturn => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         console.log(`Starting A/B test: ${testName} with variants:`, variants);
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to start A/B test:', error);
         return false;
       }
@@ -430,7 +430,7 @@ export const useLanding = (): UseLandingReturn => {
 
         console.log(`A/B test results for ${testName}:`, mockResults);
         return mockResults;
-      } catch (error) {
+      } catch {
         console.error('Failed to get A/B test result:', error);
         return null;
       }
@@ -445,7 +445,7 @@ export const useLanding = (): UseLandingReturn => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       console.log('Images optimized successfully');
       return true;
-    } catch (error) {
+    } catch {
       console.error('Failed to optimize images:', error);
       return false;
     }
@@ -458,7 +458,7 @@ export const useLanding = (): UseLandingReturn => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log('Sitemap generated successfully');
       return true;
-    } catch (error) {
+    } catch {
       console.error('Failed to generate sitemap:', error);
       return false;
     }

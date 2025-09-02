@@ -421,7 +421,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           },
         ]);
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement données dashboard:', error);
       setMessages([
         {
@@ -553,7 +553,7 @@ const SmartDashboard: React.FC<SmartDashboardProps> = ({ userProfile }) => {
           subscription.unsubscribe();
         }
       }, 30000);
-    } catch (error) {
+    } catch {
       console.error("Erreur lors de l'envoi du message:", error);
       setMessages(prev => [
         ...prev,

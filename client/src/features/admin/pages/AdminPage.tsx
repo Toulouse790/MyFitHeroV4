@@ -35,7 +35,7 @@ const Admin: React.FC = () => {
       }
 
       return data;
-    } catch (error) {
+    } catch {
       console.error('Erreur fetchUserProfile:', error);
       return null;
     }

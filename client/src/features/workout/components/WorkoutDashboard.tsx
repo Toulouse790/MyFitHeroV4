@@ -7,7 +7,6 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Activity,
   Calendar,
   Clock,
   Dumbbell,
@@ -24,7 +23,6 @@ import {
   PlusCircle,
   Filter,
   Download,
-  Share2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/shared/hooks/use-toast';
@@ -186,7 +184,7 @@ export default function WorkoutDashboard() {
       setWorkoutStats(statsResult);
       setRecentWorkouts(workoutsResult);
       setWorkoutPlans(plansResult);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement dashboard:', error);
       toast({
         title: 'Erreur',
@@ -198,7 +196,7 @@ export default function WorkoutDashboard() {
     }
   }, [toast]);
 
-  const loadWorkoutStats = async (userId: string): Promise<WorkoutStats> => {
+  const loadWorkoutStats = async (_userId: string): Promise<WorkoutStats> => {
     const { data, error } = await supabase
       .from('workouts')
       .select(
@@ -240,7 +238,7 @@ export default function WorkoutDashboard() {
     };
   };
 
-  const loadRecentWorkouts = async (userId: string): Promise<WorkoutSession[]> => {
+  const loadRecentWorkouts = async (_userId: string): Promise<WorkoutSession[]> => {
     const { data, error } = await supabase
       .from('workouts')
       .select('*')
@@ -252,7 +250,7 @@ export default function WorkoutDashboard() {
     return data || [];
   };
 
-  const loadWorkoutPlans = async (userId: string): Promise<WorkoutPlan[]> => {
+  const loadWorkoutPlans = async (_userId: string): Promise<WorkoutPlan[]> => {
     // Simulation - À adapter selon votre structure de table
     return [
       {
@@ -335,7 +333,7 @@ export default function WorkoutDashboard() {
         title: 'Entraînement terminé !',
         description: `Bien joué ! ${Math.floor(sessionTimer / 60)} minutes d'effort.`,
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Impossible de sauvegarder la session',

@@ -219,7 +219,7 @@ const Settings: React.FC = () => {
       setTimeout(() => {
         setLocation('/goodbye');
       }, 2000);
-    } catch (error) {
+    } catch {
       console.error('Erreur suppression compte:', error);
       toast({
         title: 'Erreur de suppression',
@@ -267,7 +267,7 @@ const Settings: React.FC = () => {
       if (savedInterval) {
         setSyncInterval(parseInt(savedInterval));
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement paramètres:', error);
     }
   }, [appStoreUser?.id, getCachedData, notifications, privacy, preferences]);
@@ -302,7 +302,7 @@ const Settings: React.FC = () => {
           section: 'settings',
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur sauvegarde profil:', error);
       toast({
         title: 'Erreur',
@@ -338,7 +338,7 @@ const Settings: React.FC = () => {
         title: 'Notifications mises à jour',
         description: 'Vos préférences de notification ont été sauvegardées.',
       });
-    } catch (error) {
+    } catch {
       console.error('Erreur sauvegarde notifications:', error);
       toast({
         title: 'Erreur',
@@ -374,7 +374,7 @@ const Settings: React.FC = () => {
         title: 'Préférences mises à jour',
         description: "Vos préférences d'application ont été sauvegardées.",
       });
-    } catch (error) {
+    } catch {
       console.error('Erreur sauvegarde préférences:', error);
       toast({
         title: 'Erreur',
@@ -410,7 +410,7 @@ const Settings: React.FC = () => {
         title: 'Confidentialité mise à jour',
         description: 'Vos paramètres de confidentialité ont été sauvegardés.',
       });
-    } catch (error) {
+    } catch {
       console.error('Erreur sauvegarde confidentialité:', error);
       toast({
         title: 'Erreur',

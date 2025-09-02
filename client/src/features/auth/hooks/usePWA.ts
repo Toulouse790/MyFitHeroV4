@@ -128,7 +128,7 @@ export const usePWA = (): PWAState & PWAActions => {
         setIsInstallable(false);
         setDeferredPrompt(null);
       }
-    } catch (error) {
+    } catch {
       console.error("Erreur lors de l'installation:", error);
     }
   };

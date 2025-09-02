@@ -209,7 +209,7 @@ const Social: React.FC = () => {
         achievements_count: 15,
       };
       setUserStats(mockStats);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement stats:', error);
     }
   }, [appStoreUser?.id]);
@@ -286,7 +286,7 @@ const Social: React.FC = () => {
       ];
 
       setPosts(mockPosts);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement posts:', error);
     } finally {
       setPostsLoading(false);
@@ -349,7 +349,7 @@ const Social: React.FC = () => {
       ];
 
       setChallenges(mockChallenges);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement challenges:', error);
     } finally {
       setChallengesLoading(false);
@@ -397,7 +397,7 @@ const Social: React.FC = () => {
       ];
 
       setFriends(mockFriends);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement amis:', error);
     }
   }, [appStoreUser?.id, appStoreUser?.sport]);
@@ -467,7 +467,7 @@ const Social: React.FC = () => {
           user_id: appStoreUser?.id,
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur création post:', error);
       toast({
         title: 'Erreur',
@@ -541,7 +541,7 @@ const Social: React.FC = () => {
           user_id: appStoreUser?.id,
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur création challenge:', error);
       toast({
         title: 'Erreur',

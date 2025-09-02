@@ -9,7 +9,7 @@ export class WearablesService {
       const response = await fetch(`${this.BASE_URL}/${userId}`);
       if (!response.ok) throw new Error('Erreur lors de la récupération des données');
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Erreur API wearables:', error);
       return this.getMockWearablesData();
     }
@@ -24,7 +24,7 @@ export class WearablesService {
       });
       if (!response.ok) throw new Error('Erreur lors de la mise à jour');
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Erreur mise à jour wearables:', error);
       throw error;
     }

@@ -229,7 +229,7 @@ export const useForm = <T extends Record<string, string>>(
       setIsSubmitting(true);
       try {
         await onSubmit(values);
-      } catch (error) {
+      } catch {
         console.error('Form submission error:', error);
       } finally {
         setIsSubmitting(false);

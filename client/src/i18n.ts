@@ -73,7 +73,7 @@ i18n
 
     // Gestion des clés manquantes
     saveMissing: true,
-    missingKeyHandler: (lng, ns, key, fallbackValue) => {
+    missingKeyHandler: (lng, ns, key, _fallbackValue) => {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Missing translation key: ${key} in ${lng}:${ns}`);
       }

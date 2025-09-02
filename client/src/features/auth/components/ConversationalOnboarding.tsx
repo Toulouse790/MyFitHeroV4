@@ -481,7 +481,7 @@ export default function ConversationalOnboarding({
             console.log('🟢 [DEBUG] Sauvegarde Supabase réussie:', insertedData);
           }
         }
-      } catch (error) {
+      } catch {
         console.error('🔴 Erreur lors de la sauvegarde:', error);
         toast({
           title: 'Erreur de sauvegarde',
@@ -617,7 +617,7 @@ export default function ConversationalOnboarding({
       if (importantSteps.includes(currentStep.id)) {
         await saveProgress(updatedData);
       }
-    } catch (error) {
+    } catch {
       console.error('🔴 Erreur lors de la navigation:', error);
       toast({
         title: 'Erreur',
@@ -716,7 +716,7 @@ export default function ConversationalOnboarding({
       });
 
       onComplete(finalData);
-    } catch (error) {
+    } catch {
       console.error('🔴 Erreur lors de la finalisation:', error);
       toast({
         title: 'Erreur',

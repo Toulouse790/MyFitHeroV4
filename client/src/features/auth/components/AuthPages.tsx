@@ -126,7 +126,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch {
       console.error('🔥 Exception lors inscription:', error);
       toast({
         title: 'Erreur',
@@ -179,7 +179,7 @@ const AuthPages: React.FC<AuthPagesProps> = ({ onAuthSuccess }) => {
           variant: 'destructive',
         });
       }
-    } catch (error) {
+    } catch {
       console.error('🔥 Exception lors connexion:', error);
       toast({
         title: 'Erreur',

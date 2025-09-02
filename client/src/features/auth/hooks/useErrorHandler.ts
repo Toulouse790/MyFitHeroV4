@@ -163,7 +163,7 @@ export function useErrorHandler(options: UseErrorHandlerOptions = {}): UseErrorH
       try {
         clearError();
         return await asyncFn();
-      } catch (error) {
+      } catch {
         handleError(error);
         return null;
       }

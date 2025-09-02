@@ -52,7 +52,7 @@ export class BadgeService {
       }
 
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la récupération des badges:', error);
       return [];
     }
@@ -80,7 +80,7 @@ export class BadgeService {
       }
 
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la récupération des badges utilisateur:', error);
       return [];
     }
@@ -110,7 +110,7 @@ export class BadgeService {
       });
 
       return progress;
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la récupération des progrès des badges:', error);
       return [];
     }
@@ -184,7 +184,7 @@ export class BadgeService {
       }
 
       return newBadges;
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la vérification des badges:', error);
       return [];
     }
@@ -273,7 +273,7 @@ export class BadgeService {
         is_notified: false,
         created_at: new Date().toISOString(),
       });
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la mise à jour du progrès du badge:', error);
     }
   }
@@ -302,7 +302,7 @@ export class BadgeService {
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', userId);
-    } catch (error) {
+    } catch {
       console.error("Erreur lors de la mise à jour de l'expérience:", error);
     }
   }
@@ -317,7 +317,7 @@ export class BadgeService {
         .update({ is_notified: true })
         .eq('user_id', userId)
         .in('badge_id', badgeIds);
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la mise à jour des notifications:', error);
     }
   }
@@ -345,7 +345,7 @@ export class BadgeService {
       }
 
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la récupération des badges non notifiés:', error);
       return [];
     }
@@ -369,7 +369,7 @@ export class BadgeService {
       }
 
       return data || [];
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la récupération des badges par catégorie:', error);
       return [];
     }
@@ -414,7 +414,7 @@ export class BadgeService {
         legendaryBadges: rarityCount.legendary || 0,
         totalPoints,
       };
-    } catch (error) {
+    } catch {
       console.error('Erreur lors de la récupération des statistiques des badges:', error);
       return {
         totalBadges: 0,

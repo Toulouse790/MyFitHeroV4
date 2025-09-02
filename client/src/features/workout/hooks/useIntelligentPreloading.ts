@@ -50,7 +50,7 @@ export const useIntelligentPreloading = () => {
               await import('@/pages/index'); // ✅ Corrigé:
               break;
           }
-        } catch (error) {
+        } catch {
           console.log('Preload failed for', route, error);
         }
       });

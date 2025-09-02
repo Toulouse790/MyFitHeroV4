@@ -55,7 +55,7 @@ const SmartHealthDashboard: React.FC = () => {
         description: 'Vos données wearables ont été mises à jour',
         variant: 'default',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur de synchronisation',
         description: 'Impossible de synchroniser les données',

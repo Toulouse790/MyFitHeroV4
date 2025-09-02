@@ -50,7 +50,7 @@ export const BadgeDisplay: React.FC<BadgeDisplayProps> = ({
         const badges = await BadgeService.getUserBadges(uid);
         setUserBadges(badges);
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur lors du chargement des badges:', error);
       toast({
         title: 'Erreur',

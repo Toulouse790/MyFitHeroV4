@@ -51,7 +51,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
     try {
       const raw = localStorage.getItem('currentWorkoutSession');
       return raw ? (JSON.parse(raw) as WorkoutSession) : null;
-    } catch (error) {
+    } catch {
       console.error('Erreur parsing session localStorage:', error);
       localStorage.removeItem('currentWorkoutSession');
       return null;
@@ -225,7 +225,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
           onConflict: 'user_id,stat_date',
         }
       );
-    } catch (error) {
+    } catch {
       console.error('Erreur mise à jour stats quotidiennes:', error);
     }
 
@@ -295,7 +295,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
             setIsSessionActive(session.status === 'active');
             saveLocalSession(session);
           }
-        } catch (error) {
+        } catch {
           console.error('Erreur récupération session interrompue:', error);
         }
       }

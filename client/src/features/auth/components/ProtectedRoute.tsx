@@ -59,7 +59,7 @@ const ModuleActivationPage = ({ moduleId }: { moduleId: string }) => {
       } else {
         alert("Erreur lors de l'activation du module");
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur activation:', error);
       alert("Erreur lors de l'activation");
     } finally {
@@ -121,7 +121,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, moduleRequire
           data: { session },
         } = await supabase.auth.getSession();
         setSession(session);
-      } catch (error) {
+      } catch {
         console.error('Erreur vérification auth:', error);
       } finally {
         setLoading(false);

@@ -1,4 +1,5 @@
-import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
+impo * Il n'impose aucun style ; les classes CSS peuvent être passées
+ * via la prop `className` depuis les pages consommatrices. * as CollapsiblePrimitive from '@radix-ui/react-collapsible';
 
 /**
  * Ce fichier réexporte les composants Collapsible de Radix UI.

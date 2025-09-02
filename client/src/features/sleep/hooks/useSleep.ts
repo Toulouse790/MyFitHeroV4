@@ -1,16 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SleepService } from '../services/sleep.service';
+import { SleepEntry } from '../../../shared/types/sleep.types';
 
 export interface UseSleepReturn {
-  data: any;
+  data: SleepEntry | null;
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
-  update: (data: any) => Promise<void>;
+  update: (data: SleepEntry) => Promise<void>;
 }
 
 export function useSleep(userId?: string): UseSleepReturn {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<SleepEntry | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ export function useSleep(userId?: string): UseSleepReturn {
   }, [currentUserId]);
 
   const update = useCallback(
-    async (newData: any) => {
+    async (newData: SleepEntry) => {
       if (!currentUserId) return;
 
       setIsLoading(true);

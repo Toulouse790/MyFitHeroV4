@@ -103,7 +103,7 @@ const Analytics: React.FC = () => {
       };
 
       setAnalyticsData(mockData);
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement analytics:', error);
       toast({
         title: 'Erreur de chargement',
@@ -203,7 +203,7 @@ const Analytics: React.FC = () => {
             user_id: appStoreUser.id,
           });
         }
-      } catch (error) {
+      } catch {
         console.error('Erreur export:', error);
         toast({
           title: "Erreur d'export",

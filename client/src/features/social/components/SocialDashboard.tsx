@@ -74,7 +74,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
         const stats = await socialService.getSocialStats(userId);
         setSocialStats(stats);
       }
-    } catch (error) {
+    } catch {
       console.error('Error loading social data:', error);
       toast({
         title: 'Erreur',
@@ -105,7 +105,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
         title: 'Post aimé !',
         description: 'Votre réaction a été enregistrée',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: "Impossible d'aimer ce post",
@@ -131,7 +131,7 @@ const SocialDashboard: React.FC<SocialDashboardProps> = ({ userId }) => {
           description: 'Bonne chance pour relever ce défi !',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Impossible de rejoindre ce défi',

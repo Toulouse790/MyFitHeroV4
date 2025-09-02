@@ -31,7 +31,7 @@ export class ScaleService {
 
       await device.gatt?.connect();
       return device;
-    } catch (error) {
+    } catch {
       console.error('Erreur connexion Bluetooth:', error);
       return null;
     }
@@ -58,7 +58,7 @@ export class ScaleService {
         timestamp: new Date().toISOString(),
         deviceId: device.id,
       };
-    } catch (error) {
+    } catch {
       console.error('Erreur lecture données:', error);
       return null;
     }
@@ -93,7 +93,7 @@ export class ScaleService {
 
       // Parser selon le format de chaque API
       return this.parseCloudData(provider, data);
-    } catch (error) {
+    } catch {
       console.error('Erreur sync cloud:', error);
       return [];
     }
@@ -114,7 +114,7 @@ export class ScaleService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reading),
       });
-    } catch (error) {
+    } catch {
       console.error('Erreur sauvegarde:', error);
     }
   }

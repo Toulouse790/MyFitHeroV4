@@ -258,7 +258,7 @@ export const useConversationalOnboarding = ({
         };
 
         await supabase.from('user_profiles').upsert(upsertData, { onConflict: 'id' });
-      } catch (error) {
+      } catch {
         console.error('Erreur sauvegarde:', error);
         if (debug) {
           toast({
@@ -368,7 +368,7 @@ export const useConversationalOnboarding = ({
       if (importantSteps.includes(currentStep.id)) {
         await saveProgress(updatedData);
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur navigation:', error);
       toast({
         title: 'Erreur',
@@ -452,7 +452,7 @@ export const useConversationalOnboarding = ({
       }
 
       return finalData;
-    } catch (error) {
+    } catch {
       console.error('Erreur finalisation:', error);
       throw error;
     } finally {

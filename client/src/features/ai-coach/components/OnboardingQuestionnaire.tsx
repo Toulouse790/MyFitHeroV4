@@ -59,7 +59,7 @@ const OnboardingQuestionnaire: React.FC<OnboardingQuestionnaireProps> = ({ user,
 
       console.log('🟢 Redirection vers dashboard');
       onComplete();
-    } catch (error) {
+    } catch {
       console.error('🔴 Erreur lors de la finalisation:', error);
 
       // ⚠️ MÊME EN CAS D'ERREUR CRITIQUE, on redirige

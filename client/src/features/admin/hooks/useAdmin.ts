@@ -107,7 +107,7 @@ export const useAdmin = (): UseAdminReturn => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       setStats(mockStats);
-    } catch (error) {
+    } catch {
       setStatsError(error instanceof Error ? error.message : 'Failed to load stats');
     } finally {
       setStatsLoading(false);
@@ -162,7 +162,7 @@ export const useAdmin = (): UseAdminReturn => {
         totalUsers: filteredUsers.length,
         filters,
       });
-    } catch (error) {
+    } catch {
       setUsersError(error instanceof Error ? error.message : 'Failed to load users');
     } finally {
       setUsersLoading(false);
@@ -182,7 +182,7 @@ export const useAdmin = (): UseAdminReturn => {
         }));
 
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to update user status:', error);
         return false;
       }
@@ -203,7 +203,7 @@ export const useAdmin = (): UseAdminReturn => {
         }));
 
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to update user role:', error);
         return false;
       }
@@ -224,7 +224,7 @@ export const useAdmin = (): UseAdminReturn => {
       }));
 
       return true;
-    } catch (error) {
+    } catch {
       console.error('Failed to delete user:', error);
       return false;
     }
@@ -254,7 +254,7 @@ export const useAdmin = (): UseAdminReturn => {
         }));
 
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to bulk update users:', error);
         return false;
       }
@@ -270,7 +270,7 @@ export const useAdmin = (): UseAdminReturn => {
         await new Promise(resolve => setTimeout(resolve, 800));
         console.log('Sending notification to users:', targetUsers, 'Message:', message);
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to send notification:', error);
         return false;
       }
@@ -316,7 +316,7 @@ export const useAdmin = (): UseAdminReturn => {
         }
 
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to export data:', error);
         return false;
       }
@@ -332,7 +332,7 @@ export const useAdmin = (): UseAdminReturn => {
         await new Promise(resolve => setTimeout(resolve, 2000));
         console.log(`Generating ${type} report...`);
         return true;
-      } catch (error) {
+      } catch {
         console.error('Failed to generate report:', error);
         return false;
       }

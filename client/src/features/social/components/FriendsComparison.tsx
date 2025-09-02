@@ -3,8 +3,6 @@ import {
   Users,
   Trophy,
   TrendingUp,
-  TrendingDown,
-  ChevronRight,
   Dumbbell,
   Apple,
   Droplets,
@@ -12,7 +10,6 @@ import {
   Award,
   Star,
   Crown,
-  Calendar,
   BarChart3,
   Target,
 } from 'lucide-react';
@@ -43,7 +40,7 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
       setIsLoading(true);
       const data = await socialService.getFriendsComparison(userId, period);
       setComparisonData(data);
-    } catch (error) {
+    } catch {
       console.error('Error loading friends comparison:', error);
       toast({
         title: 'Erreur',

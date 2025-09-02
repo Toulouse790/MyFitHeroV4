@@ -488,7 +488,7 @@ const Nutrition: React.FC = () => {
           lastUpdated: new Date(),
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement nutrition:', error);
     } finally {
       setIsLoading(false);

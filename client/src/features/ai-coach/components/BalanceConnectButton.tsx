@@ -67,7 +67,7 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
 
       setAvailableDevices(mockDevices);
       toast.success(`${mockDevices.length} balance(s) trouvée(s)`);
-    } catch (error) {
+    } catch {
       toast.error('Erreur lors de la recherche');
     } finally {
       setIsScanning(false);
@@ -86,7 +86,7 @@ const BalanceConnectButton: React.FC<BalanceConnectButtonProps> = ({
       setShowDeviceList(false);
       setAvailableDevices([]);
       toast.success(`${device.name} connectée avec succès !`);
-    } catch (error) {
+    } catch {
       toast.error('Échec de la connexion');
     } finally {
       setConnectingDevice(null);

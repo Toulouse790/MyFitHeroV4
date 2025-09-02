@@ -59,7 +59,7 @@ class AIService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Pattern analysis error:', error);
       throw error;
     }
@@ -86,7 +86,7 @@ class AIService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Adaptive coaching error:', error);
       throw error;
     }
@@ -109,7 +109,7 @@ class AIService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Anomaly detection error:', error);
       throw error;
     }
@@ -132,7 +132,7 @@ class AIService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Predictions error:', error);
       throw error;
     }
@@ -162,7 +162,7 @@ class AIService {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch {
       console.error('Contextual recommendations error:', error);
       throw error;
     }
@@ -191,7 +191,7 @@ class AIService {
         analysis_period: '30d',
         generated_at: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch {
       console.error('Habits insights error:', error);
       throw error;
     }
@@ -215,7 +215,7 @@ class AIService {
         next_action: this.getNextRecommendedAction(proactiveAdvice),
         generated_at: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch {
       console.error('Proactive coaching error:', error);
       throw error;
     }

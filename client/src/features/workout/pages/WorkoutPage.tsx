@@ -65,8 +65,8 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
   const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
   const [quickMode, setQuickMode] = useState(false);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
-  const [_error, _setError] = useState<string | null>(null);
-  const [isLoading, _setIsLoading] = useState(false);
+  const [__error, __setError] = useState<string | null>(null);
+  const [isLoading, __setIsLoading] = useState(false);
 
   // Exercices par défaut
   const defaultExercises: WorkoutExercise[] = [
@@ -258,7 +258,7 @@ const WorkoutPage: React.FC<WorkoutPageProps> = () => {
 
   const currentTip = getCurrentTip();
 
-  const _handleCompleteWorkout = async () => {
+  const __handleCompleteWorkout = async () => {
     if (currentSession) {
       await completeSession();
       setShowSessionSummary(true);

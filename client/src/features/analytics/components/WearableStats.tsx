@@ -35,7 +35,7 @@ const WearableStats: React.FC<WearableStatsProps> = ({ userId = 'current-user-id
       // Charger les statistiques depuis Supabase
       const wearableStats = await AnalyticsService.getWearableStats(userId, selectedPeriod);
       setStats(wearableStats);
-    } catch (error) {
+    } catch {
       console.error('Erreur lors du chargement des données wearables:', error);
     } finally {
       setIsLoading(false);

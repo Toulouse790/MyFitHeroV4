@@ -1,9 +1,9 @@
 // src/pages/ExercisesPage.tsx
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useQuery } from '@tanstack/react-query';
 import clsx from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { debounce } from 'lodash-es';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';

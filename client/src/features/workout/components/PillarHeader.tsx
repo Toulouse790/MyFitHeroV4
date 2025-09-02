@@ -8,7 +8,6 @@ import {
   Brain,
   ChevronRight,
   Calendar,
-  Award,
   Flame,
 } from 'lucide-react';
 import { appStore } from '@/store/appStore';
@@ -19,7 +18,7 @@ interface PillarHeaderProps {
   pillar: 'hydration' | 'nutrition' | 'sleep' | 'workout';
   title: string;
   icon: React.ElementType;
-  color: string;
+  _color: string;
   bgGradient: string;
   emoji: string;
   motivationalMessage?: string;
@@ -41,7 +40,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
   pillar,
   title,
   icon: Icon,
-  color,
+  _color,
   bgGradient,
   emoji,
   motivationalMessage,
@@ -74,7 +73,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
     if (!showAIRecommendation || !appStoreUser?.id) return;
 
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('ai_recommendations')
         .select('*')
         .eq('user_id', appStoreUser.id)
@@ -97,7 +96,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
           created_at: data.created_at,
         });
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement recommandation IA:', error);
     }
   };
@@ -125,7 +124,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
       } else {
         setDailyGoal(getDefaultGoal());
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur chargement objectif quotidien:', error);
       setDailyGoal(getDefaultGoal());
     }
@@ -193,7 +192,7 @@ const PillarHeader: React.FC<PillarHeaderProps> = ({
 
         setStreak(currentStreak);
       }
-    } catch (error) {
+    } catch {
       console.error('Erreur calcul streak:', error);
     }
   };

@@ -26,7 +26,7 @@ export const useAuthStatus = (): AuthStatus => {
 
         setSession(session);
         setUser(session?.user || null);
-      } catch (error) {
+      } catch {
         console.error('Error checking user:', error);
         setUser(null);
       } finally {
@@ -52,7 +52,7 @@ export const useAuthStatus = (): AuthStatus => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
-    } catch (error) {
+    } catch {
       console.error('Error signing out:', error);
     }
   };

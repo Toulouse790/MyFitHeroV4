@@ -29,8 +29,6 @@ describe.skip("Tests d'intégration - EN CHANTIER", () => {
 
   describe("Flux d'authentification", () => {
     it('permet à un utilisateur de se connecter et accéder aux fonctionnalités', async () => {
-      const user = userEvent.setup();
-
       server.use(
         http.post('*/auth/v1/token', () => {
           return HttpResponse.json({
@@ -144,8 +142,6 @@ describe.skip("Tests d'intégration - EN CHANTIER", () => {
 
   describe("Gestion des états de l'application", () => {
     it("synchronise l'état entre les composants", async () => {
-      const user = userEvent.setup();
-
       render(<MockApp />);
 
       // Tester la synchronisation d'état entre différentes parties de l'app

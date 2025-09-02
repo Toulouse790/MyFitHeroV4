@@ -1349,7 +1349,7 @@ const useOfflineSync = () => {
             console.error(`Failed to sync ${sync.type} after 3 attempts:`, sync.data);
           }
         }
-      } catch (error) {
+      } catch {
         console.error(`Sync error for ${sync.type}:`, error);
       }
     }
@@ -1669,7 +1669,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({
             appStore.getState().setUser(userData);
           }
         }
-      } catch (error) {
+      } catch {
         console.error('Auth initialization error:', error);
       } finally {
         setIsLoading(false);
@@ -1772,7 +1772,7 @@ const MyFitHeroIndex: React.FC = () => {
         }
 
         setIsInitialized(true);
-      } catch (error) {
+      } catch {
         console.error('App initialization error:', error);
         setIsInitialized(true); // Continue même en cas d'erreur
       }

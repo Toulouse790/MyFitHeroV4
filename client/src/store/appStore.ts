@@ -10,11 +10,9 @@ import {
   UserHydration,
   UserSleep,
   UserAnalytics,
-  DailyNutritionTotals,
   WearableData,
   ConnectedScale,
   WeightEntry,
-  ApiResponse,
 } from '@/features/workout/types/supabase';
 
 // Types spécifiques au store étendu
@@ -136,7 +134,14 @@ interface ExtendedAppStore extends AppStoreState {
   // Utilitaires
   getTodayProgress: () => { [key: string]: number };
   getWeeklyStats: () => Promise<{ [key: string]: number[] }>;
-  exportUserData: () => Promise<any>;
+  exportUserData: () => Promise<{
+    user: UserProfile;
+    workouts: UserWorkout[];
+    nutrition: UserNutrition[];
+    sleep: UserSleep[];
+    hydration: UserHydration[];
+    analytics: UserAnalytics;
+  }>;
 }
 
 // Calcul des objectifs personnalisés
@@ -421,7 +426,7 @@ export const appStore = create<ExtendedAppStore>()(
           const stats = data as DailyStats;
           set({ currentStats: stats });
           return stats;
-        } catch (error) {
+        } catch {
           console.error('Erreur fetchDailyStats:', error);
           set({ error: 'Erreur lors du chargement des statistiques' });
           return null;
@@ -452,7 +457,7 @@ export const appStore = create<ExtendedAppStore>()(
           const recommendations = data as AiRecommendation[];
           set({ recommendations });
           return recommendations;
-        } catch (error) {
+        } catch {
           console.error('Erreur fetchAiRecommendations:', error);
           return [];
         }
@@ -460,9 +465,9 @@ export const appStore = create<ExtendedAppStore>()(
 
       markRecommendationAsRead: async (recommendationId: string): Promise<boolean> => {
         try {
-          const { error } = await (supabase as any)
+          const { error } = await supabase
             .from('ai_recommendations')
-            .update({ is_read: true } as any)
+            .update({ is_read: true })
             .eq('id', recommendationId);
 
           if (error) {
@@ -478,7 +483,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur markRecommendationAsRead:', error);
           return false;
         }
@@ -488,7 +493,6 @@ export const appStore = create<ExtendedAppStore>()(
       addHydration: async (amount: number, type: string = 'water'): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          const today = new Date().toISOString().split('T')[0];
 
           const hydrationEntry: Partial<UserHydration> = {
             user_id: appStoreUser.id,
@@ -498,7 +502,7 @@ export const appStore = create<ExtendedAppStore>()(
             notes: null,
           };
 
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('user_hydration')
             .insert(hydrationEntry)
             .select()
@@ -515,7 +519,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur addHydration:', error);
           return false;
         }
@@ -524,7 +528,6 @@ export const appStore = create<ExtendedAppStore>()(
       addMeal: async (meal: Partial<UserNutrition>): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          const today = new Date().toISOString().split('T')[0];
 
           const mealEntry: Partial<UserNutrition> = {
             user_id: appStoreUser.id,
@@ -538,7 +541,7 @@ export const appStore = create<ExtendedAppStore>()(
             notes: meal.notes || null,
           };
 
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('user_nutrition')
             .insert(mealEntry)
             .select()
@@ -555,7 +558,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur addMeal:', error);
           return false;
         }
@@ -575,7 +578,7 @@ export const appStore = create<ExtendedAppStore>()(
             notes: sleepData.notes || null,
           };
 
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('user_sleep')
             .insert(sleepEntry)
             .select()
@@ -592,7 +595,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur addSleepSession:', error);
           return false;
         }
@@ -615,7 +618,7 @@ export const appStore = create<ExtendedAppStore>()(
             completed_at: new Date().toISOString(),
           };
 
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('user_workouts')
             .insert(workoutEntry)
             .select()
@@ -632,7 +635,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur addWorkout:', error);
           return false;
         }
@@ -642,7 +645,7 @@ export const appStore = create<ExtendedAppStore>()(
       activateModule: async (moduleId: string): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          const currentActiveModules = (appStoreUser as any).active_modules || [];
+          const currentActiveModules = appStoreUser.active_modules || [];
 
           if (currentActiveModules.includes(moduleId)) {
             console.log(`Module ${moduleId} déjà activé`);
@@ -651,12 +654,12 @@ export const appStore = create<ExtendedAppStore>()(
 
           const newActiveModules = [...currentActiveModules, moduleId];
 
-          const { error } = await (supabase as any)
+          const { error } = await supabase
             .from('user_profiles')
             .update({
               active_modules: newActiveModules,
               updated_at: new Date().toISOString(),
-            } as any)
+            })
             .eq('id', appStoreUser.id);
 
           if (error) {
@@ -664,10 +667,10 @@ export const appStore = create<ExtendedAppStore>()(
             return false;
           }
 
-          get().updateAppStoreUserProfile({ active_modules: newActiveModules } as any);
+          get().updateAppStoreUserProfile({ active_modules: newActiveModules });
           console.log(`✅ Module ${moduleId} activé avec succès`);
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur activateModule:', error);
           return false;
         }
@@ -676,21 +679,21 @@ export const appStore = create<ExtendedAppStore>()(
       deactivateModule: async (moduleId: string): Promise<boolean> => {
         try {
           const { appStoreUser } = get();
-          const currentActiveModules = (appStoreUser as any).active_modules || [];
+          const currentActiveModules = appStoreUser.active_modules || [];
 
           if (!currentActiveModules.includes(moduleId)) {
             console.log(`Module ${moduleId} déjà inactif`);
             return true;
           }
 
-          const newActiveModules = currentActiveModules.filter(module => module !== moduleId);
+          const newActiveModules = currentActiveModules.filter((module: string) => module !== moduleId);
 
-          const { error } = await (supabase as any)
+          const { error } = await supabase
             .from('user_profiles')
             .update({
               active_modules: newActiveModules,
               updated_at: new Date().toISOString(),
-            } as any)
+            })
             .eq('id', appStoreUser.id);
 
           if (error) {
@@ -698,10 +701,10 @@ export const appStore = create<ExtendedAppStore>()(
             return false;
           }
 
-          get().updateAppStoreUserProfile({ active_modules: newActiveModules } as any);
+          get().updateAppStoreUserProfile({ active_modules: newActiveModules });
           console.log(`✅ Module ${moduleId} désactivé avec succès`);
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur deactivateModule:', error);
           return false;
         }
@@ -709,7 +712,7 @@ export const appStore = create<ExtendedAppStore>()(
 
       isModuleActive: (moduleId: string): boolean => {
         const { appStoreUser } = get();
-        return (appStoreUser as any).active_modules?.includes(moduleId) || false;
+        return appStoreUser.active_modules?.includes(moduleId) || false;
       },
 
       setActiveModule: (moduleId: string | null) => {
@@ -742,7 +745,7 @@ export const appStore = create<ExtendedAppStore>()(
           });
 
           return mockData;
-        } catch (error) {
+        } catch {
           console.error('Erreur sync wearable:', error);
           set({ syncStatus: 'error' });
           return null;
@@ -761,7 +764,7 @@ export const appStore = create<ExtendedAppStore>()(
             is_active: scale.is_active ?? true,
           };
 
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('connected_scales')
             .insert(scaleEntry)
             .select()
@@ -777,7 +780,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur addConnectedScale:', error);
           return false;
         }
@@ -796,7 +799,7 @@ export const appStore = create<ExtendedAppStore>()(
             recorded_at: entry.recorded_at || new Date().toISOString(),
           };
 
-          const { data, error } = await (supabase as any)
+          const { data, error } = await supabase
             .from('weight_entries')
             .insert(weightEntry)
             .select()
@@ -812,7 +815,7 @@ export const appStore = create<ExtendedAppStore>()(
           }));
 
           return true;
-        } catch (error) {
+        } catch {
           console.error('Erreur addWeightEntry:', error);
           return false;
         }
@@ -851,7 +854,7 @@ export const appStore = create<ExtendedAppStore>()(
             sleep: Math.min((stats.sleep_hours / dailyGoals.sleep) * 100, 100),
             workouts: Math.min((stats.workouts_completed / dailyGoals.workouts) * 100, 100),
           };
-        } catch (error) {
+        } catch {
           console.error('Erreur calculateProgress:', error);
           return {};
         }
@@ -904,13 +907,20 @@ export const appStore = create<ExtendedAppStore>()(
             sleep: stats.map(s => s.sleep_hours),
             workouts: stats.map(s => s.workouts_completed),
           };
-        } catch (error) {
+        } catch {
           console.error('Erreur getWeeklyStats:', error);
           return {};
         }
       },
 
-      exportUserData: async (): Promise<any> => {
+      exportUserData: async (): Promise<{
+        user: UserProfile;
+        workouts: UserWorkout[];
+        nutrition: UserNutrition[];
+        sleep: UserSleep[];
+        hydration: UserHydration[];
+        analytics: UserAnalytics;
+      }> => {
         try {
           const { appStoreUser } = get();
 
@@ -924,17 +934,33 @@ export const appStore = create<ExtendedAppStore>()(
           ]);
 
           return {
-            profile: appStoreUser,
+            user: appStoreUser,
             workouts: workouts.data || [],
             nutrition: nutrition.data || [],
             hydration: hydration.data || [],
             sleep: sleep.data || [],
-            analytics: analytics.data || [],
-            exportDate: new Date().toISOString(),
+            analytics: analytics.data?.[0] || {
+              id: '',
+              user_id: appStoreUser.id,
+              date: new Date().toISOString().split('T')[0],
+              steps: 0,
+              calories_burned: 0,
+              active_minutes: 0,
+              distance_meters: 0,
+              heart_rate_avg: 0,
+              heart_rate_max: 0,
+              heart_rate_resting: 0,
+              weight: appStoreUser.weight || 0,
+              body_fat_percentage: 0,
+              muscle_mass: 0,
+              data_source: 'manual' as const,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            } as UserAnalytics,
           };
-        } catch (error) {
+        } catch {
           console.error('Erreur exportUserData:', error);
-          return null;
+          throw new Error('Failed to export user data');
         }
       },
     }),

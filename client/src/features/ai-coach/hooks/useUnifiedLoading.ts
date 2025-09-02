@@ -62,7 +62,7 @@ export const useUnifiedLoading = (initialLoading = false): [LoadingState, Loadin
         const result = await asyncFn();
         setLoading(false);
         return result;
-      } catch (error) {
+      } catch {
         const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
         setError(errorMessage);
         throw error;
@@ -126,7 +126,7 @@ export const useFormLoading = () => {
         const result = await withLoading(submitFn, 'form_submit');
         onSuccess?.(result);
         return result;
-      } catch (error) {
+      } catch {
         onError?.(error as Error);
         throw error;
       }
@@ -155,7 +155,7 @@ export const useDataLoading = <T>() => {
         setData(result);
         onSuccess?.(result);
         return result;
-      } catch (error) {
+      } catch {
         setData(null);
         throw error;
       }

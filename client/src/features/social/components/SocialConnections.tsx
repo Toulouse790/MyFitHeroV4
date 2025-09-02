@@ -6,19 +6,9 @@ import {
   UserCheck,
   UserX,
   MessageSquare,
-  Trophy,
-  Target,
-  Calendar,
   Star,
-  Crown,
-  Medal,
-  Activity,
-  ChevronRight,
-  Filter,
   MoreHorizontal,
   Mail,
-  Phone,
-  MapPin,
 } from 'lucide-react';
 import { socialService, UserConnection, SocialStats } from '@/services/socialService';
 import { appStore } from '@/store/appStore';
@@ -29,7 +19,7 @@ interface SocialConnectionsProps {
 }
 
 const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
-  const { appStoreUser } = appStore();
+  const { } = appStore();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<'friends' | 'search' | 'requests' | 'suggestions'>(
@@ -53,7 +43,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       setIsLoading(true);
       const friendsData = await socialService.getFriends(userId);
       setFriends(friendsData);
-    } catch (error) {
+    } catch {
       console.error('Error loading friends:', error);
       toast({
         title: 'Erreur',
@@ -69,7 +59,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
     try {
       const stats = await socialService.getSocialStats(userId);
       setSocialStats(stats);
-    } catch (error) {
+    } catch {
       console.error('Error loading social stats:', error);
     }
   };
@@ -81,7 +71,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
       setIsLoading(true);
       const results = await socialService.searchUsers(searchQuery, userId);
       setSearchResults(results);
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Erreur lors de la recherche',
@@ -103,7 +93,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         // Mettre à jour l'état local
         setSearchResults(prev => prev.filter(user => user.friend_id !== friendId));
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: "Impossible d'envoyer la demande",
@@ -123,7 +113,7 @@ const SocialConnections: React.FC<SocialConnectionsProps> = ({ userId }) => {
         loadFriends();
         setFriendRequests(prev => prev.filter(req => req.id !== connectionId));
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: "Impossible d'accepter la demande",
