@@ -4,7 +4,7 @@ import { ChevronRight, Clock, Flame, Users, Star, Plus, Minus, Edit2 } from 'luc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useWorkoutSession } from '@/shared/hooks/workout/useWorkoutSession';
+import { useWorkoutSession } from '@/features/workout/hooks/useWorkoutSession';
 import { useToast } from '@/shared/hooks/use-toast';
 
 export interface WorkoutInterface {
@@ -301,7 +301,7 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onStartWorkou
               onClick={handleStartCustomWorkout}
               className="flex-1 bg-red-600 hover:bg-red-700 text-white"
             >
-              Démarrer l'entraînement
+              Démarrer l&apos;entraînement
             </Button>
             <Button variant="outline" onClick={() => onStartWorkout(workout)}>
               Aperçu rapide
