@@ -40,7 +40,7 @@ export class BadgeService {
    */
   static async getAllBadges(): Promise<Badge[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('badges')
         .select('*')
         .eq('is_active', true)
@@ -64,7 +64,7 @@ export class BadgeService {
    */
   static async getUserBadges(userId: string): Promise<UserBadge[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_badges')
         .select(
           `
@@ -197,7 +197,7 @@ export class BadgeService {
   /**
    * Calcule le progrès d'un badge
    */
-  private static calculateBadgeProgress(badge: Badge, userStats: any, userCheckins: any[]): number {
+  private static calculateBadgeProgress(badge: Badge, userStats: any, userCheckins: unknown[]): number {
     switch (badge.condition_type) {
       case 'count':
         return this.calculateCountProgress(badge, userStats);
@@ -236,7 +236,7 @@ export class BadgeService {
   private static calculateSpecialProgress(
     badge: Badge,
     userStats: any,
-    userCheckins: any[]
+    userCheckins: unknown[]
   ): number {
     // Logique spécifique pour chaque badge spécial
     switch (badge.name) {
@@ -334,7 +334,7 @@ export class BadgeService {
    */
   static async getUnnotifiedBadges(userId: string): Promise<UserBadge[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_badges')
         .select(
           `
@@ -364,7 +364,7 @@ export class BadgeService {
    */
   static async getBadgesByCategory(category: string): Promise<Badge[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('badges')
         .select('*')
         .eq('category', category)

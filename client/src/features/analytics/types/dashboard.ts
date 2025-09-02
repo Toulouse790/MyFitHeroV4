@@ -7,8 +7,8 @@ export interface SmartDashboardContext {
   weatherContext: string;
   motivationLevel: string;
   recentActivity: string;
-  upcomingEvents: any[];
-  personalizedTips: any[];
+  upcomingEvents: unknown[];
+  personalizedTips: unknown[];
 }
 
 export interface PersonalizedWidget {

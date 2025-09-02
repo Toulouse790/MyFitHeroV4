@@ -69,7 +69,7 @@ async function fetchAllSports(): Promise<SportRow[]> {
   }
 
   // 3. Requête Supabase
-  const { data, error } = await supabase
+  const { data: _data, error: _error } = await supabase
     .from('sports_library')
     .select('id, name, emoji, icon, category, positions, is_popular, user_count, updated_at')
     .order('name', { ascending: true });
@@ -129,7 +129,7 @@ export const SportsService = {
     if (localRows.length > 0) return localRows.map(mapRow);
 
     // Recherche SQL ILIKE
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('sports_library')
       .select('id, name, emoji, icon, category, positions')
       .ilike('name', `%${query}%`)
@@ -145,7 +145,7 @@ export const SportsService = {
 
   /** Détails d’un sport */
   async getSportById(id: string): Promise<SportOption | null> {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('sports_library')
       .select('id, name, emoji, icon, category, positions')
       .eq('id', id)

@@ -120,7 +120,7 @@ const FriendsComparison: React.FC<FriendsComparisonProps> = ({
   }: {
     metric: string;
     userValue: number;
-    friends: any[];
+    friends: unknown[];
   }) => {
     const allUsers = [
       { username: 'Vous', value: userValue, isUser: true },

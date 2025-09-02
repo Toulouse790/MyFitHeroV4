@@ -73,7 +73,7 @@ jest.setTimeout(10000);
 // ---- Filtrage de certains warnings de test ----
 const originalError = console.error;
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render is deprecated')) {
       return;
     }

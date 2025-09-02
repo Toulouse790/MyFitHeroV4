@@ -16,7 +16,7 @@ export class AnalyticsService {
 
   // 🎯 Filtrage recommandations IA par confiance
   static async getHighConfidenceRecommendations(userId: string, minConfidence = 0.8) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('ai_recommendations')
       .select('*')
       .eq('user_id', userId)
@@ -29,7 +29,7 @@ export class AnalyticsService {
 
   // 🏋️ Templates de workout populaires
   static async getPopularWorkoutTemplates(limit = 10) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('workouts')
       .select('*, user_profiles(username)')
       .eq('is_template', true)
@@ -41,7 +41,7 @@ export class AnalyticsService {
 
   // 📱 Scan code-barres pour aliments
   static async getFoodByBarcode(barcode: string) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('foods_library')
       .select('*')
       .eq('barcode', barcode)
@@ -52,7 +52,7 @@ export class AnalyticsService {
 
   // 😴 Analytics sommeil avec données objets connectés
   static async analyzeSleepPatterns(userId: string, days = 30) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('sleep_sessions')
       .select('*')
       .eq('user_id', userId)
@@ -79,7 +79,7 @@ export class AnalyticsService {
 
   // 💧 Analytics hydratation par contexte
   static async getHydrationPatterns(userId: string, days = 7) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('hydration_logs')
       .select('*')
       .eq('user_id', userId)
@@ -145,7 +145,7 @@ export class AnalyticsService {
 
   // 💰 Vérification statut premium
   static async checkPremiumAccess(userId: string) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('user_profiles')
       .select('subscription_status')
       .eq('id', userId)
@@ -187,7 +187,7 @@ export class AnalyticsService {
     source: string = 'app',
     context?: any
   ) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('ai_requests')
       .insert({
         user_id: userId,
@@ -295,7 +295,7 @@ export class AnalyticsService {
 
   // 📊 Récupération des données wearables
   static async getWearableSteps(userId: string, startDate: Date, endDate: Date) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('wearable_steps')
       .select('*')
       .eq('user_id', userId)
@@ -307,7 +307,7 @@ export class AnalyticsService {
   }
 
   static async getHeartRateData(userId: string, startDate: Date, endDate: Date) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('heart_rate_logs')
       .select('*')
       .eq('user_id', userId)
@@ -319,7 +319,7 @@ export class AnalyticsService {
   }
 
   static async getSleepSessions(userId: string, startDate: Date, endDate: Date) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('sleep_sessions')
       .select('*')
       .eq('user_id', userId)
@@ -331,7 +331,7 @@ export class AnalyticsService {
   }
 
   static async getWearableWorkouts(userId: string, startDate: Date, endDate: Date) {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('wearable_workouts')
       .select('*')
       .eq('user_id', userId)

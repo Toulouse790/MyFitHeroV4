@@ -346,7 +346,7 @@ const AuthPage: React.FC = () => {
     setAuthError(null);
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: _data, error: _error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });

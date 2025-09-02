@@ -121,7 +121,7 @@ class SocialService {
   // Gestion des amis et connexions
   async getFriends(userId: string): Promise<UserConnection[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_connections')
         .select(
           `
@@ -152,7 +152,7 @@ class SocialService {
 
   async searchUsers(query: string, userId: string): Promise<UserConnection[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_profiles')
         .select(
           `
@@ -256,7 +256,7 @@ class SocialService {
       if (difficulty) query = query.eq('difficulty', difficulty);
       if (type) query = query.eq('challenge_type', type);
 
-      const { data, error } = await query;
+      const { data: _data, error: _error } = await query;
       if (error) throw error;
       return data || [];
     } catch {
@@ -287,7 +287,7 @@ class SocialService {
 
   async createChallenge(userId: string, challengeData: Partial<Challenge>): Promise<string | null> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('challenges')
         .insert({
           creator_id: userId,
@@ -316,7 +316,7 @@ class SocialService {
     completed: (Challenge & ChallengeParticipation)[];
   }> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('challenge_participations')
         .select(
           `
@@ -500,7 +500,7 @@ class SocialService {
 
   async createPost(userId: string, postData: Partial<SocialPost>): Promise<string | null> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('social_posts')
         .insert({
           user_id: userId,
@@ -568,7 +568,7 @@ class SocialService {
     period: 'week' | 'month' = 'week'
   ): Promise<{
     user_stats: any;
-    friends_stats: any[];
+    friends_stats: unknown[];
     user_rank: number;
   }> {
     try {
@@ -619,7 +619,7 @@ class SocialService {
     friend_requests: UserConnection[];
     challenge_invites: Challenge[];
     mentions: SocialPost[];
-    achievements: any[];
+    achievements: unknown[];
   }> {
     try {
       // Données mockées pour les notifications

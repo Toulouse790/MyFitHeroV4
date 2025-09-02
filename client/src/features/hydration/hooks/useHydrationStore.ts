@@ -31,7 +31,7 @@ export const useHydrationStore = create<HydrationStore>()(
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('hydration_entries')
             .insert([newEntry])
             .select()
@@ -58,7 +58,7 @@ export const useHydrationStore = create<HydrationStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('hydration_entries')
             .update({
               ...updates,
@@ -128,7 +128,7 @@ export const useHydrationStore = create<HydrationStore>()(
             query = query.lte('timestamp', endDate);
           }
 
-          const { data, error } = await query;
+          const { data: _data, error: _error } = await query;
 
           if (error) throw error;
 
@@ -170,7 +170,7 @@ export const useHydrationStore = create<HydrationStore>()(
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('hydration_goals')
             .insert([newGoal])
             .select()
@@ -196,7 +196,7 @@ export const useHydrationStore = create<HydrationStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('hydration_goals')
             .update({
               ...updates,
@@ -231,7 +231,7 @@ export const useHydrationStore = create<HydrationStore>()(
           } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('hydration_goals')
             .select('*')
             .eq('userId', user.id)

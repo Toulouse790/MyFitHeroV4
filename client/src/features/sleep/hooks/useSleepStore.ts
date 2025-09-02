@@ -32,7 +32,7 @@ export const useSleepStore = create<SleepStore>()(
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('sleep_entries')
             .insert([newEntry])
             .select()
@@ -65,7 +65,7 @@ export const useSleepStore = create<SleepStore>()(
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('sleep_entries')
             .update(updatedData)
             .eq('id', id)
@@ -126,7 +126,7 @@ export const useSleepStore = create<SleepStore>()(
           } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('sleep_entries')
             .select('*')
             .eq('userId', user.id)
@@ -168,7 +168,7 @@ export const useSleepStore = create<SleepStore>()(
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('sleep_goals')
             .insert([newGoal])
             .select()
@@ -198,7 +198,7 @@ export const useSleepStore = create<SleepStore>()(
             updated_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('sleep_goals')
             .update(updatedData)
             .eq('id', id)
@@ -230,7 +230,7 @@ export const useSleepStore = create<SleepStore>()(
           } = await supabase.auth.getUser();
           if (!user) throw new Error('Utilisateur non authentifié');
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('sleep_goals')
             .select('*')
             .eq('userId', user.id)

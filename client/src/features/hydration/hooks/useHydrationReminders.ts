@@ -150,7 +150,7 @@ export function useHydrationReminders() {
           temperature,
         };
 
-        const { data, error } = await supabase
+        const { data: _data, error: _error } = await supabase
           .from('hydration_entries')
           .insert(newEntry)
           .select()
@@ -225,7 +225,7 @@ export function useHydrationReminders() {
       try {
         const updatedGoal = { ...hydrationGoal, ...newGoal };
 
-        const { data, error } = await supabase
+        const { data: _data, error: _error } = await supabase
           .from('user_hydration_goals')
           .upsert({
             user_id: appStoreUser.id,

@@ -56,7 +56,7 @@ export class MuscleRecoveryService {
   // === PROFIL DE RÉCUPÉRATION UTILISATEUR ===
   static async getUserRecoveryProfile(userId: string): Promise<UserRecoveryProfile | null> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_recovery_profiles')
         .select('*')
         .eq('user_id', userId)
@@ -85,7 +85,7 @@ export class MuscleRecoveryService {
         nutritionData
       );
 
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_recovery_profiles')
         .upsert(profile, { onConflict: 'user_id' })
         .select()
@@ -697,7 +697,7 @@ export class MuscleRecoveryService {
 
   static async getMuscleRecoveryData(userId: string): Promise<MuscleRecoveryData[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('muscle_recovery_data')
         .select('*')
         .eq('user_id', userId)

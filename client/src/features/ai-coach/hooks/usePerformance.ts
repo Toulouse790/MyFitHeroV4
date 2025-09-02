@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 
 interface VirtualizedListProps {
-  items: any[];
+  items: unknown[];
   itemHeight: number;
   containerHeight: number;
   overscan?: number;

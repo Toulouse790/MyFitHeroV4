@@ -373,7 +373,7 @@ class AnalyticsService {
     return this.aggregateDataByDay(data || [], 'duration_minutes', 10); // Normalisation par 10 minutes
   }
 
-  private aggregateDataByDay(data: any[], field: string, divisor: number = 1): number[] {
+  private aggregateDataByDay(data: unknown[], field: string, divisor: number = 1): number[] {
     const dailyData: { [key: string]: number } = {};
 
     data.forEach(item => {

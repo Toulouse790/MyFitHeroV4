@@ -266,7 +266,7 @@ export function useSleepAnalysis() {
           sleep_duration_minutes: duration,
         };
 
-        const { data, error } = await supabase
+        const { data: _data, error: _error } = await supabase
           .from('sleep_entries')
           .insert(newEntry)
           .select()
@@ -306,7 +306,7 @@ export function useSleepAnalysis() {
           );
         }
 
-        const { data, error } = await supabase
+        const { data: _data, error: _error } = await supabase
           .from('sleep_entries')
           .update(updatedEntry)
           .eq('id', entryId)
@@ -363,7 +363,7 @@ export function useSleepAnalysis() {
       try {
         const updatedGoals = { ...sleepGoals, ...newGoals };
 
-        const { data, error } = await supabase
+        const { data: _data, error: _error } = await supabase
           .from('user_sleep_goals')
           .upsert({
             user_id: appStoreUser.id,

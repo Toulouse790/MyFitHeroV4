@@ -176,7 +176,7 @@ export const useSupabase = (): UseSupabaseReturn => {
   const signIn = useCallback(
     async (email: string, password: string) => {
       try {
-        const { data, error } = await client.auth.signIn({ email, password });
+        const { data: _data, error: _error } = await client.auth.signIn({ email, password });
         if (error) {
           return { success: false, error: error.message };
         }
@@ -194,7 +194,7 @@ export const useSupabase = (): UseSupabaseReturn => {
   const signUp = useCallback(
     async (email: string, password: string) => {
       try {
-        const { data, error } = await client.auth.signUp({ email, password });
+        const { data: _data, error: _error } = await client.auth.signUp({ email, password });
         if (error) {
           return { success: false, error: error.message };
         }
@@ -226,7 +226,7 @@ export const useSupabase = (): UseSupabaseReturn => {
 
   const getCurrentUser = useCallback(async () => {
     try {
-      const { data, error } = await client.auth.getUser();
+      const { data: _data, error: _error } = await client.auth.getUser();
       if (error) {
         return { success: false, error: error.message };
       }
@@ -251,7 +251,7 @@ export const useSupabase = (): UseSupabaseReturn => {
           });
         }
 
-        const { data, error } = await queryBuilder.select(options?.select);
+        const { data: _data, error: _error } = await queryBuilder.select(options?.select);
         if (error) {
           return { success: false, error: error.message };
         }
@@ -324,7 +324,7 @@ export const useSupabase = (): UseSupabaseReturn => {
   const uploadFile = useCallback(
     async (bucket: string, path: string, file: File) => {
       try {
-        const { data, error } = await client.storage.from(bucket).upload(path, file);
+        const { data: _data, error: _error } = await client.storage.from(bucket).upload(path, file);
         if (error) {
           return { success: false, error: error.message };
         }
@@ -342,7 +342,7 @@ export const useSupabase = (): UseSupabaseReturn => {
   const downloadFile = useCallback(
     async (bucket: string, path: string) => {
       try {
-        const { data, error } = await client.storage.from(bucket).download(path);
+        const { data: _data, error: _error } = await client.storage.from(bucket).download(path);
         if (error) {
           return { success: false, error: error.message };
         }

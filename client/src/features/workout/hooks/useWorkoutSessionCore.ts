@@ -266,7 +266,7 @@ export const useWorkoutSessionCore = (): UseWorkoutSessionCoreReturn => {
     const loadInterruptedSession = async () => {
       if (appStoreUser?.id && !currentSession) {
         try {
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('workouts')
             .select('*')
             .eq('user_id', appStoreUser.id)

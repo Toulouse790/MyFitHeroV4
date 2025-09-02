@@ -6,7 +6,7 @@ import { useToast } from '@/shared/hooks/use-toast';
 const CACHE_TTL = 5 * 60_000; // 5 minutes
 
 async function getPositionsFromLibrary(sportId: number): Promise<string[]> {
-  const { data, error } = await supabase
+  const { data: _data, error: _error } = await supabase
     .from('sports_library')
     .select('positions')
     .eq('id', sportId)
@@ -20,7 +20,7 @@ async function getPositionsFromLibrary(sportId: number): Promise<string[]> {
 }
 
 async function getPositionsFromDrills(sportName: string): Promise<string[]> {
-  const { data, error } = await supabase
+  const { data: _data, error: _error } = await supabase
     .from('sport_drills_library')
     .select('position')
     .eq('sport', sportName)

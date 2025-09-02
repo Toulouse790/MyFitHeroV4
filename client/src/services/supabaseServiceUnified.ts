@@ -81,7 +81,7 @@ class UnifiedSupabaseService {
     columns: string = '*'
   ): Promise<SupabaseResponse<TableRow<T>>> {
     try {
-      const { data, error } = await supabase.from(table).select(columns).eq('id', id).single();
+      const { data: _data, error: _error } = await supabase.from(table).select(columns).eq('id', id).single();
 
       return {
         data: data as TableRow<T>,

@@ -190,7 +190,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
     }
   };
 
-  const calculateProgress = (badgeId: string, stats: any[]): number => {
+  const calculateProgress = (badgeId: string, stats: unknown[]): number => {
     switch (badgeId) {
       case 'first_week':
         return Math.min(stats.length, 7);
@@ -223,7 +223,7 @@ const BadgeSystem: React.FC<BadgeSystemProps> = ({ showProgress = true, compact 
     }
   };
 
-  const calculateStreak = (stats: any[]): number => {
+  const calculateStreak = (stats: unknown[]): number => {
     // Logique simplifiée pour calculer la streak
     return stats.filter(s => s.completion_rate >= 75).length;
   };

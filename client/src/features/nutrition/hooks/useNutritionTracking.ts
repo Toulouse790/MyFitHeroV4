@@ -36,7 +36,7 @@ export function useNutritionTracking() {
     if (!user) return;
     setLoading(true);
     const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('nutrition_entries')
       .select('*')
       .eq('user_id', user.id)

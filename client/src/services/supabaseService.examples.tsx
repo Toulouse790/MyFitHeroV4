@@ -17,7 +17,7 @@ useEffect(() => {
   const fetchWorkouts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_workouts')
         .select('*')
         .eq('user_id', userId)

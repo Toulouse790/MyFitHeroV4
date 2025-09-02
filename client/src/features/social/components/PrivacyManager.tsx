@@ -55,7 +55,7 @@ const PrivacyManager: React.FC = () => {
     if (!appStoreUser?.id) return;
 
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_privacy_settings')
         .select('*')
         .eq('user_id', appStoreUser.id)

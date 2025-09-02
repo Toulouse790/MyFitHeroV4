@@ -153,7 +153,7 @@ export interface UseApiLoadingReturn<T> {
 
 export function useApiLoading<T = any>(
   apiFn: () => Promise<T>,
-  deps: any[] = []
+  deps: unknown[] = []
 ): UseApiLoadingReturn<T> {
   const { isLoading, error, data, clearError, executeWithData, setData } = useLoadingState<T>();
 

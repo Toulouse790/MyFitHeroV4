@@ -95,7 +95,7 @@ class AIService {
   }
 
   // Détection intelligente d'anomalies
-  async detectAnomalies(dataPoints: any[], pillar?: string): Promise<{ anomalies: Anomaly[] }> {
+  async detectAnomalies(dataPoints: unknown[], pillar?: string): Promise<{ anomalies: Anomaly[] }> {
     try {
       const response = await fetch(`${this.baseUrl}/detect-anomalies`, {
         method: 'POST',
@@ -234,7 +234,7 @@ class AIService {
     return localStorage.getItem('auth_token') || '';
   }
 
-  private analyzeHabitsLocally(logs: any[]): any {
+  private analyzeHabitsLocally(logs: unknown[]): any {
     // Analyse locale des habitudes pour réduire les appels API
     const dayStats = logs.reduce((acc, log) => {
       const day = new Date(log.created_at).getDay();
@@ -261,7 +261,7 @@ class AIService {
     };
   }
 
-  private calculateConsistency(logs: any[]): number {
+  private calculateConsistency(logs: unknown[]): number {
     // Calcul du score de consistance basé sur la régularité
     const dailyCounts = logs.reduce((acc, log) => {
       const date = new Date(log.created_at).toDateString();

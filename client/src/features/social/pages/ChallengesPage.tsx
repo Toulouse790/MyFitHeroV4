@@ -89,7 +89,7 @@ function useChallenges(params: FetchChallengesParams) {
 
 // ---- Fetch user participation for challenges ----
 async function fetchUserParticipants(userId: string) {
-  const { data, error } = await supabase
+  const { data: _data, error: _error } = await supabase
     .from<ChallengeParticipant>('challenge_participants')
     .select('*')
     .eq('user_id', userId);

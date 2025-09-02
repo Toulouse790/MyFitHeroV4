@@ -411,7 +411,7 @@ export const appStore = create<ExtendedAppStore>()(
       fetchDailyStats: async (userId: string, date: string): Promise<DailyStats | null> => {
         try {
           set({ isLoading: true });
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('daily_stats')
             .select('*')
             .eq('user_id', userId)
@@ -440,7 +440,7 @@ export const appStore = create<ExtendedAppStore>()(
         limit: number = 5
       ): Promise<AiRecommendation[]> => {
         try {
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('ai_recommendations')
             .select('*')
             .eq('user_id', userId)
@@ -499,7 +499,7 @@ export const appStore = create<ExtendedAppStore>()(
             notes: null,
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('user_hydration')
             .insert(hydrationEntry)
             .select()
@@ -537,7 +537,7 @@ export const appStore = create<ExtendedAppStore>()(
             notes: meal.notes || null,
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('user_nutrition')
             .insert(mealEntry)
             .select()
@@ -573,7 +573,7 @@ export const appStore = create<ExtendedAppStore>()(
             notes: sleepData.notes || null,
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('user_sleep')
             .insert(sleepEntry)
             .select()
@@ -612,7 +612,7 @@ export const appStore = create<ExtendedAppStore>()(
             completed_at: new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('user_workouts')
             .insert(workoutEntry)
             .select()
@@ -755,7 +755,7 @@ export const appStore = create<ExtendedAppStore>()(
             is_active: scale.is_active ?? true,
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('connected_scales')
             .insert(scaleEntry)
             .select()
@@ -789,7 +789,7 @@ export const appStore = create<ExtendedAppStore>()(
             recorded_at: entry.recorded_at || new Date().toISOString(),
           };
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('weight_entries')
             .insert(weightEntry)
             .select()
@@ -874,7 +874,7 @@ export const appStore = create<ExtendedAppStore>()(
           const startDate = new Date();
           startDate.setDate(endDate.getDate() - 6);
 
-          const { data, error } = await supabase
+          const { data: _data, error: _error } = await supabase
             .from('daily_stats')
             .select('*')
             .eq('user_id', appStoreUser.id)

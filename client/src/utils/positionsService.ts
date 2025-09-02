@@ -11,7 +11,7 @@ export class PositionService {
     const cache = memoryCache[sportId];
     if (cache && cache.expiry > Date.now()) return cache.data;
 
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('sports_library')
       .select('positions')
       .eq('id', sportId)
@@ -31,7 +31,7 @@ export class PositionService {
     const cache = memoryCache[`drills_${sportName}`];
     if (cache && cache.expiry > Date.now()) return cache.data;
 
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('sport_drills_library')
       .select('position')
       .eq('sport', sportName)

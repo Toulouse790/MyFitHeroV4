@@ -40,7 +40,7 @@ export class WearableAnalyzer {
     };
   }
 
-  static calculateSleepScore(sleepSessions: any[]): number {
+  static calculateSleepScore(sleepSessions: unknown[]): number {
     if (sleepSessions.length === 0) return 0;
 
     const session = sleepSessions[0];

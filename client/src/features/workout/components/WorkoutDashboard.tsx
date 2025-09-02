@@ -198,7 +198,7 @@ export default function WorkoutDashboard() {
   }, [toast]);
 
   const loadWorkoutStats = async (_userId: string): Promise<WorkoutStats> => {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('workouts')
       .select(
         `
@@ -240,7 +240,7 @@ export default function WorkoutDashboard() {
   };
 
   const loadRecentWorkouts = async (_userId: string): Promise<WorkoutSession[]> => {
-    const { data, error } = await supabase
+    const { data: _data, error: _error } = await supabase
       .from('workouts')
       .select('*')
       .eq('user_id', userId)
@@ -268,7 +268,7 @@ export default function WorkoutDashboard() {
     ];
   };
 
-  const calculateStreak = (workouts: any[]): number => {
+  const calculateStreak = (workouts: unknown[]): number => {
     // Logique de calcul de série
     let streak = 0;
     const today = new Date();

@@ -434,7 +434,7 @@ const FavoritesList: React.FC<{ favoriteIds: Set<string> }> = ({ favoriteIds }) 
         return;
       }
       const idsArr = Array.from(favoriteIds);
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from<ExerciseLibrary>('exercises_library')
         .select('*')
         .in('id', idsArr);

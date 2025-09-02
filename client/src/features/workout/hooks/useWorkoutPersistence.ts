@@ -38,7 +38,7 @@ export const useWorkoutPersistence = (): UseWorkoutPersistenceReturn => {
 
   const loadSession = useCallback(
     async (sessionId: string): Promise<WorkoutSession | null> => {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('workout_sessions')
         .select('*, workout_sets(*)')
         .eq('id', sessionId)

@@ -69,7 +69,7 @@ export class UserDataService {
         query = query.lte('date', endDate);
       }
 
-      const { data, error } = await query;
+      const { data: _data, error: _error } = await query;
 
       if (error) {
         console.error('Erreur lors de la récupération des données du pilier:', error);
@@ -143,7 +143,7 @@ export class UserDataService {
    */
   static async getUserStats(userId: string): Promise<UserStats | null> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('user_stats')
         .select('*')
         .eq('user_id', userId)
@@ -191,7 +191,7 @@ export class UserDataService {
    */
   static async getDailyCheckin(userId: string, date: string): Promise<DailyCheckin | null> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('daily_checkins')
         .select('*')
         .eq('user_id', userId)
@@ -242,7 +242,7 @@ export class UserDataService {
    */
   static async getCheckinHistory(userId: string, limit: number = 30): Promise<DailyCheckin[]> {
     try {
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('daily_checkins')
         .select('*')
         .eq('user_id', userId)

@@ -67,7 +67,7 @@ export const useExerciseHistory = (): UseExerciseHistoryReturn => {
       if (!appStoreUser?.id) return [];
 
       try {
-        const { data, error } = await supabase
+        const { data: _data, error: _error } = await supabase
           .from('workouts')
           .select('exercises')
           .eq('user_id', appStoreUser.id)

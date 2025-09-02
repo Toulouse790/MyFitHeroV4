@@ -471,7 +471,7 @@ const Nutrition: React.FC = () => {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      const { data, error } = await supabase
+      const { data: _data, error: _error } = await supabase
         .from('daily_stats')
         .select('total_calories, total_protein, total_carbs, total_fat, water_intake_ml')
         .eq('user_id', appStoreUser.id)

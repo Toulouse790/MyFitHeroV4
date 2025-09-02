@@ -54,7 +54,7 @@ export type ValidationRule =
   | { type: 'minLength'; value: number; message: string }
   | { type: 'maxLength'; value: number; message: string }
   | { type: 'array'; minItems?: number; maxItems?: number; message: string }
-  | { type: 'oneOf'; values: any[]; message: string }
+  | { type: 'oneOf'; values: unknown[]; message: string }
   | {
       type: 'custom';
       message: string;
@@ -754,7 +754,7 @@ export interface ExportConfig {
 export type StepResponse<T extends ConversationalStep> = T['inputType'] extends 'multi-select'
   ? T['options'] extends QuestionOption[]
     ? T['options'][number]['value'][]
-    : any[]
+    : unknown[]
   : T['inputType'] extends 'single-select'
     ? T['options'] extends QuestionOption[]
       ? T['options'][number]['value']

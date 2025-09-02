@@ -64,7 +64,7 @@ interface SocialPost {
     sport: string;
     level: number;
   };
-  achievements?: any[];
+  achievements?: unknown[];
   workout_data?: any;
   comments?: Comment[];
 }
@@ -131,7 +131,7 @@ interface CreatePostData {
   content: string;
   post_type: 'general' | 'achievement' | 'workout' | 'progress';
   media_files: File[];
-  achievements: any[];
+  achievements: unknown[];
   location?: string;
 }
 

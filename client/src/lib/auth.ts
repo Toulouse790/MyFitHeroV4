@@ -15,7 +15,7 @@ export interface AuthResponse {
 class SupabaseAuthClient {
   async register(email: string, username: string, password: string): Promise<AuthResponse> {
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data: _data, error: _error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -49,7 +49,7 @@ class SupabaseAuthClient {
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: _data, error: _error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
