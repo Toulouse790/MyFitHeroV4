@@ -1,0 +1,2 @@
+import{u as s,j as e}from"./index-CjnEZlsY.js";const a=()=>{const[t]=s(),n=t.split("/").pop();return e.jsxs("div",{className:"min-h-screen bg-gray-50 p-4",children:[e.jsx("h1",{className:"text-2xl font-bold mb-4",children:"Détails de l'entraînement"}),e.jsxs("p",{children:["ID de l'entraînement: ",n]}),e.jsx("p",{children:"Page en développement"})]})};export{a as default};
+//# sourceMappingURL=WorkoutDetailPage-DW9iy0VY.js.map
