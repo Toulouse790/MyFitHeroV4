@@ -17,12 +17,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ userProfile }) =
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Tableau de bord Admin
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Gestion et administration de MyFitHero
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Tableau de bord Admin</h1>
+          <p className="text-gray-600 mt-2">Gestion et administration de MyFitHero</p>
         </div>
 
         {userProfile && (

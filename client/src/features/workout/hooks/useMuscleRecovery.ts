@@ -1,10 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MuscleRecoveryService } from '@/services/muscleRecoveryService';
-import {
-  supabaseService,
-  SupabaseResponse,
-  QueryFilter
-} from '@/services/supabaseServiceUnified';
+import { supabaseService, SupabaseResponse, QueryFilter } from '@/services/supabaseServiceUnified';
 import { appStore } from '@/store/appStore';
 import type {
   MuscleRecoveryData,
