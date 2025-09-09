@@ -1013,7 +1013,7 @@ const useUSLocation = () => {
 
         setLocation({ state, city, zip, timezone });
       }
-    } catch () {
+    } catch (error) {
       setError('Unable to determine your location. Please ensure location services are enabled.');
     } finally {
       setIsLoading(false);
