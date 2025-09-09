@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -16,21 +15,9 @@ import {
   Check,
   AlertCircle,
   User,
-  Target,
-  Zap,
-  Heart,
-  Shield,
-  Settings,
-  BookOpen,
-  Award,
-  Coffee,
-  Moon,
-  Droplets,
-  Brain,
-  Package,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '@/shared/hooks/use-toast';
 import {
   ConversationalStep,
   OnboardingData,
@@ -41,35 +28,20 @@ import {
   CONVERSATIONAL_ONBOARDING_FLOW,
   getConditionalNextStep,
   calculateEstimatedTime,
-} from '../data/conversationalFlow';
+} from '@/data/conversationalFlow';
 import {
   AVAILABLE_SPORTS,
-  MAIN_OBJECTIVES,
-  AVAILABLE_MODULES,
-  LIFESTYLE_OPTIONS,
-  DIETARY_PREFERENCES,
-  STRENGTH_OBJECTIVES,
-  NUTRITION_OBJECTIVES,
-  FITNESS_EXPERIENCE_LEVELS,
-  EQUIPMENT_LEVELS,
-  SPORT_LEVELS,
-  SEASON_PERIODS,
-  TRAINING_AVAILABILITY,
-  HEALTH_CONDITIONS,
-} from '../data/onboardingData';
+} from '@/data/onboardingData';
 import {
   SMART_PACKS,
   getQuestionsForPack,
-  shouldAskQuestion,
-  getRecommendedPacks,
-  getEstimatedTimeForPack,
-} from '../data/smartPacks';
-import SportSelector from './SportSelector';
-import PositionSelector from './PositionSelector';
-import PersonalInfoForm from './PersonalInfoForm';
-import PackSelector from './PackSelector';
-import { useSports } from '../services/sportsService';
-import { SportOption } from '../types/onboarding';
+} from '@/data/smartPacks';
+import SportSelector from '@/features/analytics/components/SportSelector';
+import PositionSelector from '@/features/ai-coach/components/PositionSelector';
+import PersonalInfoForm from '@/features/nutrition/components/PersonalInfoForm';
+import PackSelector from '@/features/ai-coach/components/PackSelector';
+import { useSports } from '@/services/sportsService';
+import { SportOption } from '../types/onboarding-types';
 
 // Utility function to combine classNames
 const cn = (...classes: (string | boolean | undefined)[]) => {
@@ -481,8 +453,7 @@ export default function ConversationalOnboarding({
             console.log('🟢 [DEBUG] Sauvegarde Supabase réussie:', insertedData);
           }
         }
-      } catch {
-      // Erreur silencieuse
+      } catch (error) {
         console.error('🔴 Erreur lors de la sauvegarde:', error);
         toast({
           title: 'Erreur de sauvegarde',
@@ -618,8 +589,7 @@ export default function ConversationalOnboarding({
       if (importantSteps.includes(currentStep.id)) {
         await saveProgress(updatedData);
       }
-    } catch {
-      // Erreur silencieuse
+    } catch (error) {
       console.error('🔴 Erreur lors de la navigation:', error);
       toast({
         title: 'Erreur',
@@ -718,8 +688,7 @@ export default function ConversationalOnboarding({
       });
 
       onComplete(finalData);
-    } catch {
-      // Erreur silencieuse
+    } catch (error) {
       console.error('🔴 Erreur lors de la finalisation:', error);
       toast({
         title: 'Erreur',
@@ -734,12 +703,6 @@ export default function ConversationalOnboarding({
   // Rendu des types de questions
   const renderQuestionInput = useCallback(() => {
     if (!currentStep) return null;
-
-    const commonInputProps = {
-      value: state.currentResponse || '',
-      onChange: (value: any) => setState(prev => ({ ...prev, currentResponse: value })),
-      disabled: state.isLoading,
-    };
 
     switch (currentStep.inputType) {
       case 'text':
@@ -1060,7 +1023,7 @@ export default function ConversationalOnboarding({
           <CardContent className="p-6 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Erreur de configuration</h3>
-            <p className="text-gray-600 mb-4">Impossible de charger l'étape de configuration.</p>
+            <p className="text-gray-600 mb-4">Impossible de charger l&apos;étape de configuration.</p>
             <Button onClick={() => window.location.reload()}>Recharger la page</Button>
           </CardContent>
         </Card>

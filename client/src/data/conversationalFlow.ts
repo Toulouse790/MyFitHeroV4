@@ -1,3 +1,4 @@
+// Types
 import type {
   ConversationalFlow,
   ConversationalStep,
@@ -6,6 +7,8 @@ import type {
   StepConditionFunction,
   QuestionOption,
 } from '@/features/auth/types/conversationalOnboarding';
+
+// Data constants
 import {
   MAIN_OBJECTIVES,
   AVAILABLE_MODULES,
@@ -22,7 +25,19 @@ import {
   HEALTH_CONDITIONS,
   DEFAULT_ONBOARDING_CONFIG,
 } from './onboardingData';
-import { ModuleId } from './packs';
+
+// Module types
+import type { ModuleId } from './packs';
+
+// Icons from Lucide (ajoutez seulement ceux que vous utilisez)
+import {
+  User,
+  Target,
+  Zap,
+  Heart,
+  Settings,
+  // Ajoutez uniquement les icônes réellement utilisées dans le code
+} from 'lucide-react';
 
 /* ================================================================== */
 /*                     CONFIGURATION PRINCIPALE                        */
