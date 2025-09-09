@@ -15,7 +15,7 @@ export interface AuthResponse {
 class SupabaseAuthClient {
   async register(email: string, username: string, password: string): Promise<AuthResponse> {
     try {
-      const { data: _data, error: _error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -41,15 +41,15 @@ class SupabaseAuthClient {
       }
 
       return { user: null, error: 'Registration failed' };
-    } catch {
-      // Erreur silencieuse
+    } catch (err) {
+      console.error('Registration error:', err);
       return { user: null, error: 'Registration failed' };
     }
   }
 
   async signIn(email: string, password: string): Promise<AuthResponse> {
     try {
-      const { data: _data, error: _error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -69,8 +69,8 @@ class SupabaseAuthClient {
       }
 
       return { user: null, error: 'Login failed' };
-    } catch {
-      // Erreur silencieuse
+    } catch (err) {
+      console.error('Login error:', err);
       return { user: null, error: 'Login failed' };
     }
   }
@@ -95,8 +95,8 @@ class SupabaseAuthClient {
         email: user.email!,
         user_metadata: user.user_metadata,
       };
-    } catch {
-      // Erreur silencieuse
+    } catch (err) {
+      console.error('Get user error:', err);
       return null;
     }
   }
@@ -108,8 +108,8 @@ class SupabaseAuthClient {
         error,
       } = await supabase.auth.getSession();
       return error ? null : session;
-    } catch {
-      // Erreur silencieuse
+    } catch (err) {
+      console.error('Get session error:', err);
       return null;
     }
   }
