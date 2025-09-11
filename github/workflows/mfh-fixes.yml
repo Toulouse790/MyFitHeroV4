@@ -1,0 +1,81 @@
+name: MFH – Apply small fixes and open PR
+on:
+  workflow_dispatch: {}   # lancement manuel par Codex ou toi
+
+permissions:
+  contents: write         # pour pousser la branche
+  pull-requests: write    # pour créer la PR
+
+jobs:
+  apply-fixes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Create or switch to work branch
+        run: |
+          git config user.name "codex-bot"
+          git config user.email "codex-bot@users.noreply.github.com"
+          if git rev-parse --verify fix/enable-hydration-social-workout-types >/dev/null 2>&1; then
+            git checkout fix/enable-hydration-social-workout-types
+          else
+            git checkout -b fix/enable-hydration-social-workout-types
+          fi
+
+      - name: Apply changes (hydration exports, social index, setupTests)
+        shell: bash
+        run: |
+          # 1) Hydration index
+          cat > client/src/features/hydration/index.ts <<'TS'
+          export * from './types/hydration-types';
+          export * from './services/hydration.service';
+          export * from './hooks/useHydration';
+          export * from './hooks/useHydrationReminders';
+          export { default as HydrationPage } from './pages/HydrationPage';
+          TS
+
+          # 2) Social index (stabilise uniquement les exports publics)
+          mkdir -p client/src/features/social
+          cat > client/src/features/social/index.ts <<'TS'
+          export { default as SocialPage } from './pages/SocialPage';
+          export * from './hooks';
+          export * from './components';
+          TS
+
+          # 3) Tests setup (évite TS2688)
+          mkdir -p client
+          cat > client/setupTests.ts <<'TS'
+          import '@testing-library/jest-dom';
+          TS
+
+          git add client/src/features/hydration/index.ts \
+                  client/src/features/social/index.ts \
+                  client/setupTests.ts || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "feat: enable Hydration exports, stabilize Social index, add setupTests"
+          fi
+
+      - name: Push branch
+        run: |
+          git push origin fix/enable-hydration-social-workout-types || true
+
+      - name: Open PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # fourni automatiquement
+          title: "Enable Hydration exports + stabilize Social index + test setup"
+          body: |
+            - Exports Hydration feature properly (types/services/hooks + HydrationPage)
+            - Stabilizes Social index re-exports
+            - Adds setupTests to register @testing-library/jest-dom (silence TS2688)
+            - No runtime logic changed
+          branch: fix/enable-hydration-social-workout-types
+          base: main
+          commit-message: "feat: enable Hydration exports, stabilize Social index, add setupTests"
