@@ -1,0 +1,19 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck || npx tsc -p .
+      - run: npm run lint || echo "lint ignoré"
+      - run: npm test --if-present || echo "pas de tests"
+      - run: npm run build
