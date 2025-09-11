@@ -13,3 +13,4 @@ export const HydrationModule = {
   status: 'planned',
   description: 'Module hydration - À implémenter',
 };
+feat(hydration): export types/services/hooks + HydrationPage from feature index
