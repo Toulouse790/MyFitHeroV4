@@ -106,13 +106,25 @@ echo "## 🧩 COMPOSANTS POTENTIELLEMENT DUPLIQUÉS" >> "$REPORT_FILE"
 echo "" >> "$REPORT_FILE"
 
 # Chercher des noms de composants similaires
-find "$CLIENT_DIR" -name "*.tsx" -type f | xargs -r basename -s .tsx | sort | uniq -d | while read -r comp; do
-    echo "### Composant: $comp" >> "$REPORT_FILE"
-    find "$CLIENT_DIR" -name "$comp.tsx" -type f | while read -r file; do
-        lines=$(wc -l < "$file" 2>/dev/null || echo "0")
-        echo "- \`$file\` ($lines lignes)" >> "$REPORT_FILE"
-    done
-    echo "" >> "$REPORT_FILE"
+# Trouver tous les fichiers .tsx et regrouper par basename
+declare -A comp_files
+while IFS= read -r file; do
+    comp=$(basename "$file" .tsx)
+    comp_files["$comp"]+="$file"$'\n'
+done < <(find "$CLIENT_DIR" -name "*.tsx" -type f)
+
+for comp in "${!comp_files[@]}"; do
+    # Compte le nombre de fichiers pour ce composant
+    count=$(echo -n "${comp_files[$comp]}" | grep -c .)
+    if (( count > 1 )); then
+        echo "### Composant: $comp" >> "$REPORT_FILE"
+        while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            lines=$(wc -l < "$file" 2>/dev/null || echo "0")
+            echo "- \`$file\` ($lines lignes)" >> "$REPORT_FILE"
+        done <<< "${comp_files[$comp]}"
+        echo "" >> "$REPORT_FILE"
+    fi
 done
 
 # Générer un script de migration
