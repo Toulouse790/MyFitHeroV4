@@ -20,7 +20,7 @@ fi
 
 # Mise à jour des imports vers le service unifié
 echo "Mise à jour des imports Supabase..."
-find client/src \( -name "*.ts" -o -name "*.tsx" \) -type f | xargs sed -i 's/supabaseServiceUnified/unifiedSupabaseService/g'
+find client/src \( -name "*.ts" -o -name "*.tsx" \) -type f | xargs sed -i '' 's/supabaseServiceUnified/unifiedSupabaseService/g'
 
 echo "🏪 Étape 2: Consolidation des stores Auth..."
 
