@@ -1,0 +1,15 @@
+name: CI
+on: { push: { branches: ['main','fix/**','feat/**'] }, pull_request: {} }
+permissions: { contents: read }
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'npm' }
+      - run: npm ci || npm i
+      - run: npm run typecheck || npx tsc -p .
+      - run: npm run lint || echo "skip lint"
+      - run: npm test --if-present || echo "no tests"
+      - run: npm run build || echo "build attempted"

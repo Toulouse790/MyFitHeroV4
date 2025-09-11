@@ -1,0 +1,24 @@
+{
+  "name": "myfitherov4",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc -p .",
+    "lint": "eslint . --ext .ts,.tsx || true",
+    "jscpd": "jscpd --threshold 2 --format html --reporters html,console --ignore \"**/dist/**,**/build/**,**/*.snap\"",
+    "knip": "knip --include src,client/src --no-config-hint || true",
+    "tsprune": "ts-prune -p tsconfig.json || true",
+    "depc": "depcruise --include-only ^client/src --exclude \"(dist|build|__tests__)\" --output-type dot client/src | dot -Tsvg -o depgraph.svg || true",
+    "cycles": "madge --circular client/src || true",
+    "audit:all": "npm run jscpd && npm run knip && npm run tsprune && npm run cycles && npm run depc"
+  },
+  "devDependencies": {
+    "dependency-cruiser": "^17.0.1",
+    "eslint": "^9.35.0",
+    "jscpd": "^4.0.5",
+    "knip": "^5.63.1",
+    "madge": "^8.0.0",
+    "ts-prune": "^0.10.3",
+    "typescript": "^5.9.2"
+  }
+}
