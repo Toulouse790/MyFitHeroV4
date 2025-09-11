@@ -1,16 +1,6 @@
-// Export principal du module hydration
-// export * from './types/index';
-// export * from './services/hydration.service';
-// export * from './hooks/useHydration';
-
-// Exports des composants (à implémenter)
-// export * from './components';
-// export * from './pages';
-
-// Placeholder pour éviter les erreurs d'import
-export const HydrationModule = {
-  name: 'hydration',
-  status: 'planned',
-  description: 'Module hydration - À implémenter',
-};
+export * from './types/hydration-types';
+export * from './services/hydration.service';
+export * from './hooks/useHydration';
+export * from './hooks/useHydrationReminders';
+export { default as HydrationPage } from './pages/HydrationPage';
 feat(hydration): export types/services/hooks + HydrationPage from feature index
